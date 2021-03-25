@@ -1,3 +1,5 @@
+//version 1.1
+
 #define _GNU_SOURCE //It's there so the compiler would stop complaining that isascii() does not exist.
 #include <stdio.h> //Used for printf()
 #include <cs50.h> //Used for get_string()
