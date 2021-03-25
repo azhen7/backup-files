@@ -154,6 +154,5 @@ int kbhit(void)
         ungetc(ch, stdin);
         return 1;
     }
-
     return 0;
 }
