@@ -4,6 +4,8 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+
+//For the kbhit() function
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -154,6 +156,5 @@ int kbhit(void)
         ungetc(ch, stdin);
         return 1;
     }
-
     return 0;
 }
