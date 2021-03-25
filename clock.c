@@ -4,6 +4,8 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+
+//For the kbhit() function
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
