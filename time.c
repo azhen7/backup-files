@@ -38,7 +38,7 @@ int main(void)
 
             printf("Input converted to hours and minutes: %i h %i min\n", add / 60, add % 60);
 
-            printf("New time: %s\ EST\sn", finalTime);
+            printf("New time: %s\n", finalTime);
             printf("French time: %s\n", finalTime_f);
             putchar('\n');
         }
