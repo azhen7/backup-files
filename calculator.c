@@ -329,9 +329,16 @@ double solveEquation(char* input)
                     root++;
                 }
                 //log base 6
-                else if (strcmp(arr, "logs") == 0)
+                else if (strcmp(arr, "lgsi") == 0)
                 {
                     copy[copyIndexStart] = 'r';
+                    removeChar(copy, copyIndexStart);
+                    root++;
+                }
+                //log base 7
+                else if (strcmp(arr, "lgsv") == 0)
+                {
+                    copy[copyIndexStart] = 's';
                     removeChar(copy, copyIndexStart);
                     root++;
                 }
@@ -610,6 +617,14 @@ double solveEquation(char* input)
 
                     else if (Roots[a] == 'w')
                         last = log6(last);
+
+                    //log base 7
+                    else if (Roots[a] == 'x')
+                        total = log7(total);
+
+                    else if (Roots[a] == 'y')
+                        last = log7(last);
+
                 }
                 //operation
                 if (state != '\0')
@@ -642,11 +657,9 @@ double solveEquation(char* input)
 
             if (x == 0)
                 whichNum = '1';
-
             if (isdigit(copy[i]))
                 numNum = 1;
 
-            //Checks for roots
             //sqrt
             if (copy[i] == '#')
             {
@@ -660,7 +673,7 @@ double solveEquation(char* input)
                         strcat(Roots, "1");
             }
             //cbrt
-            if (copy[i] == '@')
+            else if (copy[i] == '@')
             {
                 if (state == '\0')
                 {
@@ -672,7 +685,7 @@ double solveEquation(char* input)
                         strcat(Roots, "3");
             }
             //quartic root
-            if (copy[i] == '$')
+            else if (copy[i] == '$')
             {
                 if (state == '\0')
                 {
@@ -684,7 +697,7 @@ double solveEquation(char* input)
                         strcat(Roots, "5");
             }
             //quintic root
-            if (copy[i] == '~')
+            else if (copy[i] == '~')
             {
                 if (state == '\0')
                 {
@@ -696,7 +709,7 @@ double solveEquation(char* input)
                         strcat(Roots, "7");
             }
             //squaring
-            if (copy[i] == '<')
+            else if (copy[i] == '<')
             {
                 if (state == '\0')
                 {
@@ -708,7 +721,7 @@ double solveEquation(char* input)
                         strcat(Roots, "9");
             }
             //cubing
-            if (copy[i] == '&')
+            else if (copy[i] == '&')
             {
                 if (state == '\0')
                 {
@@ -720,7 +733,7 @@ double solveEquation(char* input)
                         strcat(Roots, "]");
             }
             //sixth root
-            if (copy[i] == '!')
+            else if (copy[i] == '!')
             {
                 if (state == '\0')
                 {
@@ -732,7 +745,7 @@ double solveEquation(char* input)
                         strcat(Roots, ":");
             }
             //sin
-            if (copy[i] == ':')
+            else if (copy[i] == ':')
             {
                 if (state == '\0')
                 {
@@ -744,7 +757,7 @@ double solveEquation(char* input)
                         strcat(Roots, "}");
             }
             //cos
-            if (copy[i] == ';')
+            else if (copy[i] == ';')
             {
                 if (state == '\0')
                 {
@@ -756,7 +769,7 @@ double solveEquation(char* input)
                         strcat(Roots, "`");
             }
             //tan
-            if (copy[i] == 92)
+            else if (copy[i] == 92)
             {
                 if (state == '\0')
                 {
@@ -768,7 +781,7 @@ double solveEquation(char* input)
                         strcat(Roots, "_");
             }
             //arcsin
-            if (copy[i] == '>')
+            else if (copy[i] == '>')
             {
                 if (state == '\0')
                 {
@@ -780,7 +793,7 @@ double solveEquation(char* input)
                         strcat(Roots, ")");
             }
             //arccos
-            if (copy[i] == '?')
+            else if (copy[i] == '?')
             {
                 if (state == '\0')
                 {
@@ -792,7 +805,7 @@ double solveEquation(char* input)
                         strcat(Roots, ".");
             }
             //arctan
-            if (copy[i] == '|')
+            else if (copy[i] == '|')
             {
                 if (state == '\0')
                 {
@@ -804,7 +817,7 @@ double solveEquation(char* input)
                         strcat(Roots, ">");
             }
             //sinh
-            if (copy[i] == 34)
+            else if (copy[i] == 34)
             {
                 if (state == '\0')
                 {
@@ -816,7 +829,7 @@ double solveEquation(char* input)
                         strcat(Roots, "a");
             }
             //cosh
-            if (copy[i] == 39)
+            else if (copy[i] == 39)
             {
                 if (state == '\0')
                 {
@@ -828,7 +841,7 @@ double solveEquation(char* input)
                         strcat(Roots, "c");
             }
             //tanh
-            if (copy[i] == '\f')
+            else if (copy[i] == '\f')
             {
                 if (state == '\0')
                 {
@@ -840,7 +853,7 @@ double solveEquation(char* input)
                         strcat(Roots, "e");
             }
             //arcsinh
-            if (copy[i] == '{')
+            else if (copy[i] == '{')
             {
                 if (state == '\0')
                 {
@@ -852,7 +865,7 @@ double solveEquation(char* input)
                         strcat(Roots, "-");
             }
             //arccosh
-            if (copy[i] == '}')
+            else if (copy[i] == '}')
             {
                 if (state == '\0')
                 {
@@ -864,7 +877,7 @@ double solveEquation(char* input)
                         strcat(Roots, "/");
             }
             //arctanh
-            if (copy[i] == '(')
+            else if (copy[i] == '(')
             {
                 if (state == '\0')
                 {
@@ -876,7 +889,7 @@ double solveEquation(char* input)
                         strcat(Roots, "#");
             }
             //ceil
-            if (copy[i] == 'c')
+            else if (copy[i] == 'c')
             {
                 if (state == '\0')
                 {
@@ -888,7 +901,7 @@ double solveEquation(char* input)
                         strcat(Roots, "g");
             }
             //floor
-            if (copy[i] == 'f')
+            else if (copy[i] == 'f')
             {
                 if (state == '\0')
                 {
@@ -900,7 +913,7 @@ double solveEquation(char* input)
                         strcat(Roots, "i");
             }
             //ln
-            if (copy[i] == 'l')
+            else if (copy[i] == 'l')
             {
                 if (state == '\0')
                 {
@@ -912,7 +925,7 @@ double solveEquation(char* input)
                         strcat(Roots, "k");
             }
             //log base 10
-            if (copy[i] == 'k')
+            else if (copy[i] == 'k')
             {
                 if (state == '\0')
                 {
@@ -924,7 +937,7 @@ double solveEquation(char* input)
                         strcat(Roots, "m");
             }
             //log base 2
-            if (copy[i] == 'n')
+            else if (copy[i] == 'n')
             {
                 if (state == '\0')
                 {
@@ -936,7 +949,7 @@ double solveEquation(char* input)
                         strcat(Roots, "o");
             }
             //log base 3
-            if (copy[i] == 'o')
+            else if (copy[i] == 'o')
             {
                 if (state == '\0')
                 {
@@ -948,7 +961,7 @@ double solveEquation(char* input)
                         strcat(Roots, "q");
             }
             //log base 4
-            if (copy[i] == 'p')
+            else if (copy[i] == 'p')
             {
                 if (state == '\0')
                 {
@@ -960,7 +973,7 @@ double solveEquation(char* input)
                         strcat(Roots, "s");
             }
             //log base 5
-            if (copy[i] == 'q')
+            else if (copy[i] == 'q')
             {
                 if (state == '\0')
                 {
@@ -972,7 +985,7 @@ double solveEquation(char* input)
                         strcat(Roots, "u");
             }
             //log base 6
-            if (copy[i] == 'r')
+            else if (copy[i] == 'r')
             {
                 if (state == '\0')
                 {
@@ -982,6 +995,18 @@ double solveEquation(char* input)
                 else
                     if (numNum == 0)
                         strcat(Roots, "w");
+            }
+            //log base 7
+            else if (copy[i] == 's')
+            {
+                if (state == '\0')
+                {
+                    if (numNum == 0)
+                        strcat(Roots, "x");
+                }
+                else
+                    if (numNum == 0)
+                        strcat(Roots, "y");
             }
 
             //Converts last number to float
