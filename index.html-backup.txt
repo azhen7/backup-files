@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+  <link rel = "stylesheet" href = "style.css">
+  <title> C programming </title>
+  <body style = "background-color:#caf3ff;font-family:arial">
+    <h1 style = "size:45px;text-decoration:underline;text-align:center;">
+        C (programming language)
+    </h1>
+    <p style = "text-align:center;"> Adam Z </p>
+  <div class = "center">
+    <br />
+    <p>
+      C is one of the oldest programming languages there are. It was invented in 1972 by Dennis Ritchie and Brian Kernighan. 
+      Even though C is very old, it is one of the most important languages that existed. In this tutorial, I will tell you
+      about C.
+      <br />
+      <b>Note: </b> In this tutorial, I will assume that you have knowledge of bits and bytes and that you have prior programming
+      experience.
+    </p>
+    <img alt = "An image of the C programming language" src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/The_C_Programming_Language_logo.svg/1200px-The_C_Programming_Language_logo.svg.png" width = "200" height = "auto" class = "image">
+    <br /> 
+    <p>
+      First, to write C code, you have to use an IDE (integrated development environment). You can use this online IDE:
+      <a href = "https://www.onlinegdb.com/">https://www.onlinegdb.com/</a>
+    </p>
+    <br />
+    <p>
+      Let's begin by writing a simple program.
+          <pre>
+            #include &ltstdio.h&gt
+
+            int main(void)
+            {
+                printf("hello world\n");
+
+                return 0;
+            }
+          </pre>
+        This little program prints "hello world" to the output window. The output is: hello world
+        <br /> <br />
+        You might be wondering what the "\n" does. "\n" stands for "new line", which is almost the same as pressing enter to 
+        go to a new line, but in code.
+        <br /> <br />
+        You might also be wondering what "#include &ltstdio.h&gt" means. This is a <pre>header file</pre> (more on that later)
+        which contains the function "printf", which prints things (keep this in mind). Unlike languages such as Python, 
+        C has no inbuilt functions (more on functions later as well).
+        <br /> "return 0;" basically signals to the compiler that the program executed successfully.
+    </p>
+    <p>
+        You might also see that most lines of code in our program end with a semi-colon (;). This serves as the "period" of a line of code, 
+        just as we would use a period at the end of a sentence.
+    </p>
+    <br /><br />
+      <!-- Table of contents -->
+      <p>
+        Click these seperate links to go into more detail:
+        <ol>
+          <li><a href = "#comments">Comments</a></li> 
+          <li><a href = "#variables">Variables</a></li>
+          <li><a href = "#operators">Operators</a></li>
+          <li><a href = "#conditions">Conditional Statements</a></li>
+          <li><a href = "#loops">Loops</a></li>
+          <li><a href = "#functions">Functions</a></li>
+        </ol>
+      </p>  
+    <br />
+        <!-- Comments -->
+        <h2 id = "comments">
+          Comments
+        </h2>
+        <p>
+            Comments are very useful to tell others what your code is doing. The good thing is that the compiler ignores commnets. 
+            There are two methods of writing comments:
+            <li> Using "//". This makes an entire line of code a comment. For example: <br /> //This is a comment. </li>
+            <br />
+            <li> Using /* at the start of a comment and using */ at the end. This allows multi-line comments. For example: <br /> /* This is a comment */ </li>
+        </p>
+      <br /> <br />
+      <!-- Variables -->
+      <h2 id = "variables">
+        Variables
+      </h2>
+      <p>
+        <p>
+          Variables are used to store values. In C, we have several types of variables:
+        </p>
+          <!-- Data types -->
+          <li> short (2 bytes) </li>
+          <li> unsigned short (2 bytes) </li>
+          <li> int (4 bytes) </li>
+          <li> unsigned int (4 bytes) </li>
+          <li> long (8 bytes) </li>
+          <li> unsigned long (8 bytes) </li>
+          <li> float (4 bytes) </li>
+          <li> double (8 bytes) </li>
+          <li> long double (8 bytes) </li>
+          <li> char (1 byte) </li>
+          <li> void </li>
+        <br />
+        Click <a href = "data-types.html">this link</a> to learn more about data types.
+        <br /> <br />
+          <!-- Variable declaration -->
+          We declare variables by doing this: 
+          <pre>data_type variableName;</pre> 
+          For example: int x; 
+          <br /> <br /> We can assign the variable a value upon declaring it like: 
+          <br /> <pre>data_type var = <i>value</i>;</pre> or 
+          <pre>data_type var; <br />var = <i>value</i>; </pre>
+          <br /> For example:
+          <br /> <pre>int x = 5; <br />float y = 5.5;</pre>
+          <!-- Initializers -->
+          <br /> Your variable names can be anything, but they can only contain letters, underscore ( _ ), the dollar sign ($), and numbers.
+                 Your variable names cannot only consist of numbers, and cannot start with them either.
+          <br /> Also, you cannot use data types (such as int, double, etc.) as variable names.
+          <br />
+          <br /> It is good practice to make your variable names describe its function so that it is clearer for both you and anyone who wants to 
+                 see your code. For example, if a variable is the sum of two numbers, we should call that variable "sum".
+          <br /> <b>Note:</b> Your variable names cannot contain spaces.
+          <br /> <br /> Variable names are case-sensitive; "myNum" is not the same as "MyNum".
+          <br /> <br /> Usually, you can change the value of a variable any time you want. For example: 
+          <br /> <pre>int x = 5; <br />x = 1; </pre>
+          <!-- const -->
+          <br /> but if you don't want the value of a variable to be changed, you can use the <b>const </b> keyword:
+          <br /> <pre>const int x = 5; </pre>
+          <br /> Now, trying to change the value of x (<b>x = 1;</b>) would raise an error.
+      </p>
+      <br /> <br />
+      <!-- Operators -->
+      <h2 id = "operators">
+        Operators
+      </h2>
+      <p>
+        We use operators to perform operations on numbers.
+        <br /> We have a few types of operators: <a href = "#arithmetic">arithmetic</a>, <a href = "#comparison">comparison</a>, <a href = "#assignment">assignment</a>, <a href = "#logical">logical</a>, and <a href = "#bitwise">bitwise</a> operators.
+      </p>
+        <!-- Arithmetic operators -->
+        <h3 id = "arithmetic">
+          Arithmetic operators
+        </h3>
+        <p> 
+          We have a few arithmetic operators: +, -, *, /, %, ++, --.
+          <br />
+          <!-- "+" -->
+          <br /> The "+" operator adds two numbers. For example: 
+          <br /> <pre>int sum = 5 + 8; </pre>
+          sum holds the value 13.
+          <br /> 
+          <!-- "-" -->
+          <br /> The "-" operator subtracts two numbers. For example:
+          <br /> <pre>int diff = 10 - 2; </pre>
+          diff holds the value 8.
+          <br />
+          <!-- "*" -->
+          <br /> The "*" operator multiplies two numbers. For example:
+          <br /> <pre>int product = 5 * 2; </pre>
+          product holds the value 10.
+          <br /> 
+          <!-- "/" -->
+          <br /> The "/" operator divides two numbers. For example: 
+          <br /> <pre>int quotient = 10 / 2; </pre>
+          quotient holds the value 5.
+          <br />
+          <!-- "%" -->
+          <br /> The "%" operator finds the remainder after dividing two numbers. For example:
+          <br /> <pre>int mod = 123 % 4 </pre>
+          mod holds the value 3 (123 / 4 = 30 remainder <mark>3</mark>). 
+          <br />
+          <!-- "++" -->
+          <br /> The "++" operator increments a number by 1. For example:
+          <br /> <pre>int increment = 5; <br /> increment++; </pre>
+          increment holds the value 6.
+          <br />
+          <!-- "--" -->
+          <br /> The "--" operator decrements a umber by 1. For example:
+          <br /> <pre>int decrement = 6; <br /> decrement--; </pre>
+          decrement holds the value 5.
+        </p>
+        <br /> <br />
+        <!-- Comparison operators -->
+        <h3 id = "comparison">
+          Comparison operators 
+        </h3>
+        <p>
+          Comparison operators are used to compare two numbers. If the statement is true, the expression returns 1, and 
+          if the statement is false, the expression returns 0.
+          We have a few comparison operators: ==, !=, &lt, &gt, &lt=, and &gt=.
+          <br /> 
+          <!-- == -->
+          <br /> The "==" operator compares two values and checks if they are equal. If they are, the expression returns 1, otherwise, it returns 0. 
+                 For example:
+          <br /> <pre>printf("%i", 5 == 6); </pre>
+          This prints "0" as 5 is not equal to 6 (I will explain what %i means later).
+          <br /> 
+          <!-- != -->
+          <br /> The "!=" operator checks if two values are <b>un</b>equal. If the two values are unequal, the expression returns 1, and 0 otherwise.
+                 For example:
+          <br /> <pre>printf("%i", 5 != 6); </pre>
+          This prints "1" as 5 is not equal to 6, so the expression is true.
+          <br />
+          <!-- < -->
+          <br /> The "&lt" operator checks if one value is less than another, and returns 1 if this is the case. For example:
+          <br /> <pre>printf("%i", 6 &lt 5); </pre>
+          This prints "0" as 6 is not less than 5, so the expression is false, and 0 is returned.
+          <br /> 
+          <!-- > -->
+          <br /> The "&gt" operator checks if one value is greater than another, and returns 1 if this is the case. For example:
+          <br /> <pre>printf("%i", 6 &gt 5); </pre>
+          This prints "1" as 6 is greater than 5, so the expression is true, and 1 is returned.
+          <br /> 
+          <!-- <= -->
+          <br /> The "&lt=" operator checks if one value is less than or equal to another, and returns 1 if this is the case. For example:
+          <br /> <pre>printf("%i", 3 &lt= 5); </pre>
+          This prints "1" as 3 is less than or equal to 5, so the expression is true, and 1 is returned.
+          <br /> 
+          <!-- >= -->
+          <br /> The "&gt=" operator checks if one value is greater than or equal to another, and returns 1 if this is the case. For example:
+          <br /> <pre>printf("%i", 4 &gt 5); </pre>
+          This prints "0" as 4 is not less than or equal to 5, so the expression is false, and 0 is returned.
+          <br /> 
+        </p>
+        <br />
+        <!-- Assignment operators -->
+        <h3 id = "assignment">
+          Assignment operators  
+        </h3>
+        <p>
+          Assignment operators are used to assign variables. When we declare a variable, we use the "=" operator to <b>assign</b> that variable a value.
+          <br /> In C, when assigning a variable a value, C evaluates the right side of the expression and then stores that value inside the variable. Take this example:
+          <br /> <pre>int x = 5 + 2; </pre>
+          <br />
+          <br /> C first evaluates 5 + 2 (which is 7) and then stores it inside x. 
+          <br /> With this knowledge in mind, let's take a look at this expression:
+          <br /> <pre>x = x + 5; </pre>
+          <br /> If you've done algebra, this might look impossible to you, but this is valid code. What C does is it first evaluates x + 5, and then stores this value inside x. 
+          <br /> There are shorter ways of writing this code. Instead, we can use this: <br /> <pre>x += 5;</pre> which does the same thing.
+          <br /> There are several of these short and concise ways of doing these kinds of things. 
+          Keep in mind that all of these assignment operators <mark>store the result in the variable being changed</mark>. 
+          Here is a list of them: 
+          <li> = </li>
+          <li> += (adds a number to a variable) </li>
+          <li> -= (subtracts a number from a variable) </li>
+          <li> *= (multiplies a variable by a number) </li>
+          <li> /= (divides a variable by a number) </li>
+          <li> %= (finds the remainder of a variable divided by a number)</li>
+          <br /> There are a few more, but we will cover them later.
+        </p>
+        <br />
+        <!-- Logical operators -->
+        <h3 id = "logical">
+          Logical operators  
+        </h3>
+        <p>
+          Logical operators are used to determine the logic between expressions. We have three logical operators: &&, ||, and !.
+          <br />
+          <br /> The && logical operator returns 1 if both the statements are true, and 0 otherwise. For example:
+          <br /> <pre>x &gt 5 && x &lt 10 </pre>
+          The && operator returns 1 if x is both greater than 5 and less than 10; in other words, both statements are true.
+          <br />
+          <br /> The || logical operators returns 1 if either one or both the statements are true, and 0 otherwise. For example:
+          <br /> <pre>x &lt 0 || x &gt 100 </pre>
+          The || operator returns 1 if x is either less than 0 or greater than 100, in other words, either one or both statements are true.
+          <br />
+          <br /> The ! logical operator reverses the result. For example:
+          <br /> <pre>!(x &lt 0 || x &gt 100) </pre>
+          The ! operator returns 0 if the || operator returns 1, and vice versa. 
+        </p>
+        <br />
+        <!-- Bitwise operators -->
+        <h3 id = "bitwise">
+          Bitwise operators  
+        </h3>
+        <p>
+          Bitwise operators are hard to understand if you don't know how bits work. 
+          If you don't know how they work, I suggest that you go and try to get a deep understanding of bits before reading this section.
+          <br /> Bitwise operators are used on bits. There are a few bitwise operators: logical left shift (&lt&lt), 
+          logical right shift (&gt&gt), AND gate (&), OR gate (|), XOR gate(^), and NOT gate (~).
+          <br />
+          <!-- << operator -->
+          <br /> The &lt&lt operator takes two numbers, and shifts the bits in the first number to the left by the second number places: 
+          <br /> x &lt&lt n =&gt this shifts the bits in x to the left n places. A 0 gets added at the right. For example:
+          <br /> <pre>46 &lt&lt 3</pre>:
+          <br /> 46 = 101110
+          <br /> 101110 &lt&lt 3 = 101110<mark>0</mark> &lt&lt 2 = 101110<mark>00</mark> &lt&lt 1 = 101110<mark>000</mark> = 368
+          <br /> If you notice, 368 = 46 * 8 = 46 &lt&lt 3. This means that bitshifting a number n places to the left is the same as multiplying that number by 2<sup>n</sup>. 
+                 This makes sense, as we are moving the bitsto spots where they are twice as much as they were in their original position. 
+          <br />
+          <!-- >> operator -->
+          <br /> The &gt&gt operator takes two numbers, and shifts the bits in the first number to the right by the second number places:
+          <br /> x &gt&gt n =&gt this shifts the bits in x to the right n places. The rightmost bit gets removed. For example:
+          <br /> <pre>46 &gt&gt 3</pre>:
+          <br /> 46 = 101110
+          <br /> 101110 &gt&gt 3 = 10111<del>0</del> &gt&gt 2 = 1011<del>10</del> &gt&gt 1 = 101<del>110</del> = 101 = 5
+          <br /> When you right-shift a number by n places, you divide that number by 2<sup>n</sup>, and <mark>then you floor the resulting decimal</mark> 
+          (you round the integer down). Taking our example from before, you can see that 46 &gt&gt 3 = 5:   
+          <br /> 46 / 2<sup>3</sup>   
+          <br /> = 46 / 8
+          <br /> = 5.75
+          <br /> Rounding down, we get: 5, the same result that we got with bitshifting to the right.
+          <br /> 
+          <!-- And gate-->
+          <br /> The AND gate takes two numbers and compares their bits in the following fashion:
+          <br />
+          <br /> Bit 1 | Bit 2 | Output
+          <br /> &#160&#160 0 &#160&#160 | &#160&#160 0 &#160&#160 | &#160&#160&#160&#160 0
+          <br /> &#160&#160 1 &#160&#160 | &#160&#160 0 &#160&#160 | &#160&#160&#160&#160 0
+          <br /> &#160&#160 0 &#160&#160 | &#160&#160 1 &#160&#160 | &#160&#160&#160&#160 0
+          <br /> &#160&#160 1 &#160&#160 | &#160&#160 1 &#160&#160 | &#160&#160&#160&#160 1
+          <br /> In other words, the output bit is 1 when both bits are 1. Otherwise, the output bit is 0.
+          <br /> We use this gate with the ampersand (&) character =&gt x & n. For example:
+          <br /> <pre>int AND = 7 & 5; </pre>  =&gt the result of that is 5 (111 & 101 = 101 = 5).
+          <br />
+          <!-- OR gate -->
+          <br /> The OR gate takes two numbers and compares their bits in the following fashion:
+          <br />
+          <br /> Bit 1 | Bit 2 | Output
+          <br /> &#160&#160 0 &#160&#160 | &#160&#160 0 &#160&#160 | &#160&#160&#160&#160 0
+          <br /> &#160&#160 1 &#160&#160 | &#160&#160 0 &#160&#160 | &#160&#160&#160&#160 1
+          <br /> &#160&#160 0 &#160&#160 | &#160&#160 1 &#160&#160 | &#160&#160&#160&#160 1
+          <br /> &#160&#160 1 &#160&#160 | &#160&#160 1 &#160&#160 | &#160&#160&#160&#160 1
+          <br /> In other words, the output bit is 1 when either or both bits are 1. Otherwise, the output bit is 0.
+          <br /> We use this gate with the | charater =&gt x | n. For example:
+          <br /> <pre>int OR = 7 | 5; </pre>  =&gt the result is 7 (111 | 101 = 111 = 7).
+          <br />
+          <!-- XOR gate -->
+          <br /> The XOR gate takes two numbers and compares their bits in the following fashion: 
+          <br />
+          <br /> Bit 1 | Bit 2 | Output
+          <br /> &#160&#160 0 &#160&#160 | &#160&#160 0 &#160&#160 | &#160&#160&#160&#160 0
+          <br /> &#160&#160 1 &#160&#160 | &#160&#160 0 &#160&#160 | &#160&#160&#160&#160 1
+          <br /> &#160&#160 0 &#160&#160 | &#160&#160 1 &#160&#160 | &#160&#160&#160&#160 1
+          <br /> &#160&#160 1 &#160&#160 | &#160&#160 1 &#160&#160 | &#160&#160&#160&#160 0
+          <br /> In other words, the output bit is 1 when either bit is 1. Otherwise, the output bit is 0.
+          <br /> We use this gate with the carrot (^) charater =&gt x ^ n. For example:
+          <br /> <pre>int XOR = 7 ^ 5; </pre>  =&gt the result is 2 (111 ^ 101 = 010 = 2).
+          <br /> 
+          <!-- NOT -->
+          <br /> The NOT gate takes a number and inverts its bits: 
+          <br />
+          <br /> &#160 Bit &#160| Output
+          <br /> &#160&#160 0 &#160&#160 | &#160&#160&#160 1
+          <br /> &#160&#160 1 &#160&#160 | &#160&#160&#160 0
+          <br />
+          <!-- The bitwise assignment operators -->
+          <br /> With this, we introduce the final assignment operators: 
+          <li> &= (finding the AND of a variable and a number) </li>
+          <li> |= (finding the OR of a variable and a number) </li>
+          <li> ^= (finding the XOR of a variable and a number) </li>
+          <li> &lt&lt= (left-shifting a variable number times) </li>
+          <li> &gt&gt= (right-shifting a variable number times) </li>
+        </p>
+        <br /> <br />
+        <!-- Conditional Statements -->
+        <h3 id = "conditions">
+          Conditional Statements  
+        </h3>
+        <p>
+          Sometimes, we have many blocks of code that we want to only execute if a condition is true. To do this, we use the if statement. 
+          For example:
+          <!-- if -->
+          <br /> <pre>&#160&#160&#160&#160&#160&#160&#160&#160if (condition) { 
+          &#160&#160&#160&#160 //code to be executed if the condition is true 
+          } </pre>
+          <br /> The code inside the if statement only executes if the condition is true. This makes the if statement very useful for branching code.
+          <br />
+          <!-- else -->
+          <br /> We can also use the else statement, which only executes if the condition inside the if statement is not true. For example:
+          <br /> <pre>&#160&#160&#160&#160&#160&#160&#160&#160if (5 &gt 6) { 
+          &#160&#160&#160&#160 printf("5 is greater than 6"); 
+          } 
+          else { 
+          &#160&#160&#160&#160 printf("5 is not greater than 6") 
+          } </pre>
+          <br /> In this case, since 5 is clearly not greater than 6, the else statement executes since the statement is false.
+          <br /> <b>Note:</b> the else statement is <b>optional</b>. If you don't include it, the absence of it would be interpreted as an empty else statement.
+          <br />
+          <!-- else if -->
+          <br /> We also have else if statements. These are like extra if statements with difference conditions. If the if statement doesn't execute, the compiler
+                 checks the else if statements to see if their condition is true <b>before </b> checking the else statement. If all of the else if statements' conditions
+                 are not true, than the final else statement executes. For example:
+          <br /> <pre>&#160&#160&#160&#160&#160&#160&#160&#160if (5 &gt 6) { 
+          &#160&#160&#160&#160 printf("5 is greater than 6"); 
+          } 
+          else if (5 &lt 6) {
+          &#160&#160&#160&#160 printf("5 is less than 6"); 
+          }
+          else { 
+          &#160&#160&#160&#160 printf("5 is equal to 6"); 
+          } </pre>
+          <br /> In this case, the else if statement executes since its condition (5 &lt 6) is true.
+          <br /> Your program can consist of multiple else if statements to check for multiple conditions.
+          <br />
+          <!-- switch -->
+          <br /> We can use the switch statement to select one of many code blocks to be executed:
+          <br /> <pre>&#160&#160&#160&#160&#160&#160&#160&#160 switch(expression) {
+          &#160&#160&#160&#160case x: 
+          &#160&#160&#160&#160&#160&#160&#160&#160 //code for case x
+          &#160&#160&#160&#160&#160&#160&#160&#160 break;
+          &#160&#160&#160&#160case y:
+          &#160&#160&#160&#160&#160&#160&#160&#160 //code for case y
+          &#160&#160&#160&#160&#160&#160&#160&#160 break;
+          &#160&#160&#160&#160 ...
+          &#160&#160&#160&#160default:
+          &#160&#160&#160&#160&#160&#160&#160&#160 //default code
+          } </pre>
+          <br /> The compiler evaluates the expression and compares it with the value of each case. In our example, the compiler evaluates the expression and compares it to x, y, and
+                 so on. If the value of the expression is equal to the value of a case, its code will be executed. If none of the values of the cases match the value
+                 of the expression, than the compiler will execute the code under the default keyword; the code there is the "default" code. Essentially, our
+                 example above is the same as this:
+          <pre>&#160&#160&#160&#160&#160&#160&#160&#160 if (expression == x) { 
+            &#160&#160&#160&#160 //code to be executed if expression == x
+            }
+            else if (expression == y) {
+            &#160&#160&#160&#160 //code to be executed if expression == y
+            }
+            ...
+            else {
+            &#160&#160&#160&#160 //code to be executed if none of the above statements execute.
+            } 
+          </pre>
+          <br /> break means to exit control out of the <code>switch</code> statement.
+          <br /> <br />
+        </p>
+          <!-- Loops -->
+          <h2 id = "loops">
+            Loops  
+          </h2>
+          <p> 
+            A loop is used to repeat something a certain number of times. In C, we have several types of loops: 
+            <br />
+            <ol>
+              <li><a href = "#while-loop">The while loop</a></li>
+              <li><a href = "#for-loop">The for loop</a></li>
+              <li><a href = "#do-while-loop">The do...while loop</a></li>
+            </ol>
+          </p>
+            <!-- while loop -->
+            <h3 id = "while-loop">
+              The while loop  
+            </h3>
+            <p>
+              The while loop repeats a block of code as long as a condition is true:
+              <pre>
+                while (condition is true) {
+                    //execute code
+                }
+              </pre>
+              Execution exits the while loop as soon as the condition becomes false. Note that a while loop checks the condition <pre>before</pre> executing the code.
+              That means that if the condition starts off false, the code inside the loop will not execute. 
+            </p>
+            <!-- for loop -->
+            <h3 id = "for-loop">
+              The for loop
+            </h3>
+            <p> 
+              Using a while loop, we can repeat something a finite number of time like so:
+              <pre>
+                int x = 0;
+                while (x &lt 50) {
+                  //execute code
+                  x++; //This adds one to x, up until x = 50. 
+                }
+              </pre>
+              The example up top is a bit wordy, so instead, we can use a for loop:
+              <pre>
+                for (int i = 0; i &lt 50; i++) 
+                {
+                  //execute code
+                }
+              </pre>
+              This declares a variable called i, sets it to 0, and increments it each iteration until i == 50. 
+            </p>
+            <!-- do...while loop -->
+            <h3 id = "do-while-loop">
+              The do...while loop  
+            </h3>
+            <p>
+              The do...while loop is similar to the while loop in which it executes some code as long as a condition is true:
+              <pre>
+                do {
+                  //execute code
+                }
+                while (condition is true);
+              </pre>
+              The only difference is that a do...while loop checks the condition <pre>after</pre> executing the code. Therefore, if the 
+              conditon starts out false, the code will execute once before control exits the loop.
+            </p>
+            <!-- Infinite loops -->
+            <p> 
+              There are a few ways we can make a block of code iterate forever:
+              <pre>
+              1. for (; ;) 
+                 {
+                   //execute code
+                 }
+              </pre>
+              <pre>
+              2. while (1) {
+                  //execute code
+                 }
+              </pre>
+              <pre>
+              3. do {
+                   //execute code
+                 }
+                 while (1);
+              </pre>
+            </p>
+            <br />  <br />
+        <!-- Arrays -->
+        <h2 id = "arrays">
+            C arrays
+        </h2>
+        <p> 
+          Arrays in C are used to store multiple values inside a single variable. Take this example:
+          <pre>
+            int a = 5;
+            int b = 6;
+            int c = 7;
+            int d = 8; 
+          </pre>
+          The code above is repetitive and inefficient. We can use arrays to fix this:
+          <pre>int a[4]; </pre>
+          The code above gets 4 integers and stores them inside a list. Then we start assigning each integer of the array a value.
+          <br /> This is what we call an array. We declare arrays like so:
+          <pre> data_type variableName[size of array];  </pre>
+          We can combine this with for loops to create a very efficient way of assigning the terms of the array:
+          <pre>
+            for (int i = 0; i &lt size of array; i++)
+            {
+               array[i] = <i>value</i>;
+            }
+          </pre>
+          Which is equivalent to doing:
+          <pre>
+            array[0] = <i>value</i>;
+            array[1] = <i>value</i>;
+            ...
+          </pre>
+          but much simpler.
+          <br /> <b>Note:</b> We start at 0 as computer scientists start counting from 0. 
+          <br /> Or, we can just do this: 
+          <pre>array[size of array] = {value 1, value 2, value 3, ...}; </pre>
+          Accessing a term of an array is relatively simple: array[0] refers to the first term, array[1] refers to the second term, array[2] refers to the third term, and so on.
+          <br /> We can change a value of a term in an array by accessing the array term and changing its value like so:
+          <pre>array[term position] = <i>new value</i>; </pre>
+          You can omit the array size: <pre>array[] = ...; </pre> but it will only be as large as the number of elements inside the array. This poses a problem when you
+          try and add extra elements to the array.
+          <br />
+          <br /> We can use arrays of characters as strings, as a string is techically just an array of characters:
+          <pre>char str[5] = {'H', 'e', 'l', 'l', 'o'}; </pre>
+          The array str now holds the word "Hello". 
+          <br /> Instead of doing that, we can instead type:
+          <pre>char str[5] = "Hello"; </pre>
+        </p>
+        <!-- Functions -->
+        <h2 id = "functions">
+          Functions  
+        </h2>
+        <p>
+          Functions are blocks of code that only run when called. Functions are quite useful as they seperate some code from the rest of the code and can be called multiple times.
+          <br /> You can pass data (called arguments) into functions. 
+          <br /> We can specify functions like so:
+          <pre>
+            return_type functionName(parameter 1, parameter 2, ...)
+            {
+              //code in function
+            }
+          </pre>
+          <code>return_type</code> specifies the type of the value that the function returns to the caller.
+          For example:
+          <pre>
+            int myFunc() 
+            {
+              //code
+            }
+          </pre>
+          The above example returns a value of type int (integer) to the caller, so that they can use this value for other stuff in their program.
+          <br /> You can pass data into the function as arguments. A parameter is data that the function uses. For example:
+          <pre>
+            int myFunction(int parameter1, float parameter2) 
+            {
+              //code
+            }
+          </pre>
+          In this case, the parameters are <code>int parameter1</code> and <code>float parameter2</code>. To call this function, the caller
+          must pass in a argument of type int into the parameter of type int, and then a argument of type float into the parameter of type float:
+          <pre>
+            int param1;
+            float param2;
+            myFunction(param1, param2);
+          </pre>
+          If I passed the argument of type float into the parameter of type int, the compiler would spit out an error. The arguments
+          <b>must</b> be passed into parameters with the same type as them.
+        </p>
+        <h3>
+          Defining functions  
+        </h3>
+        <p>
+          In C, we must define the functions in two ways:
+          <ol>
+            <li>By defining the function above the main function (int main()).</li>  
+            <li>By providing a <mark>function prototype atop the file.</mark></li>
+          </ol>
+          C reads the file from top to bottom, and follows exactly what you tell it. If you use a function, but C hasn't seen it before, it doesn't know what to 
+          do with the function call, so it prompts an error; it does <b>not</b> look later on in the file for the function. We can define the function above the main
+          function:
+          <pre>
+            int myFunc()
+            {
+              //code
+            }
+            
+            int main(void)
+            {
+              myFunc();
+              //more code
+            }
+          </pre>
+          but that would push down the main function the more functions there are, and we want to see the main function at the top.
+          <br /> We can use function prototypes atop the file:
+          <pre>
+            <mark>int myFunc()</mark>;
+            
+            int main()
+            {
+              myFunc();
+              //more code
+            }
+            
+            <mark>int myFunc()</mark>
+            {
+              //code
+            }
+          </pre>
+          We would just take the function name (return_type funcName()), copy paste it above the main function, and stick a semi-colon at the end.
+        </p>
+        <h3>
+          Function overloading  
+        </h3>
+        <p>
+          The complete function "name" consists of its name and its parameters:
+          <br /> If I have a function called <code>int myFunc(int arg1, int arg2)</code>, 
+          the "name" of this function is <code>myFunc(int arg1, int arg2)</code> (the return type is not included).
+          <br /> This leads to a phenomenon called "function overloading":
+          <pre>
+            int myFunc(int arg1, int arg2) {}
+            double myFunc(int arg1, int arg2) {}
+          </pre>
+          When you call myFunc(), the compiler doesn't know which function you're calling. This prompts an error from the compiler.
+	  Now, C will not complain.
+        </p>
+    </div>      
+  </body>
+</html>
