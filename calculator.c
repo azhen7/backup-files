@@ -112,12 +112,12 @@ double solveEquation(char* input)
             return NAN;
         if (isalpha(copy[i]))
         {
-            char arr[6] = {'\0'};
+            char arr[7];
             if (copy[i] == 's')
             {
                 copyIndexStart = i;
 
-                strncat(arr, &copy[copyIndexStart], 6);
+                strncat(arr, &copy[copyIndexStart], 7);
                 if (strncmp(arr, "sqrt", 4) == 0)
                 {
                     copy[copyIndexStart] = '#';
@@ -127,13 +127,13 @@ double solveEquation(char* input)
                 else if (strcmp(arr, "square") == 0)
                 {
                     copy[copyIndexStart] = '<';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
-                else if (strncmp(arr, "sixrt", 5) == 0)
+                else if (strcmp(arr, "sixthrt") == 0)
                 {
                     copy[copyIndexStart] = '!';
-                    removeChar(copy, copyIndexStart, 5);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
                 else if (strncmp(arr, "sin", 3) == 0)
@@ -154,38 +154,38 @@ double solveEquation(char* input)
             else if (copy[i] == 'a')
             {
                 copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], 6);
+                strncat(arr, &copy[copyIndexStart], 7);
                 if (strcmp(arr, "arcsin") == 0)
                 {
                     copy[copyIndexStart] = '>';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
                 }
-                else if (strcmp(arr, "arccos") == 0)
+                else if (strncmp(arr, "arccos", 6) == 0)
                 {
                     copy[copyIndexStart] = '?';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
                 }
-                else if (strcmp(arr, "arctan") == 0)
+                else if (strncmp(arr, "arctan", 6) == 0)
                 {
                     copy[copyIndexStart] = '|';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
                 }
-                else if (strcmp(arr, "arcsnh") == 0)
+                else if (strncmp(arr, "arcsnh", 6) == 0)
                 {
                     copy[copyIndexStart] = '{';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
                 }
-                else if (strcmp(arr, "arccsh") == 0)
+                else if (strncmp(arr, "arccsh", 6) == 0)
                 {
                     copy[copyIndexStart] = '}';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
                 }
-                else if (strcmp(arr, "arctnh") == 0)
+                else if (strncmp(arr, "arctnh", 6) == 0)
                 {
                     copy[copyIndexStart] = '(';
                     removeChar(copy, copyIndexStart, 6);
@@ -197,7 +197,7 @@ double solveEquation(char* input)
             else if (copy[i] == 'c')
             {
                 copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], 6);
+                strncat(arr, &copy[copyIndexStart], 7);
                 if (strncmp(arr, "cbrt", 4) == 0)
                 {
                     copy[copyIndexStart] = '@';
@@ -210,7 +210,7 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 4);
                     root++;
                 }
-                else if (strcmp(arr, "cosine") == 0)
+                else if (strncmp(arr, "cosine", 6) == 0)
                 {
                     copy[copyIndexStart] = ';';
                     removeChar(copy, copyIndexStart, 6);
@@ -234,17 +234,17 @@ double solveEquation(char* input)
             else if (copy[i] == 'q')
             {
                 copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], 6);
-                if (strcmp(arr, "quartc") == 0)
+                strncat(arr, &copy[copyIndexStart], 7);
+                if (strcmp(arr, "quartic") == 0)
                 {
                     copy[copyIndexStart] = '$';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
-                else if (strcmp(arr, "quintc") == 0)
+                else if (strcmp(arr, "quintic") == 0)
                 {
                     copy[copyIndexStart] = '~';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
                 else
@@ -253,7 +253,7 @@ double solveEquation(char* input)
             else if (copy[i] == 't')
             {
                 copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], 4);
+                strncat(arr, &copy[copyIndexStart], 7);
                 if (strncmp(arr, "tan", 3) == 0)
                 {
                     copy[copyIndexStart] = 92;
@@ -272,7 +272,7 @@ double solveEquation(char* input)
             else if (copy[i] == 'f')
             {
                 copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], 4);
+                strncat(arr, &copy[copyIndexStart], 7);
                 if (strncmp(arr, "floor", 5) == 0)
                 {
                     copy[copyIndexStart] = 'f';
@@ -285,7 +285,7 @@ double solveEquation(char* input)
             else if (copy[i] == 'l')
             {
                 copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], 4);
+                strncat(arr, &copy[copyIndexStart], 7);
                 //ln
                 if (strncmp(arr, "ln", 2) == 0)
                 {
@@ -294,38 +294,38 @@ double solveEquation(char* input)
                     root++;
                 }
                 //log base 10
-                else if (strcmp(arr, "logten") == 0)
+                else if (strncmp(arr, "log", 3) == 0)
                 {
                     copy[copyIndexStart] = 'k';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 3);
                     root++;
                 }
                 //log base 2
-                else if (strcmp(arr, "logtwo") == 0)
+                else if (strncmp(arr, "logtwo", 6) == 0)
                 {
                     copy[copyIndexStart] = 'n';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
                 }
                 //log base 3
-                else if (strcmp(arr, "logthr") == 0)
+                else if (strncmp(arr, "logthr", 6) == 0)
                 {
                     copy[copyIndexStart] = 'o';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
                 }
                 //log base 4
-                else if (strcmp(arr, "lgfour") == 0)
+                else if (strcmp(arr, "logfour") == 0)
                 {
                     copy[copyIndexStart] = 'p';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
                 //log base 5
-                else if (strcmp(arr, "lgfive") == 0)
+                else if (strcmp(arr, "logfive") == 0)
                 {
                     copy[copyIndexStart] = 'q';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
                 //log base 6
@@ -336,10 +336,17 @@ double solveEquation(char* input)
                     root++;
                 }
                 //log base 7
-                else if (strcmp(arr, "logsev") == 0)
+                else if (strcmp(arr, "lgseven") == 0)
                 {
                     copy[copyIndexStart] = 's';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
+                    root++;
+                }
+                //log base 8
+                else if (strcmp(arr, "lgeight") == 0)
+                {
+                    copy[copyIndexStart] = 't';
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
                 else
@@ -625,6 +632,12 @@ double solveEquation(char* input)
                     else if (Roots[a] == 'y')
                         last = log7(last);
 
+                    //log base 8
+                    else if (Roots[a] == 'z')
+                        total = log8(total);
+
+                    else if (Roots[a] == 'A')
+                        last = log8(last);
                 }
                 //operation
                 if (state != '\0')
@@ -1007,6 +1020,18 @@ double solveEquation(char* input)
                 else
                     if (numNum == 0)
                         strcat(Roots, "y");
+            }
+            //log base 8
+            else if (copy[i] == 't')
+            {
+                if (state == '\0')
+                {
+                    if (numNum == 0)
+                        strcat(Roots, "z");
+                }
+                else
+                    if (numNum == 0)
+                        strcat(Roots, "A");
             }
 
             //Converts last number to float
