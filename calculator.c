@@ -51,11 +51,9 @@ double solveEquation(char* input)
     short root = 0;
     short numNum = 1;
     short convertedState = 0;
-
     float divide = 10.0;
     double last = 0.0;
     double total = 0.0;
-
     char state = '\0';
     char whichNum = '0';
     char lastNum = '0';
@@ -110,13 +108,11 @@ double solveEquation(char* input)
         else
             break;
     }
-
     //Used to check for square roots, cube roots, quartic roots, and quintic roots
     for (int i = 0; i < strlen(copy); i++)
     {
         if (!isascii(copy[i]) == 1)
             return NAN;
-
         if (isalpha(copy[i]))
         {
             char arr[4] = {'\0'};
@@ -410,16 +406,13 @@ double solveEquation(char* input)
     numNum = 0;
 
     Roots = (char*) malloc(root * sizeof(char));
-
     for (int j = 0; j < times; j++)
     {
         for (int i = location; i < strlen(copy) + 1; i++)
         {
-            //printf("%c\n", copy[i]);
             //If there's a space at copy[i], save an iteration
             if (copy[i] == ' ')
                 continue;
-
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.')
             {
                 for (int a = 0; a < root; a++)
@@ -621,7 +614,6 @@ double solveEquation(char* input)
                     else if (Roots[a] == 'w')
                         last = log6(last);
                 }
-
                 //operation
                 if (state != '\0')
                 {
@@ -647,7 +639,6 @@ double solveEquation(char* input)
                             break;
                     }
                 }
-
                 location = i;
                 break;
             }
