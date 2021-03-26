@@ -293,39 +293,52 @@ double solveEquation(char* input)
             {
                 copyIndexStart = i;
                 strncat(arr, &copy[copyIndexStart], 4);
+                //ln
                 if (strcmp(arr, "loge") == 0)
                 {
                     copy[copyIndexStart] = 'l';
                     removeChar(copy, copyIndexStart);
                     root++;
                 }
+                //log base 10
                 else if (strcmp(arr, "logr") == 0)
                 {
                     copy[copyIndexStart] = 'k';
                     removeChar(copy, copyIndexStart);
                     root++;
                 }
+                //log base 2
                 else if (strcmp(arr, "lgtw") == 0)
                 {
                     copy[copyIndexStart] = 'n';
                     removeChar(copy, copyIndexStart);
                     root++;
                 }
+                //log base 3
                 else if (strcmp(arr, "lgth") == 0)
                 {
                     copy[copyIndexStart] = 'o';
                     removeChar(copy, copyIndexStart);
                     root++;
                 }
+                //log base 4
                 else if (strcmp(arr, "lgfr") == 0)
                 {
                     copy[copyIndexStart] = 'p';
                     removeChar(copy, copyIndexStart);
                     root++;
                 }
+                //log base 5
                 else if (strcmp(arr, "lgfv") == 0)
                 {
                     copy[copyIndexStart] = 'q';
+                    removeChar(copy, copyIndexStart);
+                    root++;
+                }
+                //log base 6
+                else if (strcmp(arr, "logs") == 0)
+                {
+                    copy[copyIndexStart] = 'r';
                     removeChar(copy, copyIndexStart);
                     root++;
                 }
@@ -412,167 +425,201 @@ double solveEquation(char* input)
                 for (int a = 0; a < root; a++)
                 {
                     //Roots and additional operations
+                    //sqrt
                     if (Roots[a] == '0')
                         total = squareRoot(total);
 
                     else if (Roots[a] == '1')
                         last = squareRoot(last);
 
+                    //cbrt
                     else if (Roots[a] == '2')
                         total = cbrt(total);
 
                     else if (Roots[a] == '3')
                         last = cbrt(last);
 
+                    //quartic root
                     else if (Roots[a] == '4')
                         total = squareRoot(squareRoot(total));
 
                     else if (Roots[a] == '5')
                         last = squareRoot(squareRoot(last));
 
+                    //quintic root
                     else if (Roots[a] == '6')
                         total = qurt(total);
 
                     else if (Roots[a] == '7')
                         last = qurt(last);
 
+                    //sixth root
                     else if (Roots[a] == ';')
                         total = cbrt(squareRoot(total));
 
                     else if (Roots[a] == ':')
                         last = cbrt(squareRoot(last));
 
+                    //square
                     else if (Roots[a] == '8')
                         total *= total;
 
                     else if (Roots[a] == '9')
                         last *= last;
 
+                    //cube
                     else if (Roots[a] == '[')
                         total = pow(total, 3);
 
                     else if (Roots[a] == ']')
                         last = pow(last, 3);
 
+                    //sin
                     else if (Roots[a] == '{')
                         total = sin(total);
 
                     else if (Roots[a] == '}')
                         last = sin(last);
 
+                    //cos
                     else if (Roots[a] == '~')
                         total = cos(total);
 
                     else if (Roots[a] == '`')
                         last = cos(last);
 
+                    //tan
                     else if (Roots[a] == '=')
                         total = tan(total);
 
                     else if (Roots[a] == '_')
                         last = tan(last);
 
+                    //arcsin
                     else if (Roots[a] == '(')
                         total = asin(total);
 
                     else if (Roots[a] == ')')
                         last = asin(last);
 
+                    //arccos
                     else if (Roots[a] == ',')
                         total = acos(total);
 
                     else if (Roots[a] == '.')
                         last = acos(last);
 
+                    //arctan
                     else if (Roots[a] == '<')
                         total = atan(total);
 
                     else if (Roots[a] == '>')
                         last = atan(last);
 
+                    //sinh
                     else if (Roots[a] == ' ')
                         total = sinh(total);
 
                     else if (Roots[a] == 'a')
                         last = sinh(last);
 
+                    //cosh
                     else if (Roots[a] == 'b')
                         total = cosh(total);
 
                     else if (Roots[a] == 'c')
                         last = cosh(last);
 
+                    //tanh
                     else if (Roots[a] == 'd')
                         total = tanh(total);
 
                     else if (Roots[a] == 'e')
                         last = tanh(last);
 
+                    //arcsinh
                     else if (Roots[a] == '+')
                         total = asinh(total);
 
                     else if (Roots[a] == '-')
                         last = asinh(last);
 
+                    //arccosh
                     else if (Roots[a] == '*')
                         total = acosh(total);
 
                     else if (Roots[a] == '/')
                         last = acosh(last);
 
+                    //arctanh
                     else if (Roots[a] == '@')
                         total = atanh(total);
 
                     else if (Roots[a] == '#')
                         last = atanh(last);
 
+                    //ceil
                     else if (Roots[a] == 'f')
                         total = (int) total + 1;
 
                     else if (Roots[a] == 'g')
                         last = (int) last + 1;
 
+                    //floor
                     else if (Roots[a] == 'h')
                         total = (int) total;
 
                     else if (Roots[a] == 'i')
                         last = (int) last;
 
+                    //ln
                     else if (Roots[a] == 'j')
                         total = log(total);
 
                     else if (Roots[a] == 'k')
                         last = log(last);
 
+                    //log base 10
                     else if (Roots[a] == 'l')
                         total = log10(total);
 
                     else if (Roots[a] == 'm')
                         last = log10(last);
 
+                    //log base 2
                     else if (Roots[a] == 'n')
                         total = log2(total);
 
                     else if (Roots[a] == 'o')
                         last = log2(last);
 
+                    //log base 3
                     else if (Roots[a] == 'p')
                         total = log3(total);
 
                     else if (Roots[a] == 'q')
                         last = log3(last);
 
+                    //log base 4
                     else if (Roots[a] == 'r')
                         total = log4(total);
 
                     else if (Roots[a] == 's')
                         last = log4(last);
 
+                    //log base 5
                     else if (Roots[a] == 't')
                         total = log5(total);
 
                     else if (Roots[a] == 'u')
                         last = log5(last);
+
+                    //log base 6
+                    else if (Roots[a] == 'v')
+                        total = log6(total);
+
+                    else if (Roots[a] == 'w')
+                        last = log6(last);
                 }
 
                 //operation
@@ -935,6 +982,18 @@ double solveEquation(char* input)
                 else
                     if (numNum == 0)
                         strcat(Roots, "u");
+            }
+            //log base 6
+            if (copy[i] == 'r')
+            {
+                if (state == '\0')
+                {
+                    if (numNum == 0)
+                        strcat(Roots, "v");
+                }
+                else
+                    if (numNum == 0)
+                        strcat(Roots, "w");
             }
 
             //Converts last number to float
