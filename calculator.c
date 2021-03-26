@@ -9,16 +9,13 @@
 
 //Used to solve equation
 double solveEquation(char* input);
-
 //String char checking
 int validNext(char* input, int i);
 int validateOperation(char* input, int i);
 int validateRoot(char* input, int i);
 int letterExceptionCheck(char* input, int index);
-
 //Change strings
 char* removeChar(char* input, int index);
-
 //Root functions
 float squareRoot(float number);
 float qurt(float number);
