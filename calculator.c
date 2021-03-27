@@ -11,13 +11,20 @@
 
 //Used to solve equation
 double solveEquation(char* input);
+
+//Get some numbers
+long double convertFloat(char* input);
+unsigned int numberOfOperations(char* input);
+
 //String char checking
 int validNext(char c);
 int validateOperation(char c);
 int validateRoot(char c);
 int letterExceptionCheck(char* input, int index);
+
 //Change strings
 char* removeChar(char* input, int index, int c);
+
 //Root functions
 float squareRoot(float number);
 float qurt(float number);
@@ -374,61 +381,15 @@ double solveEquation(char* input)
         }
     }
 
-    for (int i = 0; i < strlen(copy); i++)
-    {
-        if (copy[i] == ' ' || isdigit(copy[i]))
-            continue;
-        //Check how many operations we have to do
-        if (validateOperation(copy[i]) == 0)
-        {
-            if (validNext(copy[i + 1]) == 0)
-                times++;
-        }
-    }
+    total = convertFloat(copy);
+
+    times = numberOfOperations(copy);
 
     x = times;
 
     if (times == 0)
         times++;
 
-    //Used to covert copy string to a float
-    for (int i = 0; i < strlen(copy); i++)
-    {
-        //This code is in charge of switching from adding integer parts to adding decimals
-        if (!isdigit(copy[i]))
-        {
-            if (copy[i] == '.')
-            {
-                if (!isdigit(copy[i + 1]))
-                    break;
-                else
-                {
-                    lastNum = '1';
-                    continue;
-                }
-            }
-            else if (validateRoot(copy[i]) == 0)
-                continue;
-            else if (letterExceptionCheck(copy, i) == 0);
-            else
-                break;
-        }
-        //This part actually converts the number
-        else
-        {
-            if (lastNum == '0')
-            {
-                total += copy[i] - '0';
-                if (isdigit(copy[i + 1]))
-                    total *= 10;
-            }
-            else
-            {
-                total += (copy[i] - '0') / pow(divide, numNum);
-                numNum++;
-            }
-        }
-    }
     //If there was a negative sign in front of the first number, it is negative, so multiply it by -1.
     total *= multNeg;
     lastNum = '0';
@@ -1154,6 +1115,73 @@ double solveEquation(char* input)
     }
     return total;
 }
+
+//Get first number of equation
+long double convertFloat(char* input)
+{
+    char lastNum = '0';
+    int numNum = 1;
+    float divide = 10.0;
+    long double total = 0.0;
+    //Used to covert copy string to a float
+    for (int i = 0; i < strlen(input); i++)
+    {
+        //This code is in charge of switching from adding integer parts to adding decimals
+        if (!isdigit(input[i]))
+        {
+            if (input[i] == '.')
+            {
+                if (!isdigit(input[i + 1]))
+                    break;
+                else
+                {
+                    lastNum = '1';
+                    continue;
+                }
+            }
+            else if (validateRoot(input[i]) == 0)
+                continue;
+            else if (letterExceptionCheck(input, i) == 0);
+            else
+                break;
+        }
+        //This part actually converts the number
+        else
+        {
+            if (lastNum == '0')
+            {
+                total += input[i] - '0';
+                if (isdigit(input[i + 1]))
+                    total *= 10;
+            }
+            else
+            {
+                total += (input[i] - '0') / pow(divide, numNum);
+                numNum++;
+            }
+        }
+    }
+    return total;
+}
+
+//get number of operations
+unsigned int numberOfOperations(char* input)
+{
+    unsigned int times = 0;
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] == ' ' || isdigit(input[i]))
+            continue;
+        //Check how many operations we have to do
+        if (validateOperation(input[i]) == 0)
+        {
+            if (validNext(input[i + 1]) == 0)
+                times++;
+        }
+    }
+    return times;
+}
+
 
 //Roots functions
 float squareRoot(float number)
