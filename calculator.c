@@ -49,7 +49,6 @@ double solveEquation(char* input)
     short x = 0;
     short root = 0;
     short numNum = 1;
-    short convertedState = 0;
     float divide = 10.0;
     long double last = 0.0;
     long double total = 0.0;
@@ -68,6 +67,8 @@ double solveEquation(char* input)
         //if copy[i] is a space, save an iteration
         if (copy[i] == ' ')
             continue;
+        if (validateOperation(copy, i) == 0)
+            state = copy[i];
         if (copy[i] == '+')
         {
             if (copy[i + 1] != ' ')
@@ -77,7 +78,8 @@ double solveEquation(char* input)
                     copy[i] = '-';
                     copy[i + 1] = ' ';
                 }
-                else if (isdigit(copy[i + 1]));
+                else if (isdigit(copy[i + 1]))
+                    copy[i] = ' ';
                 else
                     copy[i + 1] = ' ';
             }
@@ -101,11 +103,6 @@ double solveEquation(char* input)
                     copy[i + 1] = ' ';
             }
         }
-        if (validateOperation(copy, i) == 0)
-        {
-            state = copy[i];
-            //continue;
-        }
     }
     state = '\0';
     //Used to check for square roots, cube roots, quartic roots, and quintic roots
@@ -117,7 +114,10 @@ double solveEquation(char* input)
         {
             char arr[ARRAY_SIZE];
             arr[0] = '\0';
-            if (copy[i] == 's')
+            if (copy[i] == 'm' || copy[i] == 'e' || copy[i] == 'E')
+                continue;
+
+            else if (copy[i] == 's')
             {
                 copyIndexStart = i;
 
@@ -369,7 +369,6 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (copy[i] == 'm' || copy[i] == 'e');
             else
                 return NAN;
         }
@@ -398,14 +397,15 @@ double solveEquation(char* input)
         //This code is in charge of switching from adding integer parts to adding decimals
         if (!isdigit(copy[i]))
         {
-            if (isdigit(copy[i - 1]))
-                break;
-            if ((int) copy[i] == 46)
+            if (copy[i] == '.')
             {
                 if (!isdigit(copy[i + 1]))
                     break;
                 else
-                    convertedState = 1;
+                {
+                    lastNum = '1';
+                    continue;
+                }
             }
             else if (validateRoot(copy, i) == 0)
                 continue;
@@ -416,7 +416,7 @@ double solveEquation(char* input)
         //This part actually converts the number
         else
         {
-            if (convertedState == 0)
+            if (lastNum == '0')
             {
                 total += copy[i] - '0';
                 if (isdigit(copy[i + 1]))
@@ -431,6 +431,7 @@ double solveEquation(char* input)
     }
     //If there was a negative sign in front of the first number, it is negative, so multiply it by -1.
     total *= multNeg;
+    lastNum = '0';
     numNum = 0;
     multNeg = 1;
 
@@ -442,7 +443,7 @@ double solveEquation(char* input)
             //If there's a space at copy[i], save an iteration
             if (copy[i] == ' ')
                 continue;
-            if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.')
+            if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && state != '\0')
             {
                 for (int a = 0; a < root; a++)
                 {
@@ -694,8 +695,9 @@ double solveEquation(char* input)
                         total = fmod(total, last);
                         break;
                 }
-                if (state == 'e')
+                if (state == 'e' || state == 'E')
                 {
+                    printf("%Lf\n", total);
                     if ((int) last != last)
                         return NAN;
                     else
@@ -1133,7 +1135,7 @@ double solveEquation(char* input)
                 }
             }
 
-            if (copy[i] == '.')
+            if (copy[i] == '.' && state != '\0')
             {
                 if (isdigit(copy[i + 1]))
                 {
@@ -1196,7 +1198,7 @@ int letterExceptionCheck(char* input, int index)
     if (input[index] == 'm' || input[index] == 'c' || input[index] == 'f' || input[index] == 'l' || input[index] == 'k' || input[index] == 'n'
         || input[index] == 'o' || input[index] == 'p' || input[index] == 'q' || input[index] == 'r' || input[index] == 's' || input[index] == 't'
         || input[index] == 'u' || input[index] == 'v' || input[index] == 'w' || input[index] == 'x' || input[index] == 'y' || input[index] == 'z'
-        || input[index] == 'e')
+        || input[index] == 'e' || input[index] == 'E')
         return 0;
     return 1;
 }
