@@ -12,9 +12,9 @@
 //Used to solve equation
 double solveEquation(char* input);
 //String char checking
-int validNext(char* input, int i);
-int validateOperation(char* input, int i);
-int validateRoot(char* input, int i);
+int validNext(char c);
+int validateOperation(char c);
+int validateRoot(char c);
 int letterExceptionCheck(char* input, int index);
 //Change strings
 char* removeChar(char* input, int index, int c);
@@ -67,7 +67,7 @@ double solveEquation(char* input)
         //if copy[i] is a space, save an iteration
         if (copy[i] == ' ')
             continue;
-        if (validateOperation(copy, i) == 0)
+        if (validateOperation(copy[i]) == 0)
             state = copy[i];
         if (copy[i] == '+')
         {
@@ -379,9 +379,9 @@ double solveEquation(char* input)
         if (copy[i] == ' ' || isdigit(copy[i]))
             continue;
         //Check how many operations we have to do
-        if (validateOperation(copy, i) == 0)
+        if (validateOperation(copy[i]) == 0)
         {
-            if (validNext(copy, i) == 0)
+            if (validNext(copy[i + 1]) == 0)
                 times++;
         }
     }
@@ -407,7 +407,7 @@ double solveEquation(char* input)
                     continue;
                 }
             }
-            else if (validateRoot(copy, i) == 0)
+            else if (validateRoot(copy[i]) == 0)
                 continue;
             else if (letterExceptionCheck(copy, i) == 0);
             else
@@ -1128,7 +1128,7 @@ double solveEquation(char* input)
             //Determines operation to use
             if (state == '\0' && !isdigit(copy[i]))
             {
-                if (validateOperation(copy, i) == 0)
+                if (validateOperation(copy[i]) == 0)
                 {
                     state = copy[i];
                     numNum = 0;
@@ -1172,23 +1172,23 @@ float qurt(float number)
 
 
 //Functions related to strings
-int validNext(char* input, int i)
+int validNext(char c)
 {
-    if (input[i + 1] == ' ' || isdigit(input[i + 1]) || input[i + 1] == 'm')
+    if (c == ' ' || isdigit(c) || c == 'm')
         return 0;
     return 1;
 }
 
-int validateOperation(char* input, int i)
+int validateOperation(char c)
 {
-    if (input[i] == '+' || input[i] == '*' || input[i] == '-' || input[i] == '/' || input[i] == '^' || input[i] == '%' || input[i] == 'e')
+    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e')
         return 0;
     return 1;
 }
 
-int validateRoot(char* input, int i)
+int validateRoot(char c)
 {
-    if (input[i] == '@' || input[i] == '#' || input[i] == '$' || input[i] == '~' || input[i] == ' ' || input[i] == '<' || input[i] == '&' || input[i] == '!')
+    if (c == '@' || c == '#' || c == '$' || c == '~' || c == ' ' || c == '<' || c == '&' || c == '!')
         return 0;
     return 1;
 }
