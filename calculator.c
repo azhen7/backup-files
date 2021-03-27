@@ -443,7 +443,7 @@ double solveEquation(char* input)
             //If there's a space at copy[i], save an iteration
             if (copy[i] == ' ')
                 continue;
-            if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && state != '\0')
+            if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.')
             {
                 for (int a = 0; a < root; a++)
                 {
