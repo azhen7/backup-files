@@ -703,10 +703,7 @@ double solveEquation(char* input)
                         if (last > 9)
                             return -1;
                         else
-                        {
-                            //printf("%Lf\n",);
                             total *= pow(10, last);
-                        }
                     }
                 }
                 location = i;
