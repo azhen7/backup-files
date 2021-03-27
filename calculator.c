@@ -1164,7 +1164,7 @@ long double convertFloat(char* input)
     return total;
 }
 
-//get number of operations
+//Get number of operations
 unsigned int numberOfOperations(char* input)
 {
     unsigned int times = 0;
