@@ -25,6 +25,7 @@ int letterExceptionCheck(char* input, int index);
 //Change strings
 char* removeChar(char* input, int index, int c);
 char* assignRoots(char* Roots, int numNum, char* copy, int i, char state);
+char* setUp(char* copy);
 
 //Root functions
 float squareRoot(float number);
@@ -70,49 +71,8 @@ double solveEquation(char* input)
     strcpy(copy, input);
 
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
-    for (int i = 0; i < strlen(copy); i++)
-    {
-        //if copy[i] is a space, save an iteration
-        if (copy[i] == ' ')
-            continue;
-        if (validateOperation(copy[i]) == 0)
-            state = copy[i];
-        if (copy[i] == '+')
-        {
-            if (copy[i + 1] != ' ')
-            {
-                if (copy[i + 1] == '-')
-                {
-                    copy[i] = '-';
-                    copy[i + 1] = ' ';
-                }
-                else if (isdigit(copy[i + 1]))
-                    copy[i] = ' ';
-                else
-                    copy[i + 1] = ' ';
-            }
-        }
-        else if (copy[i] == '-')
-        {
-            if (copy[i + 1] != ' ')
-            {
-                if (copy[i + 1] == '-')
-                {
-                    copy[i] = '+';
-                    copy[i + 1] = ' ';
-                }
-                else if (isdigit(copy[i + 1]))
-                {
-                    if (state == '\0')
-                        multNeg = -1;
-                    copy[i] = 'm';
-                }
-                else
-                    copy[i + 1] = ' ';
-            }
-        }
-    }
-    state = '\0';
+    setUp(copy);
+
     //Used to check for square roots, cube roots, quartic roots, and quintic roots
     for (int i = 0; i < strlen(copy); i++)
     {
@@ -732,6 +692,47 @@ double solveEquation(char* input)
     return total;
 }
 
+char* setUp(char* copy)
+{
+    for (int i = 0; i < strlen(copy); i++)
+    {
+        //if copy[i] is a space, save an iteration
+        if (copy[i] == ' ')
+            continue;
+        if (copy[i] == '+')
+        {
+            if (copy[i + 1] != ' ')
+            {
+                if (copy[i + 1] == '-')
+                {
+                    copy[i] = '-';
+                    copy[i + 1] = ' ';
+                }
+                else if (isdigit(copy[i + 1]))
+                    copy[i] = ' ';
+                else
+                    copy[i + 1] = ' ';
+            }
+        }
+        else if (copy[i] == '-')
+        {
+            if (copy[i + 1] != ' ')
+            {
+                if (copy[i + 1] == '-')
+                {
+                    copy[i] = '+';
+                    copy[i + 1] = ' ';
+                }
+                else if (isdigit(copy[i + 1]))
+                    copy[i] = 'm';
+                else
+                    copy[i + 1] = ' ';
+            }
+        }
+    }
+    return copy;
+}
+
 char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
 {
     //sqrt
@@ -1125,6 +1126,7 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
 long double convertFloat(char* input)
 {
     char lastNum = '0';
+    int multNeg = 1;
     int numNum = 1;
     float divide = 10.0;
     long double total = 0.0;
@@ -1146,7 +1148,11 @@ long double convertFloat(char* input)
             }
             else if (validateRoot(input[i]) == 0)
                 continue;
-            else if (letterExceptionCheck(input, i) == 0);
+            else if (letterExceptionCheck(input, i) == 0)
+            {
+                if (input[i] == 'm')
+                    multNeg = -1;
+            }
             else
                 break;
         }
@@ -1166,6 +1172,7 @@ long double convertFloat(char* input)
             }
         }
     }
+    total *= multNeg;
     return total;
 }
 
