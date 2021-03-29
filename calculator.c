@@ -1,14 +1,14 @@
 #define _GNU_SOURCE //It's there so the compiler would stop complaining that isascii() does not exist.
+#define ARRAY_SIZE 8
+#define PI 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647 //value of pi
+
 #include <stdio.h> //Used for printf()
 #include <cs50.h> //Used for get_string()
 #include <string.h> //Used for strlen(), strcat, strncat(), strcmp(), strncmp()
 #include <math.h> //Used for pow(), sqrt(), cbrt(), fabsf(), log(), log10()
 #include <stdlib.h> //Used for malloc(), system()
-#include <ctype.h> //Used for isdigit(), isalpha(), isascii()
+#include <ctype.h> //Used for isdigit(), isascii()
 #include "log.h" //For some additional logarithm functions
-
-#define ARRAY_SIZE 8
-#define PI 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647
 
 
 //Used to solve equation
