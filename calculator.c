@@ -25,7 +25,6 @@ int letterExceptionCheck(char c);
 char* removeChar(char* input, int index, int c);
 char* assignRoots(char* Roots, int numNum, char* copy, int i, char state);
 char* setUp(char* copy);
-char* copyString(char* input);
 
 //Root functions
 float squareRoot(float number);
@@ -49,7 +48,7 @@ int main(void)
         result = solveEquation(getEquation);
 
         //Erase equation typed by user
-        printf("\033[A\033[2K",stdout);
+        printf("\033[A\033[2K", stdout);
         fseek(stdout, 0, SEEK_SET);
 
         printf("%s = %f\n", getEquation, result);
@@ -78,7 +77,7 @@ double solveEquation(char* input)
     char* Roots = NULL;
 
     //copy input to copy
-    copy = copyString(input);
+    strcpy(copy, input);
 
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
     setUp(copy);
@@ -784,17 +783,6 @@ char* setUp(char* copy)
     return copy;
 }
 
-char* copyString(char* input)
-{
-    char* copy = (char*) malloc(strlen(input) * sizeof(char));
-    for (int i = 0; i < strlen(input); i++)
-    {
-        if (input[i] != ' ')
-            strncat(copy, &input[i], 1);
-    }
-    return copy;
-}
-
 //Get first number of equation
 long double convertFloat(char* input, long double total)
 {
@@ -815,10 +803,7 @@ long double convertFloat(char* input, long double total)
                 if (!isdigit(input[i + 1]))
                     break;
                 else
-                {
                     lastNum = '1';
-                    continue;
-                }
             }
             else if (input[i] == 'P')
             {
