@@ -1,6 +1,6 @@
 #define _GNU_SOURCE //It's there so the compiler would stop complaining that isascii() does not exist.
 #define ARRAY_SIZE 8
-#include <stdio.h> //Used for printf()
+#include <stdio.h> //Used for printf(), fseek()
 #include <cs50.h> //Used for get_string()
 #include <string.h> //Used for strlen(), strcat, strncat(), strcmp(), strncmp()
 #include <math.h> //Used for pow(), sqrt(), cbrt(), fabsf(), log(), log10()
@@ -45,6 +45,10 @@ int main(void)
     {
         getEquation = get_string("");
         result = solveEquation(getEquation);
+
+        //Erase equation typed by user
+        printf("\033[A\033[2K",stdout);
+        fseek(stdout, 0, SEEK_SET);
 
         printf("%s = %f\n", getEquation, result);
         printf("Note that this result did not take BEDMAS into account.\n\n");
