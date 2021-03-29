@@ -1,5 +1,6 @@
-#define _GNU_SOURCE //It's there so the compiler would stop complaining that isascii() does not exist.
+#define _GNU_SOURCE //It's there so the comM_PIler would stop complaining that isascii() does not exist.
 #define ARRAY_SIZE 8
+#define M_PI 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647 //value of M_PI
 
 #include <stdio.h> //Used for printf()
 #include <cs50.h> //Used for get_string()
@@ -1188,7 +1189,7 @@ long double convertFloat(char* input, long double total)
                     return NAN;
                 else
                 {
-                    total = PI;
+                    total = M_PI;
                     temp = total;
                 }
             }
