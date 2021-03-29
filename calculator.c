@@ -8,12 +8,14 @@
 #include "log.h" //For some additional logarithm functions
 
 #define ARRAY_SIZE 8
+#define PI 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647
+
 
 //Used to solve equation
 double solveEquation(char* input);
 
 //Get some numbers
-long double convertFloat(char* input);
+long double convertFloat(char* input, long double total);
 unsigned int numberOfOperations(char* input);
 
 //String char checking
@@ -31,9 +33,12 @@ char* setUp(char* copy);
 float squareRoot(float number);
 float qurt(float number);
 
+//Factorial
+long double factorial(float number);
+
 int main(void)
 {
-    char* getEquation;
+    char* getEquation = NULL;
     float result = 0.0;
 
     system("clear");
@@ -51,6 +56,7 @@ int main(void)
 
 double solveEquation(char* input)
 {
+    static double ans = 0.0;
     unsigned int times = 0;
     unsigned int location = 0;
     short copyIndexStart = 0;
@@ -82,7 +88,7 @@ double solveEquation(char* input)
         {
             char arr[ARRAY_SIZE];
             arr[0] = '\0';
-            if (copy[i] == 'm' || copy[i] == 'e' || copy[i] == 'E')
+            if (copy[i] == 'm' || copy[i] == 'e' || copy[i] == 'E' || copy[i] == '!')
                 continue;
 
             else if (copy[i] == 's')
@@ -162,6 +168,12 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = '(';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                }
+                else if (strncmp(arr, "ans", 3) == 0)
+                {
+                    total = ans;
+                    i += 2;
+                    removeChar(copy, copyIndexStart, 3);
                 }
                 else
                     return NAN;
@@ -342,7 +354,10 @@ double solveEquation(char* input)
         }
     }
 
-    total = convertFloat(copy);
+    total = convertFloat(copy, total);
+
+    if (total == NAN)
+        return NAN;
 
     times = numberOfOperations(copy);
 
@@ -365,9 +380,9 @@ double solveEquation(char* input)
             //If there's a space at copy[i], save an iteration
             if (copy[i] == ' ')
                 continue;
-            if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.')
+            if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
-                for (int a = 0; a < root; a++)
+                for (int a = 0; a < strlen(Roots); a++)
                 {
                     //Roots and additional operations
                     //sqrt
@@ -593,6 +608,13 @@ double solveEquation(char* input)
 
                     else if (Roots[a] == 'E')
                         last = log1(last);
+
+                    //factorial
+                    else if (Roots[a] == 'F')
+                        total = factorial(total);
+
+                    else if (Roots[a] == 'G')
+                        last = factorial(last);
                 }
                 last *= multNeg;
                 //operation
@@ -689,9 +711,11 @@ double solveEquation(char* input)
         divide = 10.0;
         Roots[0] = '\0';
     }
+    ans = total;
     return total;
 }
 
+//Check for "--" or "+-"
 char* setUp(char* copy)
 {
     for (int i = 0; i < strlen(copy); i++)
@@ -814,10 +838,14 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         {
             if (numNum == 0)
                 strcat(Roots, ";");
+            else
+                strcat(Roots, "F");
         }
         else
             if (numNum == 0)
                 strcat(Roots, ":");
+            else
+                strcat(Roots, "G");
     }
     //sin
     else if (copy[i] == ':')
@@ -1123,13 +1151,15 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
 }
 
 //Get first number of equation
-long double convertFloat(char* input)
+long double convertFloat(char* input, long double total)
 {
     char lastNum = '0';
     int multNeg = 1;
     int numNum = 1;
     float divide = 10.0;
-    long double total = 0.0;
+    char state = '\0';
+    long double temp = total;
+
     //Used to covert copy string to a float
     for (int i = 0; i < strlen(input); i++)
     {
@@ -1148,6 +1178,8 @@ long double convertFloat(char* input)
             }
             else if (validateRoot(input[i]) == 0)
                 continue;
+            else if (validateOperation(input[i]) == 0)
+                state = input[i];
             else if (letterExceptionCheck(input, i) == 0)
             {
                 if (input[i] == 'm')
@@ -1159,6 +1191,12 @@ long double convertFloat(char* input)
         //This part actually converts the number
         else
         {
+            if (temp != 0.0)
+                return NAN;
+
+            if (state != '\0')
+                break;
+
             if (lastNum == '0')
             {
                 total += input[i] - '0';
@@ -1194,6 +1232,16 @@ unsigned int numberOfOperations(char* input)
     return times;
 }
 
+//Factorial
+long double factorial(float number)
+{
+    long double result = 1;
+    for (int i = 1; i <= number; i++)
+    {
+        result *= i;
+    }
+    return result;
+}
 
 //Roots functions
 float squareRoot(float number)
@@ -1210,7 +1258,6 @@ float qurt(float number)
     return pow(number, 0.2);
 }
 
-
 //Functions related to strings
 int validNext(char c)
 {
@@ -1221,7 +1268,7 @@ int validNext(char c)
 
 int validateOperation(char c)
 {
-    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e')
+    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C')
         return 0;
     return 1;
 }
@@ -1238,7 +1285,7 @@ int letterExceptionCheck(char* input, int index)
     if (input[index] == 'm' || input[index] == 'c' || input[index] == 'f' || input[index] == 'l' || input[index] == 'k' || input[index] == 'n'
         || input[index] == 'o' || input[index] == 'p' || input[index] == 'q' || input[index] == 'r' || input[index] == 's' || input[index] == 't'
         || input[index] == 'u' || input[index] == 'v' || input[index] == 'w' || input[index] == 'x' || input[index] == 'y' || input[index] == 'z'
-        || input[index] == 'e' || input[index] == 'E')
+        || input[index] == 'e' || input[index] == 'E' || input[index] == '!' || input[index] == 'C')
         return 0;
     return 1;
 }
