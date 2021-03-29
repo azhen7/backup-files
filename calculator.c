@@ -22,7 +22,7 @@ unsigned int numberOfOperations(char* input);
 int validNext(char c);
 int validateOperation(char c);
 int validateRoot(char c);
-int letterExceptionCheck(char* input, int index);
+int letterExceptionCheck(char c);
 
 //Change strings
 char* removeChar(char* input, int index, int c);
@@ -1203,7 +1203,7 @@ long double convertFloat(char* input, long double total)
                 continue;
             else if (validateOperation(input[i]) == 0)
                 state = input[i];
-            else if (letterExceptionCheck(input, i) == 0)
+            else if (letterExceptionCheck(input[i]) == 0)
             {
                 if (input[i] == 'm')
                     multNeg = -1;
@@ -1303,12 +1303,12 @@ int validateRoot(char c)
     return 1;
 }
 
-int letterExceptionCheck(char* input, int index)
+int letterExceptionCheck(char c)
 {
-    if (input[index] == 'm' || input[index] == 'c' || input[index] == 'f' || input[index] == 'l' || input[index] == 'k' || input[index] == 'n'
-        || input[index] == 'o' || input[index] == 'p' || input[index] == 'q' || input[index] == 'r' || input[index] == 's' || input[index] == 't'
-        || input[index] == 'u' || input[index] == 'v' || input[index] == 'w' || input[index] == 'x' || input[index] == 'y' || input[index] == 'z'
-        || input[index] == 'e' || input[index] == 'E' || input[index] == '!' || input[index] == 'C')
+    if (c == 'm' || c == 'c' || c == 'f' || c == 'l' || c == 'k' || c == 'n'
+        || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
+        || c == 'u' || c == 'v' || c == 'w' || c == 'x' || c == 'y' || c == 'z'
+        || c == 'e' || c == 'E' || c == '!' || c == 'C')
         return 0;
     return 1;
 }
