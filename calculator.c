@@ -10,7 +10,6 @@
 #include <ctype.h> //Used for isdigit(), isascii()
 #include "log.h" //For some additional logarithm functions
 
-
 //Used to solve equation
 double solveEquation(char* input);
 
