@@ -747,7 +747,7 @@ char* setUp(char* copy)
     for (int i = 0; i < strlen(copy); i++)
     {
         //if copy[i] is a space, save an iteration
-        if (copy[i] == ' ')
+        if (copy[i] == ' ' || isdigit(copy[i]))
             continue;
         if (copy[i] == '+')
         {
@@ -832,8 +832,10 @@ long double convertFloat(char* input, long double total)
                 if (input[i] == 'm')
                     multNeg = -1;
             }
-            else
+            else if (validateOperation(input[i]) == 0)
                 break;
+            else
+                return NAN;
         }
         //This part actually converts the number
         else
