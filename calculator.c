@@ -25,6 +25,7 @@ int letterExceptionCheck(char c);
 char* removeChar(char* input, int index, int c);
 char* assignRoots(char* Roots, int numNum, char* copy, int i, char state);
 char* setUp(char* copy);
+char* copyString(char* input);
 
 //Root functions
 float squareRoot(float number);
@@ -37,6 +38,7 @@ int main(void)
 {
     char* getEquation = NULL;
     float result = 0.0;
+    char c = '\0';
 
     system("clear");
     printf("Enter a bunch of equations below: \n");
@@ -76,7 +78,7 @@ double solveEquation(char* input)
     char* Roots = NULL;
 
     //copy input to copy
-    strcpy(copy, input);
+    copy = copyString(input);
 
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
     setUp(copy);
@@ -782,6 +784,181 @@ char* setUp(char* copy)
     return copy;
 }
 
+char* copyString(char* input)
+{
+    char* copy = (char*) malloc(strlen(input) * sizeof(char));
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] != ' ')
+            strncat(copy, &input[i], 1);
+    }
+    return copy;
+}
+
+//Get first number of equation
+long double convertFloat(char* input, long double total)
+{
+    char lastNum = '0';
+    int multNeg = 1;
+    int numNum = 1;
+    float divide = 10.0;
+    long double temp = total;
+
+    //Used to covert copy string to a float
+    for (int i = 0; i < strlen(input); i++)
+    {
+        //This code is in charge of switching from adding integer parts to adding decimals
+        if (!isdigit(input[i]))
+        {
+            if (input[i] == '.')
+            {
+                if (!isdigit(input[i + 1]))
+                    break;
+                else
+                {
+                    lastNum = '1';
+                    continue;
+                }
+            }
+            else if (input[i] == 'P')
+            {
+                if (total != 0.0)
+                    return NAN;
+                else
+                {
+                    total = M_PI;
+                    temp = total;
+                }
+            }
+            else if (input[i] == 'E')
+            {
+                if (total != 0.0)
+                    return NAN;
+                else
+                {
+                    total = M_E;
+                    temp = total;
+                }
+            }
+            else if (validateRoot(input[i]) == 0)
+                continue;
+            else if (letterExceptionCheck(input[i]) == 0)
+            {
+                if (input[i] == 'm')
+                    multNeg = -1;
+            }
+            else
+                break;
+        }
+        //This part actually converts the number
+        else
+        {
+            if (temp != 0.0)
+                return NAN;
+
+            if (lastNum == '0')
+            {
+                total += input[i] - '0';
+                if (isdigit(input[i + 1]))
+                    total *= 10;
+            }
+            else
+            {
+                total += (input[i] - '0') / pow(divide, numNum);
+                numNum++;
+            }
+        }
+    }
+    total *= multNeg;
+    return total;
+}
+
+//Get number of operations
+unsigned int numberOfOperations(char* input)
+{
+    unsigned int times = 0;
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] == ' ' || isdigit(input[i]))
+            continue;
+        //Check how many operations we have to do
+        if (validateOperation(input[i]) == 0)
+        {
+            if (validNext(input[i + 1]) == 0)
+                times++;
+        }
+    }
+    return times;
+}
+
+//Factorial
+long double factorial(float number)
+{
+    long double result = number;
+    number--;
+    for (int i = number; i >= 1; i--)
+    {
+        result *= i;
+    }
+    if (number != (int) number)
+        result *= sqrt(M_PI);
+    return result;
+}
+
+//Roots functions
+float squareRoot(float number)
+{
+    if (number < 0)
+        return NAN;
+    return sqrt(number);
+}
+
+float fifthRoot(float number)
+{
+    if (number < 0)
+        return pow(fabsf(number), 0.2) * -1;
+    return pow(number, 0.2);
+}
+
+//Functions related to strings
+int validNext(char c)
+{
+    if (c == ' ' || isdigit(c) || c == 'm')
+        return 0;
+    return 1;
+}
+
+int validateOperation(char c)
+{
+    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C')
+        return 0;
+    return 1;
+}
+
+int validateRoot(char c)
+{
+    if (c == '@' || c == '#' || c == '$' || c == '~' || c == ' ' || c == '<' || c == '&' || c == '!')
+        return 0;
+    return 1;
+}
+
+int letterExceptionCheck(char c)
+{
+    if (c == 'm' || c == 'c' || c == 'f' || c == 'l' || c == 'k' || c == 'n'
+        || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
+        || c == 'u' || c == 'v' || c == 'w' || c == 'x' || c == 'y' || c == 'z'
+        || c == 'e' || c == '!' || c == 'C')
+        return 0;
+    return 1;
+}
+
+char* removeChar(char* input, int index, int c)
+{
+    for (int i = 0; i < c - 1; i++)
+        input[index + 1 + i] = ' ';
+    return input;
+}
+
 char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
 {
     //sqrt
@@ -1173,168 +1350,4 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
                 strcat(Roots, "E");
     }
     return Roots;
-}
-
-//Get first number of equation
-long double convertFloat(char* input, long double total)
-{
-    char lastNum = '0';
-    int multNeg = 1;
-    int numNum = 1;
-    float divide = 10.0;
-    long double temp = total;
-
-    //Used to covert copy string to a float
-    for (int i = 0; i < strlen(input); i++)
-    {
-        //This code is in charge of switching from adding integer parts to adding decimals
-        if (!isdigit(input[i]))
-        {
-            if (input[i] == '.')
-            {
-                if (!isdigit(input[i + 1]))
-                    break;
-                else
-                {
-                    lastNum = '1';
-                    continue;
-                }
-            }
-            else if (input[i] == 'P')
-            {
-                if (total != 0.0)
-                    return NAN;
-                else
-                {
-                    total = M_PI;
-                    temp = total;
-                }
-            }
-            else if (input[i] == 'E')
-            {
-                if (total != 0.0)
-                    return NAN;
-                else
-                {
-                    total = M_E;
-                    temp = total;
-                }
-            }
-            else if (validateRoot(input[i]) == 0)
-                continue;
-            else if (letterExceptionCheck(input[i]) == 0)
-            {
-                if (input[i] == 'm')
-                    multNeg = -1;
-            }
-            else
-                break;
-        }
-        //This part actually converts the number
-        else
-        {
-            if (temp != 0.0)
-                return NAN;
-
-            if (lastNum == '0')
-            {
-                total += input[i] - '0';
-                if (isdigit(input[i + 1]))
-                    total *= 10;
-            }
-            else
-            {
-                total += (input[i] - '0') / pow(divide, numNum);
-                numNum++;
-            }
-        }
-    }
-    total *= multNeg;
-    return total;
-}
-
-//Get number of operations
-unsigned int numberOfOperations(char* input)
-{
-    unsigned int times = 0;
-    for (int i = 0; i < strlen(input); i++)
-    {
-        if (input[i] == ' ' || isdigit(input[i]))
-            continue;
-        //Check how many operations we have to do
-        if (validateOperation(input[i]) == 0)
-        {
-            if (validNext(input[i + 1]) == 0)
-                times++;
-        }
-    }
-    return times;
-}
-
-//Factorial
-long double factorial(float number)
-{
-    long double result = number;
-    number--;
-    for (int i = number; i >= 1; i--)
-    {
-        result *= i;
-    }
-    if (number != (int) number)
-        result *= sqrt(M_PI);
-    return result;
-}
-
-//Roots functions
-float squareRoot(float number)
-{
-    if (number < 0)
-        return NAN;
-    return sqrt(number);
-}
-
-float fifthRoot(float number)
-{
-    if (number < 0)
-        return pow(fabsf(number), 0.2) * -1;
-    return pow(number, 0.2);
-}
-
-//Functions related to strings
-int validNext(char c)
-{
-    if (c == ' ' || isdigit(c) || c == 'm')
-        return 0;
-    return 1;
-}
-
-int validateOperation(char c)
-{
-    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C')
-        return 0;
-    return 1;
-}
-
-int validateRoot(char c)
-{
-    if (c == '@' || c == '#' || c == '$' || c == '~' || c == ' ' || c == '<' || c == '&' || c == '!')
-        return 0;
-    return 1;
-}
-
-int letterExceptionCheck(char c)
-{
-    if (c == 'm' || c == 'c' || c == 'f' || c == 'l' || c == 'k' || c == 'n'
-        || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
-        || c == 'u' || c == 'v' || c == 'w' || c == 'x' || c == 'y' || c == 'z'
-        || c == 'e' || c == '!' || c == 'C')
-        return 0;
-    return 1;
-}
-
-char* removeChar(char* input, int index, int c)
-{
-    for (int i = 0; i < c - 1; i++)
-        input[index + 1 + i] = ' ';
-    return input;
 }
