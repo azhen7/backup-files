@@ -63,7 +63,7 @@ int stringcmp(string array1, string array2)
                     i++;
                     continue;
                 }
-            }
+            } 
             else if (array1[i] > array2[i])
                 return 1;
 
