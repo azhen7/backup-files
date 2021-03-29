@@ -30,7 +30,7 @@ char* setUp(char* copy);
 
 //Root functions
 float squareRoot(float number);
-float qurt(float number);
+float fifthRoot(float number);
 
 //Factorial
 long double factorial(float number);
@@ -64,6 +64,7 @@ double solveEquation(char* input)
     short root = 0;
     short numNum = 1;
     float divide = 10.0;
+    float lastCheck = 0.0;
     long double last = 0.0;
     long double total = 0.0;
     char state = '\0';
@@ -374,8 +375,8 @@ double solveEquation(char* input)
             else if (copy[i] == 'P')
             {
                 copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], 2);
-                if (strcmp(arr, "PI") == 0)
+                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
+                if (strncmp(arr, "PI", 2) == 0)
                 {
                     copy[i + 1] = ' ';
                     i++;
@@ -437,9 +438,9 @@ double solveEquation(char* input)
 
                     //quintic root
                     else if (Roots[a] == '6')
-                        total = qurt(total);
+                        total = fifthRoot(total);
                     else if (Roots[a] == '7')
-                        last = qurt(last);
+                        last = fifthRoot(last);
 
                     //sixth root
                     else if (Roots[a] == ';')
@@ -646,9 +647,8 @@ double solveEquation(char* input)
                         total = fmod(total, last);
                         break;
                 }
-                if (state == 'e' || state == 'E')
+                if (state == 'e')
                 {
-                    printf("%Lf\n", total);
                     if ((int) last != last)
                         return NAN;
                     else
@@ -677,6 +677,9 @@ double solveEquation(char* input)
             //Converts last number to float
             if (isdigit(copy[i]) && state != '\0')
             {
+                if (lastCheck != 0.0)
+                    return NAN;
+
                 whichNum = '1';
 
                 if (lastNum == '1')
@@ -699,6 +702,19 @@ double solveEquation(char* input)
                     state = copy[i];
                     numNum = 0;
                 }
+            }
+
+            if (copy[i] == 'P' && state != '\0')
+            {
+                last = M_PI;
+                lastCheck = last;
+                whichNum = '1';
+            }
+            else if (copy[i] == 'E' && state != '\0')
+            {
+                last = M_E;
+                lastCheck = M_E;
+                whichNum = '1';
             }
 
             if (copy[i] == '.' && state != '\0')
@@ -1164,7 +1180,6 @@ long double convertFloat(char* input, long double total)
     int multNeg = 1;
     int numNum = 1;
     float divide = 10.0;
-    char state = '\0';
     long double temp = total;
 
     //Used to covert copy string to a float
@@ -1193,8 +1208,16 @@ long double convertFloat(char* input, long double total)
                     temp = total;
                 }
             }
-            else if (validateOperation(input[i]) == 0)
-                state = input[i];
+            else if (input[i] == 'E')
+            {
+                if (total != 0.0)
+                    return NAN;
+                else
+                {
+                    total = M_E;
+                    temp = total;
+                }
+            }
             else if (validateRoot(input[i]) == 0)
                 continue;
             else if (letterExceptionCheck(input[i]) == 0)
@@ -1208,11 +1231,8 @@ long double convertFloat(char* input, long double total)
         //This part actually converts the number
         else
         {
-            if (temp != 0.0 && state == '\0')
+            if (temp != 0.0)
                 return NAN;
-
-            if (state != '\0')
-                break;
 
             if (lastNum == '0')
             {
@@ -1271,7 +1291,7 @@ float squareRoot(float number)
     return sqrt(number);
 }
 
-float qurt(float number)
+float fifthRoot(float number)
 {
     if (number < 0)
         return pow(fabsf(number), 0.2) * -1;
@@ -1305,7 +1325,7 @@ int letterExceptionCheck(char c)
     if (c == 'm' || c == 'c' || c == 'f' || c == 'l' || c == 'k' || c == 'n'
         || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
         || c == 'u' || c == 'v' || c == 'w' || c == 'x' || c == 'y' || c == 'z'
-        || c == 'e' || c == 'E' || c == '!' || c == 'C')
+        || c == 'e' || c == '!' || c == 'C')
         return 0;
     return 1;
 }
