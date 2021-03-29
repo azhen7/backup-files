@@ -1,6 +1,5 @@
-#define _GNU_SOURCE //It's there so the comM_PIler would stop complaining that isascii() does not exist.
+#define _GNU_SOURCE //It's there so the compiler would stop complaining that isascii() does not exist.
 #define ARRAY_SIZE 8
-
 #include <stdio.h> //Used for printf()
 #include <cs50.h> //Used for get_string()
 #include <string.h> //Used for strlen(), strcat, strncat(), strcmp(), strncmp()
