@@ -371,6 +371,16 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            else if (copy[i] == 'P')
+            {
+                copyIndexStart = i;
+                strncat(arr, &copy[copyIndexStart], 2);
+                if (strcmp(arr, "PI") == 0)
+                {
+                    copy[i + 1] = ' ';
+                    i++;
+                }
+            }
             else
                 return NAN;
         }
@@ -404,239 +414,214 @@ double solveEquation(char* input)
                 continue;
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
+                //Roots and additional operations
                 for (int a = 0; a < strlen(Roots); a++)
                 {
-                    //Roots and additional operations
                     //sqrt
                     if (Roots[a] == '0')
                         total = squareRoot(total);
-
                     else if (Roots[a] == '1')
                         last = squareRoot(last);
 
                     //cbrt
                     else if (Roots[a] == '2')
                         total = cbrt(total);
-
                     else if (Roots[a] == '3')
                         last = cbrt(last);
 
                     //quartic root
                     else if (Roots[a] == '4')
                         total = squareRoot(squareRoot(total));
-
                     else if (Roots[a] == '5')
                         last = squareRoot(squareRoot(last));
 
                     //quintic root
                     else if (Roots[a] == '6')
                         total = qurt(total);
-
                     else if (Roots[a] == '7')
                         last = qurt(last);
 
                     //sixth root
                     else if (Roots[a] == ';')
                         total = cbrt(squareRoot(total));
-
                     else if (Roots[a] == ':')
                         last = cbrt(squareRoot(last));
 
                     //square
                     else if (Roots[a] == '8')
                         total *= total;
-
                     else if (Roots[a] == '9')
                         last *= last;
 
                     //cube
                     else if (Roots[a] == '[')
                         total = pow(total, 3);
-
                     else if (Roots[a] == ']')
                         last = pow(last, 3);
 
                     //sin
                     else if (Roots[a] == '{')
                         total = sin(total);
-
                     else if (Roots[a] == '}')
                         last = sin(last);
 
                     //cos
                     else if (Roots[a] == '~')
                         total = cos(total);
-
                     else if (Roots[a] == '`')
                         last = cos(last);
 
                     //tan
                     else if (Roots[a] == '=')
                         total = tan(total);
-
                     else if (Roots[a] == '_')
                         last = tan(last);
 
                     //arcsin
                     else if (Roots[a] == '(')
                         total = asin(total);
-
                     else if (Roots[a] == ')')
                         last = asin(last);
 
                     //arccos
                     else if (Roots[a] == ',')
                         total = acos(total);
-
                     else if (Roots[a] == '.')
                         last = acos(last);
 
                     //arctan
                     else if (Roots[a] == '<')
                         total = atan(total);
-
                     else if (Roots[a] == '>')
                         last = atan(last);
 
                     //sinh
                     else if (Roots[a] == ' ')
                         total = sinh(total);
-
                     else if (Roots[a] == 'a')
                         last = sinh(last);
 
                     //cosh
                     else if (Roots[a] == 'b')
                         total = cosh(total);
-
                     else if (Roots[a] == 'c')
                         last = cosh(last);
 
                     //tanh
                     else if (Roots[a] == 'd')
                         total = tanh(total);
-
                     else if (Roots[a] == 'e')
                         last = tanh(last);
 
                     //arcsinh
                     else if (Roots[a] == '+')
                         total = asinh(total);
-
                     else if (Roots[a] == '-')
                         last = asinh(last);
 
                     //arccosh
                     else if (Roots[a] == '*')
                         total = acosh(total);
-
                     else if (Roots[a] == '/')
                         last = acosh(last);
 
                     //arctanh
                     else if (Roots[a] == '@')
                         total = atanh(total);
-
                     else if (Roots[a] == '#')
                         last = atanh(last);
 
                     //ceil
                     else if (Roots[a] == 'f')
                         total = (int) total + 1;
-
                     else if (Roots[a] == 'g')
                         last = (int) last + 1;
 
                     //floor
                     else if (Roots[a] == 'h')
                         total = (int) total;
-
                     else if (Roots[a] == 'i')
                         last = (int) last;
 
                     //ln
                     else if (Roots[a] == 'j')
                         total = ln(total);
-
                     else if (Roots[a] == 'k')
                         last = ln(last);
 
                     //log base 10
                     else if (Roots[a] == 'l')
                         total = log10(total);
-
                     else if (Roots[a] == 'm')
                         last = log10(last);
 
                     //log base 2
                     else if (Roots[a] == 'n')
                         total = log2(total);
-
                     else if (Roots[a] == 'o')
                         last = log2(last);
 
                     //log base 3
                     else if (Roots[a] == 'p')
                         total = log3(total);
-
                     else if (Roots[a] == 'q')
                         last = log3(last);
 
                     //log base 4
                     else if (Roots[a] == 'r')
                         total = log4(total);
-
                     else if (Roots[a] == 's')
                         last = log4(last);
 
                     //log base 5
                     else if (Roots[a] == 't')
                         total = log5(total);
-
                     else if (Roots[a] == 'u')
                         last = log5(last);
 
                     //log base 6
                     else if (Roots[a] == 'v')
                         total = log6(total);
-
                     else if (Roots[a] == 'w')
                         last = log6(last);
 
                     //log base 7
                     else if (Roots[a] == 'x')
                         total = log7(total);
-
                     else if (Roots[a] == 'y')
                         last = log7(last);
 
                     //log base 8
                     else if (Roots[a] == 'z')
                         total = log8(total);
-
                     else if (Roots[a] == 'A')
                         last = log8(last);
 
                     //log base 9
                     else if (Roots[a] == 'B')
                         total = log9(total);
-
                     else if (Roots[a] == 'C')
                         last = log9(last);
 
                     //log base 1
                     else if (Roots[a] == 'D')
                         total = log1(total);
-
                     else if (Roots[a] == 'E')
                         last = log1(last);
 
                     //factorial
                     else if (Roots[a] == 'F')
+                    {
+                        if (total < 0)
+                            return NAN;
                         total = factorial(total);
-
+                    }
                     else if (Roots[a] == 'G')
+                    {
+                        if (last < 0)
+                            return NAN;
                         last = factorial(last);
+                    }
                 }
                 last *= multNeg;
                 //operation
@@ -1198,10 +1183,20 @@ long double convertFloat(char* input, long double total)
                     continue;
                 }
             }
-            else if (validateRoot(input[i]) == 0)
-                continue;
+            else if (input[i] == 'P')
+            {
+                if (total != 0.0)
+                    return NAN;
+                else
+                {
+                    total = PI;
+                    temp = total;
+                }
+            }
             else if (validateOperation(input[i]) == 0)
                 state = input[i];
+            else if (validateRoot(input[i]) == 0)
+                continue;
             else if (letterExceptionCheck(input[i]) == 0)
             {
                 if (input[i] == 'm')
@@ -1213,7 +1208,7 @@ long double convertFloat(char* input, long double total)
         //This part actually converts the number
         else
         {
-            if (temp != 0.0)
+            if (temp != 0.0 && state == '\0')
                 return NAN;
 
             if (state != '\0')
@@ -1257,11 +1252,14 @@ unsigned int numberOfOperations(char* input)
 //Factorial
 long double factorial(float number)
 {
-    long double result = 1;
-    for (int i = 1; i <= number; i++)
+    long double result = number;
+    number--;
+    for (int i = number; i >= 1; i--)
     {
         result *= i;
     }
+    if (number != (int) number)
+        result *= sqrt(PI);
     return result;
 }
 
