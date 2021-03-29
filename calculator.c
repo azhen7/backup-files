@@ -101,30 +101,35 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = '#';
                     removeChar(copy, copyIndexStart, 4);
                     root++;
+                    i += 3;
                 }
                 else if (strncmp(arr, "square", 6) == 0)
                 {
                     copy[copyIndexStart] = '<';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                    i += 5;
                 }
                 else if (strncmp(arr, "sixthrt", 7) == 0)
                 {
                     copy[copyIndexStart] = '!';
                     removeChar(copy, copyIndexStart, 7);
                     root++;
+                    i += 6;
                 }
                 else if (strncmp(arr, "sin", 3) == 0)
                 {
                     copy[copyIndexStart] = ':';
                     removeChar(copy, copyIndexStart, 3);
                     root++;
+                    i += 2;
                 }
                 else if (strncmp(arr, "sinh", 4) == 0)
                 {
                     copy[copyIndexStart] = 34;
                     removeChar(copy, copyIndexStart, 4);
                     root++;
+                    i += 3;
                 }
                 else
                     return NAN;
@@ -172,11 +177,12 @@ double solveEquation(char* input)
                 else if (strncmp(arr, "ans", 3) == 0)
                 {
                     total = ans;
-                    i += 2;
+                    i -= 3;
                     removeChar(copy, copyIndexStart, 3);
                 }
                 else
                     return NAN;
+                i += 5;
             }
             else if (copy[i] == 'c')
             {
@@ -199,6 +205,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = ';';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                    i += 2;
                 }
                 else if (strncmp(arr, "cosh", 4) == 0)
                 {
@@ -214,6 +221,7 @@ double solveEquation(char* input)
                 }
                 else
                     return NAN;
+                i += 3;
             }
             else if (copy[i] == 'q')
             {
@@ -233,6 +241,7 @@ double solveEquation(char* input)
                 }
                 else
                     return NAN;
+                i += 6;
             }
             else if (copy[i] == 't')
             {
@@ -249,9 +258,11 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = '\f';
                     removeChar(copy, copyIndexStart, 4);
                     root++;
+                    i++;
                 }
                 else
                     return NAN;
+                i += 2;
             }
             else if (copy[i] == 'f')
             {
@@ -262,6 +273,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'f';
                     removeChar(copy, copyIndexStart, 5);
                     root++;
+                    i += 4;
                 }
                 else
                     return NAN;
@@ -276,12 +288,14 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'l';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                    i++;
                 }
                 else if (strncmp(arr, "logone", 6) == 0)
                 {
                     copy[copyIndexStart] = 'v';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                    i += 5;
                 }
                 //log base 2
                 else if (strncmp(arr, "logtwo", 6) == 0)
@@ -289,6 +303,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'n';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                    i += 5;
                 }
                 //log base 3
                 else if (strncmp(arr, "logthr", 6) == 0)
@@ -296,6 +311,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'o';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                    i += 5;
                 }
                 //log base 4
                 else if (strncmp(arr, "logfour", 7) == 0)
@@ -303,6 +319,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'p';
                     removeChar(copy, copyIndexStart, 7);
                     root++;
+                    i += 6;
                 }
                 //log base 5
                 else if (strncmp(arr, "logfive", 7) == 0)
@@ -310,6 +327,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'q';
                     removeChar(copy, copyIndexStart, 7);
                     root++;
+                    i += 6;
                 }
                 //log base 6
                 else if (strncmp(arr, "logsix", 6) == 0)
@@ -317,6 +335,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'r';
                     removeChar(copy, copyIndexStart, 6);
                     root++;
+                    i += 5;
                 }
                 //log base 7
                 else if (strcmp(arr, "logseven") == 0)
@@ -324,6 +343,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 's';
                     removeChar(copy, copyIndexStart, 8);
                     root++;
+                    i += 7;
                 }
                 //log base 8
                 else if (strcmp(arr, "logeight") == 0)
@@ -331,13 +351,15 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 't';
                     removeChar(copy, copyIndexStart, 8);
                     root++;
+                    i += 7;
                 }
                 //log base 9
                 else if (strncmp(arr, "lognine", 7) == 0)
                 {
                     copy[copyIndexStart] = 'u';
-                    removeChar(copy, copyIndexStart, 8);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
+                    i += 6;
                 }
                 //log base 10
                 else if (strncmp(arr, "log", 3) == 0)
@@ -345,6 +367,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 'k';
                     removeChar(copy, copyIndexStart, 3);
                     root++;
+                    i += 2;
                 }
                 else
                     return NAN;
