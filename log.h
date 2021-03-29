@@ -9,7 +9,7 @@ double log1(float number)
         return -INFINITY;
     else if (number > 1)
         return INFINITY;
-    else
+    else 
         return NAN;
 }
 
