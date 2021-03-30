@@ -8,8 +8,8 @@
 #include "log.h" //For some additional logarithm functions
 
 #define ARRAY_SIZE 9
-#define GOLDEN_RT ((1 + sqrt(5)) * 0.5)
-#define APERY_CONST 1.202056903159
+#define GOLDEN_RT ((1 + sqrt(5)) * 0.5) //Golden Ratio
+#define APERY_CONST 1.202056903159 //Apery's Constant
 
 //Used to solve equation
 double solveEquation(char* input);
@@ -60,14 +60,14 @@ double solveEquation(char* input)
 {
     static double ans = 0.0;
     unsigned int times = 0, location = 0;
-    short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1;
+    short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1, inputCheck;
     float divide = 10.0, lastCheck = 0.0;
     long double last = 0.0, total = 0.0;
     char state = '\0', whichNum = '0', lastNum = '0';
     char* copy = (char*) malloc(strlen(input) * sizeof(char));
     char* rootOperations = NULL;
 
-    //copy input to copy
+    //Copy input to copy
     strcpy(copy, input);
 
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
@@ -173,14 +173,6 @@ double solveEquation(char* input)
                 else
                     return NAN;
                 i += 7;
-            }
-            else if (copy[i] == 'A')
-            {
-                if (strncmp(arr, "APERY_CNS", 9) == 0)
-                {
-                    removeChar(copy, copyIndexStart, 9);
-                    i += 8;
-                }
             }
             else if (copy[i] == 'c')
             {
@@ -379,6 +371,30 @@ double solveEquation(char* input)
                 }
                 else
                     return NAN;
+            }
+            else if (copy[i] == 'A')
+            {
+                if (strncmp(arr, "APERY_CNS", 9) == 0)
+                {
+                    removeChar(copy, copyIndexStart, 9);
+                    i += 8;
+                }
+                else
+                    return NAN;
+            }
+            else if (copy[i] == 'S')
+            {
+                if (strncmp(arr, "SQRT_2", 6) == 0)
+                    removeChar(copy, copyIndexStart, 6);
+
+                else if (strncmp(arr, "SQRT_3", 6) == 0)
+                {
+                    copy[i] = 'M';
+                    removeChar(copy, copyIndexStart, 6);
+                }
+                else
+                    return NAN;
+                i += 5;
             }
             else
                 return NAN;
@@ -821,6 +837,7 @@ long double convertFloat(char* input, long double total)
                 else
                     lastNum = '1';
             }
+            //For Pi
             else if (input[i] == 'P')
             {
                 if (total != 0.0)
@@ -834,6 +851,7 @@ long double convertFloat(char* input, long double total)
                     temp = total;
                 }
             }
+            //For e
             else if (input[i] == 'E')
             {
                 if (total != 0.0)
@@ -849,6 +867,7 @@ long double convertFloat(char* input, long double total)
                     temp = total;
                 }
             }
+            //For Golden Ratio
             else if (input[i] == 'G')
             {
                 if (total != 0.0)
@@ -865,6 +884,7 @@ long double convertFloat(char* input, long double total)
                     continue;
                 }
             }
+            //For Apery's Constant
             else if (input[i] == 'A')
             {
                 if (total != 0.0)
@@ -875,6 +895,36 @@ long double convertFloat(char* input, long double total)
                 else
                 {
                     total = APERY_CONST;
+                    temp = total;
+                    continue;
+                }
+            }
+            //For Pythagoras' Constant
+            else if (input[i] == 'S')
+            {
+                if (total != 0.0)
+                    if (input[i - 1] == ' ')
+                        return NAN;
+                    else
+                        total *= M_SQRT2;
+                else
+                {
+                    total = M_SQRT2;
+                    temp = total;
+                    continue;
+                }
+            }
+            //For Theodorus' Constant
+            else if (input[i] == 'M')
+            {
+                if (total != 0.0)
+                    if (input[i - 1] == ' ')
+                        return NAN;
+                    else
+                        total *= sqrt(3);
+                else
+                {
+                    total = sqrt(3);
                     temp = total;
                     continue;
                 }
@@ -968,7 +1018,7 @@ int validateRoot(char c)
         || c == ':' || c == 34 || c == '>' || c == '?' || c == '|' || c == '{' || c == '}' || c == '('
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
-        || c == 'u' || c == 'k' || c == ' ')
+        || c == 'u' || c == 'k' || c == ' ' || c == 'S' || c == 'M')
         return 0;
     return 1;
 }
