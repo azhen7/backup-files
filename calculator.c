@@ -1,10 +1,10 @@
 #define _GNU_SOURCE
-#include <stdio.h> //Used for printf(), rewind()
-#include <cs50.h> //Used for get_string()
-#include <string.h> //Used for strlen(), strcat, strncat(), strcmp(), strncmp()
-#include <math.h> //Used for NAN macro, pow(), sqrt(), cbrt(), fabsf(), log(), log10(), tgamma()
-#include <stdlib.h> //Used for malloc(), system()
-#include <ctype.h> //Used for isdigit(), isascii()
+#include <stdio.h>
+#include <cs50.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include "log.h" //For some additional logarithm functions
 
 #define ARRAY_SIZE 9
@@ -59,20 +59,11 @@ int main(void)
 double solveEquation(char* input)
 {
     static double ans = 0.0;
-    unsigned int times = 0;
-    unsigned int location = 0;
-    short copyIndexStart = 0;
-    short multNeg = 1;
-    short x = 0;
-    short root = 0;
-    short numNum = 1;
-    float divide = 10.0;
-    float lastCheck = 0.0;
-    long double last = 0.0;
-    long double total = 0.0;
-    char state = '\0';
-    char whichNum = '0';
-    char lastNum = '0';
+    unsigned int times = 0, location = 0;
+    short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1;
+    float divide = 10.0, lastCheck = 0.0;
+    long double last = 0.0, total = 0.0;
+    char state = '\0', whichNum = '0', lastNum = '0';
     char* copy = (char*) malloc(strlen(input) * sizeof(char));
     char* rootOperations = NULL;
 
@@ -987,7 +978,7 @@ int letterExceptionCheck(char c)
     if (c == 'm' || c == 'c' || c == 'f' || c == 'l' || c == 'k' || c == 'n'
         || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
         || c == 'u' || c == 'v' || c == 'w' || c == 'x' || c == 'y' || c == 'z'
-        || c == 'e' || c == '!' || c == 'C')
+        || c == 'e' || c == '!' || c == 'C' || c == 'a')
         return 0;
     return 1;
 }
