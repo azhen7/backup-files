@@ -1,12 +1,15 @@
-#define _GNU_SOURCE //It's there so the compiler would stop complaining that isascii() does not exist.
-#define ARRAY_SIZE 8
-#include <stdio.h> //Used for printf(), fseek()
+#define _GNU_SOURCE
+#include <stdio.h> //Used for printf(), rewind()
 #include <cs50.h> //Used for get_string()
 #include <string.h> //Used for strlen(), strcat, strncat(), strcmp(), strncmp()
-#include <math.h> //Used for pow(), sqrt(), cbrt(), fabsf(), log(), log10(), tgamma()
+#include <math.h> //Used for NAN macro, pow(), sqrt(), cbrt(), fabsf(), log(), log10(), tgamma()
 #include <stdlib.h> //Used for malloc(), system()
 #include <ctype.h> //Used for isdigit(), isascii()
 #include "log.h" //For some additional logarithm functions
+
+#define ARRAY_SIZE 9
+#define GOLDEN_RT ((1 + sqrt(5)) * 0.5)
+#define APERY_CONST 1.202056903159
 
 //Used to solve equation
 double solveEquation(char* input);
@@ -36,6 +39,7 @@ int main(void)
     float result = 0.0;
 
     system("clear");
+    printf("%f\n", sqrt(-1));
     printf("Enter a bunch of equations below: \n");
 
     while (1)
@@ -45,7 +49,7 @@ int main(void)
 
         //Erase equation typed by user
         printf("\033[A\033[2K", stdout);
-        fseek(stdout, 0L, SEEK_SET);
+        rewind(stdout);
 
         printf("%s = %f\n", getEquation, result);
         printf("Note that this result did not take BEDMAS into account.\n\n");
@@ -81,181 +85,179 @@ double solveEquation(char* input)
     //Used to check for square root, cube roo, quartic root, and quintic root
     for (int i = 0; i < strlen(copy); i++)
     {
-        if (!isascii(copy[i]) == 1)
+        if (!isascii(copy[i]))
             return NAN;
         if (isalpha(copy[i]))
         {
-            char arr[ARRAY_SIZE];
-            arr[0] = '\0';
-            if (copy[i] == 'm' || copy[i] == 'e' || copy[i] == 'E' || copy[i] == '!')
+            char* arr = (char*) malloc(sizeof(char) * ARRAY_SIZE);
+            copyIndexStart = i;
+            strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
+            if (copy[i] == 'm' || copy[i] == 'e' || copy[i] == 'E')
                 continue;
 
             else if (copy[i] == 's')
             {
-                copyIndexStart = i;
-
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
-                if (strncmp(arr, "sqrt", 4) == 0)
+                if (strncmp(arr, "sqrt(", 5) == 0)
                 {
                     copy[copyIndexStart] = '#';
-                    removeChar(copy, copyIndexStart, 4);
+                    removeChar(copy, copyIndexStart, 5);
                     root++;
-                    i += 3;
+                    i += 4;
                 }
-                else if (strncmp(arr, "square", 6) == 0)
+                else if (strncmp(arr, "square(", 7) == 0)
                 {
                     copy[copyIndexStart] = '<';
-                    removeChar(copy, copyIndexStart, 6);
-                    root++;
-                    i += 5;
-                }
-                else if (strncmp(arr, "sixthrt", 7) == 0)
-                {
-                    copy[copyIndexStart] = '!';
                     removeChar(copy, copyIndexStart, 7);
                     root++;
                     i += 6;
                 }
-                else if (strncmp(arr, "sin", 3) == 0)
+                else if (strncmp(arr, "sixthrt(", 8) == 0)
+                {
+                    copy[copyIndexStart] = '!';
+                    removeChar(copy, copyIndexStart, 8);
+                    root++;
+                    i += 7;
+                }
+                else if (strncmp(arr, "sin(", 4) == 0)
                 {
                     copy[copyIndexStart] = ':';
-                    removeChar(copy, copyIndexStart, 3);
-                    root++;
-                    i += 2;
-                }
-                else if (strncmp(arr, "sinh", 4) == 0)
-                {
-                    copy[copyIndexStart] = 34;
                     removeChar(copy, copyIndexStart, 4);
                     root++;
                     i += 3;
+                }
+                else if (strncmp(arr, "sinh(", 5) == 0)
+                {
+                    copy[copyIndexStart] = 34;
+                    removeChar(copy, copyIndexStart, 5);
+                    root++;
+                    i += 4;
                 }
                 else
                     return NAN;
             }
             else if (copy[i] == 'a')
             {
-                copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
-                if (strncmp(arr, "arcsin", 6) == 0)
+                if (strncmp(arr, "arcsin(", 7) == 0)
                 {
                     copy[copyIndexStart] = '>';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
-                else if (strncmp(arr, "arccos", 6) == 0)
+                else if (strncmp(arr, "arccos(", 7) == 0)
                 {
                     copy[copyIndexStart] = '?';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
-                else if (strncmp(arr, "arctan", 6) == 0)
+                else if (strncmp(arr, "arctan(", 7) == 0)
                 {
                     copy[copyIndexStart] = '|';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 7);
                     root++;
                 }
-                else if (strncmp(arr, "arcsnh", 6) == 0)
+                else if (strncmp(arr, "arcsinh(", 8) == 0)
                 {
                     copy[copyIndexStart] = '{';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 8);
                     root++;
                 }
-                else if (strncmp(arr, "arccsh", 6) == 0)
+                else if (strncmp(arr, "arccosh(", 8) == 0)
                 {
                     copy[copyIndexStart] = '}';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 8);
                     root++;
                 }
-                else if (strncmp(arr, "arctnh", 6) == 0)
+                else if (strncmp(arr, "arctanh(", 8) == 0)
                 {
                     copy[copyIndexStart] = '(';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 8);
                     root++;
                 }
                 else if (strncmp(arr, "ans", 3) == 0)
                 {
                     total = ans;
-                    i -= 3;
                     removeChar(copy, copyIndexStart, 3);
+                    i -= 5;
                 }
                 else
                     return NAN;
-                i += 5;
+                i += 7;
+            }
+            else if (copy[i] == 'A')
+            {
+                if (strncmp(arr, "APERY_CNS", 9) == 0)
+                {
+                    removeChar(copy, copyIndexStart, 9);
+                    i += 8;
+                }
             }
             else if (copy[i] == 'c')
             {
-                copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
-                if (strncmp(arr, "cbrt", 4) == 0)
+                if (strncmp(arr, "cbrt(", 5) == 0)
                 {
                     copy[copyIndexStart] = '@';
-                    removeChar(copy, copyIndexStart, 4);
+                    removeChar(copy, copyIndexStart, 5);
                     root++;
                 }
-                else if (strncmp(arr, "cube", 4) == 0)
+                else if (strncmp(arr, "cube(", 5) == 0)
                 {
                     copy[copyIndexStart] = '&';
-                    removeChar(copy, copyIndexStart, 4);
+                    removeChar(copy, copyIndexStart, 5);
                     root++;
                 }
-                else if (strncmp(arr, "cosine", 6) == 0)
+                else if (strncmp(arr, "cos(", 4) == 0)
                 {
                     copy[copyIndexStart] = ';';
-                    removeChar(copy, copyIndexStart, 6);
+                    removeChar(copy, copyIndexStart, 4);
                     root++;
-                    i += 2;
+                    i--;
                 }
-                else if (strncmp(arr, "cosh", 4) == 0)
+                else if (strncmp(arr, "cosh(", 5) == 0)
                 {
                     copy[copyIndexStart] = 39;
-                    removeChar(copy, copyIndexStart, 4);
+                    removeChar(copy, copyIndexStart, 5);
                     root++;
                 }
-                else if (strncmp(arr, "ceil", 4) == 0)
+                else if (strncmp(arr, "ceil(", 5) == 0)
                 {
                     copy[copyIndexStart] = 'c';
-                    removeChar(copy, copyIndexStart, 4);
+                    removeChar(copy, copyIndexStart, 5);
                     root++;
                 }
                 else
                     return NAN;
-                i += 3;
+                i += 4;
             }
             else if (copy[i] == 'q')
             {
-                copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
-                if (strncmp(arr, "quartrt", 7) == 0)
+                if (strncmp(arr, "quartrt(", 8) == 0)
                 {
                     copy[copyIndexStart] = '$';
-                    removeChar(copy, copyIndexStart, 7);
+                    removeChar(copy, copyIndexStart, 8);
                     root++;
                 }
-                else if (strncmp(arr, "quintrt", 7) == 0)
+                else if (strncmp(arr, "quintrt(", 8) == 0)
                 {
                     copy[copyIndexStart] = '~';
-                    removeChar(copy, copyIndexStart, 7);
+                    removeChar(copy, copyIndexStart, 8);
                     root++;
                 }
                 else
                     return NAN;
-                i += 6;
+                i += 7;
             }
             else if (copy[i] == 't')
             {
-                copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
-                if (strncmp(arr, "tan", 3) == 0)
+                if (strncmp(arr, "tan(", 4) == 0)
                 {
                     copy[copyIndexStart] = 92;
-                    removeChar(copy, copyIndexStart, 3);
+                    removeChar(copy, copyIndexStart, 4);
                     root++;
                 }
-                else if (strncmp(arr, "tanh", 4) == 0)
+                else if (strncmp(arr, "tanh(", 5) == 0)
                 {
                     copy[copyIndexStart] = '\f';
-                    removeChar(copy, copyIndexStart, 4);
+                    removeChar(copy, copyIndexStart, 5);
                     root++;
                     i++;
                 }
@@ -265,121 +267,127 @@ double solveEquation(char* input)
             }
             else if (copy[i] == 'f')
             {
-                copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
-                if (strncmp(arr, "floor", 5) == 0)
+                if (strncmp(arr, "floor(", 6) == 0)
                 {
                     copy[copyIndexStart] = 'f';
-                    removeChar(copy, copyIndexStart, 5);
+                    removeChar(copy, copyIndexStart, 6);
                     root++;
-                    i += 4;
+                    i += 5;
                 }
                 else
                     return NAN;
             }
             else if (copy[i] == 'l')
             {
-                copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
                 //ln
-                if (strncmp(arr, "ln", 2) == 0)
+                if (strncmp(arr, "ln(", 3) == 0)
                 {
                     copy[copyIndexStart] = 'l';
-                    removeChar(copy, copyIndexStart, 6);
-                    root++;
-                    i++;
-                }
-                else if (strncmp(arr, "logone", 6) == 0)
-                {
-                    copy[copyIndexStart] = 'v';
-                    removeChar(copy, copyIndexStart, 6);
-                    root++;
-                    i += 5;
-                }
-                //log base 2
-                else if (strncmp(arr, "logtwo", 6) == 0)
-                {
-                    copy[copyIndexStart] = 'n';
-                    removeChar(copy, copyIndexStart, 6);
-                    root++;
-                    i += 5;
-                }
-                //log base 3
-                else if (strncmp(arr, "logthr", 6) == 0)
-                {
-                    copy[copyIndexStart] = 'o';
-                    removeChar(copy, copyIndexStart, 6);
-                    root++;
-                    i += 5;
-                }
-                //log base 4
-                else if (strncmp(arr, "logfour", 7) == 0)
-                {
-                    copy[copyIndexStart] = 'p';
-                    removeChar(copy, copyIndexStart, 7);
-                    root++;
-                    i += 6;
-                }
-                //log base 5
-                else if (strncmp(arr, "logfive", 7) == 0)
-                {
-                    copy[copyIndexStart] = 'q';
-                    removeChar(copy, copyIndexStart, 7);
-                    root++;
-                    i += 6;
-                }
-                //log base 6
-                else if (strncmp(arr, "logsix", 6) == 0)
-                {
-                    copy[copyIndexStart] = 'r';
-                    removeChar(copy, copyIndexStart, 6);
-                    root++;
-                    i += 5;
-                }
-                //log base 7
-                else if (strcmp(arr, "logseven") == 0)
-                {
-                    copy[copyIndexStart] = 's';
-                    removeChar(copy, copyIndexStart, 8);
-                    root++;
-                    i += 7;
-                }
-                //log base 8
-                else if (strcmp(arr, "logeight") == 0)
-                {
-                    copy[copyIndexStart] = 't';
-                    removeChar(copy, copyIndexStart, 8);
-                    root++;
-                    i += 7;
-                }
-                //log base 9
-                else if (strncmp(arr, "lognine", 7) == 0)
-                {
-                    copy[copyIndexStart] = 'u';
-                    removeChar(copy, copyIndexStart, 7);
-                    root++;
-                    i += 6;
-                }
-                //log base 10
-                else if (strncmp(arr, "log", 3) == 0)
-                {
-                    copy[copyIndexStart] = 'k';
                     removeChar(copy, copyIndexStart, 3);
                     root++;
                     i += 2;
+                }
+                else if (strncmp(arr, "logone(", 7) == 0)
+                {
+                    copy[copyIndexStart] = 'v';
+                    removeChar(copy, copyIndexStart, 7);
+                    root++;
+                    i += 6;
+                }
+                //log base 2
+                else if (strncmp(arr, "logtwo(", 7) == 0)
+                {
+                    copy[copyIndexStart] = 'n';
+                    removeChar(copy, copyIndexStart, 7);
+                    root++;
+                    i += 6;
+                }
+                //log base 3
+                else if (strncmp(arr, "logthree(", 9) == 0)
+                {
+                    copy[copyIndexStart] = 'o';
+                    removeChar(copy, copyIndexStart, 9);
+                    root++;
+                    i += 8;
+                }
+                //log base 4
+                else if (strncmp(arr, "logfour(", 8) == 0)
+                {
+                    copy[copyIndexStart] = 'p';
+                    removeChar(copy, copyIndexStart, 8);
+                    root++;
+                    i += 7;
+                }
+                //log base 5
+                else if (strncmp(arr, "logfive(", 8) == 0)
+                {
+                    copy[copyIndexStart] = 'q';
+                    removeChar(copy, copyIndexStart, 8);
+                    root++;
+                    i += 7;
+                }
+                //log base 6
+                else if (strncmp(arr, "logsix(", 7) == 0)
+                {
+                    copy[copyIndexStart] = 'r';
+                    removeChar(copy, copyIndexStart, 7);
+                    root++;
+                    i += 6;
+                }
+                //log base 7
+                else if (strncmp(arr, "logseven(", 9) == 0)
+                {
+                    copy[copyIndexStart] = 's';
+                    removeChar(copy, copyIndexStart, 9);
+                    root++;
+                    i += 8;
+                }
+                //log base 8
+                else if (strncmp(arr, "logeight(", 9) == 0)
+                {
+                    copy[copyIndexStart] = 't';
+                    removeChar(copy, copyIndexStart, 9);
+                    root++;
+                    i += 8;
+                }
+                //log base 9
+                else if (strncmp(arr, "lognine(", 8) == 0)
+                {
+                    copy[copyIndexStart] = 'u';
+                    removeChar(copy, copyIndexStart, 8);
+                    root++;
+                    i += 7;
+                }
+                //log base 10
+                else if (strncmp(arr, "log(", 4) == 0)
+                {
+                    copy[copyIndexStart] = 'k';
+                    removeChar(copy, copyIndexStart, 4);
+                    root++;
+                    i += 3;
                 }
                 else
                     return NAN;
             }
             else if (copy[i] == 'P')
             {
-                copyIndexStart = i;
-                strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
                 if (strncmp(arr, "PI", 2) == 0)
                 {
                     copy[i + 1] = ' ';
                     i++;
                 }
+                else
+                    return NAN;
+            }
+            else if (copy[i] == 'G')
+            {
+                if (strncmp(arr, "GOLDEN_RT", 9) == 0)
+                {
+                    removeChar(copy, copyIndexStart, 9);
+                    i += 8;
+                }
+                else
+                    return NAN;
             }
             else
                 return NAN;
@@ -664,34 +672,14 @@ double solveEquation(char* input)
 
             if (x == 0)
                 whichNum = '1';
+
             if (isdigit(copy[i]))
                 numNum = 1;
-
-            if (!isdigit(copy[i]))
+            else
                 rootOperations = assignrootOperations(rootOperations, numNum, copy, i, state);
 
             if (copy[i] == 'm' && state != '\0')
                 multNeg = -1;
-
-            //Converts last number to float
-            if (isdigit(copy[i]) && state != '\0')
-            {
-                if (lastCheck != 0.0)
-                    return NAN;
-
-                whichNum = '1';
-
-                if (lastNum == '1')
-                {
-                    last += (copy[i] - '0') / divide;
-                    divide *= 10;
-                    continue;
-                }
-
-                last += copy[i] - '0';
-                if (isdigit(copy[i + 1]))
-                    last *= 10;
-            }
 
             //Determines operation to use
             if (state == '\0' && !isdigit(copy[i]))
@@ -703,25 +691,66 @@ double solveEquation(char* input)
                 }
             }
 
-            if (copy[i] == 'P' && state != '\0')
+            if (state != '\0')
             {
-                last = M_PI;
-                lastCheck = last;
-                whichNum = '1';
-            }
-            else if (copy[i] == 'E' && state != '\0')
-            {
-                last = M_E;
-                lastCheck = M_E;
-                whichNum = '1';
-            }
-
-            if (copy[i] == '.' && state != '\0')
-            {
-                if (isdigit(copy[i + 1]))
+                //Converts last number to float
+                if (isdigit(copy[i]))
                 {
-                    lastNum = '1';
-                    continue;
+                    if (lastCheck != 0.0)
+                        return NAN;
+
+                    whichNum = '1';
+
+                    if (lastNum == '1')
+                    {
+                        last += (copy[i] - '0') / divide;
+                        divide *= 10;
+                        continue;
+                    }
+
+                    last += copy[i] - '0';
+                    if (isdigit(copy[i + 1]))
+                        last *= 10;
+                }
+                else if (copy[i] == 'P')
+                {
+                    if (total != 0.0)
+                        last *= M_PI;
+                    last = M_PI;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                else if (copy[i] == 'E')
+                {
+                    if (total != 0.0)
+                        last *= M_E;
+                    last = M_E;
+                    lastCheck = M_E;
+                    whichNum = '1';
+                }
+                else if (copy[i] == 'G')
+                {
+                    if (total != 0.0)
+                        last *= GOLDEN_RT;
+                    last = GOLDEN_RT;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                else if (copy[i] == 'A')
+                {
+                    if (total != 0.0)
+                        last *= APERY_CONST;
+                    last = APERY_CONST;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                else if (copy[i] == '.')
+                {
+                    if (isdigit(copy[i + 1]))
+                    {
+                        lastNum = '1';
+                        continue;
+                    }
                 }
             }
         }
@@ -804,7 +833,10 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'P')
             {
                 if (total != 0.0)
-                    return NAN;
+                    if (input[i - 1] == ' ')
+                        return NAN;
+                    else
+                        total *= M_PI;
                 else
                 {
                     total = M_PI;
@@ -814,11 +846,46 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'E')
             {
                 if (total != 0.0)
-                    return NAN;
+                {
+                    if (input[i - 1] == ' ')
+                        return NAN;
+                    else
+                        total *= M_E;
+                }
                 else
                 {
                     total = M_E;
                     temp = total;
+                }
+            }
+            else if (input[i] == 'G')
+            {
+                if (total != 0.0)
+                {
+                    if (input[i - 1] == ' ')
+                        return NAN;
+                    else
+                        total *= GOLDEN_RT;
+                }
+                else
+                {
+                    total = GOLDEN_RT;
+                    temp = total;
+                    continue;
+                }
+            }
+            else if (input[i] == 'A')
+            {
+                if (total != 0.0)
+                    if (input[i - 1] == ' ')
+                        return NAN;
+                    else
+                        total *= APERY_CONST;
+                else
+                {
+                    total = APERY_CONST;
+                    temp = total;
+                    continue;
                 }
             }
             else if (validateRoot(input[i]) == 0)
@@ -906,7 +973,11 @@ int validateOperation(char c)
 
 int validateRoot(char c)
 {
-    if (c == '@' || c == '#' || c == '$' || c == '~' || c == ' ' || c == '<' || c == '&' || c == '!')
+    if (c == '@' || c == '#' || c == '$' || c == '~' || c == '<' || c == '&' || c == '!' || c == ';'
+        || c == ':' || c == 34 || c == '>' || c == '?' || c == '|' || c == '{' || c == '}' || c == '('
+        || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
+        || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
+        || c == 'u' || c == 'k' || c == ' ')
         return 0;
     return 1;
 }
