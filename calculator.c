@@ -3,7 +3,7 @@
 #include <stdio.h> //Used for printf(), fseek()
 #include <cs50.h> //Used for get_string()
 #include <string.h> //Used for strlen(), strcat, strncat(), strcmp(), strncmp()
-#include <math.h> //Used for pow(), sqrt(), cbrt(), fabsf(), log(), log10()
+#include <math.h> //Used for pow(), sqrt(), cbrt(), fabsf(), log(), log10(), tgamma()
 #include <stdlib.h> //Used for malloc(), system()
 #include <ctype.h> //Used for isdigit(), isascii()
 #include "log.h" //For some additional logarithm functions
@@ -23,21 +23,17 @@ int letterExceptionCheck(char c);
 
 //Change strings
 char* removeChar(char* input, int index, int c);
-char* assignRoots(char* Roots, int numNum, char* copy, int i, char state);
+char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
 char* setUp(char* copy);
 
 //Root functions
 float squareRoot(float number);
 float fifthRoot(float number);
 
-//Factorial
-long double factorial(float number);
-
 int main(void)
 {
     char* getEquation = NULL;
     float result = 0.0;
-    char c = '\0';
 
     system("clear");
     printf("Enter a bunch of equations below: \n");
@@ -49,7 +45,7 @@ int main(void)
 
         //Erase equation typed by user
         printf("\033[A\033[2K", stdout);
-        fseek(stdout, 0, SEEK_SET);
+        fseek(stdout, 0L, SEEK_SET);
 
         printf("%s = %f\n", getEquation, result);
         printf("Note that this result did not take BEDMAS into account.\n\n");
@@ -74,7 +70,7 @@ double solveEquation(char* input)
     char whichNum = '0';
     char lastNum = '0';
     char* copy = (char*) malloc(strlen(input) * sizeof(char));
-    char* Roots = NULL;
+    char* rootOperations = NULL;
 
     //copy input to copy
     strcpy(copy, input);
@@ -82,7 +78,7 @@ double solveEquation(char* input)
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
     setUp(copy);
 
-    //Used to check for square roots, cube roots, quartic roots, and quintic roots
+    //Used to check for square root, cube roo, quartic root, and quintic root
     for (int i = 0; i < strlen(copy); i++)
     {
         if (!isascii(copy[i]) == 1)
@@ -408,7 +404,7 @@ double solveEquation(char* input)
     numNum = 0;
     multNeg = 1;
 
-    Roots = (char*) malloc(root * sizeof(char));
+    rootOperations = (char*) malloc(root * sizeof(char));
     for (int j = 0; j < times; j++)
     {
         for (int i = location; i < strlen(copy) + 1; i++)
@@ -418,213 +414,213 @@ double solveEquation(char* input)
                 continue;
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
-                //Roots and additional operations
-                for (int a = 0; a < strlen(Roots); a++)
+                //rootOperations and additional operations
+                for (int a = 0; a < strlen(rootOperations); a++)
                 {
                     //sqrt
-                    if (Roots[a] == '0')
+                    if (rootOperations[a] == '0')
                         total = squareRoot(total);
-                    else if (Roots[a] == '1')
+                    else if (rootOperations[a] == '1')
                         last = squareRoot(last);
 
                     //cbrt
-                    else if (Roots[a] == '2')
+                    else if (rootOperations[a] == '2')
                         total = cbrt(total);
-                    else if (Roots[a] == '3')
+                    else if (rootOperations[a] == '3')
                         last = cbrt(last);
 
                     //quartic root
-                    else if (Roots[a] == '4')
+                    else if (rootOperations[a] == '4')
                         total = squareRoot(squareRoot(total));
-                    else if (Roots[a] == '5')
+                    else if (rootOperations[a] == '5')
                         last = squareRoot(squareRoot(last));
 
                     //quintic root
-                    else if (Roots[a] == '6')
+                    else if (rootOperations[a] == '6')
                         total = fifthRoot(total);
-                    else if (Roots[a] == '7')
+                    else if (rootOperations[a] == '7')
                         last = fifthRoot(last);
 
                     //sixth root
-                    else if (Roots[a] == ';')
+                    else if (rootOperations[a] == ';')
                         total = cbrt(squareRoot(total));
-                    else if (Roots[a] == ':')
+                    else if (rootOperations[a] == ':')
                         last = cbrt(squareRoot(last));
 
                     //square
-                    else if (Roots[a] == '8')
+                    else if (rootOperations[a] == '8')
                         total *= total;
-                    else if (Roots[a] == '9')
+                    else if (rootOperations[a] == '9')
                         last *= last;
 
                     //cube
-                    else if (Roots[a] == '[')
+                    else if (rootOperations[a] == '[')
                         total = pow(total, 3);
-                    else if (Roots[a] == ']')
+                    else if (rootOperations[a] == ']')
                         last = pow(last, 3);
 
                     //sin
-                    else if (Roots[a] == '{')
+                    else if (rootOperations[a] == '{')
                         total = sin(total);
-                    else if (Roots[a] == '}')
+                    else if (rootOperations[a] == '}')
                         last = sin(last);
 
                     //cos
-                    else if (Roots[a] == '~')
+                    else if (rootOperations[a] == '~')
                         total = cos(total);
-                    else if (Roots[a] == '`')
+                    else if (rootOperations[a] == '`')
                         last = cos(last);
 
                     //tan
-                    else if (Roots[a] == '=')
+                    else if (rootOperations[a] == '=')
                         total = tan(total);
-                    else if (Roots[a] == '_')
+                    else if (rootOperations[a] == '_')
                         last = tan(last);
 
                     //arcsin
-                    else if (Roots[a] == '(')
+                    else if (rootOperations[a] == '(')
                         total = asin(total);
-                    else if (Roots[a] == ')')
+                    else if (rootOperations[a] == ')')
                         last = asin(last);
 
                     //arccos
-                    else if (Roots[a] == ',')
+                    else if (rootOperations[a] == ',')
                         total = acos(total);
-                    else if (Roots[a] == '.')
+                    else if (rootOperations[a] == '.')
                         last = acos(last);
 
                     //arctan
-                    else if (Roots[a] == '<')
+                    else if (rootOperations[a] == '<')
                         total = atan(total);
-                    else if (Roots[a] == '>')
+                    else if (rootOperations[a] == '>')
                         last = atan(last);
 
                     //sinh
-                    else if (Roots[a] == ' ')
+                    else if (rootOperations[a] == ' ')
                         total = sinh(total);
-                    else if (Roots[a] == 'a')
+                    else if (rootOperations[a] == 'a')
                         last = sinh(last);
 
                     //cosh
-                    else if (Roots[a] == 'b')
+                    else if (rootOperations[a] == 'b')
                         total = cosh(total);
-                    else if (Roots[a] == 'c')
+                    else if (rootOperations[a] == 'c')
                         last = cosh(last);
 
                     //tanh
-                    else if (Roots[a] == 'd')
+                    else if (rootOperations[a] == 'd')
                         total = tanh(total);
-                    else if (Roots[a] == 'e')
+                    else if (rootOperations[a] == 'e')
                         last = tanh(last);
 
                     //arcsinh
-                    else if (Roots[a] == '+')
+                    else if (rootOperations[a] == '+')
                         total = asinh(total);
-                    else if (Roots[a] == '-')
+                    else if (rootOperations[a] == '-')
                         last = asinh(last);
 
                     //arccosh
-                    else if (Roots[a] == '*')
+                    else if (rootOperations[a] == '*')
                         total = acosh(total);
-                    else if (Roots[a] == '/')
+                    else if (rootOperations[a] == '/')
                         last = acosh(last);
 
                     //arctanh
-                    else if (Roots[a] == '@')
+                    else if (rootOperations[a] == '@')
                         total = atanh(total);
-                    else if (Roots[a] == '#')
+                    else if (rootOperations[a] == '#')
                         last = atanh(last);
 
                     //ceil
-                    else if (Roots[a] == 'f')
+                    else if (rootOperations[a] == 'f')
                         total = (int) total + 1;
-                    else if (Roots[a] == 'g')
+                    else if (rootOperations[a] == 'g')
                         last = (int) last + 1;
 
                     //floor
-                    else if (Roots[a] == 'h')
+                    else if (rootOperations[a] == 'h')
                         total = (int) total;
-                    else if (Roots[a] == 'i')
+                    else if (rootOperations[a] == 'i')
                         last = (int) last;
 
                     //ln
-                    else if (Roots[a] == 'j')
+                    else if (rootOperations[a] == 'j')
                         total = ln(total);
-                    else if (Roots[a] == 'k')
+                    else if (rootOperations[a] == 'k')
                         last = ln(last);
 
                     //log base 10
-                    else if (Roots[a] == 'l')
+                    else if (rootOperations[a] == 'l')
                         total = log10(total);
-                    else if (Roots[a] == 'm')
+                    else if (rootOperations[a] == 'm')
                         last = log10(last);
 
                     //log base 2
-                    else if (Roots[a] == 'n')
+                    else if (rootOperations[a] == 'n')
                         total = log2(total);
-                    else if (Roots[a] == 'o')
+                    else if (rootOperations[a] == 'o')
                         last = log2(last);
 
                     //log base 3
-                    else if (Roots[a] == 'p')
+                    else if (rootOperations[a] == 'p')
                         total = log3(total);
-                    else if (Roots[a] == 'q')
+                    else if (rootOperations[a] == 'q')
                         last = log3(last);
 
                     //log base 4
-                    else if (Roots[a] == 'r')
+                    else if (rootOperations[a] == 'r')
                         total = log4(total);
-                    else if (Roots[a] == 's')
+                    else if (rootOperations[a] == 's')
                         last = log4(last);
 
                     //log base 5
-                    else if (Roots[a] == 't')
+                    else if (rootOperations[a] == 't')
                         total = log5(total);
-                    else if (Roots[a] == 'u')
+                    else if (rootOperations[a] == 'u')
                         last = log5(last);
 
                     //log base 6
-                    else if (Roots[a] == 'v')
+                    else if (rootOperations[a] == 'v')
                         total = log6(total);
-                    else if (Roots[a] == 'w')
+                    else if (rootOperations[a] == 'w')
                         last = log6(last);
 
                     //log base 7
-                    else if (Roots[a] == 'x')
+                    else if (rootOperations[a] == 'x')
                         total = log7(total);
-                    else if (Roots[a] == 'y')
+                    else if (rootOperations[a] == 'y')
                         last = log7(last);
 
                     //log base 8
-                    else if (Roots[a] == 'z')
+                    else if (rootOperations[a] == 'z')
                         total = log8(total);
-                    else if (Roots[a] == 'A')
+                    else if (rootOperations[a] == 'A')
                         last = log8(last);
 
                     //log base 9
-                    else if (Roots[a] == 'B')
+                    else if (rootOperations[a] == 'B')
                         total = log9(total);
-                    else if (Roots[a] == 'C')
+                    else if (rootOperations[a] == 'C')
                         last = log9(last);
 
                     //log base 1
-                    else if (Roots[a] == 'D')
+                    else if (rootOperations[a] == 'D')
                         total = log1(total);
-                    else if (Roots[a] == 'E')
+                    else if (rootOperations[a] == 'E')
                         last = log1(last);
 
                     //factorial
-                    else if (Roots[a] == 'F')
+                    else if (rootOperations[a] == 'F')
                     {
                         if (total < 0)
                             return NAN;
-                        total = factorial(total);
+                        total = tgamma(total + 1);
                     }
-                    else if (Roots[a] == 'G')
+                    else if (rootOperations[a] == 'G')
                     {
                         if (last < 0)
                             return NAN;
-                        last = factorial(last);
+                        last = tgamma(last + 1);
                     }
                 }
                 last *= multNeg;
@@ -672,7 +668,7 @@ double solveEquation(char* input)
                 numNum = 1;
 
             if (!isdigit(copy[i]))
-                Roots = assignRoots(Roots, numNum, copy, i, state);
+                rootOperations = assignrootOperations(rootOperations, numNum, copy, i, state);
 
             if (copy[i] == 'm' && state != '\0')
                 multNeg = -1;
@@ -735,7 +731,7 @@ double solveEquation(char* input)
         numNum = 0;
         lastNum = '0';
         divide = 10.0;
-        Roots[0] = '\0';
+        rootOperations[0] = '\0';
     }
     ans = total;
     return total;
@@ -878,21 +874,7 @@ unsigned int numberOfOperations(char* input)
     return times;
 }
 
-//Factorial
-long double factorial(float number)
-{
-    long double result = number;
-    number--;
-    for (int i = number; i >= 1; i--)
-    {
-        result *= i;
-    }
-    if (number != (int) number)
-        result *= sqrt(M_PI);
-    return result;
-}
-
-//Roots functions
+//root functions
 float squareRoot(float number)
 {
     if (number < 0)
@@ -946,7 +928,7 @@ char* removeChar(char* input, int index, int c)
     return input;
 }
 
-char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
+char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
 {
     //sqrt
     if (copy[i] == '#')
@@ -954,11 +936,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "0");
+                strcat(rootOperations, "0");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "1");
+                strcat(rootOperations, "1");
     }
     //cbrt
     else if (copy[i] == '@')
@@ -966,11 +948,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "2");
+                strcat(rootOperations, "2");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "3");
+                strcat(rootOperations, "3");
     }
     //quartic root
     else if (copy[i] == '$')
@@ -978,11 +960,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "4");
+                strcat(rootOperations, "4");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "5");
+                strcat(rootOperations, "5");
     }
     //quintic root
     else if (copy[i] == '~')
@@ -990,11 +972,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "6");
+                strcat(rootOperations, "6");
         }
             else
                 if (numNum == 0)
-                    strcat(Roots, "7");
+                    strcat(rootOperations, "7");
     }
     //squaring
     else if (copy[i] == '<')
@@ -1002,11 +984,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "8");
+                strcat(rootOperations, "8");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "9");
+                strcat(rootOperations, "9");
     }
     //cubing
     else if (copy[i] == '&')
@@ -1014,11 +996,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "[");
+                strcat(rootOperations, "[");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "]");
+                strcat(rootOperations, "]");
     }
     //sixth root
     else if (copy[i] == '!')
@@ -1026,15 +1008,15 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, ";");
+                strcat(rootOperations, ";");
             else
-                strcat(Roots, "F");
+                strcat(rootOperations, "F");
         }
         else
             if (numNum == 0)
-                strcat(Roots, ":");
+                strcat(rootOperations, ":");
             else
-                strcat(Roots, "G");
+                strcat(rootOperations, "G");
     }
     //sin
     else if (copy[i] == ':')
@@ -1042,11 +1024,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "{");
+                strcat(rootOperations, "{");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "}");
+                strcat(rootOperations, "}");
     }
     //cos
     else if (copy[i] == ';')
@@ -1054,11 +1036,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "~");
+                strcat(rootOperations, "~");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "`");
+                strcat(rootOperations, "`");
     }
     //tan
     else if (copy[i] == 92)
@@ -1066,11 +1048,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "=");
+                strcat(rootOperations, "=");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "_");
+                strcat(rootOperations, "_");
     }
     //arcsin
     else if (copy[i] == '>')
@@ -1078,11 +1060,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "(");
+                strcat(rootOperations, "(");
         }
         else
             if (numNum == 0)
-                strcat(Roots, ")");
+                strcat(rootOperations, ")");
     }
     //arccos
     else if (copy[i] == '?')
@@ -1090,11 +1072,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, ",");
+                strcat(rootOperations, ",");
         }
         else
             if (numNum == 0)
-                strcat(Roots, ".");
+                strcat(rootOperations, ".");
     }
     //arctan
     else if (copy[i] == '|')
@@ -1102,11 +1084,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "<");
+                strcat(rootOperations, "<");
         }
         else
             if (numNum == 0)
-                strcat(Roots, ">");
+                strcat(rootOperations, ">");
     }
     //sinh
     else if (copy[i] == 34)
@@ -1114,11 +1096,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, " ");
+                strcat(rootOperations, " ");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "a");
+                strcat(rootOperations, "a");
     }
     //cosh
     else if (copy[i] == 39)
@@ -1126,11 +1108,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "b");
+                strcat(rootOperations, "b");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "c");
+                strcat(rootOperations, "c");
     }
     //tanh
     else if (copy[i] == '\f')
@@ -1138,11 +1120,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "d");
+                strcat(rootOperations, "d");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "e");
+                strcat(rootOperations, "e");
     }
     //arcsinh
     else if (copy[i] == '{')
@@ -1150,11 +1132,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "+");
+                strcat(rootOperations, "+");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "-");
+                strcat(rootOperations, "-");
     }
     //arccosh
     else if (copy[i] == '}')
@@ -1162,11 +1144,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "*");
+                strcat(rootOperations, "*");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "/");
+                strcat(rootOperations, "/");
     }
     //arctanh
     else if (copy[i] == '(')
@@ -1174,11 +1156,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "@");
+                strcat(rootOperations, "@");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "#");
+                strcat(rootOperations, "#");
     }
     //ceil
     else if (copy[i] == 'c')
@@ -1186,11 +1168,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "f");
+                strcat(rootOperations, "f");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "g");
+                strcat(rootOperations, "g");
     }
     //floor
     else if (copy[i] == 'f')
@@ -1198,11 +1180,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "h");
+                strcat(rootOperations, "h");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "i");
+                strcat(rootOperations, "i");
     }
     //ln
     else if (copy[i] == 'l')
@@ -1210,11 +1192,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "j");
+                strcat(rootOperations, "j");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "k");
+                strcat(rootOperations, "k");
     }
     //log base 10
     else if (copy[i] == 'k')
@@ -1222,11 +1204,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "l");
+                strcat(rootOperations, "l");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "m");
+                strcat(rootOperations, "m");
     }
     //log base 2
     else if (copy[i] == 'n')
@@ -1234,11 +1216,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "n");
+                strcat(rootOperations, "n");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "o");
+                strcat(rootOperations, "o");
     }
     //log base 3
     else if (copy[i] == 'o')
@@ -1246,11 +1228,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "p");
+                strcat(rootOperations, "p");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "q");
+                strcat(rootOperations, "q");
     }
     //log base 4
     else if (copy[i] == 'p')
@@ -1258,11 +1240,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "r");
+                strcat(rootOperations, "r");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "s");
+                strcat(rootOperations, "s");
     }
     //log base 5
     else if (copy[i] == 'q')
@@ -1270,11 +1252,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "t");
+                strcat(rootOperations, "t");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "u");
+                strcat(rootOperations, "u");
     }
     //log base 6
     else if (copy[i] == 'r')
@@ -1282,11 +1264,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "v");
+                strcat(rootOperations, "v");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "w");
+                strcat(rootOperations, "w");
     }
     //log base 7
     else if (copy[i] == 's')
@@ -1294,11 +1276,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "x");
+                strcat(rootOperations, "x");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "y");
+                strcat(rootOperations, "y");
     }
     //log base 8
     else if (copy[i] == 't')
@@ -1306,11 +1288,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "z");
+                strcat(rootOperations, "z");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "A");
+                strcat(rootOperations, "A");
     }
     //log base 9
     else if (copy[i] == 'u')
@@ -1318,11 +1300,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "B");
+                strcat(rootOperations, "B");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "C");
+                strcat(rootOperations, "C");
     }
     //log base 1
     else if (copy[i] == 'v')
@@ -1330,11 +1312,11 @@ char* assignRoots(char* Roots, int numNum, char* copy, int i, char state)
         if (state == '\0')
         {
             if (numNum == 0)
-                strcat(Roots, "D");
+                strcat(rootOperations, "D");
         }
         else
             if (numNum == 0)
-                strcat(Roots, "E");
+                strcat(rootOperations, "E");
     }
-    return Roots;
+    return rootOperations;
 }
