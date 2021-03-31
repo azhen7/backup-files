@@ -447,7 +447,6 @@ double solveEquation(char* input)
     lastNum = '0';
     numNum = 0;
     multNeg = 1;
-    float test;
 
     rootOperations = (char*) malloc(root * sizeof(char));
     for (int j = 0; j < times; j++)
