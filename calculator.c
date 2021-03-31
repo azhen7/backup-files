@@ -25,10 +25,6 @@ int validNext(char c);
 int validateOperation(char c);
 int validateRoot(char c);
 
-//Factorial functions
-int nCr(long double num1, long double num2);
-int nPr(long double num1, long double num2);
-
 //Change strings
 char* removeChar(char* input, int index, int c);
 char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
