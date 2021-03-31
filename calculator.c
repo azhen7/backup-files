@@ -64,7 +64,7 @@ double solveEquation(char* input)
 {
     static double ans = 0.0;
     unsigned int times = 0, location = 0;
-    short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1, inputCheck;
+    short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1;
     float divide = 10.0, lastCheck = 0.0;
     long double last = 0.0, total = 0.0;
     char state = '\0', whichNum = '0', lastNum = '0';
@@ -714,7 +714,18 @@ double solveEquation(char* input)
                             total = tgamma(total + 1) / (tgamma(last + 1) * tgamma(total - last + 1));
                     }
                 }
-                location = i;
+                else if (state == 'P')
+                {
+                    if ((int) last != last || (int) total != total)
+                        return NAN;
+                    else
+                    {
+                        if (total < last);
+                        else
+                            total = tgamma(total + 1) / tgamma(total - last + 1);
+                    }
+                }
+                 location = i;
                 break;
             }
 
@@ -728,16 +739,6 @@ double solveEquation(char* input)
 
             if (copy[i] == 'm' && state != '\0')
                 multNeg = -1;
-
-            //Determines operation to use
-            if (state == '\0' && !isdigit(copy[i]))
-            {
-                if (validateOperation(copy[i]) == 0)
-                {
-                    state = copy[i];
-                    numNum = 0;
-                }
-            }
 
             if (state != '\0')
             {
@@ -832,6 +833,15 @@ double solveEquation(char* input)
                     }
                 }
             }
+            //Determines operation to use
+            if (state == '\0' && !isdigit(copy[i]))
+            {
+                if (validateOperation(copy[i]) == 0)
+                {
+                    state = copy[i];
+                    numNum = 0;
+                }
+            }
         }
         state = '\0';
         whichNum = '0';
@@ -910,6 +920,9 @@ long double convertFloat(char* input, long double total)
                 else
                     lastNum = '1';
             }
+            //If input[i] is a valid operation, this implies that the first number has terminated
+            else if (validateOperation(input[i]) == 0)
+                break;
             //For Pi
             else if (input[i] == 'P')
             {
@@ -1020,9 +1033,6 @@ long double convertFloat(char* input, long double total)
             //If input[i] is a root, skip
             else if (validateRoot(input[i]) == 0)
                 continue;
-            //If input[i] is a valid operation, this implies that the first number has terminated
-            else if (validateOperation(input[i]) == 0)
-                break;
             else if (input[i] == 'm')
                 multNeg = -1;
             else
