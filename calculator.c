@@ -174,6 +174,12 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 3);
                     i -= 5;
                 }
+                else if (strncmp(arr, "abs(", 4) == 0)
+                {
+                    copy[copyIndexStart] = 'w';
+                    removeChar(copy, copyIndexStart, 4);
+                    i -= 4;
+                }
                 else
                     return NAN;
                 i += 7;
@@ -666,6 +672,12 @@ double solveEquation(char* input)
                             return NAN;
                         last = tgamma(last + 1);
                     }
+
+                    //absolute value
+                    else if (rootOperations[a] == 'H')
+                        total = fabsl(total);
+                    else if (rootOperations[a] == 'I')
+                        last = fabsl(last);
                 }
                 last *= multNeg;
                 //operation
@@ -1128,7 +1140,7 @@ int validateRoot(char c)
         || c == ':' || c == 34 || c == '>' || c == '?' || c == '|' || c == '{' || c == '}' || c == '('
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
-        || c == 'u' || c == 'k' || c == ' ' || c == 'S' || c == 'M')
+        || c == 'u' || c == 'k' || c == ' ' || c == 'S' || c == 'M' || c == 'w')
         return 0;
     return 1;
 }
@@ -1529,6 +1541,18 @@ char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, 
         else
             if (numNum == 0)
                 strcat(rootOperations, "E");
+    }
+    //abslute value
+    else if (copy[i] == 'w')
+    {
+        if (state == '\0')
+        {
+            if (numNum == 0)
+                strcat(rootOperations, "H");
+        }
+        else
+            if (numNum == 0)
+                strcat(rootOperations, "I");
     }
     return rootOperations;
 }
