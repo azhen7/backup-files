@@ -41,7 +41,7 @@ float fifthRoot(float number);
 int main(void)
 {
     char* getEquation = NULL;
-    float result = 0.0;
+    double result = 0.0;
 
     system("clear");
     printf("Enter a bunch of equations below: \n");
@@ -52,7 +52,7 @@ int main(void)
         result = solveEquation(getEquation);
 
         //Erase equation typed by user
-        printf("\033[A\033[2K", stdout);
+        fputs("\033[A\033[2K", stdout);
         rewind(stdout);
 
         printf("%s = %f\n", getEquation, result);
@@ -170,6 +170,9 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "ans", 3) == 0)
                 {
+                    if (ans == 0.0)
+                        return NAN;
+
                     total = ans;
                     removeChar(copy, copyIndexStart, 3);
                     i -= 5;
