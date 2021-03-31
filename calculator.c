@@ -1106,18 +1106,6 @@ float fifthRoot(float number)
     return pow(number, 0.2);
 }
 
-//Factorial functions
-//Combinatorics function
-int nCr(long double num1, long double num2)
-{
-    return tgamma(num1) / (tgamma(num2) * tgamma(num1 - num2 + 1));
-}
-//Permutations function
-int nPr(long double num1, long double num2)
-{
-    return tgamma(num1) / tgamma(num1 - num2 + 1);
-}
-
 //String char checking
 //See if input[i] is a valid operation (+, -, etc.)
 int validateOperation(char c)
