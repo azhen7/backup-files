@@ -1046,6 +1046,7 @@ long double convertFloat(char* input, long double total)
                 continue;
             else if (input[i] == 'm')
                 multNeg = -1;
+            else if (input[i] == 'a');
             else
                 return NAN;
         }
