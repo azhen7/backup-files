@@ -10,6 +10,8 @@
 #define ARRAY_SIZE 9
 #define GOLDEN_RT ((1 + sqrt(5)) * 0.5) //Golden Ratio
 #define APERY_CONST 1.202056903159 //Apery's Constant
+#define M_SQRT_3 (sqrt(3)) //Theodorus' Constant (Square root of 3)
+#define G 0.915965594177219 //Catalan's Constant
 
 //Used to solve equation
 double solveEquation(char* input);
@@ -22,7 +24,10 @@ unsigned int numberOfOperations(char* input);
 int validNext(char c);
 int validateOperation(char c);
 int validateRoot(char c);
-int letterExceptionCheck(char c);
+
+//Factorial functions
+int nCr(long double num1, long double num2);
+int nPr(long double num1, long double num2);
 
 //Change strings
 char* removeChar(char* input, int index, int c);
@@ -39,7 +44,6 @@ int main(void)
     float result = 0.0;
 
     system("clear");
-    printf("%f\n", sqrt(-1));
     printf("Enter a bunch of equations below: \n");
 
     while (1)
@@ -396,6 +400,31 @@ double solveEquation(char* input)
                     return NAN;
                 i += 5;
             }
+            else if (copy[i] == 'C')
+            {
+                if (strncmp(arr, "CATALAN_C", 9) == 0)
+                {
+                    copy[i] = 'K';
+                    removeChar(copy, copyIndexStart, 9);
+                    i += 8;
+                }
+            }
+            else if (copy[i] == 'n')
+            {
+                if (strncmp(arr, "nCr", 3) == 0)
+                {
+                    copy[i] = 'C';
+                    removeChar(copy, copyIndexStart, 3);
+                }
+                else if (strncmp(arr, "nPr", 3) == 0)
+                {
+                    copy[i] = 'P';
+                    removeChar(copy, copyIndexStart, 3);
+                }
+                else
+                    return NAN;
+                i += 2;
+            }
             else
                 return NAN;
         }
@@ -418,6 +447,7 @@ double solveEquation(char* input)
     lastNum = '0';
     numNum = 0;
     multNeg = 1;
+    float test;
 
     rootOperations = (char*) malloc(root * sizeof(char));
     for (int j = 0; j < times; j++)
@@ -673,6 +703,17 @@ double solveEquation(char* input)
                             total *= pow(10, last);
                     }
                 }
+                else if (state == 'C')
+                {
+                    if ((int) last != last || (int) total != total)
+                        return NAN;
+                    else
+                    {
+                        if (total < last);
+                        else
+                            total = tgamma(total + 1) / (tgamma(last + 1) * tgamma(total - last + 1));
+                    }
+                }
                 location = i;
                 break;
             }
@@ -723,6 +764,7 @@ double solveEquation(char* input)
                 {
                     if (total != 0.0)
                         last *= M_PI;
+
                     last = M_PI;
                     lastCheck = last;
                     whichNum = '1';
@@ -731,6 +773,7 @@ double solveEquation(char* input)
                 {
                     if (total != 0.0)
                         last *= M_E;
+
                     last = M_E;
                     lastCheck = M_E;
                     whichNum = '1';
@@ -739,6 +782,7 @@ double solveEquation(char* input)
                 {
                     if (total != 0.0)
                         last *= GOLDEN_RT;
+
                     last = GOLDEN_RT;
                     lastCheck = last;
                     whichNum = '1';
@@ -747,7 +791,35 @@ double solveEquation(char* input)
                 {
                     if (total != 0.0)
                         last *= APERY_CONST;
+
                     last = APERY_CONST;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                else if (copy[i] == 'S')
+                {
+                    if (total != 0.0)
+                        last *= M_SQRT2;
+
+                    last = M_SQRT2;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                else if (copy[i] == 'M')
+                {
+                    if (total != 0.0)
+                        last *= M_SQRT_3;
+
+                    last = M_SQRT_3;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                else if (copy[i] == 'K')
+                {
+                    if (total != 0.0)
+                        last *= G;
+
+                    last = G;
                     lastCheck = last;
                     whichNum = '1';
                 }
@@ -830,6 +902,7 @@ long double convertFloat(char* input, long double total)
         //This code is in charge of switching from adding integer parts to adding decimals
         if (!isdigit(input[i]))
         {
+            //If input[i] is a decimal point, start adding decimals
             if (input[i] == '.')
             {
                 if (!isdigit(input[i + 1]))
@@ -921,23 +994,37 @@ long double convertFloat(char* input, long double total)
                     if (input[i - 1] == ' ')
                         return NAN;
                     else
-                        total *= sqrt(3);
+                        total *= M_SQRT_3;
                 else
                 {
-                    total = sqrt(3);
+                    total = M_SQRT_3;
                     temp = total;
                     continue;
                 }
             }
+            //For Catalan's Constant
+            else if (input[i] == 'K')
+            {
+                if (total != 0.0)
+                    if (input[i - 1] == ' ')
+                        return NAN;
+                    else
+                        total *= G;
+                else
+                {
+                    total = G;
+                    temp = total;
+                    continue;
+                }
+            }
+            //If input[i] is a root, skip
             else if (validateRoot(input[i]) == 0)
                 continue;
-            else if (letterExceptionCheck(input[i]) == 0)
-            {
-                if (input[i] == 'm')
-                    multNeg = -1;
-            }
+            //If input[i] is a valid operation, this implies that the first number has terminated
             else if (validateOperation(input[i]) == 0)
                 break;
+            else if (input[i] == 'm')
+                multNeg = -1;
             else
                 return NAN;
         }
@@ -982,14 +1069,15 @@ unsigned int numberOfOperations(char* input)
     return times;
 }
 
-//root functions
+//Foot functions
+//Square root function
 float squareRoot(float number)
 {
     if (number < 0)
         return NAN;
     return sqrt(number);
 }
-
+//Fifth root function
 float fifthRoot(float number)
 {
     if (number < 0)
@@ -997,21 +1085,34 @@ float fifthRoot(float number)
     return pow(number, 0.2);
 }
 
-//Functions related to strings
+//Factorial functions
+//Combinatorics function
+int nCr(long double num1, long double num2)
+{
+    return tgamma(num1) / (tgamma(num2) * tgamma(num1 - num2 + 1));
+}
+//Permutations function
+int nPr(long double num1, long double num2)
+{
+    return tgamma(num1) / tgamma(num1 - num2 + 1);
+}
+
+//String char checking
+//See if input[i] is a valid operation (+, -, etc.)
+int validateOperation(char c)
+{
+    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P')
+        return 0;
+    return 1;
+}
+//Validate char
 int validNext(char c)
 {
     if (c == ' ' || isdigit(c) || c == 'm')
         return 0;
     return 1;
 }
-
-int validateOperation(char c)
-{
-    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C')
-        return 0;
-    return 1;
-}
-
+//See if input[i] represents a root/trig/hyperbolic trig/log function (sqrt, cbrt, sin, cos, sinh, cosh, log, ln, etc.)
 int validateRoot(char c)
 {
     if (c == '@' || c == '#' || c == '$' || c == '~' || c == '<' || c == '&' || c == '!' || c == ';'
@@ -1022,24 +1123,14 @@ int validateRoot(char c)
         return 0;
     return 1;
 }
-
-int letterExceptionCheck(char c)
-{
-    if (c == 'm' || c == 'c' || c == 'f' || c == 'l' || c == 'k' || c == 'n'
-        || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
-        || c == 'u' || c == 'v' || c == 'w' || c == 'x' || c == 'y' || c == 'z'
-        || c == 'e' || c == '!' || c == 'C' || c == 'a')
-        return 0;
-    return 1;
-}
-
+//Set chars to ' '
 char* removeChar(char* input, int index, int c)
 {
     for (int i = 0; i < c - 1; i++)
         input[index + 1 + i] = ' ';
     return input;
 }
-
+//Append root representation onto a string
 char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
 {
     //sqrt
