@@ -961,47 +961,7 @@ double solveEquation(char* input)
     return total;
 }
 
-//Check for "--" or "+-"
-char* setUp(char* copy)
-{
-    for (int i = 0; i < strlen(copy); i++)
-    {
-        //if copy[i] is a space, save an iteration
-        if (copy[i] == ' ' || isdigit(copy[i]))
-            continue;
-        if (copy[i] == '+')
-        {
-            if (copy[i + 1] != ' ')
-            {
-                if (copy[i + 1] == '-')
-                {
-                    copy[i] = '-';
-                    copy[i + 1] = ' ';
-                }
-                else if (isdigit(copy[i + 1]));
-                else
-                    copy[i + 1] = ' ';
-            }
-        }
-        else if (copy[i] == '-')
-        {
-            if (copy[i + 1] != ' ')
-            {
-                if (copy[i + 1] == '-')
-                {
-                    copy[i] = '+';
-                    copy[i + 1] = ' ';
-                }
-                else if (isdigit(copy[i + 1]))
-                    copy[i] = 'm';
-                else
-                    copy[i + 1] = ' ';
-            }
-        }
-    }
-    return copy;
-}
-
+//GCD
 double calculateGCD(double a, double b)
 {
     double temp = 0;
@@ -1019,7 +979,6 @@ double calculateGCD(double a, double b)
     }
     return a;
 }
-
 //Get first number of equation
 double convertFloat(char* input, double total)
 {
@@ -1224,12 +1183,63 @@ int validateRoot(char c)
         return 0;
     return 1;
 }
+
+//Changing strings
 //Set chars to ' '
 char* removeChar(char* input, int index, int c)
 {
     for (int i = 0; i < c - 1; i++)
         input[index + 1 + i] = ' ';
     return input;
+}
+//Check for "--" or "+-"
+char* setUp(char* copy)
+{
+    short encounteredNum = 0;
+    for (int i = 0; i < strlen(copy); i++)
+    {
+        //if copy[i] is a space, save an iteration
+        if (copy[i] == ' ')
+            continue;
+        if (isdigit(copy[i]) == 0)
+        {
+            encounteredNum = 1;
+            continue;
+        }
+        if (copy[i] == '+')
+        {
+            if (copy[i + 1] != ' ')
+            {
+                if (copy[i + 1] == '-')
+                {
+                    copy[i] = '-';
+                    copy[i + 1] = ' ';
+                }
+                else if (isdigit(copy[i + 1]));
+                else
+                    copy[i + 1] = ' ';
+            }
+        }
+        else if (copy[i] == '-')
+        {
+            if (copy[i + 1] != ' ')
+            {
+                if (copy[i + 1] == '-')
+                {
+                    copy[i] = '+';
+                    copy[i + 1] = ' ';
+                }
+                else if (isdigit(copy[i + 1]))
+                {
+                    if (encounteredNum == 0)
+                        copy[i] = 'm';
+                }
+                else
+                    copy[i + 1] = ' ';
+            }
+        }
+    }
+    return copy;
 }
 //Append root representation onto a string
 char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
