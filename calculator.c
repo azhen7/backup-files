@@ -1195,7 +1195,7 @@ char* removeChar(char* input, int index, int c)
 //Check for "--" or "+-"
 char* setUp(char* copy)
 {
-    short encounteredNum = 0;
+    unsigned short encounteredNum = 0;
     for (int i = 0; i < strlen(copy); i++)
     {
         //if copy[i] is a space, save an iteration
