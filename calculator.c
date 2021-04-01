@@ -27,12 +27,14 @@ int validateRoot(char c);
 
 //Change strings
 char* removeChar(char* input, int index, int c);
-char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
+char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
 char* setUp(char* copy);
+char* copyStr(char* input, char* output);
 
 //Root functions
 float squareRoot(float number);
 float fifthRoot(float number);
+float seventhRoot(float number);
 
 int main(void)
 {
@@ -59,7 +61,7 @@ int main(void)
 double solveEquation(char* input)
 {
     static double ans = 0.0;
-    unsigned int times = 0, location = 0;
+    unsigned int times = 0, location = 0, temp = 0;
     short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1;
     float divide = 10.0, lastCheck = 0.0;
     long double last = 0.0, total = 0.0;
@@ -68,7 +70,7 @@ double solveEquation(char* input)
     char* rootOperations = NULL;
 
     //Copy input to copy
-    strcpy(copy, input);
+    copy = copyStr(input, copy);
 
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
     setUp(copy);
@@ -122,6 +124,13 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 5);
                     root++;
                     i += 4;
+                }
+                else if (strncmp(arr, "septrt(", 7) == 0)
+                {
+                    copy[copyIndexStart] = 'x';
+                    removeChar(copy, copyIndexStart, 7);
+                    root++;
+                    i += 6;
                 }
                 else
                     return NAN;
@@ -378,6 +387,12 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 9);
                     i += 8;
                 }
+                else if (strncmp(arr, "GCD", 3) == 0)
+                {
+                    copy[i] = 'y';
+                    removeChar(copy, copyIndexStart, 3);
+                    i += 2;
+                }
                 else
                     return NAN;
             }
@@ -458,9 +473,6 @@ double solveEquation(char* input)
     {
         for (int i = location; i < strlen(copy) + 1; i++)
         {
-            //If there's a space at copy[i], save an iteration
-            if (copy[i] == ' ')
-                continue;
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
                 //rootOperations and additional operations
@@ -677,6 +689,12 @@ double solveEquation(char* input)
                         total = fabsl(total);
                     else if (rootOperations[a] == 'I')
                         last = fabsl(last);
+
+                    //seventh root
+                    else if (rootOperations[a] == 'J')
+                        total = seventhRoot(total);
+                    else if (rootOperations[a] == 'K')
+                        last = seventhRoot(last);
                 }
                 last *= multNeg;
                 //operation
@@ -719,7 +737,8 @@ double solveEquation(char* input)
                         return NAN;
                     else
                     {
-                        if (total < last);
+                        if (total < last)
+                            total = 0;
                         else
                             total = tgamma(total + 1) / (tgamma(last + 1) * tgamma(total - last + 1));
                     }
@@ -730,12 +749,41 @@ double solveEquation(char* input)
                         return NAN;
                     else
                     {
-                        if (total < last);
+                        if (total < last)
+                            total = 0;
                         else
                             total = tgamma(total + 1) / tgamma(total - last + 1);
                     }
                 }
-                 location = i;
+                else if (state == 'y')
+                {
+                    if ((int) last != last || (int) total != total)
+                        return NAN;
+                    else
+                    {
+                        total = fabsl(total);
+                        last = fabsl(last);
+                        if (total == 0.0)
+                            total = last;
+                        else if (last == 0.0);
+                        else
+                        {
+                            if (total < last)
+                            {
+                                temp = total;
+                                total = last;
+                                last = temp;
+                            }
+                            while (last != 0)
+                            {
+                                temp = last;
+                                last = fmod(total, last);
+                                total = temp;
+                            }
+                        }
+                    }
+                }
+                location = i;
                 break;
             }
 
@@ -745,7 +793,7 @@ double solveEquation(char* input)
             if (isdigit(copy[i]))
                 numNum = 1;
             else
-                rootOperations = assignrootOperations(rootOperations, numNum, copy, i, state);
+                rootOperations = assignRootOperations(rootOperations, numNum, copy, i, state);
 
             if (copy[i] == 'm' && state != '\0')
                 multNeg = -1;
@@ -865,6 +913,17 @@ double solveEquation(char* input)
     return total;
 }
 
+//Copy string omitting ' '
+char* copyStr(char* input, char* output)
+{
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] == ' ')
+            continue;
+        strncat(output, &input[i], 1);
+    }
+    return output;
+}
 //Check for "--" or "+-"
 char* setUp(char* copy)
 {
@@ -882,8 +941,7 @@ char* setUp(char* copy)
                     copy[i] = '-';
                     copy[i + 1] = ' ';
                 }
-                else if (isdigit(copy[i + 1]))
-                    copy[i] = ' ';
+                else if (isdigit(copy[i + 1]));
                 else
                     copy[i + 1] = ' ';
             }
@@ -937,10 +995,7 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'P')
             {
                 if (total != 0.0)
-                    if (input[i - 1] == ' ')
-                        return NAN;
-                    else
-                        total *= M_PI;
+                    total *= M_PI;
                 else
                 {
                     total = M_PI;
@@ -951,12 +1006,7 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'E')
             {
                 if (total != 0.0)
-                {
-                    if (input[i - 1] == ' ')
-                        return NAN;
-                    else
-                        total *= M_E;
-                }
+                    total *= M_E;
                 else
                 {
                     total = M_E;
@@ -967,12 +1017,7 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'G')
             {
                 if (total != 0.0)
-                {
-                    if (input[i - 1] == ' ')
-                        return NAN;
-                    else
-                        total *= GOLDEN_RT;
-                }
+                    total *= GOLDEN_RT;
                 else
                 {
                     total = GOLDEN_RT;
@@ -984,10 +1029,7 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'A')
             {
                 if (total != 0.0)
-                    if (input[i - 1] == ' ')
-                        return NAN;
-                    else
-                        total *= APERY_CONST;
+                    total *= APERY_CONST;
                 else
                 {
                     total = APERY_CONST;
@@ -999,10 +1041,7 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'S')
             {
                 if (total != 0.0)
-                    if (input[i - 1] == ' ')
-                        return NAN;
-                    else
-                        total *= M_SQRT2;
+                    total *= M_SQRT2;
                 else
                 {
                     total = M_SQRT2;
@@ -1014,10 +1053,7 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'M')
             {
                 if (total != 0.0)
-                    if (input[i - 1] == ' ')
-                        return NAN;
-                    else
-                        total *= M_SQRT_3;
+                    total *= M_SQRT_3;
                 else
                 {
                     total = M_SQRT_3;
@@ -1029,10 +1065,7 @@ long double convertFloat(char* input, long double total)
             else if (input[i] == 'K')
             {
                 if (total != 0.0)
-                    if (input[i - 1] == ' ')
-                        return NAN;
-                    else
-                        total *= G;
+                    total *= G;
                 else
                 {
                     total = G;
@@ -1045,7 +1078,7 @@ long double convertFloat(char* input, long double total)
                 continue;
             else if (input[i] == 'm')
                 multNeg = -1;
-            else if (input[i] == 'a');
+            else if (input[i] == 'a' || input[i] == 'y');
             else
                 return NAN;
         }
@@ -1105,12 +1138,20 @@ float fifthRoot(float number)
         return pow(fabsf(number), 0.2) * -1;
     return pow(number, 0.2);
 }
+//Seventh root function
+float seventhRoot(float number)
+{
+    const float exponent = 1 / 7;
+    if (number < 0)
+        return pow(fabsf(number), exponent) * -1;
+    return pow(number, exponent);
+}
 
 //String char checking
 //See if input[i] is a valid operation (+, -, etc.)
 int validateOperation(char c)
 {
-    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P')
+    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P' || c == 'y')
         return 0;
     return 1;
 }
@@ -1128,19 +1169,22 @@ int validateRoot(char c)
         || c == ':' || c == 34 || c == '>' || c == '?' || c == '|' || c == '{' || c == '}' || c == '('
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
-        || c == 'u' || c == 'k' || c == ' ' || c == 'S' || c == 'M' || c == 'w')
+        || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'y')
         return 0;
     return 1;
 }
 //Set chars to ' '
 char* removeChar(char* input, int index, int c)
 {
+    char* strWithoutSpace = (char*) malloc(sizeof(char) * strlen(input));
     for (int i = 0; i < c - 1; i++)
         input[index + 1 + i] = ' ';
+    strWithoutSpace = copyStr(input, strWithoutSpace);
+    strcpy(input, strWithoutSpace);
     return input;
 }
 //Append root representation onto a string
-char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
+char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
 {
     //sqrt
     if (copy[i] == '#')
@@ -1530,7 +1574,7 @@ char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, 
             if (numNum == 0)
                 strcat(rootOperations, "E");
     }
-    //abslute value
+    //absolute value
     else if (copy[i] == 'w')
     {
         if (state == '\0')
@@ -1541,6 +1585,18 @@ char* assignrootOperations(char* rootOperations, int numNum, char* copy, int i, 
         else
             if (numNum == 0)
                 strcat(rootOperations, "I");
+    }
+    //seventh root
+    else if (copy[i] == 'x')
+    {
+        if (state == '\0')
+        {
+            if (numNum == 0)
+                strcat(rootOperations, "J");
+        }
+        else
+            if (numNum == 0)
+                strcat(rootOperations, "K");
     }
     return rootOperations;
 }
