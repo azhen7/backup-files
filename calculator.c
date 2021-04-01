@@ -17,7 +17,7 @@
 double solveEquation(char* input);
 
 //Get some numbers
-long double convertFloat(char* input, long double total);
+double convertFloat(char* input, double total);
 unsigned int numberOfOperations(char* input);
 
 //String char checking
@@ -26,13 +26,12 @@ int validateOperation(char c);
 int validateRoot(char c);
 
 //GCD
-long double calculateGCD(long double a, long double b);
+double calculateGCD(double a, double b);
 
 //Change strings
 char* removeChar(char* input, int index, int c);
 char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
 char* setUp(char* copy);
-char* copyStr(char* input, char* output);
 
 //Root functions
 float squareRoot(float number);
@@ -63,17 +62,17 @@ int main(void)
 
 double solveEquation(char* input)
 {
-    static double ans = 0.0;
+    static double ans = 0;
     unsigned int times = 0, location = 0;
     short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1;
     float divide = 10.0, lastCheck = 0.0;
-    long double last = 0.0, total = 0.0;
+    double last = 0.0, total = 0.0;
     char state = '\0', whichNum = '0', lastNum = '0';
     char* copy = (char*) malloc(strlen(input) * sizeof(char));
     char* rootOperations = NULL;
 
     //Copy input to copy
-    copy = copyStr(input, copy);
+    strcpy(copy, input);
 
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
     setUp(copy);
@@ -185,9 +184,6 @@ double solveEquation(char* input)
                 //ans
                 else if (strncmp(arr, "ans", 3) == 0)
                 {
-                    if (ans == 0.0)
-                        return NAN;
-
                     total = ans;
                     removeChar(copy, copyIndexStart, 3);
                     i -= 5;
@@ -510,6 +506,8 @@ double solveEquation(char* input)
     {
         for (int i = location; i < strlen(copy) + 1; i++)
         {
+            if (copy[i] == ' ')
+                continue;
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
                 //rootOperations and additional operations
@@ -963,17 +961,6 @@ double solveEquation(char* input)
     return total;
 }
 
-//Copy string omitting ' '
-char* copyStr(char* input, char* output)
-{
-    for (int i = 0; i < strlen(input); i++)
-    {
-        if (input[i] == ' ')
-            continue;
-        strncat(output, &input[i], 1);
-    }
-    return output;
-}
 //Check for "--" or "+-"
 char* setUp(char* copy)
 {
@@ -1015,9 +1002,9 @@ char* setUp(char* copy)
     return copy;
 }
 
-long double calculateGCD(long double a, long double b)
+double calculateGCD(double a, double b)
 {
-    long double temp = 0;
+    double temp = 0;
     if (a < b)
     {
         temp = a;
@@ -1034,13 +1021,13 @@ long double calculateGCD(long double a, long double b)
 }
 
 //Get first number of equation
-long double convertFloat(char* input, long double total)
+double convertFloat(char* input, double total)
 {
     char lastNum = '0';
     int multNeg = 1;
     int numNum = 1;
     float divide = 10.0;
-    long double temp = total;
+    double temp = total;
 
     //Used to covert copy string to a float
     for (int i = 0; i < strlen(input); i++)
@@ -1090,7 +1077,6 @@ long double convertFloat(char* input, long double total)
                 {
                     total = GOLDEN_RT;
                     temp = total;
-                    continue;
                 }
             }
             //For Apery's Constant
@@ -1102,7 +1088,6 @@ long double convertFloat(char* input, long double total)
                 {
                     total = APERY_CONST;
                     temp = total;
-                    continue;
                 }
             }
             //For Pythagoras' Constant
@@ -1114,7 +1099,6 @@ long double convertFloat(char* input, long double total)
                 {
                     total = M_SQRT2;
                     temp = total;
-                    continue;
                 }
             }
             //For Theodorus' Constant
@@ -1126,7 +1110,6 @@ long double convertFloat(char* input, long double total)
                 {
                     total = M_SQRT_3;
                     temp = total;
-                    continue;
                 }
             }
             //For Catalan's Constant
@@ -1138,7 +1121,6 @@ long double convertFloat(char* input, long double total)
                 {
                     total = G;
                     temp = total;
-                    continue;
                 }
             }
             //If input[i] is a root, skip
@@ -1220,7 +1202,7 @@ float seventhRoot(float number)
 int validateOperation(char c)
 {
     if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P'
-        || c == 'y' || c == 'z')
+        || c == 'y' || c == 'z' || c == ' ')
         return 0;
     return 1;
 }
@@ -1245,11 +1227,8 @@ int validateRoot(char c)
 //Set chars to ' '
 char* removeChar(char* input, int index, int c)
 {
-    char* strWithoutSpace = (char*) malloc(sizeof(char) * strlen(input));
     for (int i = 0; i < c - 1; i++)
         input[index + 1 + i] = ' ';
-    strWithoutSpace = copyStr(input, strWithoutSpace);
-    strcpy(input, strWithoutSpace);
     return input;
 }
 //Append root representation onto a string
