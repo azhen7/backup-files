@@ -25,6 +25,9 @@ int validNext(char c);
 int validateOperation(char c);
 int validateRoot(char c);
 
+//GCD
+long double calculateGCD(long double a, long double b);
+
 //Change strings
 char* removeChar(char* input, int index, int c);
 char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
@@ -61,7 +64,7 @@ int main(void)
 double solveEquation(char* input)
 {
     static double ans = 0.0;
-    unsigned int times = 0, location = 0, temp = 0;
+    unsigned int times = 0, location = 0;
     short copyIndexStart = 0, multNeg = 1, x = 0, root = 0, numNum = 1;
     float divide = 10.0, lastCheck = 0.0;
     long double last = 0.0, total = 0.0;
@@ -90,6 +93,7 @@ double solveEquation(char* input)
 
             else if (copy[i] == 's')
             {
+                //Square root
                 if (strncmp(arr, "sqrt(", 5) == 0)
                 {
                     copy[copyIndexStart] = '#';
@@ -97,6 +101,7 @@ double solveEquation(char* input)
                     root++;
                     i += 4;
                 }
+                //Squaring a number
                 else if (strncmp(arr, "square(", 7) == 0)
                 {
                     copy[copyIndexStart] = '<';
@@ -104,6 +109,7 @@ double solveEquation(char* input)
                     root++;
                     i += 6;
                 }
+                //Sixth root
                 else if (strncmp(arr, "sixthrt(", 8) == 0)
                 {
                     copy[copyIndexStart] = '!';
@@ -111,6 +117,15 @@ double solveEquation(char* input)
                     root++;
                     i += 7;
                 }
+                //Seventh root
+                else if (strncmp(arr, "septrt(", 7) == 0)
+                {
+                    copy[copyIndexStart] = 'x';
+                    removeChar(copy, copyIndexStart, 7);
+                    root++;
+                    i += 6;
+                }
+                //sin and sinh
                 else if (strncmp(arr, "sin(", 4) == 0)
                 {
                     copy[copyIndexStart] = ':';
@@ -125,18 +140,12 @@ double solveEquation(char* input)
                     root++;
                     i += 4;
                 }
-                else if (strncmp(arr, "septrt(", 7) == 0)
-                {
-                    copy[copyIndexStart] = 'x';
-                    removeChar(copy, copyIndexStart, 7);
-                    root++;
-                    i += 6;
-                }
                 else
                     return NAN;
             }
             else if (copy[i] == 'a')
             {
+                //Inverse trig and inverse hyperbolic functions
                 if (strncmp(arr, "arcsin(", 7) == 0)
                 {
                     copy[copyIndexStart] = '>';
@@ -173,6 +182,7 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 8);
                     root++;
                 }
+                //ans
                 else if (strncmp(arr, "ans", 3) == 0)
                 {
                     if (ans == 0.0)
@@ -182,6 +192,7 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 3);
                     i -= 5;
                 }
+                //Absolute value
                 else if (strncmp(arr, "abs(", 4) == 0)
                 {
                     copy[copyIndexStart] = 'w';
@@ -194,18 +205,21 @@ double solveEquation(char* input)
             }
             else if (copy[i] == 'c')
             {
+                //Cube root
                 if (strncmp(arr, "cbrt(", 5) == 0)
                 {
                     copy[copyIndexStart] = '@';
                     removeChar(copy, copyIndexStart, 5);
                     root++;
                 }
+                //Cubing a number
                 else if (strncmp(arr, "cube(", 5) == 0)
                 {
                     copy[copyIndexStart] = '&';
                     removeChar(copy, copyIndexStart, 5);
                     root++;
                 }
+                //Cos
                 else if (strncmp(arr, "cos(", 4) == 0)
                 {
                     copy[copyIndexStart] = ';';
@@ -213,12 +227,14 @@ double solveEquation(char* input)
                     root++;
                     i--;
                 }
+                //Cosh
                 else if (strncmp(arr, "cosh(", 5) == 0)
                 {
                     copy[copyIndexStart] = 39;
                     removeChar(copy, copyIndexStart, 5);
                     root++;
                 }
+                //Ceiling
                 else if (strncmp(arr, "ceil(", 5) == 0)
                 {
                     copy[copyIndexStart] = 'c';
@@ -229,6 +245,7 @@ double solveEquation(char* input)
                     return NAN;
                 i += 4;
             }
+            //4th root and 5th root
             else if (copy[i] == 'q')
             {
                 if (strncmp(arr, "quartrt(", 8) == 0)
@@ -247,6 +264,7 @@ double solveEquation(char* input)
                     return NAN;
                 i += 7;
             }
+            //tan and tanh
             else if (copy[i] == 't')
             {
                 if (strncmp(arr, "tan(", 4) == 0)
@@ -266,6 +284,7 @@ double solveEquation(char* input)
                     return NAN;
                 i += 2;
             }
+            //Floor
             else if (copy[i] == 'f')
             {
                 if (strncmp(arr, "floor(", 6) == 0)
@@ -278,6 +297,7 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            //Logarithm functions
             else if (copy[i] == 'l')
             {
                 //ln
@@ -370,6 +390,7 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            //Pi
             else if (copy[i] == 'P')
             {
                 if (strncmp(arr, "PI", 2) == 0)
@@ -380,6 +401,7 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            //GCD and Golden Ratio
             else if (copy[i] == 'G')
             {
                 if (strncmp(arr, "GOLDEN_RT", 9) == 0)
@@ -396,6 +418,7 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            //Apery's Constant
             else if (copy[i] == 'A')
             {
                 if (strncmp(arr, "APERY_CNS", 9) == 0)
@@ -406,6 +429,7 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            //Square root of 2 and 3
             else if (copy[i] == 'S')
             {
                 if (strncmp(arr, "SQRT_2", 6) == 0)
@@ -420,6 +444,7 @@ double solveEquation(char* input)
                     return NAN;
                 i += 5;
             }
+            //Catalan's Constant
             else if (copy[i] == 'C')
             {
                 if (strncmp(arr, "CATALAN_C", 9) == 0)
@@ -429,6 +454,7 @@ double solveEquation(char* input)
                     i += 8;
                 }
             }
+            //Combinatoris & Permutations
             else if (copy[i] == 'n')
             {
                 if (strncmp(arr, "nCr", 3) == 0)
@@ -444,6 +470,17 @@ double solveEquation(char* input)
                 else
                     return NAN;
                 i += 2;
+            }
+            else if (copy[i] == 'L')
+            {
+                if (strncmp(arr, "LCM", 3) == 0)
+                {
+                    copy[i] = 'z';
+                    removeChar(copy, copyIndexStart, 3);
+                    i += 2;
+                }
+                else
+                    return NAN;
             }
             else
                 return NAN;
@@ -719,6 +756,7 @@ double solveEquation(char* input)
                         total = fmod(total, last);
                         break;
                 }
+                //Exponential notation
                 if (state == 'e')
                 {
                     if ((int) last != last)
@@ -731,6 +769,7 @@ double solveEquation(char* input)
                             total *= pow(10, last);
                     }
                 }
+                //Combinatorics
                 else if (state == 'C')
                 {
                     if ((int) last != last || (int) total != total)
@@ -743,6 +782,7 @@ double solveEquation(char* input)
                             total = tgamma(total + 1) / (tgamma(last + 1) * tgamma(total - last + 1));
                     }
                 }
+                //Permutations
                 else if (state == 'P')
                 {
                     if ((int) last != last || (int) total != total)
@@ -755,32 +795,35 @@ double solveEquation(char* input)
                             total = tgamma(total + 1) / tgamma(total - last + 1);
                     }
                 }
+                //GCD
                 else if (state == 'y')
                 {
                     if ((int) last != last || (int) total != total)
                         return NAN;
                     else
                     {
-                        total = fabsl(total);
-                        last = fabsl(last);
+                        if (last < 0 || total < 0)
+                            return NAN;
                         if (total == 0.0)
                             total = last;
                         else if (last == 0.0);
                         else
-                        {
-                            if (total < last)
-                            {
-                                temp = total;
-                                total = last;
-                                last = temp;
-                            }
-                            while (last != 0)
-                            {
-                                temp = last;
-                                last = fmod(total, last);
-                                total = temp;
-                            }
-                        }
+                            total = calculateGCD(total, last);
+                    }
+                }
+                //LCM
+                else if (state == 'z')
+                {
+                    if ((int) last != last || (int) total != total)
+                        return NAN;
+                    else
+                    {
+                        if (last < 0 || total < 0)
+                            return NAN;
+                        if (total == 0 || last == 0)
+                            total = 0;
+                        else
+                            total = fabsl(total * last) / calculateGCD(total, last);
                     }
                 }
                 location = i;
@@ -819,6 +862,7 @@ double solveEquation(char* input)
                     if (isdigit(copy[i + 1]))
                         last *= 10;
                 }
+                //Pi
                 else if (copy[i] == 'P')
                 {
                     if (total != 0.0)
@@ -828,6 +872,7 @@ double solveEquation(char* input)
                     lastCheck = last;
                     whichNum = '1';
                 }
+                //e
                 else if (copy[i] == 'E')
                 {
                     if (total != 0.0)
@@ -837,6 +882,7 @@ double solveEquation(char* input)
                     lastCheck = M_E;
                     whichNum = '1';
                 }
+                //Golden Ratio
                 else if (copy[i] == 'G')
                 {
                     if (total != 0.0)
@@ -846,6 +892,7 @@ double solveEquation(char* input)
                     lastCheck = last;
                     whichNum = '1';
                 }
+                //Apery's Constant
                 else if (copy[i] == 'A')
                 {
                     if (total != 0.0)
@@ -855,6 +902,7 @@ double solveEquation(char* input)
                     lastCheck = last;
                     whichNum = '1';
                 }
+                //Square root of 2
                 else if (copy[i] == 'S')
                 {
                     if (total != 0.0)
@@ -864,6 +912,7 @@ double solveEquation(char* input)
                     lastCheck = last;
                     whichNum = '1';
                 }
+                //Square root of 3
                 else if (copy[i] == 'M')
                 {
                     if (total != 0.0)
@@ -873,6 +922,7 @@ double solveEquation(char* input)
                     lastCheck = last;
                     whichNum = '1';
                 }
+                //Catalan's Constant
                 else if (copy[i] == 'K')
                 {
                     if (total != 0.0)
@@ -963,6 +1013,24 @@ char* setUp(char* copy)
         }
     }
     return copy;
+}
+
+long double calculateGCD(long double a, long double b)
+{
+    long double temp = 0;
+    if (a < b)
+    {
+        temp = a;
+        a = b;
+        b = temp;
+    }
+    while (b != 0)
+    {
+        temp = b;
+        b = fmod(a, b);
+        a = temp;
+    }
+    return a;
 }
 
 //Get first number of equation
@@ -1151,7 +1219,8 @@ float seventhRoot(float number)
 //See if input[i] is a valid operation (+, -, etc.)
 int validateOperation(char c)
 {
-    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P' || c == 'y')
+    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P'
+        || c == 'y' || c == 'z')
         return 0;
     return 1;
 }
@@ -1169,7 +1238,7 @@ int validateRoot(char c)
         || c == ':' || c == 34 || c == '>' || c == '?' || c == '|' || c == '{' || c == '}' || c == '('
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
-        || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'y')
+        || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'y' || c == 'z')
         return 0;
     return 1;
 }
