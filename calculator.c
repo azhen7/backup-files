@@ -5,34 +5,33 @@
 #include <math.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "log.h" //For some additional logarithm functions
+#include "log.h"   //For some additional logarithm functions
 
 #define ARRAY_SIZE 9
-#define GOLDEN_RT ((1 + sqrt(5)) * 0.5) //Golden Ratio
-#define APERY_CONST 1.202056903159 //Apery's Constant
-#define M_SQRT_3 (sqrt(3)) //Theodorus' Constant (Square root of 3)
-#define G 0.915965594177219 //Catalan's Constant
+#define GOLDEN_RT 1.6180339887498       //Golden Ration ((1 + sqrt(5)) / 2)
+#define APERY_CONST 1.202056903159      //Apery's Constant (1 + 1/2^3 + 1/3^3 + 1/4^3 + 1/5^3 + ...)
+#define M_SQRT_3 1.73205080757          //Theodorus' Constant (sqrt(3))
+#define G 0.9159655941                  //Catalan's Constant (1 - 1/3^2 + 1/5^2 - ...)
+#define DELIAN_CONST 1.25992104         //Delian's Constant (cbrt(2))
+#define HERMITE_CONST 1.1547005         //Hermite's Constant (2 / sqrt(3) OR 1/cos(PI / 6))
+#define GELFOND_CONST 23.1406926327     //Gelfond's Constant (e ^ PI)
 
 //Used to solve equation
 double solveEquation(char* input);
-
 //Get some numbers
 double convertFloat(char* input, double total);
 unsigned int numberOfOperations(char* input);
-
 //String char checking
-int validNext(char c);
-int validateOperation(char c);
-int validateRoot(char c);
-
+unsigned int validNext(char c);
+unsigned int validateOperation(char c);
+unsigned int validateRoot(char c);
 //GCD
 double calculateGCD(double a, double b);
-
 //Change strings
-char* removeChar(char* input, int index, int c);
-char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
-char* setUp(char* copy);
-
+void removeChar(char* input, int index, int c);
+void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
+void setUp(char* copy);
+void copyStr(char* destination, char* source);
 //Root functions
 float squareRoot(float number);
 float fifthRoot(float number);
@@ -55,8 +54,16 @@ int main(void)
         fputs("\033[A\033[2K", stdout);
         rewind(stdout);
 
-        printf("%s = %f\n", getEquation, result);
-        printf("Note that this result did not take BEDMAS into account.\n\n");
+        if (strcmp(getEquation, "clear") == 0)
+        {
+            system("clear");
+            printf("Enter a bunch of equations below: \n");
+        }
+        else
+        {
+            printf("%s = %f\n", getEquation, result);
+            printf("Note that this result did not take BEDMAS into account.\n\n");
+        }
     }
 }
 
@@ -71,11 +78,15 @@ double solveEquation(char* input)
     char* copy = (char*) malloc(strlen(input) * sizeof(char));
     char* rootOperations = NULL;
 
-    //Copy input to copy
-    strcpy(copy, input);
+    if (strlen(input) == 0)
+        return NAN;
 
+    copyStr(copy, input);
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
     setUp(copy);
+
+    if (strcmp(copy, "NAN") == 0)
+        return NAN;
 
     //Used to check for square root, cube roo, quartic root, and quintic root
     for (int i = 0; i < strlen(copy); i++)
@@ -192,6 +203,13 @@ double solveEquation(char* input)
                 else if (strncmp(arr, "abs(", 4) == 0)
                 {
                     copy[copyIndexStart] = 'w';
+                    removeChar(copy, copyIndexStart, 4);
+                    i -= 4;
+                }
+                //Arithmetic mean
+                else if (strncmp(arr, "avg(", 4) == 0)
+                {
+                    copy[copyIndexStart] = 'F';
                     removeChar(copy, copyIndexStart, 4);
                     i -= 4;
                 }
@@ -386,6 +404,17 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            //Delian's Constant
+            else if (copy[i] == 'D')
+            {
+                if (strncmp(arr, "DELIAN_C", 8) == 0)
+                {
+                    removeChar(copy, copyIndexStart, 8);
+                    i += 7;
+                }
+                else
+                    return NAN;
+            }
             //Pi
             else if (copy[i] == 'P')
             {
@@ -405,11 +434,17 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 9);
                     i += 8;
                 }
-                else if (strncmp(arr, "GCD", 3) == 0)
+                else if (strncmp(arr, "GCD(", 4) == 0)
                 {
                     copy[i] = 'y';
-                    removeChar(copy, copyIndexStart, 3);
-                    i += 2;
+                    removeChar(copy, copyIndexStart, 4);
+                    i += 3;
+                }
+                else if (strncmp(arr, "GELFOND_C", 9) == 0)
+                {
+                    copy[i] = 'B';
+                    removeChar(copy, copyIndexStart, 9);
+                    i += 8;
                 }
                 else
                     return NAN;
@@ -449,6 +484,19 @@ double solveEquation(char* input)
                     removeChar(copy, copyIndexStart, 9);
                     i += 8;
                 }
+                else
+                    return NAN;
+            }
+            //Hermite's Constant
+            else if (copy[i] == 'H')
+            {
+                if (strncmp(arr, "HERMITE_C", 9) == 0)
+                {
+                    removeChar(copy, copyIndexStart, 9);
+                    i += 8;
+                }
+                else
+                    return NAN;
             }
             //Combinatoris & Permutations
             else if (copy[i] == 'n')
@@ -469,11 +517,22 @@ double solveEquation(char* input)
             }
             else if (copy[i] == 'L')
             {
-                if (strncmp(arr, "LCM", 3) == 0)
+                if (strncmp(arr, "LCM(", 4) == 0)
                 {
                     copy[i] = 'z';
-                    removeChar(copy, copyIndexStart, 3);
-                    i += 2;
+                    removeChar(copy, copyIndexStart, 4);
+                    i += 3;
+                }
+                else
+                    return NAN;
+            }
+            else if (copy[i] == 'g')
+            {
+                if (strncmp(arr, "GeoMean(", 8) == 0)
+                {
+                    copy[i] = 'I';
+                    removeChar(copy, copyIndexStart, 8);
+                    i += 7;
                 }
                 else
                     return NAN;
@@ -506,8 +565,6 @@ double solveEquation(char* input)
     {
         for (int i = location; i < strlen(copy) + 1; i++)
         {
-            if (copy[i] == ' ')
-                continue;
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
                 //rootOperations and additional operations
@@ -710,12 +767,16 @@ double solveEquation(char* input)
                     {
                         if (total < 0)
                             return NAN;
+                        else if (total > 15)
+                            return INFINITY;
                         total = tgamma(total + 1);
                     }
                     else if (rootOperations[a] == 'G')
                     {
                         if (last < 0)
                             return NAN;
+                        else if (last > 15)
+                            return INFINITY;
                         last = tgamma(last + 1);
                     }
 
@@ -730,6 +791,50 @@ double solveEquation(char* input)
                         total = seventhRoot(total);
                     else if (rootOperations[a] == 'K')
                         last = seventhRoot(last);
+
+                    //GCD
+                    else if (rootOperations[a] == 'L')
+                    {
+                        if ((int) last != last || (int) total != total)
+                            return NAN;
+                        else
+                        {
+                            if (last < 0 || total < 0)
+                                return NAN;
+                            if (total == 0.0)
+                                total = last;
+                            else if (last == 0.0);
+                            else
+                                total = calculateGCD(total, last);
+                        }
+                    }
+                    //LCM
+                    else if (rootOperations[a] == 'M')
+                    {
+                        if ((int) last != last || (int) total != total)
+                            return NAN;
+                        else
+                        {
+                            if (last < 0 || total < 0)
+                                return NAN;
+                            if (total == 0 || last == 0)
+                                total = 0;
+                            else
+                                total = fabsl(total * last) / calculateGCD(total, last);
+                        }
+                    }
+                    //Arithmetic mean
+                    else if (rootOperations[a] == 'N')
+                    {
+                        total += last;
+                        total /= 2;
+                    }
+                    //Geometric mean
+                    else if (rootOperations[a] == 'O')
+                    {
+                        total *= last;
+                        total = sqrt(total);
+                    }
                 }
                 last *= multNeg;
                 //operation
@@ -793,37 +898,6 @@ double solveEquation(char* input)
                             total = tgamma(total + 1) / tgamma(total - last + 1);
                     }
                 }
-                //GCD
-                else if (state == 'y')
-                {
-                    if ((int) last != last || (int) total != total)
-                        return NAN;
-                    else
-                    {
-                        if (last < 0 || total < 0)
-                            return NAN;
-                        if (total == 0.0)
-                            total = last;
-                        else if (last == 0.0);
-                        else
-                            total = calculateGCD(total, last);
-                    }
-                }
-                //LCM
-                else if (state == 'z')
-                {
-                    if ((int) last != last || (int) total != total)
-                        return NAN;
-                    else
-                    {
-                        if (last < 0 || total < 0)
-                            return NAN;
-                        if (total == 0 || last == 0)
-                            total = 0;
-                        else
-                            total = fabsl(total * last) / calculateGCD(total, last);
-                    }
-                }
                 location = i;
                 break;
             }
@@ -834,7 +908,7 @@ double solveEquation(char* input)
             if (isdigit(copy[i]))
                 numNum = 1;
             else
-                rootOperations = assignRootOperations(rootOperations, numNum, copy, i, state);
+                assignRootOperations(rootOperations, numNum, copy, i, state);
 
             if (copy[i] == 'm' && state != '\0')
                 multNeg = -1;
@@ -927,6 +1001,36 @@ double solveEquation(char* input)
                         last *= G;
 
                     last = G;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                //Delian's Constant
+                else if (copy[i] == 'D')
+                {
+                    if (total != 0.0)
+                        last *= DELIAN_CONST;
+
+                    last = DELIAN_CONST;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                //Hermite's Constant
+                else if (copy[i] == 'H')
+                {
+                    if (total != 0.0)
+                        last *= HERMITE_CONST;
+
+                    last = HERMITE_CONST;
+                    lastCheck = last;
+                    whichNum = '1';
+                }
+                //Gelfond's Constant
+                else if (copy[i] == 'B')
+                {
+                    if (total != 0.0)
+                        last *= GELFOND_CONST;
+
+                    last = GELFOND_CONST;
                     lastCheck = last;
                     whichNum = '1';
                 }
@@ -1082,8 +1186,41 @@ double convertFloat(char* input, double total)
                     temp = total;
                 }
             }
+            //For Delian's Constant
+            else if (input[i] == 'D')
+            {
+                if (total != 0.0)
+                    total *= DELIAN_CONST;
+                else
+                {
+                    total = DELIAN_CONST;
+                    temp = total;
+                }
+            }
+            //For Hermite's Constant
+            else if (input[i] == 'H')
+            {
+                if (total != 0.0)
+                    total *= HERMITE_CONST;
+                else
+                {
+                    total = HERMITE_CONST;
+                    temp = total;
+                }
+            }
+            //For Gelfond's Constant
+            else if (input[i] == 'B')
+            {
+                if (total != 0.0)
+                    total *= GELFOND_CONST;
+                else
+                {
+                    total = GELFOND_CONST;
+                    temp = total;
+                }
+            }
             //If input[i] is a root, skip
-            else if (validateRoot(input[i]) == 0)
+            else if (validateRoot(input[i]) == 0 || input[i] == ' ')
                 continue;
             else if (input[i] == 'm')
                 multNeg = -1;
@@ -1158,42 +1295,52 @@ float seventhRoot(float number)
 
 //String char checking
 //See if input[i] is a valid operation (+, -, etc.)
-int validateOperation(char c)
+unsigned int validateOperation(char c)
 {
     if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P'
-        || c == 'y' || c == 'z' || c == ' ')
+        || c == ',')
         return 0;
     return 1;
 }
 //Validate char
-int validNext(char c)
+unsigned int validNext(char c)
 {
     if (c == ' ' || isdigit(c) || c == 'm')
         return 0;
     return 1;
 }
 //See if input[i] represents a root/trig/hyperbolic trig/log function (sqrt, cbrt, sin, cos, sinh, cosh, log, ln, etc.)
-int validateRoot(char c)
+unsigned int validateRoot(char c)
 {
     if (c == '@' || c == '#' || c == '$' || c == '~' || c == '<' || c == '&' || c == '!' || c == ';'
         || c == ':' || c == 34 || c == '>' || c == '?' || c == '|' || c == '{' || c == '}' || c == '('
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
-        || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'y' || c == 'z')
+        || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'D' || c == 'y'
+        || c == 'z' || c == 'F' || c == 'I')
         return 0;
     return 1;
 }
 
 //Changing strings
 //Set chars to ' '
-char* removeChar(char* input, int index, int c)
+void removeChar(char* input, int index, int c)
 {
     for (int i = 0; i < c - 1; i++)
         input[index + 1 + i] = ' ';
-    return input;
+}
+//Copy input to copy without spaces
+void copyStr(char* destination, char* source)
+{
+    for (int i = 0; i < strlen(source); i++)
+    {
+        if (source[i] == 32)
+            continue;
+        strncat(destination, &source[i], 1);
+    }
 }
 //Check for "--" or "+-"
-char* setUp(char* copy)
+void setUp(char* copy)
 {
     unsigned short encounteredNum = 0;
     for (int i = 0; i < strlen(copy); i++)
@@ -1201,7 +1348,7 @@ char* setUp(char* copy)
         //if copy[i] is a space, save an iteration
         if (copy[i] == ' ')
             continue;
-        if (isdigit(copy[i]) == 0)
+        if (isdigit(copy[i]))
         {
             encounteredNum = 1;
             continue;
@@ -1217,7 +1364,7 @@ char* setUp(char* copy)
                 }
                 else if (isdigit(copy[i + 1]));
                 else
-                    copy[i + 1] = ' ';
+                    strcpy(copy, "NAN");
             }
         }
         else if (copy[i] == '-')
@@ -1235,14 +1382,13 @@ char* setUp(char* copy)
                         copy[i] = 'm';
                 }
                 else
-                    copy[i + 1] = ' ';
+                    strcpy(copy, "NAN");
             }
         }
     }
-    return copy;
 }
 //Append root representation onto a string
-char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
+void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
 {
     //sqrt
     if (copy[i] == '#')
@@ -1656,5 +1802,28 @@ char* assignRootOperations(char* rootOperations, int numNum, char* copy, int i, 
             if (numNum == 0)
                 strcat(rootOperations, "K");
     }
-    return rootOperations;
+    //GCD
+    else if (copy[i] == 'y')
+    {
+        if (numNum == 0)
+            strcat(rootOperations, "L");
+    }
+    //LCM
+    else if (copy[i] == 'z')
+    {
+        if (numNum == 0)
+            strcat(rootOperations, "M");
+    }
+    //Arithmetic mean
+    else if (copy[i] == 'F')
+    {
+        if (numNum == 0)
+            strcat(rootOperations, "N");
+    }
+    //Geometric mean
+    else if (copy[i] == 'I')
+    {
+        if (numNum == 0)
+            strcat(rootOperations, "O");
+    }
 }
