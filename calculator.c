@@ -91,7 +91,7 @@ double solveEquation(char* input)
     if (strcmp(copy, "NAN") == 0)
         return NAN;
 
-    //Used to check for square root, cube roo, quartic root, and quintic root
+    //Used to check for square root, cube root, quartic root, quintic root and sixth root
     for (int i = 0; i < strlen(copy); i++)
     {
         if (!isascii(copy[i]))
@@ -292,7 +292,7 @@ double solveEquation(char* input)
                 //cosecant
                 else if (strncmp(arr, "cot(", 4) == 0)
                 {
-                    copy[copyIndexStart] = 'M';
+                    copy[copyIndexStart] = 'N';
                     removeChar(copy, copyIndexStart, 4);
                     root++;
                     i += 3;
@@ -568,7 +568,7 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (copy[i] == 'G')
+            else if (copy[i] == 'g')
             {
                 if (strncmp(arr, "geoMean(", 8) == 0)
                 {
@@ -607,6 +607,8 @@ double solveEquation(char* input)
     {
         for (int i = location; i < strlen(copy) + 1; i++)
         {
+            if (copy[i] == ' ')
+                continue;
             if (i == strlen(copy))
                 whichNum = '1';
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
@@ -892,7 +894,7 @@ double solveEquation(char* input)
                     else if (rootOperations[a] == 'S')
                         last = sec(last);
 
-                    //cotangent
+                    //cotan
                     else if (rootOperations[a] == 'T')
                         total = cot(total);
                     else if (rootOperations[a] == 'U')
@@ -1380,7 +1382,7 @@ unsigned int validateOperation(char c)
 //Validate char
 unsigned int validNext(char c)
 {
-    if (isdigit(c) || c == 'm' || c == 'a')
+    if (isdigit(c) || c == 'm' || c == 'a' || c == ' ')
         return 0;
     return 1;
 }
@@ -1392,7 +1394,7 @@ unsigned int validateRoot(char c)
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
         || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'D' || c == 'y'
-        || c == 'z' || c == 'F' || c == 'I' || c == 'J' || c == 'L' || c == 'M')
+        || c == 'z' || c == 'F' || c == 'I' || c == 'J' || c == 'L' || c == 'N')
         return 0;
     return 1;
 }
@@ -1418,6 +1420,7 @@ void copyStr(char* destination, char* source)
 void setUp(char* copy)
 {
     unsigned short encounteredNum = 0;
+    char state = '\0';
     for (int i = 0; i < strlen(copy); i++)
     {
         //if copy[i] is a space, save an iteration
@@ -1459,6 +1462,12 @@ void setUp(char* copy)
                 else
                     strcpy(copy, "NAN");
             }
+        }
+        if (validateOperation(copy[i]) == 0)
+        {
+            state = copy[i];
+            encounteredNum = 0;
+            continue;
         }
     }
 }
@@ -1926,7 +1935,7 @@ void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, c
                 strcat(rootOperations, "S");
     }
     //cotangent
-    else if (copy[i] == 'M')
+    else if (copy[i] == 'N')
     {
         if (state == '\0')
         {
