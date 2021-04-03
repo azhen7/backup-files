@@ -32,10 +32,13 @@ void removeChar(char* input, int index, int c);
 void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
 void setUp(char* copy);
 void copyStr(char* destination, char* source);
-//Root functions
+//Root and trig and related functions
 float squareRoot(float number);
 float fifthRoot(float number);
 float seventhRoot(float number);
+float sinc(float number);
+float sec(float number);
+float cot(float number);
 
 int main(void)
 {
@@ -93,7 +96,12 @@ double solveEquation(char* input)
     {
         if (!isascii(copy[i]))
             return NAN;
-        if (isalpha(copy[i]))
+        if (validateOperation(copy[i]) == 0)
+        {
+            state = copy[i];
+            continue;
+        }
+        else if (isalpha(copy[i]))
         {
             char* arr = (char*) malloc(sizeof(char) * ARRAY_SIZE);
             copyIndexStart = i;
@@ -150,6 +158,20 @@ double solveEquation(char* input)
                     root++;
                     i += 4;
                 }
+                else if (strncmp(arr, "sinc(", 5) == 0)
+                {
+                    copy[copyIndexStart] = 'J';
+                    removeChar(copy, copyIndexStart, 5);
+                    root++;
+                    i += 4;
+                }
+                else if (strncmp(arr, "sec(", 4) == 0)
+                {
+                    copy[copyIndexStart] = 'L';
+                    removeChar(copy, copyIndexStart, 4);
+                    root++;
+                    i += 3;
+                }
                 else
                     return NAN;
             }
@@ -161,61 +183,69 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = '>';
                     removeChar(copy, copyIndexStart, 7);
                     root++;
+                    i += 6;
                 }
                 else if (strncmp(arr, "arccos(", 7) == 0)
                 {
                     copy[copyIndexStart] = '?';
                     removeChar(copy, copyIndexStart, 7);
                     root++;
+                    i += 6;
                 }
                 else if (strncmp(arr, "arctan(", 7) == 0)
                 {
                     copy[copyIndexStart] = '|';
                     removeChar(copy, copyIndexStart, 7);
                     root++;
+                    i += 6;
                 }
                 else if (strncmp(arr, "arcsinh(", 8) == 0)
                 {
                     copy[copyIndexStart] = '{';
                     removeChar(copy, copyIndexStart, 8);
                     root++;
+                    i += 7;
                 }
                 else if (strncmp(arr, "arccosh(", 8) == 0)
                 {
                     copy[copyIndexStart] = '}';
                     removeChar(copy, copyIndexStart, 8);
                     root++;
+                    i += 7;
                 }
                 else if (strncmp(arr, "arctanh(", 8) == 0)
                 {
                     copy[copyIndexStart] = '(';
                     removeChar(copy, copyIndexStart, 8);
                     root++;
+                    i += 7;
                 }
                 //ans
                 else if (strncmp(arr, "ans", 3) == 0)
                 {
-                    total = ans;
+                    if (state == '\0')
+                        total = ans;
+                    else
+                        last = ans;
                     removeChar(copy, copyIndexStart, 3);
-                    i -= 5;
+                    i += 2;
                 }
                 //Absolute value
                 else if (strncmp(arr, "abs(", 4) == 0)
                 {
                     copy[copyIndexStart] = 'w';
                     removeChar(copy, copyIndexStart, 4);
-                    i -= 4;
+                    i += 3;
                 }
                 //Arithmetic mean
                 else if (strncmp(arr, "avg(", 4) == 0)
                 {
                     copy[copyIndexStart] = 'F';
                     removeChar(copy, copyIndexStart, 4);
-                    i -= 4;
+                    i += 3;
                 }
                 else
                     return NAN;
-                i += 7;
             }
             else if (copy[i] == 'c')
             {
@@ -225,6 +255,7 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = '@';
                     removeChar(copy, copyIndexStart, 5);
                     root++;
+                    i += 4;
                 }
                 //Cubing a number
                 else if (strncmp(arr, "cube(", 5) == 0)
@@ -232,32 +263,42 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = '&';
                     removeChar(copy, copyIndexStart, 5);
                     root++;
+                    i += 4;
                 }
-                //Cos
+                //cos
                 else if (strncmp(arr, "cos(", 4) == 0)
                 {
                     copy[copyIndexStart] = ';';
                     removeChar(copy, copyIndexStart, 4);
                     root++;
-                    i--;
+                    i += 3;
                 }
-                //Cosh
+                //cosh
                 else if (strncmp(arr, "cosh(", 5) == 0)
                 {
                     copy[copyIndexStart] = 39;
                     removeChar(copy, copyIndexStart, 5);
                     root++;
+                    i += 4;
                 }
-                //Ceiling
+                //ceiling
                 else if (strncmp(arr, "ceil(", 5) == 0)
                 {
                     copy[copyIndexStart] = 'c';
                     removeChar(copy, copyIndexStart, 5);
                     root++;
+                    i += 4;
+                }
+                //cosecant
+                else if (strncmp(arr, "cot(", 4) == 0)
+                {
+                    copy[copyIndexStart] = 'M';
+                    removeChar(copy, copyIndexStart, 4);
+                    root++;
+                    i += 3;
                 }
                 else
                     return NAN;
-                i += 4;
             }
             //4th root and 5th root
             else if (copy[i] == 'q')
@@ -267,16 +308,17 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = '$';
                     removeChar(copy, copyIndexStart, 8);
                     root++;
+                    i += 7;
                 }
                 else if (strncmp(arr, "quintrt(", 8) == 0)
                 {
                     copy[copyIndexStart] = '~';
                     removeChar(copy, copyIndexStart, 8);
                     root++;
+                    i += 7;
                 }
                 else
                     return NAN;
-                i += 7;
             }
             //tan and tanh
             else if (copy[i] == 't')
@@ -286,17 +328,17 @@ double solveEquation(char* input)
                     copy[copyIndexStart] = 92;
                     removeChar(copy, copyIndexStart, 4);
                     root++;
+                    i += 3;
                 }
                 else if (strncmp(arr, "tanh(", 5) == 0)
                 {
                     copy[copyIndexStart] = '\f';
                     removeChar(copy, copyIndexStart, 5);
                     root++;
-                    i++;
+                    i += 4;
                 }
                 else
                     return NAN;
-                i += 2;
             }
             //Floor
             else if (copy[i] == 'f')
@@ -526,9 +568,9 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (copy[i] == 'g')
+            else if (copy[i] == 'G')
             {
-                if (strncmp(arr, "GeoMean(", 8) == 0)
+                if (strncmp(arr, "geoMean(", 8) == 0)
                 {
                     copy[i] = 'I';
                     removeChar(copy, copyIndexStart, 8);
@@ -541,7 +583,7 @@ double solveEquation(char* input)
                 return NAN;
         }
     }
-
+    state = '\0';
     total = convertFloat(copy, total);
 
     if (total == NAN)
@@ -565,6 +607,8 @@ double solveEquation(char* input)
     {
         for (int i = location; i < strlen(copy) + 1; i++)
         {
+            if (i == strlen(copy))
+                whichNum = '1';
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
                 //rootOperations and additional operations
@@ -835,6 +879,24 @@ double solveEquation(char* input)
                         total *= last;
                         total = sqrt(total);
                     }
+
+                    //sinc
+                    else if (rootOperations[a] == 'P')
+                        total = sinc(total);
+                    else if (rootOperations[a] == 'Q')
+                        last = sinc(last);
+
+                    //sec
+                    else if (rootOperations[a] == 'R')
+                        total = sec(total);
+                    else if (rootOperations[a] == 'S')
+                        last = sec(last);
+
+                    //cotangent
+                    else if (rootOperations[a] == 'T')
+                        total = cot(total);
+                    else if (rootOperations[a] == 'U')
+                        last = cot(last);
                 }
                 last *= multNeg;
                 //operation
@@ -1044,13 +1106,10 @@ double solveEquation(char* input)
                 }
             }
             //Determines operation to use
-            if (state == '\0' && !isdigit(copy[i]))
+            if (validateOperation(copy[i]) == 0)
             {
-                if (validateOperation(copy[i]) == 0)
-                {
-                    state = copy[i];
-                    numNum = 0;
-                }
+                state = copy[i];
+                numNum = 0;
             }
         }
         state = '\0';
@@ -1269,7 +1328,7 @@ unsigned int numberOfOperations(char* input)
     return times;
 }
 
-//Foot functions
+//Root and trig and related functions functions
 //Square root function
 float squareRoot(float number)
 {
@@ -1287,10 +1346,26 @@ float fifthRoot(float number)
 //Seventh root function
 float seventhRoot(float number)
 {
-    const float exponent = 1 / 7;
     if (number < 0)
-        return pow(fabsf(number), exponent) * -1;
-    return pow(number, exponent);
+        return pow(fabsf(number), 1 / 7) * -1;
+    return pow(number, 1 / 7);
+}
+//sinc function
+float sinc(float number)
+{
+    if (number == 0)
+        return 1;
+    return sin(number) / number;
+}
+//secant fucntion
+float sec(float number)
+{
+    return 1 / cos(number);
+}
+//cotangent function
+float cot(float number)
+{
+    return 1 / tan(number);
 }
 
 //String char checking
@@ -1305,7 +1380,7 @@ unsigned int validateOperation(char c)
 //Validate char
 unsigned int validNext(char c)
 {
-    if (c == ' ' || isdigit(c) || c == 'm')
+    if (isdigit(c) || c == 'm' || c == 'a')
         return 0;
     return 1;
 }
@@ -1317,7 +1392,7 @@ unsigned int validateRoot(char c)
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
         || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'D' || c == 'y'
-        || c == 'z' || c == 'F' || c == 'I')
+        || c == 'z' || c == 'F' || c == 'I' || c == 'J' || c == 'L' || c == 'M')
         return 0;
     return 1;
 }
@@ -1825,5 +1900,41 @@ void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, c
     {
         if (numNum == 0)
             strcat(rootOperations, "O");
+    }
+    //sinc
+    else if (copy[i] == 'J')
+    {
+        if (state == '\0')
+        {
+            if (numNum == 0)
+                strcat(rootOperations, "P");
+        }
+        else
+            if (numNum == 0)
+                strcat(rootOperations, "Q");
+    }
+    //sec
+    else if (copy[i] == 'L')
+    {
+        if (state == '\0')
+        {
+            if (numNum == 0)
+                strcat(rootOperations, "R");
+        }
+        else
+            if (numNum == 0)
+                strcat(rootOperations, "S");
+    }
+    //cotangent
+    else if (copy[i] == 'M')
+    {
+        if (state == '\0')
+        {
+            if (numNum == 0)
+                strcat(rootOperations, "T");
+        }
+        else
+            if (numNum == 0)
+                strcat(rootOperations, "U");
     }
 }
