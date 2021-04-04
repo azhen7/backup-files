@@ -1,45 +1,4 @@
-#define _GNU_SOURCE
-#include <stdio.h>
-#include <cs50.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "log.h"   //For some additional logarithm functions
-
-#define ARRAY_SIZE 9
-#define GOLDEN_RT 1.6180339887498       //Golden Ration ((1 + sqrt(5)) / 2)
-#define APERY_CONST 1.202056903159      //Apery's Constant (1 + 1/2^3 + 1/3^3 + 1/4^3 + 1/5^3 + ...)
-#define M_SQRT_3 1.73205080757          //Theodorus' Constant (sqrt(3))
-#define G 0.9159655941                  //Catalan's Constant (1 - 1/3^2 + 1/5^2 - ...)
-#define DELIAN_CONST 1.25992104         //Delian's Constant (cbrt(2))
-#define HERMITE_CONST 1.1547005         //Hermite's Constant (2 / sqrt(3) OR 1/cos(PI / 6))
-#define GELFOND_CONST 23.1406926327     //Gelfond's Constant (e ^ PI)
-
-//Used to solve equation
-double solveEquation(char* input);
-//Get some numbers
-double convertFloat(char* input, double total);
-unsigned int numberOfOperations(char* input);
-//String char checking
-unsigned int validNext(char c);
-unsigned int validateOperation(char c);
-unsigned int validateRoot(char c);
-//GCD
-double calculateGCD(double a, double b);
-//Change strings
-void removeChar(char* input, int index, int c);
-void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state);
-void setUp(char* copy);
-void copyStr(char* destination, char* source);
-//Root and trig and related functions
-float squareRoot(float number);     //square root
-float fifthRoot(float number);      //fifth root
-float seventhRoot(float number);    //seventh root
-float sinc(float number);           //sine cardinal (sinc)
-float sec(float number);            //secant
-float cot(float number);            //cotangent
-float cosec(float number);          //cosecant
+#include "importantFuncs.h"
 
 int main(void)
 {
@@ -81,10 +40,12 @@ double solveEquation(char* input)
     char state = '\0', whichNum = '0', lastNum = '0';
     char* copy = (char*) malloc(strlen(input) * sizeof(char));
     char* rootOperations = NULL;
+    char* arr = strchr(input, ' ');
 
-    if (strlen(input) == 0 || strcmp(input, strchr(input, ' ')) == 0)
-        return NAN;
-
+    if (arr != NULL)
+        if (strlen(input) == 0 || strcmp(input, arr) == 0)
+            return NAN;
+    formatInput(input);
     copyStr(copy, input);
 
     if (strcmp(copy, "NAN") == 0)
@@ -102,7 +63,7 @@ double solveEquation(char* input)
         }
         else if (isalpha(copy[i]))
         {
-            char* arr = (char*) malloc(sizeof(char) * ARRAY_SIZE);
+            arr = (char*) malloc(sizeof(char) * ARRAY_SIZE);
             copyIndexStart = i;
             strncat(arr, &copy[copyIndexStart], ARRAY_SIZE);
             if (copy[i] == 'm' || copy[i] == 'e' || copy[i] == 'E')
@@ -592,6 +553,11 @@ double solveEquation(char* input)
     }
     //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
     setUp(copy);
+
+    arr = (char*) malloc(sizeof(char) * strlen(copy));
+    copyStr(arr, copy);
+    strcpy(copy, arr);
+
     state = '\0';
     total = convertFloat(copy, total);
 
@@ -1162,6 +1128,8 @@ double calculateGCD(double a, double b)
 //Get first number of equation
 double convertFloat(char* input, double total)
 {
+    if (strcmp(input, "NAN") == 0)
+        return NAN;
     char lastNum = '0';
     int multNeg = 1;
     int numNum = 1;
@@ -1436,6 +1404,29 @@ void copyStr(char* destination, char* source)
         strncat(destination, &source[i], 1);
     }
 }
+//Format input
+void formatInput(char* input)
+{
+    char* formattedInput = (char*) malloc(sizeof(char) * strlen(input));
+    unsigned int encounteredSpace;
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] == ' ')
+        {
+            if (encounteredSpace == 0)
+            {
+                strcat(formattedInput, " ");
+                encounteredSpace = 1;
+            }
+        }
+        else
+        {
+            strncat(formattedInput, &input[i], 1);
+            encounteredSpace = 0;
+        }
+    }
+    strcpy(input, formattedInput);
+}
 //Check for "--" or "+-"
 void setUp(char* copy)
 {
@@ -1462,7 +1453,10 @@ void setUp(char* copy)
                 }
                 else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0);
                 else
+                {
                     strcpy(copy, "NAN");
+                    break;
+                }
             }
         }
         else if (copy[i] == '-')
@@ -1480,14 +1474,40 @@ void setUp(char* copy)
                         copy[i] = 'm';
                 }
                 else
+                {
                     strcpy(copy, "NAN");
+                    break;
+                }
+            }
+        }
+        else if (copy[i] == '*')
+        {
+            if (copy[i + 1] != ' ')
+            {
+                if (copy[i + 1] == '*')
+                {
+                    copy[i] = '^';
+                    copy[i + 1] = ' ';
+                }
+                else
+                {
+                    strcpy(copy, "NAN");
+                    break;
+                }
+            }
+        }
+        else if (copy[i] == '/')
+        {
+            if (copy[i + 1] != ' ')
+            {
+                strcpy(copy, "NAN");
+                break;
             }
         }
         if (validateOperation(copy[i]) == 0)
         {
             state = copy[i];
             encounteredNum = 0;
-            continue;
         }
     }
 }
