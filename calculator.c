@@ -33,12 +33,13 @@ void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, c
 void setUp(char* copy);
 void copyStr(char* destination, char* source);
 //Root and trig and related functions
-float squareRoot(float number);
-float fifthRoot(float number);
-float seventhRoot(float number);
-float sinc(float number);
-float sec(float number);
-float cot(float number);
+float squareRoot(float number);     //square root
+float fifthRoot(float number);      //fifth root
+float seventhRoot(float number);    //seventh root
+float sinc(float number);           //sine cardinal (sinc)
+float sec(float number);            //secant
+float cot(float number);            //cotangent
+float cosec(float number);          //cosecant
 
 int main(void)
 {
@@ -81,12 +82,10 @@ double solveEquation(char* input)
     char* copy = (char*) malloc(strlen(input) * sizeof(char));
     char* rootOperations = NULL;
 
-    if (strlen(input) == 0)
+    if (strlen(input) == 0 || strcmp(input, strchr(input, ' ')) == 0)
         return NAN;
 
     copyStr(copy, input);
-    //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
-    setUp(copy);
 
     if (strcmp(copy, "NAN") == 0)
         return NAN;
@@ -289,13 +288,21 @@ double solveEquation(char* input)
                     root++;
                     i += 4;
                 }
-                //cosecant
+                //cotangent
                 else if (strncmp(arr, "cot(", 4) == 0)
                 {
                     copy[copyIndexStart] = 'N';
                     removeChar(copy, copyIndexStart, 4);
                     root++;
                     i += 3;
+                }
+                //cosecant
+                else if (strncmp(arr, "cosec(", 6) == 0)
+                {
+                    copy[copyIndexStart] = 'O';
+                    removeChar(copy, copyIndexStart, 6);
+                    root++;
+                    i += 5;
                 }
                 else
                     return NAN;
@@ -583,6 +590,8 @@ double solveEquation(char* input)
                 return NAN;
         }
     }
+    //Check for negative first number or stuff like subtracting negative numbers and adding negative numbers
+    setUp(copy);
     state = '\0';
     total = convertFloat(copy, total);
 
@@ -899,6 +908,12 @@ double solveEquation(char* input)
                         total = cot(total);
                     else if (rootOperations[a] == 'U')
                         last = cot(last);
+
+                    //cosec
+                    else if (rootOperations[a] == 'V')
+                        total = cosec(total);
+                    else if (rootOperations[a] == 'W')
+                        last = cosec(last);
                 }
                 last *= multNeg;
                 //operation
@@ -1369,6 +1384,11 @@ float cot(float number)
 {
     return 1 / tan(number);
 }
+//cosecant function
+float cosec(float number)
+{
+    return 1 / sin(number);
+}
 
 //String char checking
 //See if input[i] is a valid operation (+, -, etc.)
@@ -1382,7 +1402,7 @@ unsigned int validateOperation(char c)
 //Validate char
 unsigned int validNext(char c)
 {
-    if (isdigit(c) || c == 'm' || c == 'a' || c == ' ')
+    if (isdigit(c) || c == 'm' || c == 'a' || c == ' ' || validateRoot(c) == 0)
         return 0;
     return 1;
 }
@@ -1394,7 +1414,7 @@ unsigned int validateRoot(char c)
         || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
         || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'D' || c == 'y'
-        || c == 'z' || c == 'F' || c == 'I' || c == 'J' || c == 'L' || c == 'N')
+        || c == 'z' || c == 'F' || c == 'I' || c == 'J' || c == 'L' || c == 'N' || c == 'O')
         return 0;
     return 1;
 }
@@ -1440,7 +1460,7 @@ void setUp(char* copy)
                     copy[i] = '-';
                     copy[i + 1] = ' ';
                 }
-                else if (isdigit(copy[i + 1]));
+                else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0);
                 else
                     strcpy(copy, "NAN");
             }
@@ -1454,7 +1474,7 @@ void setUp(char* copy)
                     copy[i] = '+';
                     copy[i + 1] = ' ';
                 }
-                else if (isdigit(copy[i + 1]))
+                else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0)
                 {
                     if (encounteredNum == 0)
                         copy[i] = 'm';
@@ -1945,5 +1965,17 @@ void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, c
         else
             if (numNum == 0)
                 strcat(rootOperations, "U");
+    }
+    //cosecant
+    else if (copy[i] == 'O')
+    {
+        if (state == '\0')
+        {
+            if (numNum == 0)
+                strcat(rootOperations, "V");
+        }
+        else
+            if (numNum == 0)
+                strcat(rootOperations, "W");
     }
 }
