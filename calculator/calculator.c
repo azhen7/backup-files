@@ -46,7 +46,7 @@ double solveEquation(char* input)
         if (strlen(input) == 0 || strcmp(input, arr) == 0)
             return NAN;
     formatInput(input);
-    copyStr(copy, input);
+    strcpy(copy, input);
 
     if (strcmp(copy, "NAN") == 0)
         return NAN;
@@ -1408,18 +1408,32 @@ void copyStr(char* destination, char* source)
 void formatInput(char* input)
 {
     char* formattedInput = (char*) malloc(sizeof(char) * strlen(input));
-    unsigned int encounteredSpace;
+    unsigned short encounteredSpace;
+    unsigned short operation = 0;
     for (int i = 0; i < strlen(input); i++)
     {
+        if (validateOperation(input[i]) == 0)
+        {
+            strncat(formattedInput, &input[i], 1);
+            if (operation == 0)
+                operation = 1;
+            else
+                operation = 0;
+        }
         if (input[i] == ' ')
         {
-            if (encounteredSpace == 0)
+            if (isdigit(input[i + 1]))
+            {
+                operation = 0;
+                encounteredSpace = 0;
+            }
+            if (encounteredSpace == 0 && operation == 0)
             {
                 strcat(formattedInput, " ");
                 encounteredSpace = 1;
             }
         }
-        else
+        else if (validateOperation(input[i]) == 1)
         {
             strncat(formattedInput, &input[i], 1);
             encounteredSpace = 0;
@@ -1431,7 +1445,6 @@ void formatInput(char* input)
 void setUp(char* copy)
 {
     unsigned short encounteredNum = 0;
-    char state = '\0';
     for (int i = 0; i < strlen(copy); i++)
     {
         //if copy[i] is a space, save an iteration
@@ -1468,6 +1481,8 @@ void setUp(char* copy)
                     copy[i] = '+';
                     copy[i + 1] = ' ';
                 }
+                else if (copy[i + 1] == '+')
+                    copy[i + 1] = ' ';
                 else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0)
                 {
                     if (encounteredNum == 0)
@@ -1482,6 +1497,14 @@ void setUp(char* copy)
         }
         else if (copy[i] == '*')
         {
+            if (i > 0)
+            {
+                if (copy[i + 1] == '*' && copy[i + 2] != ' ')
+                {
+                    strcpy(copy, "NAN");
+                    break;
+                }
+            }
             if (copy[i + 1] != ' ')
             {
                 if (copy[i + 1] == '*')
@@ -1503,11 +1526,6 @@ void setUp(char* copy)
                 strcpy(copy, "NAN");
                 break;
             }
-        }
-        if (validateOperation(copy[i]) == 0)
-        {
-            state = copy[i];
-            encounteredNum = 0;
         }
     }
 }
