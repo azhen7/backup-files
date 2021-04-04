@@ -1,4 +1,4 @@
-#include "importantFuncs.h"
+#include "defs.h"
 
 int main(void)
 {
