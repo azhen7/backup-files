@@ -1,4 +1,3 @@
-#define E 2.7182818284590452353602874713527
 #include <math.h>
 
 int main(void);
@@ -9,7 +8,7 @@ double log1(float number)
         return -INFINITY;
     else if (number > 1)
         return INFINITY;
-    else 
+    else
         return NAN;
 }
 
@@ -50,5 +49,5 @@ double log9(float number)
 
 double ln(double number)
 {
-    return log10(number) / log10(E);
+    return log10(number) / log10(M_E);
 }
