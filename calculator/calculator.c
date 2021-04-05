@@ -978,25 +978,6 @@ double solveEquation(char* input)
     ans = total;
     return total;
 }
-
-//GCD
-double calculateGCD(double a, double b)
-{
-    double temp = 0;
-    if (a < b)
-    {
-        temp = a;
-        a = b;
-        b = temp;
-    }
-    while (b != 0)
-    {
-        temp = b;
-        b = fmod(a, b);
-        a = temp;
-    }
-    return a;
-}
 //Get first number of equation
 double convertFloat(char* input, double total)
 {
