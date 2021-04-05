@@ -65,6 +65,8 @@ void formatInput(char* input)
                 operation = 1;
             else
                 operation = 0;
+            if (isdigit(input[i + 1]))
+                strcat(formattedInput, " ");
         }
         if (input[i] == ' ')
         {
@@ -83,6 +85,8 @@ void formatInput(char* input)
         {
             strncat(formattedInput, &input[i], 1);
             encounteredSpace = 0;
+            if (validateOperation(input[i + 1]) == 0 && input[i + 1] != ',' && (input[i] != 'G' && input[i] != 'L'))
+                strcat(formattedInput, " ");
         }
     }
     strcpy(input, formattedInput);
@@ -446,125 +450,11 @@ void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, c
             if (numNum == 0)
                 strcat(rootOperations, "k");
     }
-    //log base 10
+    //logarithm
     else if (copy[i] == 'k')
     {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "l");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "m");
-    }
-    //log base 2
-    else if (copy[i] == 'n')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "n");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "o");
-    }
-    //log base 3
-    else if (copy[i] == 'o')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "p");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "q");
-    }
-    //log base 4
-    else if (copy[i] == 'p')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "r");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "s");
-    }
-    //log base 5
-    else if (copy[i] == 'q')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "t");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "u");
-    }
-    //log base 6
-    else if (copy[i] == 'r')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "v");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "w");
-    }
-    //log base 7
-    else if (copy[i] == 's')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "x");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "y");
-    }
-    //log base 8
-    else if (copy[i] == 't')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "z");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "A");
-    }
-    //log base 9
-    else if (copy[i] == 'u')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "B");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "C");
-    }
-    //log base 1
-    else if (copy[i] == 'v')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "D");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "E");
+        if (numNum == 0)
+            strcat(rootOperations, "l");
     }
     //absolute value
     else if (copy[i] == 'w')
