@@ -1313,51 +1313,6 @@ unsigned int numberOfOperations(char* input)
     return times;
 }
 
-//Root and trig and related functions functions
-//Square root function
-float squareRoot(float number)
-{
-    if (number < 0)
-        return NAN;
-    return sqrt(number);
-}
-//Fifth root function
-float fifthRoot(float number)
-{
-    if (number < 0)
-        return pow(fabsf(number), 0.2) * -1;
-    return pow(number, 0.2);
-}
-//Seventh root function
-float seventhRoot(float number)
-{
-    if (number < 0)
-        return pow(fabsf(number), 1 / 7) * -1;
-    return pow(number, 1 / 7);
-}
-//sinc function
-float sinc(float number)
-{
-    if (number == 0)
-        return 1;
-    return sin(number) / number;
-}
-//secant fucntion
-float sec(float number)
-{
-    return 1 / cos(number);
-}
-//cotangent function
-float cot(float number)
-{
-    return 1 / tan(number);
-}
-//cosecant function
-float cosec(float number)
-{
-    return 1 / sin(number);
-}
-
 //String char checking
 //See if input[i] is a valid operation (+, -, etc.)
 unsigned int validateOperation(char c)
