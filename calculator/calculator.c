@@ -332,78 +332,6 @@ double solveEquation(char* input)
                     root++;
                     i += 2;
                 }
-                else if (strncmp(arr, "logone(", 7) == 0)
-                {
-                    copy[copyIndexStart] = 'v';
-                    removeChar(copy, copyIndexStart, 7);
-                    root++;
-                    i += 6;
-                }
-                //log base 2
-                else if (strncmp(arr, "logtwo(", 7) == 0)
-                {
-                    copy[copyIndexStart] = 'n';
-                    removeChar(copy, copyIndexStart, 7);
-                    root++;
-                    i += 6;
-                }
-                //log base 3
-                else if (strncmp(arr, "logthree(", 9) == 0)
-                {
-                    copy[copyIndexStart] = 'o';
-                    removeChar(copy, copyIndexStart, 9);
-                    root++;
-                    i += 8;
-                }
-                //log base 4
-                else if (strncmp(arr, "logfour(", 8) == 0)
-                {
-                    copy[copyIndexStart] = 'p';
-                    removeChar(copy, copyIndexStart, 8);
-                    root++;
-                    i += 7;
-                }
-                //log base 5
-                else if (strncmp(arr, "logfive(", 8) == 0)
-                {
-                    copy[copyIndexStart] = 'q';
-                    removeChar(copy, copyIndexStart, 8);
-                    root++;
-                    i += 7;
-                }
-                //log base 6
-                else if (strncmp(arr, "logsix(", 7) == 0)
-                {
-                    copy[copyIndexStart] = 'r';
-                    removeChar(copy, copyIndexStart, 7);
-                    root++;
-                    i += 6;
-                }
-                //log base 7
-                else if (strncmp(arr, "logseven(", 9) == 0)
-                {
-                    copy[copyIndexStart] = 's';
-                    removeChar(copy, copyIndexStart, 9);
-                    root++;
-                    i += 8;
-                }
-                //log base 8
-                else if (strncmp(arr, "logeight(", 9) == 0)
-                {
-                    copy[copyIndexStart] = 't';
-                    removeChar(copy, copyIndexStart, 9);
-                    root++;
-                    i += 8;
-                }
-                //log base 9
-                else if (strncmp(arr, "lognine(", 8) == 0)
-                {
-                    copy[copyIndexStart] = 'u';
-                    removeChar(copy, copyIndexStart, 8);
-                    root++;
-                    i += 7;
-                }
-                //log base 10
                 else if (strncmp(arr, "log(", 4) == 0)
                 {
                     copy[copyIndexStart] = 'k';
@@ -719,69 +647,13 @@ double solveEquation(char* input)
 
                     //ln
                     else if (rootOperations[a] == 'j')
-                        total = ln(total);
+                        total = log(total);
                     else if (rootOperations[a] == 'k')
-                        last = ln(last);
+                        last = log(last);
 
                     //log base 10
                     else if (rootOperations[a] == 'l')
-                        total = log10(total);
-                    else if (rootOperations[a] == 'm')
-                        last = log10(last);
-
-                    //log base 2
-                    else if (rootOperations[a] == 'n')
-                        total = log2(total);
-                    else if (rootOperations[a] == 'o')
-                        last = log2(last);
-
-                    //log base 3
-                    else if (rootOperations[a] == 'p')
-                        total = log3(total);
-                    else if (rootOperations[a] == 'q')
-                        last = log3(last);
-
-                    //log base 4
-                    else if (rootOperations[a] == 'r')
-                        total = log4(total);
-                    else if (rootOperations[a] == 's')
-                        last = log4(last);
-
-                    //log base 5
-                    else if (rootOperations[a] == 't')
-                        total = log5(total);
-                    else if (rootOperations[a] == 'u')
-                        last = log5(last);
-
-                    //log base 6
-                    else if (rootOperations[a] == 'v')
-                        total = log6(total);
-                    else if (rootOperations[a] == 'w')
-                        last = log6(last);
-
-                    //log base 7
-                    else if (rootOperations[a] == 'x')
-                        total = log7(total);
-                    else if (rootOperations[a] == 'y')
-                        last = log7(last);
-
-                    //log base 8
-                    else if (rootOperations[a] == 'z')
-                        total = log8(total);
-                    else if (rootOperations[a] == 'A')
-                        last = log8(last);
-
-                    //log base 9
-                    else if (rootOperations[a] == 'B')
-                        total = log9(total);
-                    else if (rootOperations[a] == 'C')
-                        last = log9(last);
-
-                    //log base 1
-                    else if (rootOperations[a] == 'D')
-                        total = log1(total);
-                    else if (rootOperations[a] == 'E')
-                        last = log1(last);
+                        total = log_base(total, last);
 
                     //factorial
                     else if (rootOperations[a] == 'F')
