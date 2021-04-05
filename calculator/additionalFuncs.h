@@ -2,55 +2,10 @@
 
 int main(void);
 
-//Log functions
-double log1(float number)
+//log function
+double log_base(float number, float base)
 {
-    if (number < 1)
-        return -INFINITY;
-    else if (number > 1)
-        return INFINITY;
-    else
-        return NAN;
-}
-
-double log3(float number)
-{
-    return log10(number) / log10(3);
-}
-
-double log4(float number)
-{
-    return log10(number) / log10(4);
-}
-
-double log5(float number)
-{
-    return log10(number) / log10(5);
-}
-
-double log6(float number)
-{
-    return log10(number) / log10(6);
-}
-
-double log7(float number)
-{
-    return log10(number) / log10(7);
-}
-
-double log8(float number)
-{
-    return log10(number) / log10(8);
-}
-
-double log9(float number)
-{
-    return log10(number) / log10(9);
-}
-
-double ln(double number)
-{
-    return log10(number) / log10(M_E);
+    return log10(number) / log10(base);
 }
 
 //Root and trig and related functions functions
@@ -96,4 +51,22 @@ float cot(float number)
 float cosec(float number)
 {
     return 1 / sin(number);
+}
+//GCD
+double calculateGCD(double a, double b)
+{
+    double temp = 0;
+    if (a < b)
+    {
+        temp = a;
+        a = b;
+        b = temp;
+    }
+    while (b != 0)
+    {
+        temp = b;
+        b = fmod(a, b);
+        a = temp;
+    }
+    return a;
 }
