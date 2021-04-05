@@ -1,10 +1,8 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <cs50.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "log.h"   //For some additional logarithm functions
+#include "additionalFuncs.h"   //For some additional logarithm functions
+#include "manipulateStr.h"     //Used to check and manipulate input string
 
 #define ARRAY_SIZE 9
 #define GOLDEN_RT 1.6180339887498       //Golden Ration ((1 + sqrt(5)) / 2)
@@ -40,5 +38,3 @@ float sinc(float number);           //sine cardinal (sinc)
 float sec(float number);            //secant
 float cot(float number);            //cotangent
 float cosec(float number);          //cosecant
-
-
