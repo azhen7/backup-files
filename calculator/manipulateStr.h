@@ -32,6 +32,15 @@ unsigned int validNext(char c)
         return 0;
     return 1;
 }
+//Unchanged root/trig/related functions char checking
+unsigned int validUnchanged(char c)
+{
+    if (c == 'l' || c == 's' || c == 'c' || c == 'q' || c == 'a' || c == 't'
+        || c == 'L' || c == 'G' || c == 'g' || c == 'C' || c == 'P' || c == 'H'
+        || c == 'S' || c == 'A' || c == 'D' || c == 'f')
+        return 1;
+    return 0;
+}
 
 //Changing strings
 //Set chars to ' '
@@ -70,7 +79,7 @@ void formatInput(char* input)
         }
         if (input[i] == ' ')
         {
-            if (isdigit(input[i + 1]))
+            if (isdigit(input[i + 1]) || validateRoot(input[i + 1]) == 0)
             {
                 operation = 0;
                 encounteredSpace = 0;
@@ -85,7 +94,7 @@ void formatInput(char* input)
         {
             strncat(formattedInput, &input[i], 1);
             encounteredSpace = 0;
-            if (validateOperation(input[i + 1]) == 0 && input[i + 1] != ',' && (input[i] != 'G' && input[i] != 'L'))
+            if (validateOperation(input[i + 1]) == 0 && input[i + 1] != ',' && !validUnchanged(input[i + 1]))
                 strcat(formattedInput, " ");
         }
     }
