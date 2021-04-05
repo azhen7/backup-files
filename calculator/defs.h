@@ -19,9 +19,10 @@ double solveEquation(char* input);
 double convertFloat(char* input, double total);
 unsigned int numberOfOperations(char* input);
 //String char checking
-unsigned int validNext(char c);
-unsigned int validateOperation(char c);
-unsigned int validateRoot(char c);
+unsigned int validNext(char c);             //Check if next char is "valid"
+unsigned int validateOperation(char c);     //Check if current char is an operation (+, -, etc.)
+unsigned int validateRoot(char c);          //Check if current char corresponds to a root, trig function, etc.
+unsigned int validUnchanged(char c);        //Check if current char is the first char of word of root, trig function, etc. (e.g. sqrt, cbrt, log, etc.)
 //GCD
 double calculateGCD(double a, double b);
 //Change strings
