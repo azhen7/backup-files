@@ -18,7 +18,7 @@ unsigned int validateRoot(char c)
 {
     if (c == '@' || c == '#' || c == '$' || c == '~' || c == '<' || c == '&' || c == '!' || c == ';'
         || c == ':' || c == 34 || c == '>' || c == '?' || c == '|' || c == '{' || c == '}' || c == '('
-        || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'v'
+        || c == ')' || c == 'c' || c == 39 || c == 92 || c == '\f' || c == 'f' || c == 'l' || c == 'm'
         || c == 'v' || c == 'n' || c == 'o' || c == 'p' || c == 'q' || c == 'r' || c == 's' || c == 't'
         || c == 'u' || c == 'k' || c == 'S' || c == 'M' || c == 'w' || c == 'x' || c == 'D' || c == 'y'
         || c == 'z' || c == 'F' || c == 'I' || c == 'J' || c == 'L' || c == 'N' || c == 'O')
@@ -235,9 +235,9 @@ void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, c
             if (numNum == 0)
                 strcat(rootOperations, "6");
         }
-            else
-                if (numNum == 0)
-                    strcat(rootOperations, "7");
+        else
+            if (numNum == 0)
+                strcat(rootOperations, "7");
     }
     //squaring
     else if (copy[i] == '<')
@@ -560,5 +560,11 @@ void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, c
         else
             if (numNum == 0)
                 strcat(rootOperations, "W");
+    }
+    //iterative log
+    else if (copy[i] == 'm')
+    {
+        if (numNum == 0)
+            strcat(rootOperations, "m");
     }
 }
