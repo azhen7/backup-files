@@ -70,3 +70,14 @@ double calculateGCD(double a, double b)
     }
     return a;
 }
+//iterative log
+unsigned int iterative_log(double a, double base)
+{
+    unsigned int iterateCount = 0;
+    while (a > 1)
+    {
+        iterateCount++;
+        a = log_base(a, base);
+    }
+    return iterateCount;
+}
