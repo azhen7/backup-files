@@ -332,6 +332,15 @@ double solveEquation(char* input)
                     root++;
                     i += 2;
                 }
+                //iterative log
+                else if (strncmp(arr, "log * (", 7) == 0)
+                {
+                    copy[copyIndexStart] = 'm';
+                    removeChar(copy, copyIndexStart, 7);
+                    root++;
+                    i += 6;
+                }
+                //log; inputed base
                 else if (strncmp(arr, "log(", 4) == 0)
                 {
                     copy[copyIndexStart] = 'k';
@@ -489,8 +498,13 @@ double solveEquation(char* input)
     state = '\0';
     total = convertFloat(copy, total);
 
+    //Check for maximum / minimum / NAN
     if (total == NAN)
         return NAN;
+    else if (total > UINT_MAX)
+        return INFINITY;
+    else if (total < LLONG_MIN)
+        return -INFINITY;
 
     times = numberOfOperations(copy);
 
@@ -512,10 +526,15 @@ double solveEquation(char* input)
         {
             if (copy[i] == ' ')
                 continue;
-            if (i == strlen(copy))
+            if (i == strlen(input))
                 whichNum = '1';
             if (whichNum == '1' && !isdigit(copy[i]) && copy[i] != '.' && copy[i] != '!')
             {
+                //Check for maximum / minimum
+                if (last > UINT_MAX)
+                    return INFINITY;
+                else if (last < LLONG_MIN)
+                    return -INFINITY;
                 //rootOperations and additional operations
                 for (int a = 0; a < strlen(rootOperations); a++)
                 {
@@ -653,7 +672,12 @@ double solveEquation(char* input)
 
                     //log base 10
                     else if (rootOperations[a] == 'l')
-                        total = log_base(total, last);
+                    {
+                        if (last == 0.0)
+                            total = log10(total);
+                        else
+                            total = log_base(total, last);
+                    }
 
                     //factorial
                     else if (rootOperations[a] == 'F')
@@ -752,6 +776,10 @@ double solveEquation(char* input)
                         total = cosec(total);
                     else if (rootOperations[a] == 'W')
                         last = cosec(last);
+
+                    //iterative log
+                    else if (rootOperations[a] == 'm')
+                        total = iterative_log(total, last);
                 }
                 last *= multNeg;
                 //operation
@@ -815,6 +843,11 @@ double solveEquation(char* input)
                             total = tgamma(total + 1) / tgamma(total - last + 1);
                     }
                 }
+                //Check for maximum / minimum
+                if (total > UINT_MAX)
+                    return INFINITY;
+                else if (total < LLONG_MIN)
+                    return -INFINITY;
                 location = i;
                 break;
             }
