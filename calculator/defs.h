@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <cs50.h>
+#include <limits.h>
 #include "additionalFuncs.h"   //For some additional logarithm functions
 #include "manipulateStr.h"     //Used to check and manipulate input string
 
@@ -32,10 +33,11 @@ void setUp(char* copy);
 void copyStr(char* destination, char* source);
 void formatInput(char* input);
 //Root and trig and related functions
-float squareRoot(float number);     //square root
-float fifthRoot(float number);      //fifth root
-float seventhRoot(float number);    //seventh root
-float sinc(float number);           //sine cardinal (sinc)
-float sec(float number);            //secant
-float cot(float number);            //cotangent
-float cosec(float number);          //cosecant
+float squareRoot(float number);         //square root
+float fifthRoot(float number);          //fifth root
+float seventhRoot(float number);        //seventh root
+float sinc(float number);               //sine cardinal (sinc)
+float sec(float number);                //secant
+float cot(float number);                //cotangent
+float cosec(float number);              //cosecant
+unsigned int iterative_log(double a, double base);  //iterative log
