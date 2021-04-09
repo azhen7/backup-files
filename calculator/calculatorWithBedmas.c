@@ -564,16 +564,12 @@ double solveEquation(char* input)
                 nums2 = nums[i];
                 nums[i + 1] *= nums[i];
                 nums[i] = 0;
-                if (x == 0)
-                    total = nums[i + 1];
             }
             else if (state[i] == '/')
             {
                 nums[i] /= nums[i + 1];
                 nums[i + 1] = nums[i];
                 nums[i] = 0;
-                if (x == 0)
-                    total = nums[i + 1];
             }
             else if (state[i] == 'C')
             {
@@ -593,7 +589,8 @@ double solveEquation(char* input)
             }
             else if (state[i] == '+' || state[i] == '-')
                 total = nums[i];
-            //state[i] = '+';
+            if (x == 0)
+                total = nums[i + 1];
         }
     }
     int mul = 1;
