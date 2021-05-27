@@ -64,10 +64,10 @@ double solveEquation(char* input)
             return NAN;
         if (isalpha(equation[i]))
         {
-            strncat(arr, &input[i], ARRAY_SIZE);
-            if (equation[i] == 'P')
+            strncpy(arr, &input[i], ARRAY_SIZE);
+            if (equation[i] == 'P' || equation[i] == 'p')
             {
-                if (strncmp(arr, "PI", 2) == 0)
+                if (strncmp(arr, "PI", 2) == 0 || strncmp(arr, "pi", 2) == 0)
                 {
                     equation[i] = '!';
                     removeChar(equation, i, 1);
@@ -96,15 +96,15 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (equation[i] == 'S')
+            else if (equation[i] == 'S' || equation[i] == 's')
             {
-                if (strncmp(arr, "SQRT_2", 6) == 0)
+                if (strncmp(arr, "SQRT_2", 6) == 0 || strncmp(arr, "sqrt_2", 2) == 0)
                 {
                     equation[i] = 'T';
                     removeChar(equation, i, 5);
                     i += 5;
                 }
-                else if (strncmp(arr, "SQRT_3", 6) == 0)
+                else if (strncmp(arr, "SQRT_3", 6) == 0 || strncmp(arr, "sqrt_3", 3) == 0)
                 {
                     equation[i] = 'R';
                     removeChar(equation, i, 5);
@@ -156,7 +156,7 @@ double solveEquation(char* input)
             strncat(state, &equation[i], 1);
     }
 
-    for (int i = 0, n = strlen(equation); i < strlen(equation); i++)
+    for (int i = 0; i < strlen(equation); i++)
     {
         if (isdigit(equation[i]))
         {
