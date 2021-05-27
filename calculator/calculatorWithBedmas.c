@@ -9,16 +9,15 @@
  *      - Bug 4 (incorrect value of a % b + c) - PATCHED
  *      - Bug 5 (incorrect value of a + b % c) - PATCHED
  *      - Bug 6 (fraction addition doesn't work) - PATCHED
- *      - Bug 7 (where adding 5 of any number returns -nan) - PATCHED - Zeroing all elements is now handled manually
+ *      - Bug 7 (where adding 5 of any number returns -nan) - PATCHED - Zeroing all elements is now handled manually instead of using memset()
  *      - Bug 8 (cPI has incorrect value, where c is a number (e.g. 2PI)) - PATCHED
  *
  * - 5/26/2021: Version 1.04 - Added the constants: Golden Ratio, Root 2, Root 3, Euler's number.
- * - 5/27/2021: Version 1.05 - Added Silver Ratio.
+ * - 5/27/2021: Version 1.05 - Added Silver Ratio, Apery's Constant.
 ***************************************************************************************************************************/
 
 #include "defs.h"
 
-void push_back(char* str, int index);
 double getMathConstant(char* input, int i, float mathConstant);
 
 int main(void)
@@ -77,6 +76,16 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            else if (equation[i] == 'A')
+            {
+                if (strncmp(arr, "APERY_CNST", 10) == 0)
+                {
+                    removeChar(equation, i, 9);
+                    i += 9;
+                }
+                else
+                    return NAN;
+            }
             else if (equation[i] == 'G')
             {
                 if (strncmp(arr, "GOLDEN_RT", 9) == 0)
@@ -84,6 +93,8 @@ double solveEquation(char* input)
                     removeChar(equation, i, 8);
                     i += 8;
                 }
+                else
+                    return NAN;
             }
             else if (equation[i] == 'S')
             {
@@ -105,6 +116,8 @@ double solveEquation(char* input)
                     removeChar(equation, i, 8);
                     i += 8;
                 }
+                else
+                    return NAN;
             }
             else if (equation[i] == 'n')
             {
@@ -172,7 +185,6 @@ double solveEquation(char* input)
                 positions[posIndex] = i;
                 posIndex++;
                 times--;
-                push_back(state, 0);
             }
             else if (validateConstantChar(equation[i]))
             {
@@ -331,6 +343,12 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
                 total = getMathConstant(input, i, SILVER_RT);
                 break;
             }
+            //Apery's Constant
+            else if (input[i] == 'A')
+            {
+                total = getMathConstant(input, i, APERY_CONST);
+                break;
+            }
             else if (input[i] == 'm')
                     multNeg = -1;
             //If input[i] is a root, skip
@@ -379,6 +397,7 @@ double getMathConstant(char* input, int i, float mathConstant)
     }
     else
        value = mathConstant;
+
     return value;
 }
 
@@ -398,11 +417,4 @@ unsigned int numberOfOperations(char* input)
         }
     }
     return times;
-}
-
-//Push back string
-void push_back(char* str, int index)
-{
-    for (int i = index; i < strlen(str) - 1; i++)
-        str[i] = str[i + 1];
 }
