@@ -8,8 +8,7 @@ int main(void);
 //See if input[i] is a valid operation (+, -, etc.)
 unsigned int validateOperation(char c)
 {
-    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P'
-        || c == ',')
+    if (c == '+' || c == '*' || c == '-' || c == '/' || c == '^' || c == '%' || c == 'e' || c == 'C' || c == 'P')
         return 0;
     return 1;
 }
@@ -32,12 +31,10 @@ unsigned int validNext(char c)
         return 0;
     return 1;
 }
-//Unchanged root/trig/related functions char checking
-unsigned int validUnchanged(char c)
+//Check whether char is first character of math constant (e.g. PI)
+unsigned int validateConstantChar(char c)
 {
-    if (c == 'l' || c == 's' || c == 'c' || c == 'q' || c == 'a' || c == 't'
-        || c == 'L' || c == 'G' || c == 'g' || c == 'C' || c == 'P' || c == 'H'
-        || c == 'S' || c == 'A' || c == 'D' || c == 'f')
+    if (c == '!' || c == 'T' || c == 'R' || c == 'G' || c == 'E')
         return 1;
     return 0;
 }
@@ -46,18 +43,8 @@ unsigned int validUnchanged(char c)
 //Set chars to ' '
 void removeChar(char* input, int index, int c)
 {
-    for (int i = 0; i < c - 1; i++)
+    for (int i = 0; i < c; i++)
         input[index + 1 + i] = ' ';
-}
-//Copy input to copy without spaces
-void copyStr(char* destination, char* source)
-{
-    for (int i = 0; i < strlen(source); i++)
-    {
-        if (source[i] == 32)
-            continue;
-        strncat(destination, &source[i], 1);
-    }
 }
 //Format input
 void formatInput(char* input)
@@ -74,8 +61,13 @@ void formatInput(char* input)
                 operation = 1;
             else
                 operation = 0;
-            if (isdigit(input[i + 1]))
+            if (isdigit(input[i + 1]) && !isalpha(input[i + 2]))
                 strcat(formattedInput, " ");
+        }
+        if (isdigit(input[i]) && isalpha(input[i + 1]))
+        {
+            strncat(formattedInput, &input[i], 1);
+            continue;
         }
         if (input[i] == ' ')
         {
@@ -84,7 +76,7 @@ void formatInput(char* input)
                 operation = 0;
                 encounteredSpace = 0;
             }
-            if (encounteredSpace == 0 && operation == 0)
+            if ((encounteredSpace == 0 && operation == 0) || isalpha(input[i - 1]) || isalpha(input[i + 1]))
             {
                 strcat(formattedInput, " ");
                 encounteredSpace = 1;
@@ -94,7 +86,7 @@ void formatInput(char* input)
         {
             strncat(formattedInput, &input[i], 1);
             encounteredSpace = 0;
-            if (validateOperation(input[i + 1]) == 0 && input[i + 1] != ',' && !validUnchanged(input[i + 1]))
+            if (validateOperation(input[i + 1]) == 0)
                 strcat(formattedInput, " ");
         }
     }
@@ -123,7 +115,7 @@ void setUp(char* copy)
                     copy[i] = '-';
                     copy[i + 1] = ' ';
                 }
-                else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0);
+                else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0 || copy[i + 1] == 'P');
                 else
                 {
                     strcpy(copy, "NAN");
@@ -142,9 +134,9 @@ void setUp(char* copy)
                 }
                 else if (copy[i + 1] == '+')
                     copy[i + 1] = ' ';
-                else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0)
+                else if (isdigit(copy[i + 1]) || validateRoot(copy[i + 1]) == 0 || copy[i + 1] == 'P')
                 {
-                    if (encounteredNum == 0)
+                    if (encounteredNum == 0 && !isdigit(copy[i - 1]))
                         copy[i] = 'm';
                 }
                 else
@@ -186,385 +178,5 @@ void setUp(char* copy)
                 break;
             }
         }
-    }
-}
-//Append root representation onto a string
-void assignRootOperations(char* rootOperations, int numNum, char* copy, int i, char state)
-{
-    //sqrt
-    if (copy[i] == '#')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "0");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "1");
-    }
-    //cbrt
-    else if (copy[i] == '@')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "2");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "3");
-    }
-    //quartic root
-    else if (copy[i] == '$')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "4");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "5");
-    }
-    //quintic root
-    else if (copy[i] == '~')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "6");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "7");
-    }
-    //squaring
-    else if (copy[i] == '<')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "8");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "9");
-    }
-    //cubing
-    else if (copy[i] == '&')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "[");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "]");
-    }
-    //sixth root
-    else if (copy[i] == '!')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, ";");
-            else
-                strcat(rootOperations, "F");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, ":");
-            else
-                strcat(rootOperations, "G");
-    }
-    //sin
-    else if (copy[i] == ':')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "{");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "}");
-    }
-    //cos
-    else if (copy[i] == ';')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "~");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "`");
-    }
-    //tan
-    else if (copy[i] == 92)
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "=");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "_");
-    }
-    //arcsin
-    else if (copy[i] == '>')
-        {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "(");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, ")");
-    }
-    //arccos
-    else if (copy[i] == '?')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, ",");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, ".");
-    }
-    //arctan
-    else if (copy[i] == '|')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "<");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, ">");
-    }
-    //sinh
-    else if (copy[i] == 34)
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, " ");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "a");
-    }
-    //cosh
-    else if (copy[i] == 39)
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "b");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "c");
-    }
-    //tanh
-    else if (copy[i] == '\f')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "d");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "e");
-    }
-    //arcsinh
-    else if (copy[i] == '{')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "+");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "-");
-    }
-    //arccosh
-    else if (copy[i] == '}')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "*");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "/");
-    }
-    //arctanh
-    else if (copy[i] == '(')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "@");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "#");
-    }
-    //ceil
-    else if (copy[i] == 'c')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "f");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "g");
-    }
-    //floor
-    else if (copy[i] == 'f')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "h");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "i");
-    }
-    //ln
-    else if (copy[i] == 'l')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "j");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "k");
-    }
-    //logarithm
-    else if (copy[i] == 'k')
-    {
-        if (numNum == 0)
-            strcat(rootOperations, "l");
-    }
-    //absolute value
-    else if (copy[i] == 'w')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "H");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "I");
-    }
-    //seventh root
-    else if (copy[i] == 'x')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "J");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "K");
-    }
-    //GCD
-    else if (copy[i] == 'y')
-    {
-        if (numNum == 0)
-            strcat(rootOperations, "L");
-    }
-    //LCM
-    else if (copy[i] == 'z')
-    {
-        if (numNum == 0)
-            strcat(rootOperations, "M");
-    }
-    //Arithmetic mean
-    else if (copy[i] == 'F')
-    {
-        if (numNum == 0)
-            strcat(rootOperations, "N");
-    }
-    //Geometric mean
-    else if (copy[i] == 'I')
-    {
-        if (numNum == 0)
-            strcat(rootOperations, "O");
-    }
-    //sinc
-    else if (copy[i] == 'J')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "P");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "Q");
-    }
-    //sec
-    else if (copy[i] == 'L')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "R");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "S");
-    }
-    //cotangent
-    else if (copy[i] == 'N')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "T");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "U");
-    }
-    //cosecant
-    else if (copy[i] == 'O')
-    {
-        if (state == '\0')
-        {
-            if (numNum == 0)
-                strcat(rootOperations, "V");
-        }
-        else
-            if (numNum == 0)
-                strcat(rootOperations, "W");
-    }
-    //iterative log
-    else if (copy[i] == 'm')
-    {
-        if (numNum == 0)
-            strcat(rootOperations, "m");
     }
 }
