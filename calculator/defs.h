@@ -6,7 +6,8 @@
 #include "manipulateStr.h"     //Used to check and manipulate input string
 
 #define ARRAY_SIZE 9
-#define GOLDEN_RT 1.6180339887498       //Golden Ration ((1 + sqrt(5)) / 2)
+#define GOLDEN_RT 1.6180339887498       //Golden Ratio ((1 + sqrt(5)) / 2)
+#define SILVER_RT 2.4142135623          //Silver Ratio (1 + sqrt(2))
 #define APERY_CONST 1.202056903159      //Apery's Constant (1 + 1/2^3 + 1/3^3 + 1/4^3 + 1/5^3 + ...)
 #define M_SQRT_3 1.73205080757          //Theodorus' Constant (sqrt(3))
 #define G 0.9159655941                  //Catalan's Constant (1 - 1/3^2 + 1/5^2 - ...)
