@@ -19,7 +19,8 @@
 
 #include "defs.h"
 
-double getMathConstant(char* input, int i, float mathConstant);
+double getMathConstant(char* input, int index, float mathConstant);
+double returnValueOfMathConstant(char* input, int i);
 
 int main(void)
 {
@@ -142,10 +143,10 @@ double solveEquation(char* input)
                     removeChar(equation, i, 2);
                     i += 2;
                 }
-                else if (equation[i] == 'E');
                 else
                     return NAN;
             }
+            else if (equation[i] == 'E');
             else
                 return NAN;
         }
@@ -316,46 +317,9 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
             //If input[i] is a valid operation, this implies that the first number has terminated
             else if (validateOperation(input[i]) == 0)
                     break;
-            //Pi
-            else if (input[i] == '!')
+            else if (validateConstantChar(input[i]))
             {
-                total = getMathConstant(input, i, M_PI);
-                break;
-            }
-            //Golden Ratio
-            else if (input[i] == 'G')
-            {
-                total = getMathConstant(input, i, GOLDEN_RT);
-                break;
-            }
-            //Square root of 2
-            else if (input[i] == 'T')
-            {
-                total = getMathConstant(input, i, M_SQRT2);
-                break;
-            }
-            //Square root of 3
-            else if (input[i] == 'R')
-            {
-                total = getMathConstant(input, i, M_SQRT_3);
-                break;
-            }
-            //Euler's number
-            else if (input[i] == 'E')
-            {
-                total = getMathConstant(input, i, M_E);
-                break;
-            }
-            //Silver Ratio
-            else if (input[i] == 'Y')
-            {
-                total = getMathConstant(input, i, SILVER_RT);
-                break;
-            }
-            //Apery's Constant
-            else if (input[i] == 'A')
-            {
-                total = getMathConstant(input, i, APERY_CONST);
+                total = returnValueOfMathConstant(input, i);
                 break;
             }
             else if (input[i] == 'm')
@@ -363,7 +327,6 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
             //If input[i] is a root, skip
             else if (validateRoot(input[i]) == 0 || input[i] == ' ')
                 continue;
-            else if (input[i] == 'a' || input[i] == 'y');
             else
                 return NAN;
         }
@@ -387,20 +350,20 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
     return total;
 }
 
-double getMathConstant(char* input, int i, float mathConstant)
+double getMathConstant(char* input, int index, float mathConstant)
 {
     float value = 0.0, coefForConsts;
     int lookback = 1, startIndexCoefficient = 0;
-    if (i > 0 && isdigit(input[i - 1]))
+    if (index > 0 && isdigit(input[index - 1]))
     {
         coefForConsts = 0;
-        while ((isdigit(input[i - lookback]) || input[i - lookback] == '.') && i - lookback >= 0)
+        while ((isdigit(input[index - lookback]) || input[index - lookback] == '.') && index - lookback >= 0)
         {
             startIndexCoefficient++;
             lookback++;
         }
 
-        coefForConsts = convertFloat(input, coefForConsts, i - startIndexCoefficient, i);
+        coefForConsts = convertFloat(input, coefForConsts, index - startIndexCoefficient, index);
 
         value = coefForConsts * mathConstant;
     }
@@ -408,6 +371,39 @@ double getMathConstant(char* input, int i, float mathConstant)
        value = mathConstant;
 
     return value;
+}
+
+double returnValueOfMathConstant(char* input, int i)
+{
+    //Pi
+    if (input[i] == '!')
+        return getMathConstant(input, i, M_PI);
+
+    //Golden Ratio
+    else if (input[i] == 'G')
+        return getMathConstant(input, i, GOLDEN_RT);
+
+    //Square root of 2
+    else if (input[i] == 'T')
+        return getMathConstant(input, i, M_SQRT2);
+
+    //Square root of 3
+    else if (input[i] == 'R')
+        return getMathConstant(input, i, M_SQRT_3);
+
+    //Euler's number
+    else if (input[i] == 'E')
+        return getMathConstant(input, i, M_E);
+
+    //Silver Ratio
+    else if (input[i] == 'Y')
+        return getMathConstant(input, i, SILVER_RT);
+
+    //Apery's Constant
+    else if (input[i] == 'A')
+        return getMathConstant(input, i, APERY_CONST);
+
+    return 0.0;
 }
 
 //Get number of operations
