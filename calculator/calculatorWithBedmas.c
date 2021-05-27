@@ -14,6 +14,7 @@
  *
  * - 5/26/2021: Version 1.04 - Added the constants: Golden Ratio, Root 2, Root 3, Euler's number.
  * - 5/27/2021: Version 1.05 - Added Silver Ratio, Apery's Constant.
+ *      - Bug 9 (Seg fault when input string has no spaces) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -51,6 +52,14 @@ double solveEquation(char* input)
 
     if (strlen(input) == 0)
         return NAN;
+
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] != ' ')
+            break;
+        if (i == strlen(input) - 1)
+            return NAN;
+    }
 
     formatInput(input);
     strcpy(equation, input);
