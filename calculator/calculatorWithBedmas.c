@@ -13,6 +13,7 @@
  *      - Bug 8 (cPI has incorrect value, where c is a number (e.g. 2PI)) - PATCHED
  *
  * - 5/26/2021: Version 1.04 - Added the constants: Golden Ratio, Root 2, Root 3, Euler's number.
+ * - 5/27/2021: Version 1.05 - Added Silver Ratio.
 ***************************************************************************************************************************/
 
 #include "defs.h"
@@ -44,79 +45,82 @@ int main(void)
 
 double solveEquation(char* input)
 {
-    unsigned int times = 0, location = 0, posIndex = 0, multiply = 0;
-    short x = 0, root = 0;
+    unsigned int times = 0, posIndex = 0;
     double total = 0.0;
-    char* copy = (char*) malloc(strlen(input) * sizeof(char));
-    char* testIfNull = strchr(input, ' ');
-    char* arr = (char*) malloc(ARRAY_SIZE * sizeof(char));
+    char* equation = (char*) malloc(strlen(input) * sizeof(char));
+    char* arr = (char*) malloc(ARRAY_SIZE);
 
-    if (testIfNull != NULL)
-        if (strlen(input) == 0 || strcmp(input, testIfNull) == 0)
-            return NAN;
-
-    formatInput(input);
-    strcpy(copy, input);
-
-    if (strcmp(copy, "NAN") == 0)
+    if (strlen(input) == 0)
         return NAN;
 
-    for (int i = 0; i < strlen(copy); i++)
+    formatInput(input);
+    strcpy(equation, input);
+
+    if (strcmp(equation, "NAN") == 0)
+        return NAN;
+
+    for (int i = 0; i < strlen(equation); i++)
     {
-        if (!isascii(copy[i]))
+        if (!isascii(equation[i]))
             return NAN;
-        if (isalpha(copy[i]))
+        if (isalpha(equation[i]))
         {
             strncat(arr, &input[i], ARRAY_SIZE);
-            if (copy[i] == 'P')
+            if (equation[i] == 'P')
             {
                 if (strncmp(arr, "PI", 2) == 0)
                 {
-                    copy[i] = '!';
-                    removeChar(copy, i, 1);
+                    equation[i] = '!';
+                    removeChar(equation, i, 1);
                     i++;
                 }
                 else
                     return NAN;
             }
-            else if (copy[i] == 'G')
+            else if (equation[i] == 'G')
             {
                 if (strncmp(arr, "GOLDEN_RT", 9) == 0)
                 {
-                    removeChar(copy, i, 8);
+                    removeChar(equation, i, 8);
                     i += 8;
                 }
             }
-            else if (copy[i] == 'S')
+            else if (equation[i] == 'S')
             {
                 if (strncmp(arr, "SQRT_2", 6) == 0)
                 {
-                    copy[i] = 'T';
-                    removeChar(copy, i, 5);
+                    equation[i] = 'T';
+                    removeChar(equation, i, 5);
                     i += 5;
                 }
                 else if (strncmp(arr, "SQRT_3", 6) == 0)
                 {
-                    copy[i] = 'R';
-                    removeChar(copy, i, 5);
+                    equation[i] = 'R';
+                    removeChar(equation, i, 5);
                     i += 5;
                 }
+                else if (strncmp(arr, "SILVER_RT", 9) == 0)
+                {
+                    equation[i] = 'Y';
+                    removeChar(equation, i, 8);
+                    i += 8;
+                }
             }
-            else if (copy[i] == 'E');
-            else if (copy[i] == 'n')
+            else if (equation[i] == 'n')
             {
                 if (strncmp(arr, "nPr", 3) == 0)
                 {
-                    copy[i] = 'P';
-                    removeChar(copy, i, 2);
+                    equation[i] = 'P';
+                    removeChar(equation, i, 2);
                     i += 2;
                 }
                 else if (strncmp(arr, "nCr", 3) == 0)
                 {
-                    copy[i] = 'C';
-                    removeChar(copy, i, 2);
+                    equation[i] = 'C';
+                    removeChar(equation, i, 2);
                     i += 2;
                 }
+                else if (equation[i] == 'E');
                 else
                     return NAN;
             }
@@ -125,36 +129,27 @@ double solveEquation(char* input)
         }
     }
 
-    setUp(copy);
+    setUp(equation);
 
-    times = numberOfOperations(copy);
+    times = numberOfOperations(equation);
 
     char* state = (char*) malloc(times);
     int positions[times + 1];
     memset(positions, -1, times + 1);
 
-    for (int i = 0; i < strlen(copy); i++)
+    for (int i = 0; i < strlen(equation); i++)
     {
-        if (validateOperation(copy[i]) == 0)
-        {
-            if (copy[i] == '-' || copy[i] == '+')
-                multiply++;
-            strncat(state, &copy[i], 1);
-        }
+        if (validateOperation(equation[i]) == 0)
+            strncat(state, &equation[i], 1);
     }
 
-    x = multiply;
-
-    if (multiply == 0)
-        multiply++;
-
-    for (int i = 0, n = strlen(copy); i < strlen(copy); i++)
+    for (int i = 0, n = strlen(equation); i < strlen(equation); i++)
     {
-        if (isdigit(copy[i]))
+        if (isdigit(equation[i]))
         {
             if (i > 0)
             {
-                if (!isdigit(copy[i - 1]) && copy[i - 1] != 'm' && copy[i - 1] != '.')
+                if (!isdigit(equation[i - 1]) && equation[i - 1] != 'm' && equation[i - 1] != '.')
                 {
                     positions[posIndex] = i;
                     posIndex++;
@@ -162,7 +157,7 @@ double solveEquation(char* input)
             }
             else
             {
-                if (copy[i + 1] != '!')
+                if (equation[i + 1] != '!')
                 {
                     positions[posIndex] = i;
                     posIndex++;
@@ -171,15 +166,15 @@ double solveEquation(char* input)
         }
         else
         {
-            if (copy[i] == '-' && isdigit(copy[i + 1]) && !isdigit(copy[i - 1]))
+            if (equation[i] == '-' && isdigit(equation[i + 1]) && !isdigit(equation[i - 1]))
             {
-                copy[i] = 'm';
+                equation[i] = 'm';
                 positions[posIndex] = i;
                 posIndex++;
                 times--;
                 push_back(state, 0);
             }
-            else if (validateConstantChar(copy[i]))
+            else if (validateConstantChar(equation[i]))
             {
                 positions[posIndex] = i;
                 posIndex++;
@@ -193,7 +188,7 @@ double solveEquation(char* input)
     //Get all the numbers
     for (int i = 0; i < times + 1; i++)
     {
-        nums[i] = convertFloat(copy, nums[i], positions[i], strlen(copy));
+        nums[i] = convertFloat(equation, nums[i], positions[i], strlen(equation));
         //Check for maximum / minimum / NAN
         if (nums[0] == NAN)
             return NAN;
@@ -249,8 +244,7 @@ double solveEquation(char* input)
             total += nums[i + 1];
             nums[i] = 0;
         }
-        if (x == 0)
-            total = nums[i + 1];
+
     }
     //Assign total the first non-zero number
     for (int i = 0; i < times + 1; i++)
@@ -284,7 +278,7 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
     int numNum = 1;
     short divide = 10;
 
-    //Used to covert copy string to a float
+    //Used to covert equation string to a float
     for (int i = startIndex; i < endIndex; i++)
     {
         //This code is in charge of switching from adding integer parts to adding decimals
@@ -301,29 +295,41 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
             //If input[i] is a valid operation, this implies that the first number has terminated
             else if (validateOperation(input[i]) == 0)
                     break;
+            //Pi
             else if (input[i] == '!')
             {
                 total = getMathConstant(input, i, M_PI);
                 break;
             }
+            //Golden Ratio
             else if (input[i] == 'G')
             {
                 total = getMathConstant(input, i, GOLDEN_RT);
                 break;
             }
+            //Square root of 2
             else if (input[i] == 'T')
             {
                 total = getMathConstant(input, i, M_SQRT2);
                 break;
             }
+            //Square root of 3
             else if (input[i] == 'R')
             {
                 total = getMathConstant(input, i, M_SQRT_3);
                 break;
             }
+            //Euler's number
             else if (input[i] == 'E')
             {
                 total = getMathConstant(input, i, M_E);
+                break;
+            }
+            //Silver Ratio
+            else if (input[i] == 'Y')
+            {
+                total = getMathConstant(input, i, SILVER_RT);
+                break;
             }
             else if (input[i] == 'm')
                     multNeg = -1;
