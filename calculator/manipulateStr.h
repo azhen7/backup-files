@@ -1,4 +1,4 @@
-#include <string.h>
+v#include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
@@ -31,10 +31,17 @@ unsigned int validNext(char c)
         return 0;
     return 1;
 }
-//Check whether char is first character of math constant (e.g. PI)
+//Check whether char is representative of a math constant (e.g. PI)
 unsigned int validateConstantChar(char c)
 {
-    if (c == '!' || c == 'T' || c == 'R' || c == 'G' || c == 'E')
+    if (c == '!' || c == 'T' || c == 'R' || c == 'G' || c == 'E' || c == 'Y' || c == 'A')
+        return 1;
+    return 0;
+}
+//Check whether char is first character of math constant
+unsigned int validateConstantFirstChar(char c)
+{
+    if (c == 'P' || c == 'G' || c == 'S' || c == 'R' || c == 'A' || c == 'C')
         return 1;
     return 0;
 }
@@ -71,7 +78,7 @@ void formatInput(char* input)
         }
         if (input[i] == ' ')
         {
-            if (isdigit(input[i + 1]) || validateRoot(input[i + 1]) == 0)
+            if (isdigit(input[i + 1]))
             {
                 operation = 0;
                 encounteredSpace = 0;
@@ -86,7 +93,7 @@ void formatInput(char* input)
         {
             strncat(formattedInput, &input[i], 1);
             encounteredSpace = 0;
-            if (validateOperation(input[i + 1]) == 0)
+            if (validateOperation(input[i + 1]) == 0 && !validateConstantFirstChar(input[i + 1]))
                 strcat(formattedInput, " ");
         }
     }
