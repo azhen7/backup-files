@@ -27,10 +27,12 @@
  *
  * - 5/28/2021: Version 1.06
  *      - sqrt and cbrt has been removed
- *      - Added root() function (root(a, b) returns bth root of a (e.g. root(4, 2) returns square root of 4))
+ *      - Added root() function (root(a, b) returns bth root of a)
  *          - Bug 12 (a root( + b, c returns value of a + root(b, c)) - PATCHED
  *          - Bug 13 (a + root(b, c) = NAN) - PATCHED
  *          - Bug 14 (4 nCr 2 = 2 * the correct value) - PATCHED
+ *      - Added log_base function (log_base(a, b) returns log base b of a)
+ *      - Added GCD and LCM functions
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -124,6 +126,14 @@ double solveEquation(char* input)
                     removeChar(equation, i, 8);
                     i += 8;
                 }
+                else if (strncmp(arr, "GCD(", 4) == 0)
+                {
+                    removeChar(equation, i - 1, 4);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "3");
+                }
                 else
                     return NAN;
             }
@@ -152,7 +162,6 @@ double solveEquation(char* input)
             }
             else if (equation[i] == 'r')
             {
-                //cbrt
                 if (strncmp(arr, "root(", 5) == 0)
                 {
                     removeChar(equation, i - 1, 5);
@@ -160,6 +169,32 @@ double solveEquation(char* input)
                     numberOfFunctions++;
                     i += 5;
                     strcat(functions, "1");
+                }
+                else
+                    return NAN;
+            }
+            else if (equation[i] == 'l')
+            {
+                if (strncmp(arr, "log(", 4) == 0)
+                {
+                    removeChar(equation, i - 1, 4);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "2");
+                }
+                else
+                    return NAN;
+            }
+            else if (equation[i] == 'L')
+            {
+                if (strncmp(arr, "LCM(", 4) == 0)
+                {
+                    removeChar(equation, i - 1, 4);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "4");
                 }
                 else
                     return NAN;
@@ -292,6 +327,20 @@ double solveEquation(char* input)
         }
         if (functions[i] == '1')
             nums[location] = pow(nums[location], 1 / nums[location + 1]);
+        else if (functions[i] == '2')
+            nums[location] = log_base(nums[location], nums[location + 1]);
+        else if (functions[i] == '3')
+        {
+            if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
+                return NAN;
+            nums[location] = calculateGCD(nums[location], nums[location + 1]);
+        }
+        else if (functions[i] == '4')
+        {
+            if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
+                return NAN;
+            nums[location] = fabs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
+        }
         index++;
     }
     //Modulo operation
@@ -453,31 +502,24 @@ double returnValueOfMathConstant(char* input, int i)
     //Pi
     if (input[i] == '!')
         return getMathConstant(input, i, M_PI);
-
     //Golden Ratio
     else if (input[i] == 'G')
         return getMathConstant(input, i, GOLDEN_RT);
-
     //Square root of 2
     else if (input[i] == 'T')
         return getMathConstant(input, i, M_SQRT2);
-
     //Square root of 3
     else if (input[i] == 'R')
         return getMathConstant(input, i, M_SQRT_3);
-
     //Euler's number
     else if (input[i] == 'E')
         return getMathConstant(input, i, M_E);
-
     //Silver Ratio
     else if (input[i] == 'Y')
         return getMathConstant(input, i, SILVER_RT);
-
     //Apery's Constant
     else if (input[i] == 'A')
         return getMathConstant(input, i, APERY_CONST);
-
     return 0.0;
 }
 
