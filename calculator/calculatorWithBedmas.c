@@ -350,6 +350,7 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
     return total;
 }
 
+//Get value of math constant multiplied by coefficient
 double getMathConstant(char* input, int index, float mathConstant)
 {
     float value = 0.0, coefForConsts;
@@ -373,6 +374,7 @@ double getMathConstant(char* input, int index, float mathConstant)
     return value;
 }
 
+//Return value of math constant multiplied by coefficient
 double returnValueOfMathConstant(char* input, int i)
 {
     //Pi
