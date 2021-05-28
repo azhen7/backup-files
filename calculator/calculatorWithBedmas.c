@@ -361,10 +361,6 @@ double solveEquation(char* input)
     if (times == 0)
         total = nums[0];
 
-    //If total = +/- infinity, return NAN
-    if (total == INFINITY)
-        return NAN;
-
     return total;
 }
 //Get first number of equation
