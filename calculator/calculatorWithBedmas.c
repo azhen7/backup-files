@@ -26,7 +26,8 @@
  *          - Bug 11 (a + sqrt(b) returns value of sqrt(a) + b) - PATCHED
  *
  * - 5/28/2021: Version 1.06
- *      - Replaced sqrt and cbrt with root() function (root(a, b) returns bth root of a)
+ *      - sqrt and cbrt has been removed
+ *      - Added root() function (root(a, b) returns bth root of a (e.g. root(4, 2) returns square root of 4))
  *          - Bug 12 (a + root(b, c) = NAN) - PATCHED
 ****************************************************************************************************************/
 
