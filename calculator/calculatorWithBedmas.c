@@ -21,9 +21,13 @@
  * - 5/27/2021: Version 1.05
  *      - Added Silver Ratio, Apery's Constant.
  *      - Bug 9 (Seg fault when input string has no spaces) - PATCHED
- *      - Added sqrt() and cbrt()
+ *      - Added sqrt and cbrt
  *          - Bug 10 (sqrt(a) where a < 0 = 0) - PATCHED
  *          - Bug 11 (a + sqrt(b) returns value of sqrt(a) + b) - PATCHED
+ *
+ * - 5/28/2021: Version 1.06
+ *      - Replaced sqrt and cbrt with root() function (root(a, b) returns bth root of a)
+ *          - Bug 12 (a + root(b, c) = NAN) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -143,10 +147,10 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (equation[i] == 's')
+            else if (equation[i] == 'r')
             {
-                //sqrt
-                if (strncmp(arr, "sqrt(", 5) == 0)
+                //cbrt
+                if (strncmp(arr, "root(", 5) == 0)
                 {
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -154,18 +158,8 @@ double solveEquation(char* input)
                     i += 5;
                     strcat(functions, "1");
                 }
-            }
-            else if (equation[i] == 'c')
-            {
-                //cbrt
-                if (strncmp(arr, "cbrt(", 5) == 0)
-                {
-                    removeChar(equation, i - 1, 5);
-                    functionPositions[numberOfFunctions] = i;
-                    numberOfFunctions++;
-                    i += 5;
-                    strcat(functions, "2");
-                }
+                else
+                    return NAN;
             }
             else if (equation[i] == 'n')
             {
@@ -195,13 +189,29 @@ double solveEquation(char* input)
     times = numberOfOperations(equation);
 
     char* state = (char*) malloc(times);
+    int* operationPositions = (int*) malloc(times);
+    unsigned int operationPositionIndex = 0;
+    unsigned short numberOfSeperators = 0;
     int positions[times + 1];
     memset(positions, -1, times + 1);
 
     for (int i = 0; i < strlen(equation); i++)
     {
         if (validateOperation(equation[i]) == 0)
-            strncat(state, &equation[i], 1);
+        {
+            if (equation[i] != ',')
+            {
+                strncat(state, &equation[i], 1);
+                operationPositions[operationPositionIndex] = i;
+                operationPositionIndex++;
+            }
+            else
+            {
+                numberOfSeperators++;
+                if (strlen(functions) < numberOfSeperators)
+                    return NAN;
+            }
+        }
     }
 
     for (int i = 0; i < strlen(equation); i++)
@@ -259,20 +269,27 @@ double solveEquation(char* input)
     }
 
     unsigned int location = 0;
+    unsigned index = 0;
     for (int i = 0; i < numberOfFunctions; i++)
     {
         for (int j = 0; j < times + 1; j++)
         {
-            if (functionPositions[j] < positions[j])
+            if (functionPositions[index] < positions[j])
             {
-                location = j;
-                break;
+                if (functionPositions[index] > operationPositions[j - 1] && operationPositionIndex > 0)
+                {
+                    location = j;
+                    break;
+                }
+                else if (operationPositionIndex == 0)
+                    break;
+                else
+                    return NAN;
             }
         }
         if (functions[i] == '1')
-            nums[location] = squareRoot(nums[location]);
-        else if (functions[i] == '2')
-            nums[location] = cbrt(nums[location]);
+            nums[location] = pow(nums[location], 1 / nums[location + 1]);
+        index++;
     }
     //Modulo operation
     for (int i = 0; i < times; i++)
