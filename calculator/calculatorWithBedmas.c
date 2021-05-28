@@ -28,7 +28,8 @@
  * - 5/28/2021: Version 1.06
  *      - sqrt and cbrt has been removed
  *      - Added root() function (root(a, b) returns bth root of a (e.g. root(4, 2) returns square root of 4))
- *          - Bug 12 (a + root(b, c) = NAN) - PATCHED
+ *          - Bug 12 (a root( + b, c returns value of a + root(b, c)) - PATCHED
+ *          - Bug 13 (a + root(b, c) = NAN) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
