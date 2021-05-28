@@ -21,6 +21,9 @@
  * - 5/27/2021: Version 1.05
  *      - Added Silver Ratio, Apery's Constant.
  *      - Bug 9 (Seg fault when input string has no spaces) - PATCHED
+ *      - Added sqrt() and cbrt()
+ *          - Bug 10 (sqrt(a) where a < 0 = 0) - PATCHED
+ *          - Bug 11 (a + sqrt(b) returns value of sqrt(a) + b) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -59,6 +62,9 @@ double solveEquation(char* input)
     double total = 0.0;
     char* equation = (char*) malloc(strlen(input) * sizeof(char));
     char* arr = (char*) malloc(ARRAY_SIZE);
+    char* functions = (char*) malloc(strlen(input));
+    int* functionPositions = (int*) malloc(strlen(input));
+    unsigned int numberOfFunctions = 0;
 
     if (strlen(input) == 0)
         return NAN;
@@ -71,7 +77,6 @@ double solveEquation(char* input)
             return NAN;
     }
 
-    formatInput(input);
     strcpy(equation, input);
 
     if (strcmp(equation, "NAN") == 0)
@@ -115,15 +120,15 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (equation[i] == 'S' || equation[i] == 's')
+            else if (equation[i] == 'S')
             {
-                if (strncmp(arr, "SQRT_2", 6) == 0 || strncmp(arr, "sqrt_2", 2) == 0)
+                if (strncmp(arr, "SQRT_2", 6) == 0)
                 {
                     equation[i] = 'T';
                     removeChar(equation, i, 5);
                     i += 5;
                 }
-                else if (strncmp(arr, "SQRT_3", 6) == 0 || strncmp(arr, "sqrt_3", 3) == 0)
+                else if (strncmp(arr, "SQRT_3", 6) == 0)
                 {
                     equation[i] = 'R';
                     removeChar(equation, i, 5);
@@ -137,6 +142,30 @@ double solveEquation(char* input)
                 }
                 else
                     return NAN;
+            }
+            else if (equation[i] == 's')
+            {
+                //sqrt
+                if (strncmp(arr, "sqrt(", 5) == 0)
+                {
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "1");
+                }
+            }
+            else if (equation[i] == 'c')
+            {
+                //cbrt
+                if (strncmp(arr, "cbrt(", 5) == 0)
+                {
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "2");
+                }
             }
             else if (equation[i] == 'n')
             {
@@ -227,6 +256,23 @@ double solveEquation(char* input)
             return INFINITY;
         else if (nums[0] < LLONG_MIN)
             return -INFINITY;
+    }
+
+    unsigned int location = 0;
+    for (int i = 0; i < numberOfFunctions; i++)
+    {
+        for (int j = 0; j < times + 1; j++)
+        {
+            if (functionPositions[j] < positions[j])
+            {
+                location = j;
+                break;
+            }
+        }
+        if (functions[i] == '1')
+            nums[location] = squareRoot(nums[location]);
+        else if (functions[i] == '2')
+            nums[location] = cbrt(nums[location]);
     }
     //Modulo operation
     for (int i = 0; i < times; i++)
