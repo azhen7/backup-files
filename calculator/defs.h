@@ -15,8 +15,6 @@
 #define HERMITE_CONST 1.1547005         //Hermite's Constant (2 / sqrt(3) OR 1/cos(PI / 6))
 #define GELFOND_CONST 23.1406926327     //Gelfond's Constant (e ^ PI)
 
-//Used to solve equation
-double solveEquation(char* input);
 //Get the first number and number of operations
 double convertFloat(char* input, double total, int startIndex, int endIndex);
 unsigned int numberOfOperations(char* input);
