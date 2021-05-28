@@ -30,6 +30,7 @@
  *      - Added root() function (root(a, b) returns bth root of a (e.g. root(4, 2) returns square root of 4))
  *          - Bug 12 (a root( + b, c returns value of a + root(b, c)) - PATCHED
  *          - Bug 13 (a + root(b, c) = NAN) - PATCHED
+ *          - Bug 14 (4 nCr 2 = 2 * the correct value) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -328,15 +329,13 @@ double solveEquation(char* input)
         }
         else if (state[i] == 'C')
         {
-            nums[i + 1] = tgamma(nums[i] + 1) / (tgamma(nums[i + 1] + 1) * tgamma(nums[i] - nums[i + 1]));
-            nums[i + 1] /= 2;
+            nums[i + 1] = tgamma(nums[i] + 1) / (tgamma(nums[i + 1] + 1) * tgamma(nums[i] - nums[i + 1] + 1));
             total += nums[i + 1];
             nums[i] = 0;
         }
         else if (state[i] == 'P')
         {
-            nums[i + 1] = tgamma(nums[i] + 1) / tgamma(nums[i] - nums[i + 1]);
-            nums[i + 1] /= 2;
+            nums[i + 1] = tgamma(nums[i] + 1) / tgamma(nums[i] - nums[i + 1] + 1);
             total += nums[i + 1];
             nums[i] = 0;
         }
@@ -361,6 +360,10 @@ double solveEquation(char* input)
     }
     if (times == 0)
         total = nums[0];
+
+    //If total = +/- infinity, return NAN
+    if (total == INFINITY)
+        return NAN;
 
     return total;
 }
