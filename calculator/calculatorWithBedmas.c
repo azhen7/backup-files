@@ -25,6 +25,7 @@
 
 #include "defs.h"
 
+double solveEquation(char* input);
 double getMathConstant(char* input, int index, float mathConstant);
 double returnValueOfMathConstant(char* input, int i);
 
