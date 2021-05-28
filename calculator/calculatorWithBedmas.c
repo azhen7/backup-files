@@ -1,7 +1,9 @@
 /***************************************************************************************************************
  * Developper logs:
- * - 5/25/2021: Version 1.02 - Added PI functionality. Fix bug where it says "PI = 6.283..."
- * 
+ * - 5/25/2021: Version 1.02
+ *      - Added PI functionality.
+ *      - Note: Fix bug where it says "PI = 6.283..."
+ *
  * - 5/26/2021: Version 1.03
  *      - Bug 1 (incorrect value of PI) - PATCHED
  *      - Bug 2 (nCr and nPr doesn't work properly) - PATCHED
@@ -13,9 +15,11 @@
  *      - Bug 7 (where adding 5 of any number returns -nan) - PATCHED - Zeroing all elements is now handled manually instead of using memset()
  *      - Bug 8 (cPI has incorrect value, where c is a number (e.g. 2PI)) - PATCHED
  *
- * - 5/26/2021: Version 1.04 - Added the constants: Golden Ratio, Root 2, Root 3, Euler's number.
+ * - 5/26/2021: Version 1.04
+ *      - Added the constants: Golden Ratio, Root 2, Root 3, Euler's number.
  *
- * - 5/27/2021: Version 1.05 - Added Silver Ratio, Apery's Constant.
+ * - 5/27/2021: Version 1.05
+ *      - Added Silver Ratio, Apery's Constant.
  *      - Bug 9 (Seg fault when input string has no spaces) - PATCHED
 ****************************************************************************************************************/
 
