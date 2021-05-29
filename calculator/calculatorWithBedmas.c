@@ -34,9 +34,14 @@
  *      - Added log_base function (log_base(a, b) returns log base b of a)
  *      - Added GCD and LCM functions
  *      - Bug 15 (a + root(b, c) = NAN) - PATCHED
- *      - Bug 16 (a * root(b, c) = NAN) - PATCHED
- *      - Bug 17 (root(b, c) + a has incorrect value) - PATCHED
- *      - Bug 18 (root(b, c) * a has incorrect value) - PATCHED
+ *      - Bug 16 (root(b, c) + a has incorrect value) - PATCHED
+ *      - Bug 17 (root(b, c) * a has incorrect value) - PATCHED
+ *
+ * - 5/29/2021: Version 1.07
+ *      - Bug 18 (a * root(b, c) has incorrect value) - PATCHED
+ *      - Bug 19 (root(b, c) * a = NULL) - PATCHED
+ *      - Bug 20 (Seg fault after entering root(b, c)) - PATCHED
+ *      - Bug 21 (sin(9) = NAN) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -187,6 +192,8 @@ double solveEquation(char* input)
                     i += 4;
                     strcat(functions, "4");
                 }
+                else
+                    return NAN;
             }
             else if (equation[i] == 'l')
             {
@@ -231,6 +238,17 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            else if (equation[i] == 'c')
+            {
+                if (strncmp(arr, "cos(", 4) == 0)
+                {
+                    removeChar(equation, i - 4, 4);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "5");
+                }
+            }
             else if (equation[i] == 'E');
             else
                 return NAN;
@@ -242,16 +260,14 @@ double solveEquation(char* input)
     times = numberOfOperations(equation);
 
     char* state = (char*) malloc(times);
-    int* operationPositions = (int*) malloc(times);
+    int operationPositions[times];
     int numberOfOperationsLeadingUpToFunction[times];
-    unsigned int operationPositionIndex = 0;
-    unsigned short numberOfSeperators = 0;
+    unsigned short operationPositionIndex = 0, numberOfSeperators = 0;
     int positions[times + 1];
     memset(positions, -1, times + 1);
+
     for (int i = 0; i < times; i++)
-    {
         numberOfOperationsLeadingUpToFunction[i] = 0;
-    }
 
     for (int i = 0; i < strlen(equation); i++)
     {
@@ -273,6 +289,8 @@ double solveEquation(char* input)
         }
     }
 
+    unsigned int seperatorPositions[numberOfSeperators];
+    numberOfSeperators = 0;
     for (int i = 0; i < strlen(equation); i++)
     {
         if (isdigit(equation[i]))
@@ -325,6 +343,12 @@ double solveEquation(char* input)
             return INFINITY;
         else if (nums[0] < LLONG_MIN)
             return -INFINITY;
+
+        if (state[i] == ',')
+        {
+            seperatorPositions[numberOfSeperators] = i;
+            numberOfSeperators++;
+        }
     }
 
     unsigned int location = 0;
@@ -335,12 +359,12 @@ double solveEquation(char* input)
         {
             if (functionPositions[index] < positions[j])
             {
-                if (functionPositions[index] > operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
+                if (functionPositions[index] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
                 {
                     location = j;
                     break;
                 }
-                else if (state[0] == ',')
+                else if (state[0] == ',' || j == 0)
                     break;
                 else
                     return NAN;
@@ -350,13 +374,29 @@ double solveEquation(char* input)
         if (functions[i] == '0')
         {
             nums[location + 1] = pow(nums[location], 1 / nums[location + 1]);
-            nums[location] = 0;
+            if (seperatorPositions[i] == 0)
+                nums[location] = 0;
+            else
+            {
+                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                    nums[location] = 1;
+                else
+                    nums[location] = 0;
+            }
         }
         //log
         else if (functions[i] == '1')
         {
             nums[location + 1] = log_base(nums[location], nums[location + 1]);
-            nums[location] = 0;
+            if (seperatorPositions[i] == 0)
+                nums[location] = 0;
+            else
+            {
+                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                    nums[location] = 1;
+                else
+                    nums[location] = 0;
+            }
         }
         //GCD
         else if (functions[i] == '2')
@@ -364,7 +404,15 @@ double solveEquation(char* input)
             if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
                 return NAN;
             nums[location + 1] = calculateGCD(nums[location], nums[location + 1]);
-            nums[location] = 0;
+            if (seperatorPositions[i] == 0)
+                nums[location] = 0;
+            else
+            {
+                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                    nums[location] = 1;
+                else
+                    nums[location] = 0;
+            }
         }
         //LCM
         else if (functions[i] == '3')
@@ -372,13 +420,25 @@ double solveEquation(char* input)
             if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
                 return NAN;
             nums[location + 1] = fabs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
-            nums[location] = 0;
+            if (seperatorPositions[i] == 0)
+                nums[location] = 0;
+            else
+            {
+                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                    nums[location] = 1;
+                else
+                    nums[location] = 0;
+            }
         }
         //sin
         else if (functions[i] == '4')
             nums[location] = sin(nums[location]);
+        //cos
+        else if (functions[i] == '5')
+            nums[location] = cos(nums[location]);
         index++;
     }
+
     //Modulo operation
     for (int i = 0; i < times; i++)
     {
@@ -386,14 +446,13 @@ double solveEquation(char* input)
         {
             nums[i + 1] = fmod(nums[i], nums[i + 1]);
             nums[i] = 0 + 1 * (state[i + 1] == '*' || state[i + 1] == '/');
-            if (state[i - 1] == '+')
-                state[i] = '+';
-            else if (state[i - 1] == '-')
-                state[i] = '-';
-            else if (state[i - 1] == '*')
-                state[i] = '*';
-            else if (state[i - 1] == '/')
-                state[i] = '/';
+            if (state[i - 1] != 'C' && state[i - 1] != 'P')
+                state[i] = state[i - 1];
+        }
+        else if (state[i] == ',')
+        {
+            if (state[i - 1] != 'C' && state[i - 1] != 'P')
+                state[i] = state[i - 1];
         }
     }
     //Multiplications, Division, nCr, nPr
@@ -403,14 +462,16 @@ double solveEquation(char* input)
         {
             nums[i + 1] *= nums[i];
             nums[i] = 0;
-            state[i] = state[i - 1];
+            if (state[i - 1] != 'C' && state[i - 1] != 'P')
+                state[i] = state[i - 1];
         }
         else if (state[i] == '/')
         {
             nums[i] /= nums[i + 1];
             nums[i + 1] = nums[i];
             nums[i] = 0;
-            state[i] = state[i - 1];
+            if (state[i - 1] != 'C' && state[i - 1] != 'P')
+                state[i] = state[i - 1];
         }
         else if (state[i] == 'C')
         {
@@ -438,12 +499,6 @@ double solveEquation(char* input)
     //Addition, Subtraction
     for (int i = 0; i < operationPositionIndex + 1; i++)
     {
-        if (state[i] == ',' && i > 0)
-        {
-            if (state[i] == 'C' || state[i] == 'P');
-            else
-                state[i] = state[i - 1];
-        }
         if (state[i] == '+')
             total += nums[i + 1];
         else if (state[i] == '-')
