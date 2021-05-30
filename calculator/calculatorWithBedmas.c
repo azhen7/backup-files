@@ -11,7 +11,7 @@
  *      - Bug 4 (incorrect value of a % b + c) - PATCHED
  *      - Bug 5 (incorrect value of a + b % c) - PATCHED
  *      - Bug 6 (fraction addition doesn't work) - PATCHED
- *      - Bug 7 (where adding 5 of any number returns -nan) - PATCHED - Zeroing all elements is now handled manually instead of using memset()
+ *      - Bug 7 (where adding 5 numbers returns -nan) - PATCHED - Zeroing all elements is now handled manually instead of using memset()
  *      - Bug 8 (cPI has incorrect value, where c is a number (e.g. 2PI)) - PATCHED
  *      - Added the constants: Golden Ratio, Root 2, Root 3, Euler's number.
  *
@@ -44,6 +44,8 @@
  * - 5/30/2021: Version 1.07
  *      - Added base converter - you can convert numbers in different bases. Type "convert bases" to
  *        use the number base converter
+ *      - Bug 22 (tan( + 4 + 4 returns value of tan(4) + 4) - PATCHED - Now, nums[location] is checked for whether
+ *        it is before next operation
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -99,7 +101,7 @@ int main(void)
                 if (convertedValue != NULL)
                     printf("Your input in base %i is: %s\n\n", base_convert, convertedValue);
                 else
-                    printf("malloc(): memory allocation failed.\n Operation discontinued.")
+                    printf("malloc(): memory allocation failed.\n Operation discontinued.");
             }
         }
         else
@@ -335,12 +337,10 @@ double solveEquation(char* input)
         if (validateOperation(equation[i]) == 0)
         {
             strncat(state, &equation[i], 1);
+            operationPositions[operationPositionIndex] = i;
+            operationPositionIndex++;
             if (equation[i] != ',')
-            {
-                operationPositions[operationPositionIndex] = i;
-                operationPositionIndex++;
                 numberOfOperationsLeadingUpToFunction[strlen(functions)]++;
-            }
             else
             {
                 numberOfSeperators++;
@@ -420,12 +420,13 @@ double solveEquation(char* input)
         {
             if (functionPositions[index] < positions[j])
             {
-                if (functionPositions[index] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
+                if (functionPositions[index] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0
+                    && positions[j] <= operationPositions[j])
                 {
                     location = j;
                     break;
                 }
-                else if (state[0] == ',' || j == 0)
+                else if ((state[0] == ',' || j == 0) && positions[j] <= operationPositions[j])
                     break;
                 else
                     return NAN;
