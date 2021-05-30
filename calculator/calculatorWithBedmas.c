@@ -41,6 +41,7 @@
  *      - Bug 19 (root(b, c) * a = NULL) - PATCHED
  *      - Bug 20 (Seg fault after entering root(b, c)) - PATCHED
  *      - Bug 21 (sin(9) = NAN) - PATCHED
+ *      - New feature: If result returned is an integer, now, 0 decimal places are printed
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -68,7 +69,10 @@ int main(void)
         fputs("\033[A\033[2K", stdout);
         rewind(stdout);
 
-        printf("%s = %f\n", getEquation, result);
+        if (result == (int) result)
+            printf("%s = %.0f\n", getEquation, result);
+        else
+            printf("%s = %f\n", getEquation, result);
         putchar('\n');
     }
 }
