@@ -13,18 +13,16 @@
  *      - Bug 6 (fraction addition doesn't work) - PATCHED
  *      - Bug 7 (where adding 5 of any number returns -nan) - PATCHED - Zeroing all elements is now handled manually instead of using memset()
  *      - Bug 8 (cPI has incorrect value, where c is a number (e.g. 2PI)) - PATCHED
- *
- * - 5/26/2021: Version 1.04
  *      - Added the constants: Golden Ratio, Root 2, Root 3, Euler's number.
  *
- * - 5/27/2021: Version 1.05
+ * - 5/27/2021: Version 1.04
  *      - Added Silver Ratio, Apery's Constant.
  *      - Bug 9 (Seg fault when input string has no spaces) - PATCHED
  *      - Added sqrt and cbrt
  *          - Bug 10 (sqrt(a) where a < 0 = 0) - PATCHED
  *          - Bug 11 (a + sqrt(b) returns value of sqrt(a) + b) - PATCHED
  *
- * - 5/28/2021: Version 1.06
+ * - 5/28/2021: Version 1.05
  *      - sqrt and cbrt has been removed
  *      - Added root() function (root(a, b) returns bth root of a)
  *          - Bug 12 (a root( + b, c returns value of a + root(b, c)) - PATCHED
@@ -36,12 +34,16 @@
  *      - Bug 16 (root(b, c) + a has incorrect value) - PATCHED
  *      - Bug 17 (root(b, c) * a has incorrect value) - PATCHED
  *
- * - 5/29/2021: Version 1.07
+ * - 5/29/2021: Version 1.06
  *      - Bug 18 (a * root(b, c) has incorrect value) - PATCHED
  *      - Bug 19 (root(b, c) * a = NULL) - PATCHED
  *      - Bug 20 (Seg fault after entering root(b, c)) - PATCHED
  *      - Bug 21 (sin(9) = NAN) - PATCHED
  *      - New feature: If result returned is an integer, now, 0 decimal places are printed
+ *
+ * - 5/30/2021: Version 1.07
+ *      - Added base converter - you can convert numbers in different bases. Type "convert bases" to
+ *        use the number base converter
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -52,10 +54,18 @@ unsigned int numberOfOperations(char* input);
 double getMathConstant(char* input, int index, float mathConstant);
 double returnValueOfMathConstant(char* input, int i);
 
+char* invert_letters(char* input);
+char* convert(char* input, int base_input, int base_convert);
+int validateInput(char* input, int base_input);
+long int convertBaseTen(char* input, int base_input);
+
 int main(void)
 {
     char* getEquation = NULL;
     double result = 0.0;
+    int base_input;
+    int base_convert;
+    char* convertedValue;
 
     system("clear");
     printf("Enter a bunch of equations below: \n");
@@ -63,17 +73,50 @@ int main(void)
     while (1)
     {
         getEquation = get_string("");
-        result = solveEquation(getEquation);
 
-        //Erase equation typed by user
-        fputs("\033[A\033[2K", stdout);
-        rewind(stdout);
+        if (strcmp(getEquation, "convert bases") == 0)
+        {
+            do
+            {
+                base_input = get_int("Enter base of input: ");
+            }
+            while (base_input > 36 || base_input < 2);
 
-        if (result == (int) result)
-            printf("%s = %.0f\n", getEquation, result);
+            do
+            {
+                base_convert = get_int("Enter base to convert input to: ");
+            }
+            while (base_convert > 36 || base_input < 2);
+
+            getEquation = get_string("Enter input: ");
+
+            if (validateInput(getEquation, base_input))
+                printf("Invalid input.\n\n");
+            else
+            {
+                convertedValue = convert(getEquation, base_input, base_convert);
+
+                if (convertedValue != NULL)
+                    printf("Your input in base %i is: %s\n\n", base_convert, convertedValue);
+                else
+                    printf("malloc(): memory allocation failed.\n Operation discontinued.")
+            }
+        }
         else
-            printf("%s = %f\n", getEquation, result);
-        putchar('\n');
+        {
+            result = solveEquation(getEquation);
+
+            //Erase equation typed by user
+            fputs("\033[A\033[2K", stdout);
+            rewind(stdout);
+
+            if (fabs(round(result) - result) < 0.000001)
+                printf("%s = %.0f\n", getEquation, result);
+            else
+                printf("%s = %f\n", getEquation, result);
+
+            putchar('\n');
+        }
     }
 }
 
@@ -251,6 +294,21 @@ double solveEquation(char* input)
                     i += 4;
                     strcat(functions, "5");
                 }
+                else
+                    return NAN;
+            }
+            else if (equation[i] == 't')
+            {
+                if (strncmp(arr, "tan(", 4) == 0)
+                {
+                    removeChar(equation, i - 4, 4);
+                    functionPositions[numberOfFunctions] = 1;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "6");
+                }
+                else
+                    return NAN;
             }
             else if (equation[i] == 'E');
             else
@@ -439,6 +497,9 @@ double solveEquation(char* input)
         //cos
         else if (functions[i] == '5')
             nums[location] = cos(nums[location]);
+        //tan
+        else if (functions[i] == '6')
+            nums[location] = tan(nums[location]);
         index++;
     }
 
@@ -640,4 +701,155 @@ unsigned int numberOfOperations(char* input)
         }
     }
     return times;
+}
+
+
+//Functions for converting number bases
+char* invert_letters(char* input)
+{
+    char temp;
+    for (int i = 0, n = strlen(input); i < n / 2; i++)
+    {
+        temp = input[i];
+        input[i] = input[n - i - 1];
+        input[n - i - 1] = temp;
+    }
+    return input;
+}
+
+//Convert input
+char* convert(char* input, int base_input, int base_convert)
+{
+    long int decimalForm = 0;
+    int addToDecimal;
+
+    decimalForm = convertBaseTen(input, base_input);
+
+    //Allocate 50 bytes of memory for result
+    char* result = (char*) malloc(50 * sizeof(char));
+
+    if (result == NULL)
+        return NULL;
+
+    if (base_convert != 10 && base_input != 10)
+        printf("Converting to base 10: %li\n", decimalForm);
+
+    //If base_convert == base_input, the input in base_input is the same as the output in base_convert => 100 in base 5 = 100 in base 5
+    if (base_convert != base_input)
+    {
+        if (base_convert == 10)
+            sprintf(result, "%li", decimalForm);
+        else
+        {
+            int times = 0; //Number of times to divide input by base to convert to
+            int mod;
+            char temp = '\0';
+
+            addToDecimal = decimalForm;
+            while (addToDecimal != 0)
+            {
+                times++;
+                addToDecimal /= base_convert;
+            }
+
+            times++;
+
+            for (int i = 0; i < times && decimalForm != 0; i++)
+            {
+                //Find the remainder of decimalForm / base_convert. Update decimalForm to be the quotient of decimalForm / base_convert
+                mod = decimalForm % base_convert;
+                decimalForm /= base_convert;
+
+                //Append the remainder to the result array. If mod >= 10, append the mod in the form of letters
+                sprintf(&temp, "%c", mod + 48 + (7 * (mod >= 10)));
+
+                strcat(result, &temp);
+            }
+            if (base_convert == 16)
+                strcat(result, "x0");
+
+            //Read the remainders backwards
+            invert_letters(result);
+        }
+    }
+    else
+        sprintf(result, "%s", input);
+
+    return result;
+}
+
+//Validate the input
+int validateInput(char* input, int base_input)
+{
+    int addToDecimal;
+    //Check if input is valid
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (isdigit(input[i]))
+        {
+            addToDecimal = input[i] - '0';
+            if (addToDecimal > base_input - 1)
+                return 1;
+        }
+        else if (isalpha(input[i]))
+        {
+            if (base_input <= 10)
+                return 1;
+            else
+            {
+                if (islower(input[i]))
+                {
+                    if (input[i] - 87 > base_input - 1)
+                        return 1;
+                }
+                else if (isupper(input[i]))
+                {
+                    if (input[i] - 55 > base_input - 1)
+                        return 1;
+                }
+            }
+        }
+        else
+            return 1;
+    }
+    return 0;
+}
+
+long int convertBaseTen(char* input, int base_input)
+{
+    long int decimal = 0;
+    int addToDecimal = 0;
+
+    //Convert input to decimal
+    if (base_input == 10)
+        decimal = atoi(input);
+    else
+    {
+        //Convert input to base 10
+        for (int i = 0, n = strlen(input); i < n; i++)
+        {
+            if (isdigit(input[i]))
+            {
+                addToDecimal = input[i] - '0';
+                addToDecimal *= pow(base_input, n - i - 1);
+                decimal += addToDecimal;
+            }
+            else if (isalpha(input[i]))
+            {
+                if (isupper(input[i]))
+                {
+                    addToDecimal = (int) input[i] - 55;
+                    addToDecimal *= pow(base_input, n - i - 1);
+                    decimal += addToDecimal;
+                }
+                else if (islower(input[i]))
+                {
+                    addToDecimal = (int) input[i] - 87;
+                    addToDecimal *= pow(base_input, n - i - 1);
+                    decimal += addToDecimal;
+                }
+            }
+        }
+    }
+    return decimal;
 }
