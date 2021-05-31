@@ -21,6 +21,7 @@
  *      - Added sqrt and cbrt
  *          - Bug 10 (sqrt(a) where a < 0 = 0) - PATCHED
  *          - Bug 11 (a + sqrt(b) returns value of sqrt(a) + b) - PATCHED
+ *      - Automatic text formatting function was removed.
  *
  * - 5/28/2021: Version 1.05
  *      - sqrt and cbrt has been removed
@@ -46,6 +47,10 @@
  *        use the number base converter
  *      - Bug 22 (tan( + 4 + 4 returns value of tan(4) + 4) - PATCHED - Now, nums[location] is checked for whether
  *        it is before next operation
+ *      - Bug 23 (second input when first input starts with "cos(" or "tan(" displays error) - PATCHED
+ *      - Bug 24 (-a * b returns value of -a - b) - PATCHED
+ *      - Added E function (4E3)
+ *      - Update to nCr and nPr: you now cannot do a nCr b where a and/or b is a decimal
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -55,11 +60,6 @@ double convertFloat(char* input, double total, int startIndex, int endIndex);
 unsigned int numberOfOperations(char* input);
 double getMathConstant(char* input, int index, float mathConstant);
 double returnValueOfMathConstant(char* input, int i);
-
-char* invert_letters(char* input);
-char* convert(char* input, int base_input, int base_convert);
-int validateInput(char* input, int base_input);
-long int convertBaseTen(char* input, int base_input);
 
 int main(void)
 {
@@ -240,6 +240,14 @@ double solveEquation(char* input)
                     i += 4;
                     strcat(functions, "4");
                 }
+                else if (strncmp(arr, "sec(", 4) == 0)
+                {
+                    removeChar(equation, i - 1, 4);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "8");
+                }
                 else
                     return NAN;
             }
@@ -290,11 +298,27 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "cos(", 4) == 0)
                 {
-                    removeChar(equation, i - 4, 4);
+                    removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
                     i += 4;
                     strcat(functions, "5");
+                }
+                else if (strncmp(arr, "cosec(", 6) == 0)
+                {
+                    removeChar(equation, i - 1,  6);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 6;
+                    strcat(functions, "7");
+                }
+                else if (strncmp(arr, "cot(", 4) == 0)
+                {
+                    removeChar(equation, i - 1, 4);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "9");
                 }
                 else
                     return NAN;
@@ -303,7 +327,7 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "tan(", 4) == 0)
                 {
-                    removeChar(equation, i - 4, 4);
+                    removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = 1;
                     numberOfFunctions++;
                     i += 4;
@@ -312,7 +336,7 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (equation[i] == 'E');
+            else if (equation[i] == 'E' || equation[i] == 'e');
             else
                 return NAN;
         }
@@ -336,6 +360,8 @@ double solveEquation(char* input)
     {
         if (validateOperation(equation[i]) == 0)
         {
+            if (equation[i] == '-' && isdigit(equation[i + 1]) && !isdigit(equation[i - 1]))
+                continue;
             strncat(state, &equation[i], 1);
             operationPositions[operationPositionIndex] = i;
             operationPositionIndex++;
@@ -501,9 +527,32 @@ double solveEquation(char* input)
         //tan
         else if (functions[i] == '6')
             nums[location] = tan(nums[location]);
+        //cosecant
+        else if (functions[i] == '7')
+            nums[location] = cosec(nums[location]);
+        //secant
+        else if (functions[i] == '8')
+            nums[location] = sec(nums[location]);
+        //cotangent
+        else if (functions[i] == '9')
+            nums[location] = cot(nums[location]);
         index++;
     }
 
+    //E
+    for (int i = 0; i < times; i++)
+    {
+        if (state[i] == 'e')
+        {
+            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
+                return NAN;
+
+            nums[i + 1] = nums[i] * pow(10, nums[i + 1]);
+            nums[i] = 0 + 1 * (state[i + 1] == '*' || state[i + 1] == '/');
+            if (state[i - 1] != 'C' && state[i - 1] != 'P')
+                state[i] = state[i - 1];
+        }
+    }
     //Modulo operation
     for (int i = 0; i < times; i++)
     {
@@ -540,12 +589,18 @@ double solveEquation(char* input)
         }
         else if (state[i] == 'C')
         {
+            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
+                return NAN;
+
             nums[i + 1] = tgamma(nums[i] + 1) / (tgamma(nums[i + 1] + 1) * tgamma(nums[i] - nums[i + 1] + 1));
             total += nums[i + 1];
             nums[i] = 0;
         }
         else if (state[i] == 'P')
         {
+            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
+                return NAN;
+
             nums[i + 1] = tgamma(nums[i] + 1) / tgamma(nums[i] - nums[i + 1] + 1);
             total += nums[i + 1];
             nums[i] = 0;
@@ -611,7 +666,7 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
                     multNeg = -1;
             //If input[i] is a root, skip
             else if (input[i] == ' ')
-                continue;
+                break;
             else
                 return NAN;
         }
@@ -702,155 +757,4 @@ unsigned int numberOfOperations(char* input)
         }
     }
     return times;
-}
-
-
-//Functions for converting number bases
-char* invert_letters(char* input)
-{
-    char temp;
-    for (int i = 0, n = strlen(input); i < n / 2; i++)
-    {
-        temp = input[i];
-        input[i] = input[n - i - 1];
-        input[n - i - 1] = temp;
-    }
-    return input;
-}
-
-//Convert input
-char* convert(char* input, int base_input, int base_convert)
-{
-    long int decimalForm = 0;
-    int addToDecimal;
-
-    decimalForm = convertBaseTen(input, base_input);
-
-    //Allocate 50 bytes of memory for result
-    char* result = (char*) malloc(50 * sizeof(char));
-
-    if (result == NULL)
-        return NULL;
-
-    if (base_convert != 10 && base_input != 10)
-        printf("Converting to base 10: %li\n", decimalForm);
-
-    //If base_convert == base_input, the input in base_input is the same as the output in base_convert => 100 in base 5 = 100 in base 5
-    if (base_convert != base_input)
-    {
-        if (base_convert == 10)
-            sprintf(result, "%li", decimalForm);
-        else
-        {
-            int times = 0; //Number of times to divide input by base to convert to
-            int mod;
-            char temp = '\0';
-
-            addToDecimal = decimalForm;
-            while (addToDecimal != 0)
-            {
-                times++;
-                addToDecimal /= base_convert;
-            }
-
-            times++;
-
-            for (int i = 0; i < times && decimalForm != 0; i++)
-            {
-                //Find the remainder of decimalForm / base_convert. Update decimalForm to be the quotient of decimalForm / base_convert
-                mod = decimalForm % base_convert;
-                decimalForm /= base_convert;
-
-                //Append the remainder to the result array. If mod >= 10, append the mod in the form of letters
-                sprintf(&temp, "%c", mod + 48 + (7 * (mod >= 10)));
-
-                strcat(result, &temp);
-            }
-            if (base_convert == 16)
-                strcat(result, "x0");
-
-            //Read the remainders backwards
-            invert_letters(result);
-        }
-    }
-    else
-        sprintf(result, "%s", input);
-
-    return result;
-}
-
-//Validate the input
-int validateInput(char* input, int base_input)
-{
-    int addToDecimal;
-    //Check if input is valid
-    for (int i = 0; i < strlen(input); i++)
-    {
-        if (isdigit(input[i]))
-        {
-            addToDecimal = input[i] - '0';
-            if (addToDecimal > base_input - 1)
-                return 1;
-        }
-        else if (isalpha(input[i]))
-        {
-            if (base_input <= 10)
-                return 1;
-            else
-            {
-                if (islower(input[i]))
-                {
-                    if (input[i] - 87 > base_input - 1)
-                        return 1;
-                }
-                else if (isupper(input[i]))
-                {
-                    if (input[i] - 55 > base_input - 1)
-                        return 1;
-                }
-            }
-        }
-        else
-            return 1;
-    }
-    return 0;
-}
-
-long int convertBaseTen(char* input, int base_input)
-{
-    long int decimal = 0;
-    int addToDecimal = 0;
-
-    //Convert input to decimal
-    if (base_input == 10)
-        decimal = atoi(input);
-    else
-    {
-        //Convert input to base 10
-        for (int i = 0, n = strlen(input); i < n; i++)
-        {
-            if (isdigit(input[i]))
-            {
-                addToDecimal = input[i] - '0';
-                addToDecimal *= pow(base_input, n - i - 1);
-                decimal += addToDecimal;
-            }
-            else if (isalpha(input[i]))
-            {
-                if (isupper(input[i]))
-                {
-                    addToDecimal = (int) input[i] - 55;
-                    addToDecimal *= pow(base_input, n - i - 1);
-                    decimal += addToDecimal;
-                }
-                else if (islower(input[i]))
-                {
-                    addToDecimal = (int) input[i] - 87;
-                    addToDecimal *= pow(base_input, n - i - 1);
-                    decimal += addToDecimal;
-                }
-            }
-        }
-    }
-    return decimal;
 }
