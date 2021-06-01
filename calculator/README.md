@@ -4,6 +4,4 @@ This is the folder which contains all the code for my calculator. The file "calc
 
 All the other files contain header file definitions and functions which I need in my calculator.
 
-```c
-printf("azhen7 out\n");
-```
+I will add things (and potentially bug fix things) to the calculator on a daily basis.
