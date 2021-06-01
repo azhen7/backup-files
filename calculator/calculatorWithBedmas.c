@@ -49,7 +49,7 @@
  *      - Bug 23 (second input when first input starts with "cos(" or "tan(" displays error) - PATCHED
  *      - Bug 24 (-a * b returns value of -a - b) - PATCHED
  *      - Added E function (4E3)
- *      - Update to nCr and nPr: you now cannot do a nCr b where b is a decimal
+ *      - Update to nCr and nPr: you now cannot do "a nCr b" where b is a decimal
  *
  *  - 5/31/2021: Version 1.08
  *      - Bug 25 (a + sin(b) returns value of sin(b)) - PATCHED
@@ -59,6 +59,12 @@
  *      - Re-added sqrt and cbrt for convenience
  *      - Added square and cube functions (which square and cube a number, respectively)
  *      - Added code that checks for double decimal points
+ *
+ *  - 6/1/2021: Version 1.09
+ *      - Bug 26 (square(b) = NAN) - PATCHED
+ *      - Bug 27 (log(9 + 2 returns a value, not NAN) - PATCHED
+ *      - Added ln and log for convenience
+ *      - Changed iterative log from "iterate_log(" to "log*("
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -290,21 +296,12 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
-            else if (equation[i] == 'i')
-            {
-                if (strncmp(arr, "iterate_log", 11) == 0)
-                {
-                    removeChar(equation, i - 1, 11);
-                    functionPositions[numberOfFunctions] = i;
-                    numberOfFunctions++;
-                    i += 11;
-                    strcat(functions, "A");
-                }
-            }
             else if (equation[i] == 'r')
             {
                 if (strncmp(arr, "root(", 5) == 0)
                 {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
@@ -366,14 +363,14 @@ double solveEquation(char* input)
                     i += 5;
                     strcat(functions, "k");
                 }
-                else if (strncmp(arr, "square(", 6) == 0)
+                else if (strncmp(arr, "square(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 6]))
+                    if (!isdigit(equation[i + 7]))
                         return NAN;
-                    removeChar(equation, i - 1, 6);
+                    removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 6;
+                    i += 7;
                     strcat(functions, "m");
                 }
                 else
@@ -383,11 +380,43 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "log(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]))
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
                     i += 4;
                     strcat(functions, "1");
+                }
+                else if (strncmp(arr, "log*(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "A");
+                }
+                else if (strncmp(arr, "ln(", 3) == 0)
+                {
+                    if (!isdigit(equation[i + 3]))
+                        return NAN;
+                    removeChar(equation, i - 1, 3);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 3;
+                    strcat(functions, "o");
+                }
+                else if (strncmp(arr, "log10(", 6) == 0)
+                {
+                    if (!isdigit(equation[i + 6]))
+                        return NAN;
+                    removeChar(equation, i - 1, 6);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 6;
+                    strcat(functions, "p");
                 }
                 else
                     return NAN;
@@ -615,18 +644,17 @@ double solveEquation(char* input)
     }
 
     unsigned int location = 0;
-    unsigned index = 0;
     for (int i = 0; i < numberOfFunctions; i++)
     {
         for (int j = 0; j < times + 1; j++)
         {
-            if (functionPositions[index] < positions[j])
+            if (functionPositions[i] < positions[j])
             {
-                if (functionPositions[index] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
+                if (functionPositions[i] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
                 {
                     if (operationPositionIndex > 1)
                     {
-                        if (positions[j] <= operationPositions[j])
+                        if (positions[j] <= operationPositions[j] && state[j] == ',')
                         {
                             location = j;
                             break;
@@ -640,7 +668,7 @@ double solveEquation(char* input)
                         break;
                     }
                 }
-                else if (state[0] == ',' || j == 0)
+                else if (state[j] == ',')
                     break;
                 else
                     return NAN;
@@ -766,6 +794,12 @@ double solveEquation(char* input)
         //cube
         else if (functions[i] == 'n')
             nums[location] *= nums[location] * nums[location];
+        //natural log
+        else if (functions[i] == 'o')
+            nums[location] = log(nums[location]);
+        //log base 10
+        else if (functions[i] == 'p')
+            nums[location] = log10(nums[location]);
         //iterative log
         else if (functions[i] == 'A')
         {
@@ -780,7 +814,6 @@ double solveEquation(char* input)
                     nums[location] = 0;
             }
         }
-        index++;
     }
 
     //E
