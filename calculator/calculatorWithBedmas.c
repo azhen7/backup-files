@@ -551,7 +551,7 @@ double solveEquation(char* input)
 
     times = numberOfOperations(equation);
 
-    char* state = (char*) malloc(times);
+    char* operations = (char*) malloc(times);
     int operationPositions[times];
     int numberOfOperationsLeadingUpToFunction[times];
     unsigned short operationPositionIndex = 0, numberOfSeperators = 0;
@@ -567,7 +567,7 @@ double solveEquation(char* input)
         {
             if (equation[i] == '-' && isdigit(equation[i + 1]) && !isdigit(equation[i - 1]))
                 continue;
-            strncat(state, &equation[i], 1);
+            strncat(operations, &equation[i], 1);
             operationPositions[operationPositionIndex] = i;
             operationPositionIndex++;
             if (equation[i] != ',')
@@ -636,7 +636,7 @@ double solveEquation(char* input)
         else if (nums[0] < LLONG_MIN)
             return -INFINITY;
 
-        if (state[i] == ',')
+        if (operations[i] == ',')
         {
             seperatorPositions[numberOfSeperators] = i;
             numberOfSeperators++;
@@ -654,7 +654,7 @@ double solveEquation(char* input)
                 {
                     if (operationPositionIndex > 1)
                     {
-                        if (positions[j] <= operationPositions[j] && state[j] == ',')
+                        if (positions[j] <= operationPositions[j] && operations[j] == ',')
                         {
                             location = j;
                             break;
@@ -668,7 +668,7 @@ double solveEquation(char* input)
                         break;
                     }
                 }
-                else if (state[j] == ',')
+                else if (operations[j] == ',')
                     break;
                 else
                     return NAN;
@@ -682,7 +682,7 @@ double solveEquation(char* input)
                 nums[location] = 0;
             else
             {
-                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
                     nums[location] = 1;
                 else
                     nums[location] = 0;
@@ -696,7 +696,7 @@ double solveEquation(char* input)
                 nums[location] = 0;
             else
             {
-                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
                     nums[location] = 1;
                 else
                     nums[location] = 0;
@@ -712,7 +712,7 @@ double solveEquation(char* input)
                 nums[location] = 0;
             else
             {
-                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
                     nums[location] = 1;
                 else
                     nums[location] = 0;
@@ -728,7 +728,7 @@ double solveEquation(char* input)
                 nums[location] = 0;
             else
             {
-                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
                     nums[location] = 1;
                 else
                     nums[location] = 0;
@@ -808,7 +808,7 @@ double solveEquation(char* input)
                 nums[location] = 0;
             else
             {
-                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
                     nums[location] = 1;
                 else
                     nums[location] = 0;
@@ -819,52 +819,52 @@ double solveEquation(char* input)
     //E
     for (int i = 0; i < times; i++)
     {
-        if (state[i] == 'e')
+        if (operations[i] == 'e')
         {
             if ((int) nums[i + 1] != nums[i + 1])
                 return NAN;
 
             nums[i + 1] = (int) (nums[i] * pow(10, nums[i + 1]));
-            nums[i] = 0 + 1 * (state[i + 1] == '*' || state[i + 1] == '/');
-            if (state[i - 1] != 'C' && state[i - 1] != 'P')
-                state[i] = state[i - 1];
+            nums[i] = 0 + 1 * (operations[i + 1] == '*' || operations[i + 1] == '/');
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
         }
     }
     //Modulo operation
     for (int i = 0; i < times; i++)
     {
-        if (state[i] == '%')
+        if (operations[i] == '%')
         {
             nums[i + 1] = fmod(nums[i], nums[i + 1]);
-            nums[i] = 0 + 1 * (state[i + 1] == '*' || state[i + 1] == '/');
-            if (state[i - 1] != 'C' && state[i - 1] != 'P')
-                state[i] = state[i - 1];
+            nums[i] = 0 + 1 * (operations[i + 1] == '*' || operations[i + 1] == '/');
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
         }
-        else if (state[i] == ',')
+        else if (operations[i] == ',')
         {
-            if (state[i - 1] != 'C' && state[i - 1] != 'P')
-                state[i] = state[i - 1];
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
         }
     }
     //Multiplications, Division, nCr, nPr
     for (int i = 0; i < times; i++)
     {
-        if (state[i] == '*')
+        if (operations[i] == '*')
         {
             nums[i + 1] *= nums[i];
             nums[i] = 0;
-            if (state[i - 1] != 'C' && state[i - 1] != 'P')
-                state[i] = state[i - 1];
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
         }
-        else if (state[i] == '/')
+        else if (operations[i] == '/')
         {
             nums[i] /= nums[i + 1];
             nums[i + 1] = nums[i];
             nums[i] = 0;
-            if (state[i - 1] != 'C' && state[i - 1] != 'P')
-                state[i] = state[i - 1];
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
         }
-        else if (state[i] == 'C')
+        else if (operations[i] == 'C')
         {
             if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
                 return NAN;
@@ -872,7 +872,7 @@ double solveEquation(char* input)
             total += nums[i + 1];
             nums[i] = 0;
         }
-        else if (state[i] == 'P')
+        else if (operations[i] == 'P')
         {
             if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
                 return NAN;
@@ -894,9 +894,9 @@ double solveEquation(char* input)
     //Addition, Subtraction
     for (int i = 0; i < operationPositionIndex + 1; i++)
     {
-        if (state[i] == '+')
+        if (operations[i] == '+')
             total += nums[i + 1];
-        else if (state[i] == '-')
+        else if (operations[i] == '-')
             total -= nums[i + 1];
     }
     if (times == 0)
@@ -926,7 +926,7 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
             {
                 if (!isdigit(input[i + 1]))
                 {
-                    if (input[i + 1] == '.' || isalpha(input[i + 1]))
+                    if (input[i + 1] == '.' || isalpha(input[i + 1]) || isspace(input[i + 1]))
                         return NAN;
                     else
                         break;
