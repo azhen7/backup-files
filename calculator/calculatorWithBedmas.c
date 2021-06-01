@@ -286,6 +286,17 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            else if (equation[i] == 'i')
+            {
+                if (strncmp(arr, "iterate_log", 11) == 0)
+                {
+                    removeChar(equation, i - 1, 11);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 11;
+                    strcat(functions, "A");
+                }
+            }
             else if (equation[i] == 'r')
             {
                 if (strncmp(arr, "root(", 5) == 0)
@@ -330,6 +341,16 @@ double solveEquation(char* input)
                     numberOfFunctions++;
                     i += 5;
                     strcat(functions, "a");
+                }
+                else if (strncmp(arr, "sinc(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "j");
                 }
                 else
                     return NAN;
@@ -686,6 +707,23 @@ double solveEquation(char* input)
         //arctanh
         else if (functions[i] == 'i')
             nums[location] = atanh(nums[location]);
+        //sinc
+        else if (functions[i] == 'j')
+            nums[location] = sinc(nums[location]);
+        //iterative log
+        else if (functions[i] == 'A')
+        {
+            nums[location + 1] = iterative_log(nums[location], nums[location + 1]);
+            if (seperatorPositions[i] == 0)
+                nums[location] = 0;
+            else
+            {
+                if (state[seperatorPositions[i] - 1] == '*' || state[seperatorPositions[i] - 1] == '/')
+                    nums[location] = 1;
+                else
+                    nums[location] = 0;
+            }
+        }
         index++;
     }
 
