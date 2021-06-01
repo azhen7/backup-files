@@ -1,7 +1,6 @@
 /***************************************************************************************************************
  * - 5/25/2021: Version 1.02
  *      - Added PI functionality.
- *      - Note: Fix bug where it says "PI = 6.283..."
  *
  * - 5/26/2021: Version 1.03
  *      - Bug 1 (incorrect value of PI) - PATCHED
@@ -40,7 +39,7 @@
  *      - Bug 19 (root(b, c) * a = NULL) - PATCHED
  *      - Bug 20 (Seg fault after entering root(b, c)) - PATCHED
  *      - Bug 21 (sin(9) = NAN) - PATCHED
- *      - New feature: If result returned is an integer, now, 0 decimal places are printed
+ *      - New feature: If result returned is an integer, 0 decimal places are printed.
  *
  * - 5/30/2021: Version 1.07
  *      - Added base converter - you can convert numbers in different bases. Type "convert bases" to
@@ -50,7 +49,12 @@
  *      - Bug 23 (second input when first input starts with "cos(" or "tan(" displays error) - PATCHED
  *      - Bug 24 (-a * b returns value of -a - b) - PATCHED
  *      - Added E function (4E3)
- *      - Update to nCr and nPr: you now cannot do a nCr b where a and/or b is a decimal
+ *      - Update to nCr and nPr: you now cannot do a nCr b where b is a decimal
+ *
+ *  - 5/31/2021: Version 1.08
+ *      - Bug 25 (a + sin(b) returns value of sin(b)) - PATCHED
+ *      - Update to trig functions - If character right after "(" is not a number, NAN is returned
+ *      - Added arcsin, arccos, arctan, arcsinh, arccosh, arctanh
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -176,6 +180,71 @@ double solveEquation(char* input)
                 else
                     return NAN;
             }
+            else if (equation[i] == 'a')
+            {
+                if (strncmp(arr, "arcsin(", 7) == 0)
+                {
+                    if (!isdigit(equation[i + 7]))
+                        return NAN;
+                    removeChar(equation, i - 1, 7);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 7;
+                    strcat(functions, "d");
+                }
+                else if (strncmp(arr, "arccos(", 7) == 0)
+                {
+                    if (!isdigit(equation[i + 7]))
+                        return NAN;
+                    removeChar(equation, i - 1, 7);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 7;
+                    strcat(functions, "e");
+                }
+                else if (strncmp(arr, "arctan(", 7) == 0)
+                {
+                    if (!isdigit(equation[i + 7]))
+                        return NAN;
+                    removeChar(equation, i - 1, 7);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 7;
+                    strcat(functions, "f");
+                }
+                else if (strncmp(arr, "arcsinh(", 8) == 0)
+                {
+                    if (!isdigit(equation[i + 8]))
+                        return NAN;
+                    removeChar(equation, i - 1, 8);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 8;
+                    strcat(functions, "g");
+                }
+                else if (strncmp(arr, "arccosh(", 8) == 0)
+                {
+                    if (!isdigit(equation[i + 8]))
+                        return NAN;
+                    removeChar(equation, i - 1, 8);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 8;
+                    strcat(functions, "h");
+                }
+                else if (strncmp(arr, "arctanh(", 8) == 0)
+                {
+                    if (!isdigit(equation[i + 8]))
+                        return NAN;
+                    removeChar(equation, i - 1, 8);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 8;
+                    strcat(functions, "i");
+                }
+                else
+                    return NAN;
+            }
             else if (equation[i] == 'G')
             {
                 if (strncmp(arr, "GOLDEN_RT", 9) == 0)
@@ -234,6 +303,8 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "sin(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]))
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
@@ -242,11 +313,23 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "sec(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]))
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
                     i += 4;
                     strcat(functions, "8");
+                }
+                else if (strncmp(arr, "sinh(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "a");
                 }
                 else
                     return NAN;
@@ -298,6 +381,8 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "cos(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]))
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
@@ -306,6 +391,8 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "cosec(", 6) == 0)
                 {
+                    if (!isdigit(equation[i + 6]))
+                        return NAN;
                     removeChar(equation, i - 1,  6);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
@@ -314,11 +401,23 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "cot(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]))
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
                     i += 4;
                     strcat(functions, "9");
+                }
+                else if (strncmp(arr, "cosh(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "b");
                 }
                 else
                     return NAN;
@@ -327,16 +426,28 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "tan(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]))
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = 1;
                     numberOfFunctions++;
                     i += 4;
                     strcat(functions, "6");
                 }
+                else if (strncmp(arr, "tanh(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "c");
+                }
                 else
                     return NAN;
             }
-            else if (equation[i] == 'E' || equation[i] == 'e');
+            else if (equation[i] == 'E' || equation[i] == 'e' || equation[i] == 'x');
             else
                 return NAN;
         }
@@ -446,13 +557,25 @@ double solveEquation(char* input)
         {
             if (functionPositions[index] < positions[j])
             {
-                if (functionPositions[index] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0
-                    && positions[j] <= operationPositions[j])
+                if (functionPositions[index] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
                 {
-                    location = j;
-                    break;
+                    if (operationPositionIndex > 1)
+                    {
+                        if (positions[j] <= operationPositions[j])
+                        {
+                            location = j;
+                            break;
+                        }
+                        else
+                            return NAN;
+                    }
+                    else
+                    {
+                        location = j;
+                        break;
+                    }
                 }
-                else if ((state[0] == ',' || j == 0) && positions[j] <= operationPositions[j])
+                else if (state[0] == ',' || j == 0)
                     break;
                 else
                     return NAN;
@@ -536,6 +659,33 @@ double solveEquation(char* input)
         //cotangent
         else if (functions[i] == '9')
             nums[location] = cot(nums[location]);
+        //sinh
+        else if (functions[i] == 'a')
+            nums[location] = sinh(nums[location]);
+        //cosh
+        else if (functions[i] == 'b')
+            nums[location] = cosh(nums[location]);
+        //tanh
+        else if (functions[i] == 'c')
+            nums[location] = tanh(nums[location]);
+        //arcsin
+        else if (functions[i] == 'd')
+            nums[location] = asin(nums[location]);
+        //arccos
+        else if (functions[i] == 'e')
+            nums[location] = acos(nums[location]);
+        //arctan
+        else if (functions[i] == 'f')
+            nums[location] = atan(nums[location]);
+        //arcsinh
+        else if (functions[i] == 'g')
+            nums[location] = asinh(nums[location]);
+        //arccosh
+        else if (functions[i] == 'h')
+            nums[location] = acosh(nums[location]);
+        //arctanh
+        else if (functions[i] == 'i')
+            nums[location] = atanh(nums[location]);
         index++;
     }
 
@@ -544,10 +694,10 @@ double solveEquation(char* input)
     {
         if (state[i] == 'e')
         {
-            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
+            if ((int) nums[i + 1] != nums[i + 1])
                 return NAN;
 
-            nums[i + 1] = nums[i] * pow(10, nums[i + 1]);
+            nums[i + 1] = (int) (nums[i] * pow(10, nums[i + 1]));
             nums[i] = 0 + 1 * (state[i + 1] == '*' || state[i + 1] == '/');
             if (state[i - 1] != 'C' && state[i - 1] != 'P')
                 state[i] = state[i - 1];
@@ -591,7 +741,6 @@ double solveEquation(char* input)
         {
             if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
                 return NAN;
-
             nums[i + 1] = tgamma(nums[i] + 1) / (tgamma(nums[i + 1] + 1) * tgamma(nums[i] - nums[i + 1] + 1));
             total += nums[i + 1];
             nums[i] = 0;
@@ -600,7 +749,6 @@ double solveEquation(char* input)
         {
             if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
                 return NAN;
-
             nums[i + 1] = tgamma(nums[i] + 1) / tgamma(nums[i] - nums[i + 1] + 1);
             total += nums[i + 1];
             nums[i] = 0;
