@@ -55,6 +55,10 @@
  *      - Bug 25 (a + sin(b) returns value of sin(b)) - PATCHED
  *      - Update to trig functions - If character right after "(" is not a number, NAN is returned
  *      - Added arcsin, arccos, arctan, arcsinh, arccosh, arctanh
+ *      - Added iterative log function
+ *      - Re-added sqrt and cbrt for convenience
+ *      - Added square and cube functions (which square and cube a number, respectively)
+ *      - Added code that checks for double decimal points
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -116,7 +120,7 @@ int main(void)
             fputs("\033[A\033[2K", stdout);
             rewind(stdout);
 
-            if (fabs(round(result) - result) < 0.000001)
+            if (fabs(round(result) - result) < 0.000000001)
                 printf("%s = %.0f\n", getEquation, result);
             else
                 printf("%s = %f\n", getEquation, result);
@@ -156,7 +160,7 @@ double solveEquation(char* input)
     {
         if (!isascii(equation[i]))
             return NAN;
-        if (isalpha(equation[i]))
+        else if (isalpha(equation[i]))
         {
             strncpy(arr, &input[i], ARRAY_SIZE);
             if (equation[i] == 'P' || equation[i] == 'p')
@@ -352,6 +356,26 @@ double solveEquation(char* input)
                     i += 5;
                     strcat(functions, "j");
                 }
+                else if (strncmp(arr, "sqrt(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "k");
+                }
+                else if (strncmp(arr, "square(", 6) == 0)
+                {
+                    if (!isdigit(equation[i + 6]))
+                        return NAN;
+                    removeChar(equation, i - 1, 6);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 6;
+                    strcat(functions, "m");
+                }
                 else
                     return NAN;
             }
@@ -439,6 +463,26 @@ double solveEquation(char* input)
                     numberOfFunctions++;
                     i += 5;
                     strcat(functions, "b");
+                }
+                else if (strncmp(arr, "cbrt(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "l");
+                }
+                else if (strncmp(arr, "cube(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "n");
                 }
                 else
                     return NAN;
@@ -710,6 +754,18 @@ double solveEquation(char* input)
         //sinc
         else if (functions[i] == 'j')
             nums[location] = sinc(nums[location]);
+        //sqrt
+        else if (functions[i] == 'k')
+            nums[location] = sqrt(nums[location]);
+        //cbrt
+        else if (functions[i] == 'l')
+            nums[location] = cbrt(nums[location]);
+        //square
+        else if (functions[i] == 'm')
+            nums[location] *= nums[location];
+        //cube
+        else if (functions[i] == 'n')
+            nums[location] *= nums[location] * nums[location];
         //iterative log
         else if (functions[i] == 'A')
         {
@@ -836,7 +892,12 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
             if (input[i] == '.')
             {
                 if (!isdigit(input[i + 1]))
-                    break;
+                {
+                    if (input[i + 1] == '.' || isalpha(input[i + 1]))
+                        return NAN;
+                    else
+                        break;
+                }
                 else
                     lastNum = '1';
             }
