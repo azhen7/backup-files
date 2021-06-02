@@ -72,6 +72,8 @@
  *  - 6/2/2021: Version 1.10
  *      - Bug 31 (tetration returns incorrect value) - PATCHED
  *      - Bug 32 (cbrt(-27) = NAN) - PATCHED
+ *      - Bug 33 (a * b nCr c returns incorrect value) - PATCHED - nCr and nPr now take higher precedence than
+ *        multiplication and division
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -81,6 +83,7 @@ long double convertFloat(char* input, double total, int startIndex, int endIndex
 unsigned int numberOfOperations(char* input);
 long double getMathConstant(char* input, int index, float mathConstant);
 long double returnValueOfMathConstant(char* input, int i);
+long double setNum(char* operations, int index, long double n);
 
 int main(void)
 {
@@ -718,29 +721,13 @@ long double solveEquation(char* input)
         if (functions[i] == '0')
         {
             nums[location + 1] = pow(nums[location], 1 / nums[location + 1]);
-            if (seperatorPositions[i] == 0)
-                nums[location] = 0;
-            else
-            {
-                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
-                    nums[location] = 1;
-                else
-                    nums[location] = 0;
-            }
+            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
         }
         //log
         else if (functions[i] == '1')
         {
             nums[location + 1] = log_base(nums[location], nums[location + 1]);
-            if (seperatorPositions[i] == 0)
-                nums[location] = 0;
-            else
-            {
-                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
-                    nums[location] = 1;
-                else
-                    nums[location] = 0;
-            }
+            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
         }
         //GCD
         else if (functions[i] == '2')
@@ -748,15 +735,7 @@ long double solveEquation(char* input)
             if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
                 return NAN;
             nums[location + 1] = calculateGCD(nums[location], nums[location + 1]);
-            if (seperatorPositions[i] == 0)
-                nums[location] = 0;
-            else
-            {
-                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
-                    nums[location] = 1;
-                else
-                    nums[location] = 0;
-            }
+            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
         }
         //LCM
         else if (functions[i] == '3')
@@ -764,15 +743,7 @@ long double solveEquation(char* input)
             if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
                 return NAN;
             nums[location + 1] = fabsl(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
-            if (seperatorPositions[i] == 0)
-                nums[location] = 0;
-            else
-            {
-                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
-                    nums[location] = 1;
-                else
-                    nums[location] = 0;
-            }
+            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
         }
         //sin
         else if (functions[i] == '4')
@@ -849,15 +820,7 @@ long double solveEquation(char* input)
         else if (functions[i] == 'A')
         {
             nums[location + 1] = iterative_log(nums[location], nums[location + 1]);
-            if (seperatorPositions[i] == 0)
-                nums[location] = 0;
-            else
-            {
-                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
-                    nums[location] = 1;
-                else
-                    nums[location] = 0;
-            }
+            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
         }
         //tetration
         else if (functions[i] == 'B')
@@ -869,16 +832,7 @@ long double solveEquation(char* input)
             for (int j = 0; j < nums[location + 1] - 1; j++)
                 exponent = pow(nums[location], exponent);
             nums[location + 1] = exponent;
-
-            if (seperatorPositions[i] == 0)
-                nums[location] = 0;
-            else
-            {
-                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
-                    nums[location] = 1;
-                else
-                    nums[location] = 0;
-            }
+            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
         }
     }
     //E
@@ -922,7 +876,31 @@ long double solveEquation(char* input)
                 operations[i] = operations[i - 1];
         }
     }
-    //Multiplications, Division, nCr, nPr
+    //nCr, nPr
+    for (int i = 0; i < times; i++)
+    {
+        if (operations[i] == 'C')
+        {
+            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
+                return NAN;
+            nums[i + 1] = tgamma(nums[i] + 1) / (tgamma(nums[i + 1] + 1) * tgamma(nums[i] - nums[i + 1] + 1));
+            total += nums[i + 1];
+            nums[i] = 0 + 1 * (operations[i - 1] == '*' || operations[i - 1] == '/');
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
+        }
+        else if (operations[i] == 'P')
+        {
+            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
+                return NAN;
+            nums[i + 1] = tgamma(nums[i] + 1) / tgamma(nums[i] - nums[i + 1] + 1);
+            total += nums[i + 1];
+            nums[i] = 0 + 1 * (operations[i - 1] == '*' || operations[i - 1] == '/');
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
+        }
+    }
+    //Multiplications, Division
     for (int i = 0; i < times; i++)
     {
         if (operations[i] == '*')
@@ -940,23 +918,6 @@ long double solveEquation(char* input)
             if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
                 operations[i] = operations[i - 1];
         }
-        else if (operations[i] == 'C')
-        {
-            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
-                return NAN;
-            nums[i + 1] = tgamma(nums[i] + 1) / (tgamma(nums[i + 1] + 1) * tgamma(nums[i] - nums[i + 1] + 1));
-            total += nums[i + 1];
-            nums[i] = 0;
-        }
-        else if (operations[i] == 'P')
-        {
-            if ((int) nums[i] != nums[i] || (int) nums[i + 1] != nums[i + 1])
-                return NAN;
-            nums[i + 1] = tgamma(nums[i] + 1) / tgamma(nums[i] - nums[i + 1] + 1);
-            total += nums[i + 1];
-            nums[i] = 0;
-        }
-
     }
     //Assign total the first non-zero number
     for (int i = 0; i < times + 1; i++)
@@ -1116,4 +1077,18 @@ unsigned int numberOfOperations(char* input)
         }
     }
     return times;
+}
+
+long double setNum(char* operations, int index, long double num)
+{
+    if (index == 0)
+        num = 0;
+    else
+    {
+        if (operations[index - 1] == '*' || operations[index - 1] == '/')
+            num = 1;
+        else
+            num = 0;
+    }
+    return num;
 }
