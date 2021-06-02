@@ -66,6 +66,8 @@
  *      - Added ln and log for convenience
  *      - Changed iterative log from "iterate_log(" to "log*("
  *      - Bug 30 (a / b % c returns infinity) - PATCHED
+ *      - Added binary log for convenience
+ *      - Added tetration function (for a given number n, a is multiplied to itself n - 1 times)
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -419,6 +421,16 @@ double solveEquation(char* input)
                     i += 6;
                     strcat(functions, "p");
                 }
+                else if (strncmp(arr, "log2(", 5) == 0)
+                {
+                    if (!isdigit(equation[i + 5]))
+                        return NAN;
+                    removeChar(equation, i - 1, 5);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 5;
+                    strcat(functions, "q");
+                }
                 else
                     return NAN;
             }
@@ -538,6 +550,16 @@ double solveEquation(char* input)
                     numberOfFunctions++;
                     i += 5;
                     strcat(functions, "c");
+                }
+                else if (strncmp(arr, "tetrate(", 8) == 0)
+                {
+                    if (!isdigit(equation[i + 8]))
+                        return NAN;
+                    removeChar(equation, i - 1, 8);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 8;
+                    strcat(functions, "r");
                 }
                 else
                     return NAN;
@@ -801,6 +823,19 @@ double solveEquation(char* input)
         //log base 10
         else if (functions[i] == 'p')
             nums[location] = log10(nums[location]);
+        //binary log
+        else if (functions[i] == 'q')
+            nums[location] = log2(nums[location]);
+        //tetration
+        else if (functions[i] == 'r')
+        {
+            if ((int) nums[location + 1] != nums[location + 1])
+                return NAN;
+            for (int j = 0; j < nums[location + 1] - 1; j++)
+            {
+                nums[location] *= nums[location];
+            }
+        }
         //iterative log
         else if (functions[i] == 'A')
         {
@@ -843,6 +878,17 @@ double solveEquation(char* input)
         }
         else if (operations[i] == ',')
         {
+            if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
+                operations[i] = operations[i - 1];
+        }
+    }
+    //Exponents
+    for (int i = 0; i < times; i++)
+    {
+        if (operations[i] == '^')
+        {
+            nums[i + 1] = pow(nums[i], nums[i + 1]);
+            nums[i] = 0 + 1 * (operations[i - 1] == '*' || operations[i - 1] == '/');
             if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
                 operations[i] = operations[i - 1];
         }
