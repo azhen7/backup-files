@@ -84,6 +84,7 @@ unsigned int numberOfOperations(char* input);
 long double getMathConstant(char* input, int index, float mathConstant);
 long double returnValueOfMathConstant(char* input, int i);
 long double setNum(char* operations, int index, long double n);
+int isvalidInput(char* input);
 
 int main(void)
 {
@@ -156,16 +157,8 @@ long double solveEquation(char* input)
     int* functionPositions = (int*) malloc(strlen(input));
     unsigned int numberOfFunctions = 0;
 
-    if (strlen(input) == 0)
+    if (!isvalidInput(input))
         return NAN;
-
-    for (int i = 0; i < strlen(input); i++)
-    {
-        if (input[i] != ' ')
-            break;
-        if (i == strlen(input) - 1)
-            return NAN;
-    }
 
     strcpy(equation, input);
 
@@ -941,7 +934,6 @@ long double solveEquation(char* input)
 
     return total;
 }
-
 //Get first number of equation
 long double convertFloat(char* input, double total, int startIndex, int endIndex)
 {
@@ -1006,7 +998,6 @@ long double convertFloat(char* input, double total, int startIndex, int endIndex
     total *= multNeg;
     return total;
 }
-
 //Get value of math constant multiplied by coefficient
 long double getMathConstant(char* input, int index, float mathConstant)
 {
@@ -1030,7 +1021,6 @@ long double getMathConstant(char* input, int index, float mathConstant)
 
     return value;
 }
-
 //Return value of math constant multiplied by coefficient
 long double returnValueOfMathConstant(char* input, int i)
 {
@@ -1057,7 +1047,6 @@ long double returnValueOfMathConstant(char* input, int i)
         return getMathConstant(input, i, APERY_CONST);
     return 0.0;
 }
-
 //Get number of operations
 unsigned int numberOfOperations(char* input)
 {
@@ -1078,7 +1067,6 @@ unsigned int numberOfOperations(char* input)
     }
     return times;
 }
-
 long double setNum(char* operations, int index, long double num)
 {
     if (index == 0)
@@ -1091,4 +1079,17 @@ long double setNum(char* operations, int index, long double num)
             num = 0;
     }
     return num;
+}
+//Validate string
+int isvalidInput(char* input)
+{
+    if (strlen(input) == 0)
+        return 1;
+    while (*input)
+    {
+        if (!isspace(*input))
+            return 1;
+        input++;
+    }
+    return 0;
 }
