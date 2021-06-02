@@ -68,15 +68,19 @@
  *      - Bug 30 (a / b % c returns infinity) - PATCHED
  *      - Added binary log for convenience
  *      - Added tetration function (for a given number n, a is multiplied to itself n - 1 times)
+ *
+ *  - 6/2/2021: Version 1.10
+ *      - Bug 31 (tetration returns incorrect value) - PATCHED
+ *      - Bug 32 (cbrt(-27) = NAN) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
 
-double solveEquation(char* input);
-double convertFloat(char* input, double total, int startIndex, int endIndex);
+long double solveEquation(char* input);
+long double convertFloat(char* input, double total, int startIndex, int endIndex);
 unsigned int numberOfOperations(char* input);
-double getMathConstant(char* input, int index, float mathConstant);
-double returnValueOfMathConstant(char* input, int i);
+long double getMathConstant(char* input, int index, float mathConstant);
+long double returnValueOfMathConstant(char* input, int i);
 
 int main(void)
 {
@@ -139,7 +143,7 @@ int main(void)
     }
 }
 
-double solveEquation(char* input)
+long double solveEquation(char* input)
 {
     unsigned int times = 0, posIndex = 0;
     double total = 0.0;
@@ -197,7 +201,7 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "arcsin(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]))
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
@@ -207,7 +211,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "arccos(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]))
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
@@ -217,7 +221,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "arctan(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]))
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
@@ -227,7 +231,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "arcsinh(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]))
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
@@ -237,7 +241,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "arccosh(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]))
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
@@ -247,13 +251,23 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "arctanh(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]))
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
                     i += 8;
                     strcat(functions, "i");
+                }
+                else if (strncmp(arr, "abs(", 4) == 0)
+                {
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                        return NAN;
+                    removeChar(equation, i - 1, 4);
+                    functionPositions[numberOfFunctions] = i;
+                    numberOfFunctions++;
+                    i += 4;
+                    strcat(functions, "r");
                 }
                 else
                     return NAN;
@@ -267,6 +281,8 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "GCD(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
@@ -303,7 +319,7 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "root(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -318,7 +334,7 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "sin(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]))
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
@@ -328,7 +344,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "sec(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]))
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
@@ -338,7 +354,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "sinh(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -348,7 +364,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "sinc(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -358,7 +374,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "sqrt(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -368,7 +384,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "square(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]))
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
@@ -383,7 +399,7 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "log(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]))
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
@@ -393,7 +409,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "log*(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -403,7 +419,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "ln(", 3) == 0)
                 {
-                    if (!isdigit(equation[i + 3]))
+                    if (!isdigit(equation[i + 3]) && equation[i + 3] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 3);
                     functionPositions[numberOfFunctions] = i;
@@ -413,7 +429,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "log10(", 6) == 0)
                 {
-                    if (!isdigit(equation[i + 6]))
+                    if (!isdigit(equation[i + 6]) && equation[i + 6] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 6);
                     functionPositions[numberOfFunctions] = i;
@@ -423,7 +439,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "log2(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -438,6 +454,8 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "LCM(", 4) == 0)
                 {
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                        return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
@@ -468,7 +486,7 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "cos(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]))
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
@@ -478,7 +496,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "cosec(", 6) == 0)
                 {
-                    if (!isdigit(equation[i + 6]))
+                    if (!isdigit(equation[i + 6]) && equation[i + 6] != '-')
                         return NAN;
                     removeChar(equation, i - 1,  6);
                     functionPositions[numberOfFunctions] = i;
@@ -488,7 +506,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "cot(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]))
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
@@ -498,7 +516,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "cosh(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -508,7 +526,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "cbrt(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -518,7 +536,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "cube(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -533,7 +551,7 @@ double solveEquation(char* input)
             {
                 if (strncmp(arr, "tan(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]))
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = 1;
@@ -543,7 +561,7 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "tanh(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]))
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
@@ -553,13 +571,13 @@ double solveEquation(char* input)
                 }
                 else if (strncmp(arr, "tetrate(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]))
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
                     i += 8;
-                    strcat(functions, "r");
+                    strcat(functions, "B");
                 }
                 else
                     return NAN;
@@ -634,7 +652,6 @@ double solveEquation(char* input)
                 equation[i] = 'm';
                 positions[posIndex] = i;
                 posIndex++;
-                times--;
             }
             else if (validateConstantChar(equation[i]))
             {
@@ -643,7 +660,7 @@ double solveEquation(char* input)
             }
         }
     }
-    double nums[times + 1];
+    long double nums[times + 1];
     for (int i = 0; i < times + 1; i++)
         nums[i] = 0;
 
@@ -652,11 +669,11 @@ double solveEquation(char* input)
     {
         nums[i] = convertFloat(equation, nums[i], positions[i], strlen(equation));
         //Check for maximum / minimum / NAN
-        if (nums[0] == NAN)
+        if (nums[i] == NAN)
             return NAN;
-        else if (nums[0]> UINT_MAX)
+        else if (nums[i]> UINT_MAX)
             return INFINITY;
-        else if (nums[0] < LLONG_MIN)
+        else if (nums[i] < LLONG_MIN)
             return -INFINITY;
 
         if (operations[i] == ',')
@@ -746,7 +763,7 @@ double solveEquation(char* input)
         {
             if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
                 return NAN;
-            nums[location + 1] = fabs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
+            nums[location + 1] = fabsl(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
             if (seperatorPositions[i] == 0)
                 nums[location] = 0;
             else
@@ -759,13 +776,13 @@ double solveEquation(char* input)
         }
         //sin
         else if (functions[i] == '4')
-            nums[location] = sin(nums[location]);
+            nums[location] = sinl(nums[location]);
         //cos
         else if (functions[i] == '5')
-            nums[location] = cos(nums[location]);
+            nums[location] = cosl(nums[location]);
         //tan
         else if (functions[i] == '6')
-            nums[location] = tan(nums[location]);
+            nums[location] = tanl(nums[location]);
         //cosecant
         else if (functions[i] == '7')
             nums[location] = cosec(nums[location]);
@@ -777,40 +794,40 @@ double solveEquation(char* input)
             nums[location] = cot(nums[location]);
         //sinh
         else if (functions[i] == 'a')
-            nums[location] = sinh(nums[location]);
+            nums[location] = sinhl(nums[location]);
         //cosh
         else if (functions[i] == 'b')
-            nums[location] = cosh(nums[location]);
+            nums[location] = coshl(nums[location]);
         //tanh
         else if (functions[i] == 'c')
-            nums[location] = tanh(nums[location]);
+            nums[location] = tanhl(nums[location]);
         //arcsin
         else if (functions[i] == 'd')
-            nums[location] = asin(nums[location]);
+            nums[location] = asinl(nums[location]);
         //arccos
         else if (functions[i] == 'e')
-            nums[location] = acos(nums[location]);
+            nums[location] = acosl(nums[location]);
         //arctan
         else if (functions[i] == 'f')
-            nums[location] = atan(nums[location]);
+            nums[location] = atanl(nums[location]);
         //arcsinh
         else if (functions[i] == 'g')
-            nums[location] = asinh(nums[location]);
+            nums[location] = asinhl(nums[location]);
         //arccosh
         else if (functions[i] == 'h')
-            nums[location] = acosh(nums[location]);
+            nums[location] = acoshl(nums[location]);
         //arctanh
         else if (functions[i] == 'i')
-            nums[location] = atanh(nums[location]);
+            nums[location] = atanhl(nums[location]);
         //sinc
         else if (functions[i] == 'j')
             nums[location] = sinc(nums[location]);
         //sqrt
         else if (functions[i] == 'k')
-            nums[location] = sqrt(nums[location]);
+            nums[location] = sqrtl(nums[location]);
         //cbrt
         else if (functions[i] == 'l')
-            nums[location] = cbrt(nums[location]);
+            nums[location] = cbrtl(nums[location]);
         //square
         else if (functions[i] == 'm')
             nums[location] *= nums[location];
@@ -819,23 +836,15 @@ double solveEquation(char* input)
             nums[location] *= nums[location] * nums[location];
         //natural log
         else if (functions[i] == 'o')
-            nums[location] = log(nums[location]);
+            nums[location] = logl(nums[location]);
         //log base 10
         else if (functions[i] == 'p')
-            nums[location] = log10(nums[location]);
+            nums[location] = log10l(nums[location]);
         //binary log
         else if (functions[i] == 'q')
-            nums[location] = log2(nums[location]);
-        //tetration
+            nums[location] = log2l(nums[location]);
         else if (functions[i] == 'r')
-        {
-            if ((int) nums[location + 1] != nums[location + 1])
-                return NAN;
-            for (int j = 0; j < nums[location + 1] - 1; j++)
-            {
-                nums[location] *= nums[location];
-            }
-        }
+            nums[location] = fabsl(nums[location]);
         //iterative log
         else if (functions[i] == 'A')
         {
@@ -850,8 +859,28 @@ double solveEquation(char* input)
                     nums[location] = 0;
             }
         }
-    }
+        //tetration
+        else if (functions[i] == 'B')
+        {
+            if ((int) nums[location + 1] != nums[location + 1])
+                return NAN;
 
+            long exponent = nums[location];
+            for (int j = 0; j < nums[location + 1] - 1; j++)
+                exponent = pow(nums[location], exponent);
+            nums[location + 1] = exponent;
+
+            if (seperatorPositions[i] == 0)
+                nums[location] = 0;
+            else
+            {
+                if (operations[seperatorPositions[i] - 1] == '*' || operations[seperatorPositions[i] - 1] == '/')
+                    nums[location] = 1;
+                else
+                    nums[location] = 0;
+            }
+        }
+    }
     //E
     for (int i = 0; i < times; i++)
     {
@@ -953,7 +982,7 @@ double solveEquation(char* input)
 }
 
 //Get first number of equation
-double convertFloat(char* input, double total, int startIndex, int endIndex)
+long double convertFloat(char* input, double total, int startIndex, int endIndex)
 {
     if (strcmp(input, "NAN") == 0)
         return NAN;
@@ -1018,7 +1047,7 @@ double convertFloat(char* input, double total, int startIndex, int endIndex)
 }
 
 //Get value of math constant multiplied by coefficient
-double getMathConstant(char* input, int index, float mathConstant)
+long double getMathConstant(char* input, int index, float mathConstant)
 {
     float value = 0.0, coefForConsts;
     int lookback = 1, startIndexCoefficient = 0;
@@ -1042,7 +1071,7 @@ double getMathConstant(char* input, int index, float mathConstant)
 }
 
 //Return value of math constant multiplied by coefficient
-double returnValueOfMathConstant(char* input, int i)
+long double returnValueOfMathConstant(char* input, int i)
 {
     //Pi
     if (input[i] == '!')
@@ -1080,7 +1109,10 @@ unsigned int numberOfOperations(char* input)
         if (validateOperation(input[i]) == 0)
         {
             if (validNext(input[i + 1]) == 0)
-                times++;
+            {
+                if (!(input[i] == '-' && isdigit(input[i + 1]) && !isdigit(input[i - 1])))
+                    times++;
+            }
         }
     }
     return times;
