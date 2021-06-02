@@ -65,6 +65,7 @@
  *      - Bug 27 (log(9 + 2 returns a value, not NAN) - PATCHED
  *      - Added ln and log for convenience
  *      - Changed iterative log from "iterate_log(" to "log*("
+ *      - Bug 30 (a / b % c returns infinity) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -836,7 +837,7 @@ double solveEquation(char* input)
         if (operations[i] == '%')
         {
             nums[i + 1] = fmod(nums[i], nums[i + 1]);
-            nums[i] = 0 + 1 * (operations[i + 1] == '*' || operations[i + 1] == '/');
+            nums[i] = 0 + 1 * (operations[i - 1] == '*' || operations[i - 1] == '/');
             if (operations[i - 1] != 'C' && operations[i - 1] != 'P')
                 operations[i] = operations[i - 1];
         }
