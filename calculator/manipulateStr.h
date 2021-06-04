@@ -13,13 +13,6 @@ unsigned int validateOperation(char c)
         return 0;
     return 1;
 }
-//Validate char
-unsigned int validNext(char c)
-{
-    if (isdigit(c) || c == 'm' || c == ' ' || c == '-')
-        return 0;
-    return 1;
-}
 //Check whether char is representative of a math constant (e.g. PI)
 unsigned int validateConstantChar(char c)
 {
@@ -33,6 +26,13 @@ unsigned int validateConstantFirstChar(char c)
     if (c == 'P' || c == 'G' || c == 'S' || c == 'R' || c == 'A' || c == 'C' || c == 'p' || c == 's')
         return 1;
     return 0;
+}
+//Validate char
+unsigned int validNext(char c)
+{
+    if (isdigit(c) || c == 'm' || c == ' ' || c == '-' || validateConstantChar(c))
+        return 0;
+    return 1;
 }
 //Changing strings
 //Set chars to ' '
