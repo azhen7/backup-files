@@ -78,6 +78,7 @@
  *  - 6/3/2021: Version 1.11
  *      - Bug 34 (a -b returns incorrect value) - PATCHED
  *      - Bug 35 (root(a, b), where a < 0 and b is an odd number, returns -nan) - PATCHED
+ *      - Bug 36 (3 + PI returns incorrect value) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -175,7 +176,7 @@ long double solveEquation(char* input)
             return NAN;
         else if (isalpha(equation[i]))
         {
-            strncpy(arr, &input[i], ARRAY_SIZE);
+            strncpy(arr, &equation[i], ARRAY_SIZE);
             if (equation[i] == 'P' || equation[i] == 'p')
             {
                 if (strncmp(arr, "PI", 2) == 0 || strncmp(arr, "pi", 2) == 0)
