@@ -74,6 +74,10 @@
  *      - Bug 32 (cbrt(-27) = NAN) - PATCHED
  *      - Bug 33 (a * b nCr c returns incorrect value) - PATCHED - nCr and nPr now take higher precedence than
  *        multiplication and division
+ *
+ *  - 6/3/2021: Version 1.11
+ *      - Bug 34 (a -b returns incorrect value) - PATCHED
+ *      - Bug 35 (root(a, b), where a < 0 and b is an odd number, returns -nan) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -160,7 +164,7 @@ long double solveEquation(char* input)
     if (!isvalidInput(input))
         return NAN;
 
-    strcpy(equation, input);
+    equation = copyStrWithoutSpaces(input);
 
     if (strcmp(equation, "NAN") == 0)
         return NAN;
@@ -680,7 +684,7 @@ long double solveEquation(char* input)
     }
 
     unsigned int location = 0;
-    for (int i = 0; i < numberOfFunctions; i++)
+    for (int i = 0, negative = 1; i < numberOfFunctions; i++)
     {
         for (int j = 0; j < times + 1; j++)
         {
@@ -713,8 +717,14 @@ long double solveEquation(char* input)
         //nth root
         if (functions[i] == '0')
         {
+            if (nums[location] < 0 && fmodl(nums[location + 1], 2) != 0)
+            {
+                nums[location] *= -1;
+                negative = -1;
+            }
             nums[location + 1] = pow(nums[location], 1 / nums[location + 1]);
             nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
+            nums[location + 1] *= negative;
         }
         //log
         else if (functions[i] == '1')
