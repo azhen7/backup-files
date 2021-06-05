@@ -66,7 +66,7 @@
  *      - Added ln and log for convenience
  *      - Changed iterative log from "iterate_log(" to "log*("
  *      - Bug 30 (a / b % c returns infinity) - PATCHED
- *      - Added binary log for convenience
+ *      - Added binary log (log2) for convenience
  *      - Added tetration function (for a given number n, a is multiplied to itself n - 1 times)
  *
  *  - 6/2/2021: Version 1.10
@@ -79,6 +79,14 @@
  *      - Bug 34 (a -b returns incorrect value) - PATCHED
  *      - Bug 35 (root(a, b), where a < 0 and b is an odd number, returns -nan) - PATCHED
  *      - Bug 36 (3 + PI returns incorrect value) - PATCHED
+ *
+ *  - 6/4/2021: Version 1.12
+ *      - Added prime factoring
+ *          - Bug 37 (infinite loop when entering specific input) - PATCHED
+ *
+ *  - 6/5/2021: Version 1.13
+ *      - Bug 38 (incorrect ouput when entering specific input) - PATCHED
+ *      - Bug 39 (Floating point exception) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -95,9 +103,13 @@ int main(void)
 {
     char* getEquation = NULL;
     double result = 0.0;
+
     int base_input;
     int base_convert;
     char* convertedValue;
+
+    int numToPrimeFactor = 0;
+    int numberOfPrimeFactors = 0;
 
     system("clear");
     printf("Enter a bunch of equations below: \n");
@@ -106,6 +118,7 @@ int main(void)
     {
         getEquation = get_string("");
 
+        //Number base conversion
         if (strcmp(getEquation, "convert bases") == 0)
         {
             do
@@ -123,17 +136,53 @@ int main(void)
             getEquation = get_string("Enter input: ");
 
             if (validateInput(getEquation, base_input))
-                printf("Invalid input.\n\n");
+                printf("Invalid input.\n");
             else
             {
                 convertedValue = convert(getEquation, base_input, base_convert);
 
                 if (convertedValue != NULL)
-                    printf("Your input in base %i is: %s\n\n", base_convert, convertedValue);
+                    printf("Your input in base %i is: %s\n", base_convert, convertedValue);
                 else
-                    printf("malloc(): memory allocation failed.\n Operation discontinued.");
+                    printf("malloc(): memory allocation failed.\n Operation discontinued.\n");
             }
         }
+        //Prime factoring
+        else if (strcmp(getEquation, "prime factor") == 0)
+        {
+            numToPrimeFactor = get_int("Enter number to be prime factored: ");
+            if (numToPrimeFactor > UINT_MAX)
+            {
+                printf("Number too large to prime factor.\n\n");
+                continue;
+            }
+            if (numToPrimeFactor <= 1)
+            {
+                printf("Number cannot be prime factored.\n\n");
+                continue;
+            }
+            if (isPrime(numToPrimeFactor) == 0)
+            {
+                printf("(%i)\n\n", numToPrimeFactor);
+                continue;
+            }
+            numberOfPrimeFactors = getNumberOfPrimeFactors(numToPrimeFactor);
+            int* primeFactors = (int*) malloc(numberOfPrimeFactors);
+            primeFactors = getPrimeFactors(numToPrimeFactor);
+            int* primeFactorExponents = (int*) malloc(numberOfPrimeFactors);
+            primeFactorExponents = getPrimeFactorExponents(numToPrimeFactor);
+            //printf("%i\n", numberOfPrimeFactors);
+            for (int i = 0; i < numberOfPrimeFactors; i++)
+            {
+                printf("%i", primeFactors[i]);
+                if (primeFactorExponents[i] > 1)
+                    printf("^%i", primeFactorExponents[i]);
+                if (i != numberOfPrimeFactors - 1)
+                    printf(" x ");
+            }
+            puts("");
+        }
+        //Solve equation
         else
         {
             result = solveEquation(getEquation);
@@ -146,9 +195,8 @@ int main(void)
                 printf("%s = %.0f\n", getEquation, result);
             else
                 printf("%s = %f\n", getEquation, result);
-
-            putchar('\n');
         }
+        putchar('\n');
     }
 }
 
@@ -721,7 +769,8 @@ long double solveEquation(char* input)
             if (nums[location] < 0 && fmodl(nums[location + 1], 2) != 0)
             {
                 nums[location] *= -1;
-                negative = -1;
+                if (nums[location + 1] == (int) nums[location + 1])
+                    negative = -1;
             }
             nums[location + 1] = pow(nums[location], 1 / nums[location + 1]);
             nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
