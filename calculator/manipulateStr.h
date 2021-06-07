@@ -4,6 +4,11 @@
 
 int main(void);
 
+unsigned int isFunctionWithTwoArgs(char c) {
+    if ((c >= '0' && c <= '3') || (c >= 'A' && c <= 'B'))
+        return 1;
+    return 0;
+}
 //String char checking
 //See if input[i] is a valid operation (+, -, etc.)
 unsigned int validateOperation(char c)
@@ -54,86 +59,69 @@ char* copyStrWithoutSpaces(char* input)
 //Check for "--" or "+-"
 void setUp(char* copy)
 {
-    unsigned short encounteredNum = 0;
     for (int i = 0; i < strlen(copy); i++)
     {
-        //if copy[i] is a space, save an iteration
-        if (copy[i] == ' ')
-            continue;
-        if (isdigit(copy[i]))
-        {
-            encounteredNum = 1;
-            continue;
-        }
         if (copy[i] == '+')
         {
-            if (copy[i + 1] != ' ')
+            if (copy[i + 1] == '-')
             {
-                if (copy[i + 1] == '-')
-                {
-                    copy[i] = '-';
-                    copy[i + 1] = ' ';
-                }
-                else if (isdigit(copy[i + 1]) || copy[i + 1] == 'P');
-                else
-                {
-                    copy = (char*) malloc(3);
-                    strcpy(copy, "NAN");
-                    break;
-                }
+                copy[i] = '-';
+                copy[i + 1] = ' ';
+            }
+            else if (isdigit(copy[i + 1]));
+            else
+            {
+                copy = (char*) malloc(3);
+                strcpy(copy, "NAN");
+                break;
             }
         }
         else if (copy[i] == '-')
         {
-            if (copy[i + 1] != ' ')
+            if (copy[i + 1] == '-')
             {
-                if (copy[i + 1] == '-')
-                {
-                    copy[i] = '+';
-                    copy[i + 1] = ' ';
-                }
-                else if (copy[i + 1] == '+')
-                    copy[i + 1] = ' ';
-                else if (isdigit(copy[i + 1]) || copy[i + 1] == 'P');
-                else
-                {
-                    copy = (char*) malloc(3);
-                    strcpy(copy, "NAN");
-                    break;
-                }
+                copy[i] = '+';
+                copy[i + 1] = ' ';
+            }
+            else if (copy[i + 1] == '+')
+                copy[i + 1] = ' ';
+            else if (isdigit(copy[i + 1]));
+            else
+            {
+                copy = (char*) malloc(3);
+                strcpy(copy, "NAN");
+                break;
             }
         }
-        else if (copy[i] == 'x')
-            copy[i] = '*';
-        else if (copy[i] == '*')
+        else if (copy[i] == '*' || copy[i] == 'x')
         {
+            copy[i] = '*';
             if (i > 0)
             {
-                if (copy[i + 1] == '*' && copy[i + 2] != ' ')
+                if (copy[i + 1] == '/')
                 {
                     strcpy(copy, "NAN");
                     break;
                 }
             }
-            if (copy[i + 1] != ' ')
+            if (copy[i + 1] == '*')
             {
-                if (copy[i + 1] == '*')
-                {
-                    copy[i] = '^';
-                    copy[i + 1] = ' ';
-                }
-                else if (isdigit(copy[i + 1]) || copy[i + 1] == '-');
-                else
-                {
-                    copy = (char*) malloc(3);
-                    strcpy(copy, "NAN");
-                    break;
-                }
+                copy[i] = '^';
+                copy[i + 1] = ' ';
+            }
+            else if (copy[i + 1] == '+')
+                copy[i + 1] = ' ';
+            else if (isdigit(copy[i + 1]) || copy[i + 1] == '-');
+            else
+            {
+                copy = (char*) malloc(3);
+                strcpy(copy, "NAN");
+                break;
             }
         }
         else if (copy[i] == '/')
         {
-            if (copy[i + 1] != ' ')
+            if (copy[i + 1] == '*')
             {
                 copy = (char*) malloc(3);
                 strcpy(copy, "NAN");
