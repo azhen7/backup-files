@@ -87,27 +87,30 @@
  *  - 6/5/2021: Version 1.13
  *      - Bug 38 (incorrect ouput when entering specific input) - PATCHED
  *      - Bug 39 (Floating point exception) - PATCHED
+ *
+ *  - 6/7/2021: Version 1.14
+ *      - Bug 40 (sin(a * b = NAN) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
 
 long double solveEquation(char* input);
-long double convertFloat(char* input, double total, int startIndex, int endIndex);
+long double convertFloat(char* input, int startIndex, int endIndex);
 unsigned int numberOfOperations(char* input);
 long double getMathConstant(char* input, int index, float mathConstant);
 long double returnValueOfMathConstant(char* input, int i);
-long double setNum(char* operations, int index, long double n);
+long double setNum(char* operations, int index);
 int isvalidInput(char* input);
 
 int main(void)
 {
     char* getEquation = NULL;
     double result = 0.0;
-
+    //Number base conversion
     int base_input;
     int base_convert;
     char* convertedValue;
-
+    //Prime factoring
     int numToPrimeFactor = 0;
     int numberOfPrimeFactors = 0;
 
@@ -117,7 +120,6 @@ int main(void)
     while (1)
     {
         getEquation = get_string("");
-
         //Number base conversion
         if (strcmp(getEquation, "convert bases") == 0)
         {
@@ -207,16 +209,13 @@ long double solveEquation(char* input)
     char* equation = (char*) malloc(strlen(input) * sizeof(char));
     char* arr = (char*) malloc(ARRAY_SIZE);
     char* functions = (char*) malloc(strlen(input));
-    int* functionPositions = (int*) malloc(strlen(input));
+    int functionPositions[strlen(input) - 5];
     unsigned int numberOfFunctions = 0;
 
     if (!isvalidInput(input))
         return NAN;
 
     equation = copyStrWithoutSpaces(input);
-
-    if (strcmp(equation, "NAN") == 0)
-        return NAN;
 
     for (int i = 0; i < strlen(equation); i++)
     {
@@ -326,7 +325,7 @@ long double solveEquation(char* input)
                 if (strncmp(arr, "GOLDEN_RT", 9) == 0)
                 {
                     removeChar(equation, i, 8);
-                    i += 8;
+                    i += 9;
                 }
                 else if (strncmp(arr, "GCD(", 4) == 0)
                 {
@@ -639,6 +638,9 @@ long double solveEquation(char* input)
 
     setUp(equation);
 
+    if (strcmp(equation, "NAN") == 0)
+        return NAN;
+
     times = numberOfOperations(equation);
 
     char* operations = (char*) malloc(times);
@@ -646,7 +648,6 @@ long double solveEquation(char* input)
     int numberOfOperationsLeadingUpToFunction[times];
     unsigned short operationPositionIndex = 0, numberOfSeperators = 0;
     int positions[times + 1];
-    memset(positions, -1, times + 1);
 
     for (int i = 0; i < times; i++)
         numberOfOperationsLeadingUpToFunction[i] = 0;
@@ -716,7 +717,7 @@ long double solveEquation(char* input)
     //Get all the numbers
     for (int i = 0; i < times + 1; i++)
     {
-        nums[i] = convertFloat(equation, nums[i], positions[i], strlen(equation));
+        nums[i] = convertFloat(equation, positions[i], strlen(equation));
         //Check for maximum / minimum / NAN
         if (nums[i] == NAN)
             return NAN;
@@ -739,28 +740,39 @@ long double solveEquation(char* input)
         {
             if (functionPositions[i] < positions[j])
             {
-                if (functionPositions[i] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
+                if (isFunctionWithTwoArgs(functions[j]))
                 {
-                    if (operationPositionIndex > 1)
+                    if (functionPositions[i] >= operationPositions[j - 1] && numberOfOperationsLeadingUpToFunction[i] >= 0)
                     {
-                        if (positions[j] <= operationPositions[j] && operations[j] == ',')
+                        if (operationPositionIndex > 1)
+                        {
+                            if (positions[j] <= operationPositions[j] && operations[j] == ',')
+                            {
+                                location = j;
+                                break;
+                            }
+                            else
+                                return NAN;
+                        }
+                        else
                         {
                             location = j;
                             break;
                         }
-                        else
-                            return NAN;
                     }
+                    else if (operations[j] == ',')
+                        break;
                     else
+                        return NAN;
+                }
+                else
+                {
+                    if (functionPositions[i] < positions[j])
                     {
                         location = j;
                         break;
                     }
                 }
-                else if (operations[j] == ',')
-                    break;
-                else
-                    return NAN;
             }
         }
         //nth root
@@ -773,14 +785,14 @@ long double solveEquation(char* input)
                     negative = -1;
             }
             nums[location + 1] = pow(nums[location], 1 / nums[location + 1]);
-            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
+            nums[location] = setNum(operations, seperatorPositions[i]);
             nums[location + 1] *= negative;
         }
         //log
         else if (functions[i] == '1')
         {
             nums[location + 1] = log_base(nums[location], nums[location + 1]);
-            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
+            nums[location] = setNum(operations, seperatorPositions[i]);
         }
         //GCD
         else if (functions[i] == '2')
@@ -788,7 +800,7 @@ long double solveEquation(char* input)
             if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
                 return NAN;
             nums[location + 1] = calculateGCD(nums[location], nums[location + 1]);
-            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
+            nums[location] = setNum(operations, seperatorPositions[i]);
         }
         //LCM
         else if (functions[i] == '3')
@@ -796,7 +808,7 @@ long double solveEquation(char* input)
             if (nums[location] != (int) nums[location] || nums[location + 1] != (int) nums[location + 1])
                 return NAN;
             nums[location + 1] = fabsl(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
-            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
+            nums[location] = setNum(operations, seperatorPositions[i]);
         }
         //sin
         else if (functions[i] == '4')
@@ -873,7 +885,7 @@ long double solveEquation(char* input)
         else if (functions[i] == 'A')
         {
             nums[location + 1] = iterative_log(nums[location], nums[location + 1]);
-            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
+            nums[location] = setNum(operations, seperatorPositions[i]);
         }
         //tetration
         else if (functions[i] == 'B')
@@ -885,7 +897,7 @@ long double solveEquation(char* input)
             for (int j = 0; j < nums[location + 1] - 1; j++)
                 exponent = pow(nums[location], exponent);
             nums[location + 1] = exponent;
-            nums[location] = setNum(operations, seperatorPositions[i], nums[location]);
+            nums[location] = setNum(operations, seperatorPositions[i]);
         }
     }
     //E
@@ -995,11 +1007,10 @@ long double solveEquation(char* input)
     return total;
 }
 //Get first number of equation
-long double convertFloat(char* input, double total, int startIndex, int endIndex)
+long double convertFloat(char* input, int startIndex, int endIndex)
 {
-    if (strcmp(input, "NAN") == 0)
-        return NAN;
     char lastNum = '0';
+    double total = 0.0;
     short multNeg = 1;
     int numNum = 1;
     short divide = 10;
@@ -1033,7 +1044,6 @@ long double convertFloat(char* input, double total, int startIndex, int endIndex
             }
             else if (input[i] == 'm')
                     multNeg = -1;
-            //If input[i] is a root, skip
             else if (input[i] == ' ')
                 break;
             else
@@ -1072,7 +1082,7 @@ long double getMathConstant(char* input, int index, float mathConstant)
             lookback++;
         }
 
-        coefForConsts = convertFloat(input, coefForConsts, index - startIndexCoefficient, index);
+        coefForConsts = convertFloat(input, index - startIndexCoefficient, index);
 
         value = coefForConsts * mathConstant;
     }
@@ -1113,7 +1123,7 @@ unsigned int numberOfOperations(char* input)
     unsigned int times = 0;
     for (int i = 0; i < strlen(input); i++)
     {
-        if (input[i] == ' ' || isdigit(input[i]))
+        if (isdigit(input[i]))
             continue;
         //Check how many operations we have to do
         if (validateOperation(input[i]) == 0)
@@ -1127,18 +1137,18 @@ unsigned int numberOfOperations(char* input)
     }
     return times;
 }
-long double setNum(char* operations, int index, long double num)
+long double setNum(char* operations, int index)
 {
     if (index == 0)
-        num = 0;
+        return 0;
     else
     {
         if (operations[index - 1] == '*' || operations[index - 1] == '/')
-            num = 1;
+            return 1;
         else
-            num = 0;
+            return 0;
     }
-    return num;
+    return 0;
 }
 //Validate string
 int isvalidInput(char* input)
