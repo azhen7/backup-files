@@ -28,7 +28,7 @@ int main(void)
             printf("Note that this result did not take BEDMAS into account.\n\n");
         }
     }
-}
+} 
 
 double solveEquation(char* input)
 {
