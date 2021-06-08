@@ -7,28 +7,9 @@ double log_base(float number, float base)
 {
     return log10(number) / log10(base);
 }
-
-//Root and trig and related functions functions
-//Square root function
-float squareRoot(float number)
-{
-    if (number < 0)
-        return NAN;
-    return sqrt(number);
-}
-//Fifth root function
-float fifthRoot(float number)
-{
-    if (number < 0)
-        return pow(fabsf(number), 0.2) * -1;
-    return pow(number, 0.2);
-}
-//Seventh root function
-float seventhRoot(float number)
-{
-    if (number < 0)
-        return pow(fabsf(number), 1 / 7) * -1;
-    return pow(number, 1 / 7);
+//Function which compares two elements
+int cmpfunc (const void * a, const void * b) {
+   return (* (int*) a - * (int*) b );
 }
 //sinc function
 float sinc(float number)
@@ -71,8 +52,10 @@ double calculateGCD(double a, double b)
     return a;
 }
 //iterative log
-unsigned int iterative_log(double a, double base)
+int iterative_log(double a, double base)
 {
+    if (base < 1.444667 || a <= 1)
+        return -1;
     unsigned int iterateCount = 0;
     while (a > 1)
     {
