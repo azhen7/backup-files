@@ -90,6 +90,9 @@
  *
  *  - 6/7/2021: Version 1.14
  *      - Bug 40 (sin(a * b = NAN) - PATCHED
+ *
+ *  - 6/8/2021: Version 1.15
+ *      - Bug 41 (sin(Pi = NAN) - PATCHED
 ****************************************************************************************************************/
 
 #include "defs.h"
@@ -216,6 +219,7 @@ long double solveEquation(char* input)
         return NAN;
 
     equation = copyStrWithoutSpaces(input);
+    char c;
 
     for (int i = 0; i < strlen(equation); i++)
     {
@@ -249,72 +253,72 @@ long double solveEquation(char* input)
             {
                 if (strncmp(arr, "arcsin(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-' && !validateConstantFirstChar(equation[i + 7]))
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 7;
+                    i += 6;
                     strcat(functions, "d");
                 }
                 else if (strncmp(arr, "arccos(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-' && !validateConstantFirstChar(equation[i + 7]))
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 7;
+                    i += 6;
                     strcat(functions, "e");
                 }
                 else if (strncmp(arr, "arctan(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-' && !validateConstantFirstChar(equation[i + 7]))
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 7;
+                    i += 6;
                     strcat(functions, "f");
                 }
                 else if (strncmp(arr, "arcsinh(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-' && !validateConstantFirstChar(equation[i + 8]))
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 8;
+                    i += 7;
                     strcat(functions, "g");
                 }
                 else if (strncmp(arr, "arccosh(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-' && !validateConstantFirstChar(equation[i + 8]))
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 8;
+                    i += 7;
                     strcat(functions, "h");
                 }
                 else if (strncmp(arr, "arctanh(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-' && !validateConstantFirstChar(equation[i + 8]))
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 8;
+                    i += 7;
                     strcat(functions, "i");
                 }
                 else if (strncmp(arr, "abs(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "r");
                 }
                 else
@@ -325,16 +329,16 @@ long double solveEquation(char* input)
                 if (strncmp(arr, "GOLDEN_RT", 9) == 0)
                 {
                     removeChar(equation, i, 8);
-                    i += 9;
+                    i += 8;
                 }
                 else if (strncmp(arr, "GCD(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "2");
                 }
                 else
@@ -346,13 +350,13 @@ long double solveEquation(char* input)
                 {
                     equation[i] = 'T';
                     removeChar(equation, i, 5);
-                    i += 5;
+                    i += 4;
                 }
                 else if (strncmp(arr, "SQRT_3", 6) == 0)
                 {
                     equation[i] = 'R';
                     removeChar(equation, i, 5);
-                    i += 5;
+                    i += 4;
                 }
                 else if (strncmp(arr, "SILVER_RT", 9) == 0)
                 {
@@ -367,12 +371,12 @@ long double solveEquation(char* input)
             {
                 if (strncmp(arr, "root(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "0");
                 }
                 else
@@ -382,62 +386,62 @@ long double solveEquation(char* input)
             {
                 if (strncmp(arr, "sin(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "4");
                 }
                 else if (strncmp(arr, "sec(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "8");
                 }
                 else if (strncmp(arr, "sinh(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "a");
                 }
                 else if (strncmp(arr, "sinc(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "j");
                 }
                 else if (strncmp(arr, "sqrt(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "k");
                 }
                 else if (strncmp(arr, "square(", 7) == 0)
                 {
-                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-')
+                    if (!isdigit(equation[i + 7]) && equation[i + 7] != '-' && !validateConstantFirstChar(equation[i + 7]))
                         return NAN;
                     removeChar(equation, i - 1, 7);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 7;
+                    i += 6;
                     strcat(functions, "m");
                 }
                 else
@@ -447,52 +451,52 @@ long double solveEquation(char* input)
             {
                 if (strncmp(arr, "log(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "1");
                 }
                 else if (strncmp(arr, "log*(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "A");
                 }
                 else if (strncmp(arr, "ln(", 3) == 0)
                 {
-                    if (!isdigit(equation[i + 3]) && equation[i + 3] != '-')
+                    if (!isdigit(equation[i + 3]) && equation[i + 3] != '-' && !validateConstantFirstChar(equation[i + 3]))
                         return NAN;
                     removeChar(equation, i - 1, 3);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 3;
+                    i += 2;
                     strcat(functions, "o");
                 }
                 else if (strncmp(arr, "log10(", 6) == 0)
                 {
-                    if (!isdigit(equation[i + 6]) && equation[i + 6] != '-')
+                    if (!isdigit(equation[i + 6]) && equation[i + 6] != '-' && !validateConstantFirstChar(equation[i + 6]))
                         return NAN;
                     removeChar(equation, i - 1, 6);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 6;
+                    i += 5;
                     strcat(functions, "p");
                 }
                 else if (strncmp(arr, "log2(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "q");
                 }
                 else
@@ -502,12 +506,12 @@ long double solveEquation(char* input)
             {
                 if (strncmp(arr, "LCM(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "3");
                 }
                 else
@@ -534,62 +538,62 @@ long double solveEquation(char* input)
             {
                 if (strncmp(arr, "cos(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "5");
                 }
                 else if (strncmp(arr, "cosec(", 6) == 0)
                 {
-                    if (!isdigit(equation[i + 6]) && equation[i + 6] != '-')
+                    if (!isdigit(equation[i + 6]) && equation[i + 6] != '-' && !validateConstantFirstChar(equation[i + 6]))
                         return NAN;
                     removeChar(equation, i - 1,  6);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 6;
+                    i += 5;
                     strcat(functions, "7");
                 }
                 else if (strncmp(arr, "cot(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "9");
                 }
                 else if (strncmp(arr, "cosh(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "b");
                 }
                 else if (strncmp(arr, "cbrt(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "l");
                 }
                 else if (strncmp(arr, "cube(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "n");
                 }
                 else
@@ -599,32 +603,32 @@ long double solveEquation(char* input)
             {
                 if (strncmp(arr, "tan(", 4) == 0)
                 {
-                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-')
+                    if (!isdigit(equation[i + 4]) && equation[i + 4] != '-' && !validateConstantFirstChar(equation[i + 4]))
                         return NAN;
                     removeChar(equation, i - 1, 4);
                     functionPositions[numberOfFunctions] = 1;
                     numberOfFunctions++;
-                    i += 4;
+                    i += 3;
                     strcat(functions, "6");
                 }
                 else if (strncmp(arr, "tanh(", 5) == 0)
                 {
-                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-')
+                    if (!isdigit(equation[i + 5]) && equation[i + 5] != '-' && !validateConstantFirstChar(equation[i + 5]))
                         return NAN;
                     removeChar(equation, i - 1, 5);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 5;
+                    i += 4;
                     strcat(functions, "c");
                 }
                 else if (strncmp(arr, "tetrate(", 8) == 0)
                 {
-                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-')
+                    if (!isdigit(equation[i + 8]) && equation[i + 8] != '-' && !validateConstantFirstChar(equation[i + 8]))
                         return NAN;
                     removeChar(equation, i - 1, 8);
                     functionPositions[numberOfFunctions] = i;
                     numberOfFunctions++;
-                    i += 8;
+                    i += 7;
                     strcat(functions, "B");
                 }
                 else
