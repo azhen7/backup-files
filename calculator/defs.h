@@ -37,4 +37,4 @@ float sinc(float number);               //sine cardinal (sinc)
 float sec(float number);                //secant
 float cot(float number);                //cotangent
 float cosec(float number);              //cosecant
-unsigned int iterative_log(double a, double base);  //iterative log
+int iterative_log(double a, double base);  //iterative log
