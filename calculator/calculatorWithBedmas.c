@@ -710,6 +710,7 @@ long double solveEquation(char* input)
             }
         }
     }
+    qsort(positions, posIndex, 4, cmpfunc);
     long double nums[times + 1];
     for (int i = 0; i < times + 1; i++)
         nums[i] = 0;
