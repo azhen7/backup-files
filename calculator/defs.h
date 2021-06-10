@@ -10,10 +10,6 @@
 #define SILVER_RT 2.4142135623          //Silver Ratio (1 + sqrt(2))
 #define APERY_CONST 1.202056903159      //Apery's Constant (1 + 1/2^3 + 1/3^3 + 1/4^3 + 1/5^3 + ...)
 #define M_SQRT_3 1.73205080757          //Theodorus' Constant (sqrt(3))
-#define G 0.9159655941                  //Catalan's Constant (1 - 1/3^2 + 1/5^2 - ...)
-#define DELIAN_CONST 1.25992104         //Delian's Constant (cbrt(2))
-#define HERMITE_CONST 1.1547005         //Hermite's Constant (2 / sqrt(3) OR 1/cos(PI / 6))
-#define GELFOND_CONST 23.1406926327     //Gelfond's Constant (e ^ PI)
 
 //String char checking
 unsigned int validNext(char c);             //Check if next char is "valid"
