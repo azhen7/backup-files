@@ -1,1 +1,27 @@
-
+<!DOCTYPE html>
+<html>
+  <title>Calculator</title>
+  <script type = "text/javascript" src = "bedmas-calculator/script.js"></script>
+  <script type = "text/javascript" src = "bedmas-calculator/manipulateStr.js"></script>
+  <script type = "text/javascript" src = "bedmas-calculator/helper.js"></script>
+  <script type = "text/javascript" src = "sharedFunctions.js"></script>
+  <body style = "text-align:center;">
+    <h1>
+      Calculator
+    </h1>
+    <p>
+      By Adam Z
+    </p>
+    <form>
+      Input: <input id = "equation">
+      <button type = "button" onclick = "solveEquation(document.getElementById('equation').value);">
+        Solve
+      </button>
+    </form>
+    <p id = "result"></p>
+    <br /><br />
+    <button style = "margin-left:auto;margin-right:auto;">
+      <a href = "index.html">Go back</a>
+    </button>
+  </body>
+</html>
