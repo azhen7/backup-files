@@ -93,7 +93,5 @@ function getExponentsOfPrimeFactors(num) {
       num /= primeFactors[i];
     }
   }
-  for (let i = 0; i < numberOfPrimeFactors; i++) {
-  }
   return primeFactorsAndExponents;
 }
