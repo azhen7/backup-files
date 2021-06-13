@@ -45,7 +45,7 @@ function convertFloat(input, startIndex, endIndex) {
       {
         if (!isdigit(input[i + 1]))
         {
-          if (input[i + 1] == '.' || isalpha(input[i + 1]) || isspace(input[i + 1])) {
+          if (input[i + 1] == '.' || isalpha(input[i + 1]) || input[i + 1] == ' ') {
             document.getElementById('result').innerHTML = "Invalid input";
             return;
           }
