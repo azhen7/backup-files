@@ -1008,6 +1008,11 @@ long double solveEquation(char* input)
     }
     if (times == 0)
         total = nums[0];
+    
+    free(operations);
+    free(functions);
+    free(arr);
+    free(equation);
 
     return total;
 }
