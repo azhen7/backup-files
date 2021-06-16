@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+#define _DEFAULT_SOURCE
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -10,7 +10,9 @@ int print(char* str, ...);
 void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum);
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
 
-int main(void);
+int main(void) {
+    print("Gello world");
+}
 
 int print(char* str, ...) {
     int numCharsPrinted = 0;
