@@ -54,21 +54,25 @@ int print(char* str, ...) {
             //%f
             else if (str[i] == 'f' || (str[i] == 'l' && str[i + 1] == 'f')) {
                 doubleNum = va_arg(vl, double);
-                if (doubleNum == 0)
+                if (doubleNum == 0 || doubleNum == 6.79039e-313) {
                     doubleNum = va_arg(vl, int);
+                }
 
-                int len = 0;
+                int len = floor(log10(abs((int) doubleNum))) + 1;
                 char* decimalAsStr;
                 if ((int) doubleNum == 0)
                     decimalAsStr = malloc(8);
-                else {
-                    len = floor(log10(abs((int) doubleNum))) + 1;
+                else
                     decimalAsStr = malloc(len + 7);
-                }
 
                 gcvt(doubleNum, len + 6, decimalAsStr);
                 if ((int) atof(decimalAsStr) == atof(decimalAsStr))
                     strcat(decimalAsStr, ".000000");
+                else if (atof(decimalAsStr) == 6.79039e-313) {
+                    int a = va_arg(vl, int);
+                    gcvt(a, len + 6, decimalAsStr);
+                    strcat(decimalAsStr, ".000000");
+                }
                 else {
                     int addLength = strlen(decimalAsStr);
                     for (int j = 0; j + addLength < 7 + len; j++)
@@ -287,7 +291,7 @@ int print(char* str, ...) {
                     doubleNum = va_arg(vl, double);
                     if (l_doubleNum != doubleNum) {
                         l_doubleNum = doubleNum;
-                        if (l_doubleNum == 0)
+                        if (l_doubleNum == 0 || l_doubleNum == 6.79039e-313)
                             l_doubleNum = va_arg(vl, int);
                     }
 
@@ -302,6 +306,11 @@ int print(char* str, ...) {
                     gcvt(doubleNum, len + 6, decimalAsStr);
                     if ((int) atof(decimalAsStr) == atof(decimalAsStr))
                         strcat(decimalAsStr, ".000000");
+                    else if (atof(decimalAsStr) == 6.79039e-313) {
+                        int a = va_arg(vl, int);
+                        gcvt(a, len + 6, decimalAsStr);
+                        strcat(decimalAsStr, ".000000");
+                    }
                     else {
                         int addLength = strlen(decimalAsStr);
                         for (int j = 0; j + addLength < 7 + len; j++)
