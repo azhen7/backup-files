@@ -10,9 +10,7 @@ int print(char* str, ...);
 void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum);
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
 
-int main(void) {
-    print("Gello world");
-}
+int main(void);
 
 int print(char* str, ...) {
     int numCharsPrinted = 0;
