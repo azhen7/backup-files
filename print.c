@@ -16,9 +16,9 @@ int print(char* str, ...) {
     int numCharsPrinted = 0;
 
     int intNum = 0;
-    double doubleNum = 0.0F;
     long l_intNum = 0;
     long long ll_intNum = 0;
+    double doubleNum = 0.0F;
     long double l_doubleNum;
     char* strVar = NULL;
 
@@ -140,12 +140,20 @@ int print(char* str, ...) {
                         numCharsPrinted += numDigits - 1;
                     }
                 }
+                else {
+                    print("\rERROR: Invalid conversion specifier\n");
+                    return -1;
+                }
             }
             //Precision %f and %Lf
             else if (str[i] == '.') {
                 i++;
-                int precision = atoi(&str[i]);
-                if (isdigit(str[i])) {
+                if (isdigit(str[i]) || str[i] == '-') {
+                    int precision = atoi(&str[i]);
+                    if (precision < 0) {
+                        print("\rERROR: Invalid conversion specifier \'-\' at character %i of str\n", i + 1);
+                        return -1;
+                    }
                     while (isdigit(str[i]))
                         i++;
                     //If precision %f is %.nf, print float argument to n decimal places
@@ -161,7 +169,10 @@ int print(char* str, ...) {
                         else
                             strfromPrecision = malloc(len + 1 + precision);
 
-                        gcvt(doubleNum, len + precision, strfromPrecision);
+                        if (precision == 0)
+                            gcvt((int) doubleNum, len + precision, strfromPrecision);
+                        else
+                            gcvt(doubleNum, len + precision, strfromPrecision);
                         if ((int) atof(strfromPrecision) == atof(strfromPrecision))
                             strcat(strfromPrecision, ".000000");
                         else {
@@ -196,7 +207,11 @@ int print(char* str, ...) {
                             else
                                 strfromPrecision = malloc(floor(log10(abs(precision))) + 1);
 
-                            gcvt(doubleNum, len + precision, strfromPrecision);
+                            if (precision == 0)
+                                gcvt((int) doubleNum, len + precision, strfromPrecision);
+                            else
+                                gcvt(doubleNum, len + precision, strfromPrecision);
+
                             if ((int) strtold(strfromPrecision, NULL) == strtold(strfromPrecision, NULL))
                                 strcat(strfromPrecision, ".000000");
                             else {
@@ -261,6 +276,10 @@ int print(char* str, ...) {
                         free(roundedStr);
                     }
                 }
+                else {
+                    print("\rERROR: Invalid conversion specifier\n");
+                    return -1;
+                }
             }
             //For long (long) --- (e.g. long long int, long double)
             else if (str[i] == 'L') {
@@ -321,14 +340,17 @@ int print(char* str, ...) {
                     numCharsPrinted += strlen(decimalAsStr) - 1;
                     free(decimalAsStr);
                 }
-
+                else {
+                    print("\rERROR: Invalid conversion specifier\n");
+                    return -1;
+                }
             }
             //%%
             else if (str[i] == '%')
                 putchar('%');
             //Invalid conversion specification
             else {
-                print("\rInvalid conversion specifier\n");
+                print("\rERROR: Invalid conversion specifier\n");
                 return -1;
             }
         }
