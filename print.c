@@ -1,5 +1,4 @@
 //My own implementation of printf
-
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdarg.h>
@@ -7,12 +6,17 @@
 #include <math.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
+
+#define UINT_MAX 4294967295U
 
 int print(char* str, ...);
 void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum);
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
 
-int main(void);
+int main(void) {
+    print("%i\n", 4);
+}
 
 int print(char* str, ...) {
     int numCharsPrinted = 0;
@@ -46,11 +50,9 @@ int print(char* str, ...) {
                 }
 
                 numDigits = floor(log10(abs(intNum))) + 1;
-                for (int j = 0; j < numDigits; j++)
-                {
-                    putchar(intNum / pow(10, numDigits - j - 1) + '0');
-                    intNum -= floor(intNum / pow(10, numDigits - j - 1)) * pow(10, numDigits - j - 1);
-                }
+                char* strFromInt = malloc(numDigits);
+                gcvt(intNum, numDigits, strFromInt);
+                fputs(strFromInt, stdout);
                 numCharsPrinted += numDigits - 1;
             }
             //%f
@@ -327,7 +329,7 @@ int print(char* str, ...) {
                     gcvt(doubleNum, len + 6, decimalAsStr);
                     if ((int) atof(decimalAsStr) == atof(decimalAsStr))
                         strcat(decimalAsStr, ".000000");
-                    else if (atof(decimalAsStr) == 6.79039e-313) {
+                    else if (atof(decimalAsStr) == 6.79039e-313 || atof(decimalAsStr) == 0) {
                         int a = va_arg(vl, int);
                         gcvt(a, len + 6, decimalAsStr);
                         strcat(decimalAsStr, ".000000");
@@ -346,6 +348,17 @@ int print(char* str, ...) {
                     print("\rERROR: Invalid conversion specifier\n");
                     return -1;
                 }
+            }
+            //%u
+            else if (str[i] == 'u') {
+                unsigned int unsignedIntNum;
+                unsignedIntNum = va_arg(vl, unsigned int);
+                int len = floor(log10(unsignedIntNum)) + 1;
+                char* unsignedIntToStr = malloc(len);
+                gcvt(unsignedIntNum, len, unsignedIntToStr);
+                fputs(unsignedIntToStr, stdout);
+                numCharsPrinted += strlen(unsignedIntToStr) - 1;
+                free(unsignedIntToStr);
             }
             //%%
             else if (str[i] == '%')
