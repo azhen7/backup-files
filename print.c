@@ -7,22 +7,19 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <time.h>
-
-#define UINT_MAX 4294967295U
+#include <limits.h>
 
 int print(char* str, ...);
 void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum);
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
 
 int main(void) {
-    print("%i\n", 4);
+    print("%i\n", 12345678912);
 }
 
 int print(char* str, ...) {
     int numCharsPrinted = 0;
 
-    int intNum = 0;
-    long l_intNum = 0;
     long long ll_intNum = 0;
     double doubleNum = 0.0F;
     long double l_doubleNum;
@@ -39,7 +36,13 @@ int print(char* str, ...) {
             //%i or %d
             if (str[i] == 'i' || str[i] == 'd') {
                 int numDigits = 0;
-                intNum = va_arg(vl, int);
+                ll_intNum = va_arg(vl, long long int);
+
+                if (ll_intNum >= INT_MAX) {
+                    print("\rArgument too large to represent as int.\n");
+                    return -1;
+                }
+                int intNum = ll_intNum;
 
                 if (intNum == 0)
                     putchar('0');
@@ -89,7 +92,7 @@ int print(char* str, ...) {
             }
             //%c
             else if (str[i] == 'c') {
-                intNum = va_arg(vl, int);
+                int intNum = va_arg(vl, int);
                 putchar(intNum);
             }
             //%s
@@ -103,8 +106,15 @@ int print(char* str, ...) {
                 i++;
                 //%li
                 if (str[i] == 'i' || str[i] == 'd') {
+                    ll_intNum = va_arg(vl, long long int);
+                    if (ll_intNum >= LONG_MAX) {
+                        print("\rArgument too large to represent as long int.\n");
+                        return -1;
+                    }
+
+                    int l_intNum;
                     int numDigits = 0;
-                    l_intNum = va_arg(vl, long int);
+                    l_intNum = ll_intNum;
                     if (l_intNum == 0)
                         putchar('0');
                     if (l_intNum < 0)
@@ -117,7 +127,7 @@ int print(char* str, ...) {
                     for (int j = 0; j < numDigits; j++)
                     {
                         putchar(l_intNum / pow(10, numDigits - j - 1) + '0');
-                        l_intNum -= floor(intNum / pow(10, numDigits - j - 1)) * pow(10, numDigits - j - 1);
+                        l_intNum -= floor(l_intNum / pow(10, numDigits - j - 1)) * pow(10, numDigits - j - 1);
                     }
                     numCharsPrinted += numDigits - 1;
                 }
