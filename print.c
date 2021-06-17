@@ -53,32 +53,24 @@ int print(char* str, ...) {
 
                 numDigits = floor(log10(abs(intNum))) + 1;
                 char* strFromInt = malloc(numDigits);
-                gcvt(intNum, numDigits, strFromInt);
+                long_long_to_str((long long int) intNum, strFromInt);
                 fputs(strFromInt, stdout);
                 numCharsPrinted += numDigits - 1;
             }
             //%f
             else if (str[i] == 'f' || (str[i] == 'l' && str[i + 1] == 'f')) {
                 doubleNum = va_arg(vl, double);
-                if (doubleNum == 0 || doubleNum == 6.79039e-313) {
+                if (fabs(doubleNum) < 0.000001) {
                     doubleNum = va_arg(vl, int);
                 }
-
-                int len = floor(log10(abs((int) doubleNum))) + 1;
+                int b = floor(doubleNum);
+                int len = floor(log10(abs(b))) + 1;
                 char* decimalAsStr;
-                if ((int) doubleNum == 0)
-                    decimalAsStr = malloc(8);
-                else
-                    decimalAsStr = malloc(len + 7);
+                decimalAsStr = malloc(len + 7);
 
                 gcvt(doubleNum, len + 6, decimalAsStr);
                 if ((int) atof(decimalAsStr) == atof(decimalAsStr))
                     strcat(decimalAsStr, ".000000");
-                else if (atof(decimalAsStr) == 6.79039e-313) {
-                    int a = va_arg(vl, int);
-                    gcvt(a, len + 6, decimalAsStr);
-                    strcat(decimalAsStr, ".000000");
-                }
                 else {
                     int addLength = strlen(decimalAsStr);
                     for (int j = 0; j + addLength < 7 + len; j++)
@@ -110,19 +102,19 @@ int print(char* str, ...) {
                         puts("\rERROR: Argument too large to represent as integer value.");
                         return -1;
                     }
-
+                    int l_intNum = ll_intNum;
                     int numDigits = 0;
-                    if (ll_intNum == 0)
+                    if (l_intNum == 0)
                         putchar('0');
-                    if (ll_intNum < 0)
+                    if (l_intNum < 0)
                     {
                         putchar('-');
-                        ll_intNum = -ll_intNum;
+                        l_intNum = -l_intNum;
                     }
 
-                    numDigits = floor(log10(labs(ll_intNum))) + 1;
+                    numDigits = floor(log10(llabs(l_intNum))) + 1;
                     char* strFromInt = malloc(numDigits);
-                    long_long_to_str(ll_intNum, strFromInt);
+                    long_long_to_str(l_intNum, strFromInt);
                     fputs(strFromInt, stdout);
                     numCharsPrinted += numDigits - 1;
                 }
@@ -141,11 +133,9 @@ int print(char* str, ...) {
                         }
 
                         numDigits = floor(log10(labs(ll_intNum))) + 1;
-                        for (int j = 0; j < numDigits; j++)
-                        {
-                            putchar(ll_intNum / pow(10, numDigits - j - 1) + '0');
-                            ll_intNum -= floor(ll_intNum / pow(10, numDigits - j - 1)) * pow(10, numDigits - j - 1);
-                        }
+                        char* strFromInt = malloc(numDigits);
+                        long_long_to_str((long long int) ll_intNum, strFromInt);
+                        fputs(strFromInt, stdout);
                         numCharsPrinted += numDigits - 1;
                     }
                 }
@@ -319,7 +309,7 @@ int print(char* str, ...) {
                     doubleNum = va_arg(vl, double);
                     if (l_doubleNum != doubleNum) {
                         l_doubleNum = doubleNum;
-                        if (l_doubleNum == 0 || l_doubleNum == 6.79039e-313)
+                        if (fabsl(l_doubleNum) < 0.000001)
                             l_doubleNum = va_arg(vl, int);
                     }
 
@@ -334,11 +324,6 @@ int print(char* str, ...) {
                     gcvt(l_doubleNum, len + 6, decimalAsStr);
                     if ((int) atof(decimalAsStr) == atof(decimalAsStr))
                         strcat(decimalAsStr, ".000000");
-                    else if (atof(decimalAsStr) == 6.79039e-313 || atof(decimalAsStr) == 0) {
-                        int a = va_arg(vl, int);
-                        gcvt(a, len + 6, decimalAsStr);
-                        strcat(decimalAsStr, ".000000");
-                    }
                     else {
                         int addLength = strlen(decimalAsStr);
                         for (int j = 0; j + addLength < 7 + len; j++)
