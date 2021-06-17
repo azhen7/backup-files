@@ -12,9 +12,11 @@
 int print(char* str, ...);
 void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum);
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
+char* long_long_to_str(long long int num, char* buffer);
 
 int main(void) {
-    print("%i\n", 12345678912);
+    printf("%f\n", (double) 12222222);
+    print("%f\n", 12222222);
 }
 
 int print(char* str, ...) {
@@ -39,7 +41,7 @@ int print(char* str, ...) {
                 ll_intNum = va_arg(vl, long long int);
 
                 if (ll_intNum >= INT_MAX) {
-                    print("\rArgument too large to represent as int.\n");
+                    puts("\rERROR: Argument too large to represent as int.");
                     return -1;
                 }
                 int intNum = ll_intNum;
@@ -104,31 +106,27 @@ int print(char* str, ...) {
             //%li and %lli / %lld (long int and long long int conversion specifications)
             else if (str[i] == 'l') {
                 i++;
-                //%li
+                //%li or %ld
                 if (str[i] == 'i' || str[i] == 'd') {
-                    ll_intNum = va_arg(vl, long long int);
+                    ll_intNum = va_arg(vl, long int);
                     if (ll_intNum >= LONG_MAX) {
-                        print("\rArgument too large to represent as long int.\n");
+                        puts("\rERROR: Argument too large to represent as integer value.");
                         return -1;
                     }
 
-                    int l_intNum;
                     int numDigits = 0;
-                    l_intNum = ll_intNum;
-                    if (l_intNum == 0)
+                    if (ll_intNum == 0)
                         putchar('0');
-                    if (l_intNum < 0)
+                    if (ll_intNum < 0)
                     {
                         putchar('-');
-                        l_intNum = -l_intNum;
+                        ll_intNum = -ll_intNum;
                     }
 
-                    numDigits = floor(log10(labs(l_intNum))) + 1;
-                    for (int j = 0; j < numDigits; j++)
-                    {
-                        putchar(l_intNum / pow(10, numDigits - j - 1) + '0');
-                        l_intNum -= floor(l_intNum / pow(10, numDigits - j - 1)) * pow(10, numDigits - j - 1);
-                    }
+                    numDigits = floor(log10(labs(ll_intNum))) + 1;
+                    char* strFromInt = malloc(numDigits);
+                    long_long_to_str(ll_intNum, strFromInt);
+                    fputs(strFromInt, stdout);
                     numCharsPrinted += numDigits - 1;
                 }
                 //%lli or %lld
@@ -155,7 +153,7 @@ int print(char* str, ...) {
                     }
                 }
                 else {
-                    print("\rERROR: Invalid conversion specifier\n");
+                    puts("\rERROR: Invalid conversion specifier.");
                     return -1;
                 }
             }
@@ -291,7 +289,7 @@ int print(char* str, ...) {
                     }
                 }
                 else {
-                    print("\rERROR: Invalid conversion specifier\n");
+                    puts("\rERROR: Invalid conversion specifier.");
                     return -1;
                 }
             }
@@ -335,8 +333,8 @@ int print(char* str, ...) {
                     else
                         decimalAsStr = malloc(floor(log10(abs(integerPartOfDecimal))) + 51);
 
-                    int len = floor(log10(abs((int) doubleNum))) + 1;
-                    gcvt(doubleNum, len + 6, decimalAsStr);
+                    int len = floor(log10(abs((int) l_doubleNum))) + 1;
+                    gcvt(l_doubleNum, len + 6, decimalAsStr);
                     if ((int) atof(decimalAsStr) == atof(decimalAsStr))
                         strcat(decimalAsStr, ".000000");
                     else if (atof(decimalAsStr) == 6.79039e-313 || atof(decimalAsStr) == 0) {
@@ -355,7 +353,7 @@ int print(char* str, ...) {
                     free(decimalAsStr);
                 }
                 else {
-                    print("\rERROR: Invalid conversion specifier\n");
+                    puts("\rERROR: Invalid conversion specifier.");
                     return -1;
                 }
             }
@@ -375,7 +373,7 @@ int print(char* str, ...) {
                 putchar('%');
             //Invalid conversion specification
             else {
-                print("\rERROR: Invalid conversion specifier\n");
+                puts("\rERROR: Invalid conversion specifier.");
                 return -1;
             }
         }
@@ -432,4 +430,13 @@ void cutOffExcessDecimalDigits(char* decimalAsStr, int len) {
             }
         }
     }
+}
+
+char* long_long_to_str(long long int num, char* buffer) {
+    int len = floor(log10(llabs(num))) + 1;
+    for (int i = len - 1; i >= 0; i--) {
+        buffer[i] = (num % 10) + '0';
+        num /= 10;
+    }
+    return buffer;
 }
