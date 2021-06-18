@@ -14,28 +14,27 @@ void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precisi
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
 char* long_long_to_str(long long int num, char* buffer);
 
-int main(void);
+int main(void) {
+    print("%lli\n", -7);
+}
 
 int print(char* str, ...) {
     int numCharsPrinted = 0;
-
     long long ll_intNum = 0;
-    double doubleNum = 0.0F;
+    double doubleNum = 0.0;
     long double l_doubleNum;
     char* strVar = NULL;
 
     va_list vl;
     va_start(vl, str);
-    for (int i = 0; i < strlen(str); i++)
-    {
+    for (int i = 0; i < strlen(str); i++) {
         //Conversion specifications
-        if (str[i] == '%')
-        {
+        if (str[i] == '%') {
             i++;
             //%i or %d
             if (str[i] == 'i' || str[i] == 'd') {
                 int numDigits = 0;
-                ll_intNum = va_arg(vl, long long int);
+                ll_intNum = va_arg(vl, int);
 
                 if (ll_intNum >= INT_MAX) {
                     puts("\rERROR: Argument too large to represent as int.");
@@ -63,20 +62,20 @@ int print(char* str, ...) {
                 if (fabs(doubleNum) < 0.000001) {
                     doubleNum = va_arg(vl, int);
                 }
-                int b = floor(doubleNum);
-                int len = floor(log10(abs(b))) + 1;
-                char* decimalAsStr;
-                decimalAsStr = malloc(len + 7);
+                int len = floor(log10(abs((int) doubleNum))) + 1;
+                char* decimalAsStr = malloc(len + 7);
 
                 gcvt(doubleNum, len + 6, decimalAsStr);
+                //If decimalAsStr is has no decimal places, append .000000 onto the end of it
                 if ((int) atof(decimalAsStr) == atof(decimalAsStr))
                     strcat(decimalAsStr, ".000000");
+                //Otherwise, append 0s until there are 6 decimal digits
                 else {
                     int addLength = strlen(decimalAsStr);
                     for (int j = 0; j + addLength < 7 + len; j++)
                         strcat(decimalAsStr, "0");
                 }
-                cutOffExcessDecimalDigits(decimalAsStr, len);
+                cutOffExcessDecimalDigits(decimalAsStr, len); //Cut off excess digits so that there are only 6 decimal digits. Round accordingly.
                 fputs(decimalAsStr, stdout);
                 numCharsPrinted += 7 + len;
                 free(decimalAsStr);
@@ -98,10 +97,6 @@ int print(char* str, ...) {
                 //%li or %ld
                 if (str[i] == 'i' || str[i] == 'd') {
                     ll_intNum = va_arg(vl, long int);
-                    if (ll_intNum >= LONG_MAX) {
-                        puts("\rERROR: Argument too large to represent as integer value.");
-                        return -1;
-                    }
                     int l_intNum = ll_intNum;
                     int numDigits = 0;
                     if (l_intNum == 0)
@@ -134,7 +129,7 @@ int print(char* str, ...) {
 
                         numDigits = floor(log10(labs(ll_intNum))) + 1;
                         char* strFromInt = malloc(numDigits);
-                        long_long_to_str((long long int) ll_intNum, strFromInt);
+                        long_long_to_str(ll_intNum, strFromInt);
                         fputs(strFromInt, stdout);
                         numCharsPrinted += numDigits - 1;
                     }
@@ -158,7 +153,7 @@ int print(char* str, ...) {
                     //If precision %f is %.nf, print float argument to n decimal places
                     if (str[i] == 'f') {
                         doubleNum = va_arg(vl, double);
-                        if (doubleNum == 0)
+                        if (fabs(doubleNum) < 0.000001)
                             doubleNum = va_arg(vl, int);
 
                         char* strfromPrecision;
@@ -168,12 +163,12 @@ int print(char* str, ...) {
                         else
                             strfromPrecision = malloc(len + 1 + precision);
 
-                        if (precision == 0)
-                            gcvt((int) doubleNum, len + precision, strfromPrecision);
-                        else
-                            gcvt(doubleNum, len + precision, strfromPrecision);
-                        if ((int) atof(strfromPrecision) == atof(strfromPrecision))
-                            strcat(strfromPrecision, ".000000");
+                        gcvt(doubleNum, len + precision, strfromPrecision);
+                        if ((int) atof(strfromPrecision) == atof(strfromPrecision)) {
+                            strcat(strfromPrecision, ".");
+                            for (int j = 0; j < precision; j++)
+                                strcat(strfromPrecision, "0");
+                        }
                         else {
                             for (int j = 0; strlen(strfromPrecision) - len - 1 < precision; j++)
                                 strcat(strfromPrecision, "0");
@@ -195,7 +190,7 @@ int print(char* str, ...) {
                             doubleNum = va_arg(vl, double);
                             if (l_doubleNum != doubleNum) {
                                 l_doubleNum = doubleNum;
-                                if (l_doubleNum == 0)
+                                if (fabsl(l_doubleNum) < 0.000001)
                                     l_doubleNum = va_arg(vl, int);
                             }
 
@@ -206,11 +201,7 @@ int print(char* str, ...) {
                             else
                                 strfromPrecision = malloc(floor(log10(abs(precision))) + 1);
 
-                            if (precision == 0)
-                                gcvt((int) doubleNum, len + precision, strfromPrecision);
-                            else
-                                gcvt(doubleNum, len + precision, strfromPrecision);
-
+                            gcvt(doubleNum, len + precision, strfromPrecision);
                             if ((int) strtold(strfromPrecision, NULL) == strtold(strfromPrecision, NULL))
                                 strcat(strfromPrecision, ".000000");
                             else {
@@ -232,7 +223,7 @@ int print(char* str, ...) {
                 else if (str[i] == 'f') {
                     if (str[i] == 'f') {
                         doubleNum = va_arg(vl, double);
-                        if (doubleNum == 0)
+                        if (fabs(doubleNum) < 0.000001)
                             doubleNum = va_arg(vl, int);
 
                         int roundedDoubleNum = round(doubleNum);
@@ -257,7 +248,7 @@ int print(char* str, ...) {
                         doubleNum = va_arg(vl, double);
                         if (l_doubleNum != doubleNum && doubleNum != 0) {
                             l_doubleNum = doubleNum;
-                            if (l_doubleNum == 0)
+                            if (fabsl(l_doubleNum) < 0.000001)
                                 l_doubleNum = va_arg(vl, int);
                         }
 
@@ -296,11 +287,9 @@ int print(char* str, ...) {
                     }
 
                     numDigits = floor(log10(labs(ll_intNum))) + 1;
-                    for (int j = 0; j < numDigits; j++)
-                    {
-                        putchar(ll_intNum / pow(10, numDigits - j - 1) + '0');
-                        ll_intNum -= floor(ll_intNum / pow(10, numDigits - j - 1)) * pow(10, numDigits - j - 1);
-                    }
+                    char* strFromInt = malloc(numDigits);
+                    long_long_to_str(ll_intNum, strFromInt);
+                    fputs(strFromInt, stdout);
                     numCharsPrinted += numDigits - 1;
                 }
                 //%Lf
