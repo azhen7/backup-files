@@ -10,11 +10,13 @@
 #include <limits.h>
 
 int print(char* str, ...);
-void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum);
+void cutOffExcessDecimalDigits_Precision(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum);
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
 char* long_long_to_str(long long int num, char* buffer);
 
-int main(void);
+int main(void) {
+    print("%lli\n", -7);
+}
 
 int print(char* str, ...) {
     int numCharsPrinted = 0;
@@ -173,7 +175,7 @@ int print(char* str, ...) {
                         }
 
                         if (strlen(strfromPrecision) > len + 1 + precision) {
-                            precisionFloat(strfromPrecision, len, precision, doubleNum);
+                            cutOffExcessDecimalDigits_Precision(strfromPrecision, len, precision, doubleNum);
                         }
 
                         fputs(strfromPrecision, stdout);
@@ -208,7 +210,7 @@ int print(char* str, ...) {
                             }
 
                             if (strlen(strfromPrecision) > len + 1 + precision) {
-                                precisionFloat(strfromPrecision, len, precision, l_doubleNum);
+                                cutOffExcessDecimalDigits_Precision(strfromPrecision, len, precision, l_doubleNum);
                             }
 
                             fputs(strfromPrecision, stdout);
@@ -355,7 +357,7 @@ int print(char* str, ...) {
     return numCharsPrinted;
 }
 
-void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum) {
+void cutOffExcessDecimalDigits_Precision(char* strfromPrecision, int lengthOfIntegerPart, int precision, long double doubleNum) {
     int j = lengthOfIntegerPart + precision + 1;
     if (strfromPrecision[j] >= '5') {
         if (precision <= 6) {
