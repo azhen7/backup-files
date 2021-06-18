@@ -6,7 +6,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <time.h>
 #include <limits.h>
 
 int print(char* str, ...);
