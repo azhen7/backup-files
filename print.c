@@ -14,9 +14,7 @@ void precisionFloat(char* strfromPrecision, int lengthOfIntegerPart, int precisi
 void cutOffExcessDecimalDigits(char* decimalAsStr, int len);
 char* long_long_to_str(long long int num, char* buffer);
 
-int main(void) {
-    print("%lli\n", -7);
-}
+int main(void);
 
 int print(char* str, ...) {
     int numCharsPrinted = 0;
