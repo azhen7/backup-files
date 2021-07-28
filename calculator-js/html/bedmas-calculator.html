@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Calculator</title>
+    <script type="text/javascript" src="/sharedFunctions.js"></script>
+    <script type="text/javascript" src="/bedmas-calculator/main.js"></script>        <!-- This file has the actual calculator code -->
+    <script type="text/javascript" src="/bedmas-calculator/htmlJS.js"></script>
+    <script type="text/javascript" src="/bedmas-calculator/helper.js"></script>
+    <script type="text/javascript" src="/bedmas-calculator/manipulateStr.js"></script>
+    <script type="text/javascript" src="/bedmas-calculator/mathFunctions.js"></script>
+    <script>
+      
+    </script>
+    <link rel="stylesheet" href="/bedmas-calculator/style.css">
+  </head>
+  <body style = "text-align:center;">
+    <h1>
+      Calculator
+    </h1>
+    <p>
+      By Adam Z
+    </p>
+    <table align = "center">
+      <tbody>
+      <input placeholder = "Enter an equation: " id="equation">
+        <p id = "result"></p>
+        <tr>
+          <td><input type="button" value="←" onclick="decrease()"></td>
+          <td><input type="button" value="→" onclick="increase()"></td>
+        </tr>
+        <tr>
+          <td><input type="button" value="1st" onclick="setMode(1)"></td>
+          <td><input type="button" value="2nd" onclick="setMode(2)"></td>
+          <td><input type="button" value="3rd" onclick="setMode(3)"></td>
+        </tr>
+        <tr>
+          <td><input id="inbuilt_logs" type="button" value="log(" onclick="setAddValue('inbuilt_logs')"></td>
+          <td><input type="button" value="root(" onclick="addToEquation(value)"></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><input type="button" value="1" onclick="addToEquation(value)"></td>
+          <td><input type="button" value="2" onclick="addToEquation(value)"></td>
+          <td><input type="button" value="3" onclick="addToEquation(value)"></td>
+          <td><input type="button" value="DEL" onclick="removeLastChar()"></td>
+          <td><input type="button" value="C" onclick="clrscr()"></td>
+        </tr>
+        <tr>
+          <td><input id="inbuilt_powers" type="button" value="x²" onclick = "setAddValue('inbuilt_powers')"></td>
+          <td><input type="button" value="4" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="5" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="6" onclick = "addToEquation(value)"></td>
+          <td><input id="multiplySign" type="button" value="x" onclick = "setAddValue('multiplySign')"></td>
+          <td><input id="divideSign" type="button" value="/" onclick = "setAddValue('divideSign')"></td>
+        </tr>
+        <tr>
+          <td><input type="button" value="^" onclick="addToEquation(value)"></td>
+          <td><input type="button" value="7" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="8" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="9" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="+" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="-" onclick = "addToEquation(value)"></td>
+        </tr>
+        <tr>
+          <td><input type="button" value="!" onclick="addToEquation(value)"></td>
+          <td><input type="button" value="0" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="." onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="e" onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="," onclick = "addToEquation(value)"></td>
+          <td><input type="button" value="=" onclick="solveEquation(actualEquation, document.getElementById('equation').value)"></td>
+        </tr>
+      </tbody>
+    </table>
+    <br /><br />
+    <button style = "margin-left:auto;margin-right:auto;">
+      <a href = "/index.html">Go back</a>
+    </button>
+  </body>
+</html>
