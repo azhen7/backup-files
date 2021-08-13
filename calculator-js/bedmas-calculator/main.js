@@ -1,10 +1,14 @@
-"use strict";
+import '/bedmas-calculator/manipulateStr.js';
+import '/bedmas-calculator/charComparison.js';
+import '/bedmas-calculator/helper.js';
+import '/bedmas-calculator/mathFunctions.js';
+
+'use strict';
 
 let counter = 0;
-function solveEquation(input, strUserSees) {
+function solveEquation(input, strUserSees, returnMode = 1) {
   const resultOfEquation = document.getElementById('result');
   superScript = 0;
-  input = strUserSees;
   console.clear();
   clrscr();
   function setOperation(operations, index) {
@@ -16,7 +20,7 @@ function solveEquation(input, strUserSees) {
     }
     return changedStrOperations;
   }
-  counter++;
+  counter += returnMode;
   let times = 0;
   let total = 0.0;
   let equation = '', arr = '', functions = '';
@@ -27,7 +31,7 @@ function solveEquation(input, strUserSees) {
     const newline = document.createElement("br");
     resultOfEquation.appendChild(newline);
   }
-  if (input.length > 25) {
+  if (strUserSees.length > 25) {
     resultOfEquation.append("Input is too long. Maximum length of input is 25.");
     return;
   }
@@ -44,465 +48,476 @@ function solveEquation(input, strUserSees) {
     }
     if (isalpha(equation[i])) {
       arr = equation.substring(i, i + 10);
-      if (equation[i] === 'P') {
-        if (arr.startsWith("PI")) {
-          equation = equation.substring(0, i) + 'Z' + equation.substring(i + 1);
-          equation = removeChar(equation, i, 1);
-          i++;
+      switch(equation[i]) {
+        case "P": {
+          if (arr.startsWith("PI")) {
+            equation = equation.substring(0, i) + 'Z' + equation.substring(i + 1);
+            equation = removeChar(equation, i, 1);
+            i++;
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
         }
-        else {
+        case "a": {
+          if (arr.startsWith("arcsin(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 7)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 7);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 6;
+            functions += "d";
+          }
+          else if (arr.startsWith("arccos(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 7)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 7);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 6;
+            functions += "e";
+          }
+          else if (arr.startsWith("arctan(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 7)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 7);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 6;
+            functions += "f";
+          }
+          else if (arr.startsWith("arcsinh(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 8)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 8);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 7;
+            functions += "g";
+          }
+          else if (arr.startsWith("arccosh(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 8)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 8);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 7;
+            functions += "h";
+          }
+          else if (arr.startsWith("arctanh(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 8)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 8);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 7;
+            functions += "i";
+          }
+          else if (arr.startsWith("abs(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "r";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "G": {
+          if (arr.startsWith("GOLDEN_RT")) {
+            equation = removeChar(equation, i, 8);
+            i += 8;
+          }
+          else if (arr.startsWith("GCD(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "2";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+        }
+        case "S": {
+          if (arr.startsWith("SILVER_RT")) {
+            equation = equation.substring(0, i) + 'Y' + equation.substring(i + 1);
+            equation = removeChar(equation, i, 8);
+            i += 8;
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "r": {
+          if (arr.startsWith("root(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "0";
+          }
+          else if (arr.startsWith("round(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 6)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 6);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 5;
+            functions += "u";
+          }
+          else if (arr.startsWith("random(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 7)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 7);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 6;
+            functions += "q";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "s": {
+          if (arr.startsWith("sin(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "4";
+          }
+          else if (arr.startsWith("sec(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "8";
+          }
+          else if (arr.startsWith("sinh(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "a";
+          }
+          else if (arr.startsWith("sinc(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "j";
+          }
+          else if (arr.startsWith("sqrt(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "k";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "l": {
+          if (arr.startsWith("log(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "1";
+          }
+          else if (arr.startsWith("log*(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "A";
+          }
+          else if (arr.startsWith("ln(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 3)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 3);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 2;
+            functions += "o";
+          }
+          else if (arr.startsWith("log10(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 6)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 6);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 5;
+            functions += "p";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "L": {
+          if (arr.startsWith("LCM(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "3";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "n": {
+          if (arr.startsWith("nCr")) {
+            equation = equation.substring(0, i) + 'C' + equation.substring(i + 1);
+            equation = removeChar(equation, i, 2);
+            i += 2;
+          }
+          else if (arr.startsWith("nPr")) {
+            equation = equation.substring(0, i) + 'P' + equation.substring(i + 1);
+            equation = removeChar(equation, i, 2);
+            i += 2;
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "c": {
+          if (arr.startsWith("cos(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "5";
+          }
+          else if (arr.startsWith("csc(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 6);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 5;
+            functions += "7";
+          }
+          else if (arr.startsWith("cot(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "9";
+          }
+          else if (arr.startsWith("cosh(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "b";
+          }
+          else if (arr.startsWith("cbrt(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "l";
+          }
+          else if (arr.startsWith("ceil(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "s";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "t": {
+          if (arr.startsWith("tan(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 4)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 4);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 3;
+            functions += "6";
+          }
+          else if (arr.startsWith("tanh(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 5)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 5);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 4;
+            functions += "c";
+          }
+          else if (arr.startsWith("tetrate(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 8)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 8);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 7;
+            functions += "B";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "f": {
+          if (arr.startsWith("floor(")) {
+            if (!verifyValidCharAfterFunction(equation, i, 6)) {
+              resultOfEquation.append(`Syntax ERROR`);
+              return;
+            }
+            equation = removeChar(equation, i - 1, 6);
+            functionPositions[numberOfFunctions] = i;
+            numberOfFunctions++;
+            i += 5;
+            functions += "t";
+          }
+          else {
+            resultOfEquation.append(`Syntax ERROR`);
+            return;
+          }
+          break;
+        }
+        case "E":
+        case "e":
+          break;
+        default: {
           resultOfEquation.append(`Syntax ERROR`);
           return;
         }
-      }
-      else if (equation[i] === 'a') {
-        if (arr.startsWith("arcsin(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 7)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 7);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 6;
-          functions += "d";
-        }
-        else if (arr.startsWith("arccos(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 7)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 7);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 6;
-          functions += "e";
-        }
-        else if (arr.startsWith("arctan(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 7)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 7);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 6;
-          functions += "f";
-        }
-        else if (arr.startsWith("arcsinh(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 8)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 8);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 7;
-          functions += "g";
-        }
-        else if (arr.startsWith("arccosh(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 8)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 8);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 7;
-          functions += "h";
-        }
-        else if (arr.startsWith("arctanh(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 8)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 8);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 7;
-          functions += "i";
-        }
-        else if (arr.startsWith("abs(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "r";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'G') {
-        if (arr.startsWith("GOLDEN_RT")) {
-          equation = removeChar(equation, i, 8);
-          i += 8;
-        }
-        else if (arr.startsWith("GCD(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "2";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'S') {
-        if (arr.startsWith("SQRT_2")) {
-          equation = equation.substring(0, i) + 'T' + equation.substring(i + 1);
-          equation = removeChar(equation, i, 5);
-          i += 5;
-        }
-        else if (arr.startsWith("SQRT_3")) {
-          equation = equation.substring(0, i) + 'R' + equation.substring(i + 1);
-          equation = removeChar(equation, i, 5);
-          i += 5;
-        }
-        else if (arr.startsWith("SILVER_RT")) {
-          equation = equation.substring(0, i) + 'Y' + equation.substring(i + 1);
-          equation = removeChar(equation, i, 8);
-          i += 8;
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'r') {
-        if (arr.startsWith("root(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "0";
-        }
-        else if (arr.startsWith("round(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 6)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 6);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 5;
-          functions += "u";
-        }
-        else if (arr.startsWith("random(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 7)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 7);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 6;
-          functions += "q";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 's') {
-        if (arr.startsWith("sin(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "4";
-        }
-        else if (arr.startsWith("sec(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "8";
-        }
-        else if (arr.startsWith("sinh(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "a";
-        }
-        else if (arr.startsWith("sinc(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "j";
-        }
-        else if (arr.startsWith("sqrt(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "k";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'l') {
-        if (arr.startsWith("log(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "1";
-        }
-        else if (arr.startsWith("log*(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "A";
-        }
-        else if (arr.startsWith("ln(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 3)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 3);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 2;
-          functions += "o";
-        }
-        else if (arr.startsWith("log10(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 6)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 6);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 5;
-          functions += "p";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'L') {
-        if (arr.startsWith("LCM(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "3";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'n') {
-        if (arr.startsWith("nCr")) {
-          equation = equation.substring(0, i) + 'C' + equation.substring(i + 1);
-          equation = removeChar(equation, i, 2);
-          i += 2;
-        }
-        else if (arr.startsWith("nPr")) {
-          equation = equation.substring(0, i) + 'P' + equation.substring(i + 1);
-          equation = removeChar(equation, i, 2);
-          i += 2;
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'c') {
-        if (arr.startsWith("cos(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "5";
-        }
-        else if (arr.startsWith("cosec(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 6)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 6);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 5;
-          functions += "7";
-        }
-        else if (arr.startsWith("cot(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "9";
-        }
-        else if (arr.startsWith("cosh(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "b";
-        }
-        else if (arr.startsWith("cbrt(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "l";
-        }
-        else if (arr.startsWith("ceil(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "s";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 't') {
-        if (arr.startsWith("tan(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 4)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 4);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 3;
-          functions += "6";
-        }
-        else if (arr.startsWith("tanh(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 5)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 5);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 4;
-          functions += "c";
-        }
-        else if (arr.startsWith("tetrate(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 8)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 8);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 7;
-          functions += "B";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'f') {
-        if (arr.startsWith("floor(")) {
-          if (!verifyValidCharAfterFunction(equation, i, 6)) {
-            resultOfEquation.append(`Syntax ERROR`);
-            return;
-          }
-          equation = removeChar(equation, i - 1, 6);
-          functionPositions[numberOfFunctions] = i;
-          numberOfFunctions++;
-          i += 5;
-          functions += "t";
-        }
-        else {
-          resultOfEquation.append(`Syntax ERROR`);
-          return;
-        }
-      }
-      else if (equation[i] === 'E' || equation[i] === 'e' || equation[i] === 'x');
-      else {
-        resultOfEquation.append(`Syntax ERROR`);
-        return;
       }
     }
   }
   equation = setUp(equation);
-  if (equation === "NAN") {
+  if (!equation) {
     resultOfEquation.append(`Syntax ERROR`);
     return;
   }
+  equation = getBracketResults(equation);
+  if (!equation) {
+    resultOfEquation.append(`Syntax ERROR`);
+    return;
+  }
+  
   let positions = [].fill(0);
   positions = getPositionsOfNums(equation);
   times = positions.length - 1;
@@ -561,19 +576,18 @@ function solveEquation(input, strUserSees) {
     }
   }
   for (let i = 0, coefficient = 1; i < numberOfFunctions; i++) {
-    location = getLocation(i, times, positions, operations, operationPositions, functionPositions);
-    if (Number.isNaN(location)) {
+    location = getLocation(i, times, positions, operations, operationPositions, functionPositions, functions);
+    if (location === -1) {
       resultOfEquation.append(`Argument ERROR`);
       return;
     }
-    nums = getFunctionValue(nums, operations, functions, location, i, counter, coefficient);
+    nums = getFunctionValue(nums, operations, functions, location, i, counter);
     if (nums.includes(undefined)) {
       resultOfEquation.append(`Argument ERROR`);
       return;
     }
     location = 0;
   }
-  console.log(nums)
   //E
   for (let i = 0; i < times; i++) {
     if (operations[i] === 'e') {
@@ -593,13 +607,12 @@ function solveEquation(input, strUserSees) {
       nums[i] = setNum(operations, i);
       operations = setOperation(operations, i);
     }
-    else if (operations[i] === ',') {
+    else if (operations[i] === ',' && operations[i - 1] !== '^') {
       operations = setOperation(operations, i);
     }
   }
   //Exponents
-  for (let i = 0; i < times; i++)
-  {
+  for (let i = 0; i < times; i++) {
     if (operations[i] === '^') {
       nums[i + 1] = Math.pow(nums[i], nums[i + 1]);
       nums[i] = setNum(operations, i);
@@ -664,5 +677,10 @@ function solveEquation(input, strUserSees) {
       total -= nums[i + 1];
     }
   }
-  resultOfEquation.innerHTML += `Equation ${counter}: ${strUserSees} = ${total}`;
+  if (returnMode === 1) {
+    resultOfEquation.innerHTML += `Equation ${counter}: ${strUserSees} = ${total}`;
+  }
+  else {
+    return total.toString();
+  }
 }
