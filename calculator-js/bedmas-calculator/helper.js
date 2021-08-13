@@ -81,6 +81,16 @@ function setNum(operations, index, offset = -1) {
   }
 }
 
+function setOperation(operations, index) {
+  let changedStrOperations = operations;
+  if (index > 0) {
+    if (operations[index - 1] !== 'C' && operations[index - 1] !== 'P') {
+      changedStrOperations = operations.substring(0, index) + operations[index - 1] + operations.substring(index + 1);
+    }
+  }
+  return changedStrOperations;
+}
+
 //Get the positions of the numbers
 function getPositionsOfNums(equation, arrSize) {
   let positions = [];
