@@ -1,8 +1,3 @@
-import '/bedmas-calculator/manipulateStr.js';
-import '/bedmas-calculator/charComparison.js';
-import '/bedmas-calculator/helper.js';
-import '/bedmas-calculator/mathFunctions.js';
-
 'use strict';
 
 let counter = 0;
