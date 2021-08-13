@@ -1,7 +1,7 @@
 let mode = 1;
 let cursorPos = 0;
 let multiplySign = [
-  "x",
+  "×",
   "nPr",
   "GCD("
 ];
@@ -20,6 +20,22 @@ let inbuilt_powers = [
   "x³",
   ""
 ];
+let sin = [
+  "sin(",
+  "csc(",
+  "arcsin("
+];
+let cos = [
+  "cos(",
+  "sec(",
+  "arccos("
+];
+let tan = [
+  "tan(",
+  "cot(",
+  "arctan("
+];
+
 let functions = [
   "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
   "sin(", "cos(", "tan(",
@@ -34,14 +50,14 @@ let functions = [
   "ln(", "LN(",
   "log10(", "LOG10(",
   "log2(", "LOG2(",
-  "cot(", "cosec(", "sec(",
+  "cot(", "csc(", "sec(",
   "sinc(", "log*(", "LOG*(",
   "LCM(", "GCD(", 
   "root(", "tetrate(",
   "square(", "cube(",
   "sqrt(", "cbrt(",
   "floor(", "ceil(", "round(",
-  "abs("
+  "abs(", ","
 ];
 let superscriptReplacementText = [
   "⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹",
@@ -64,18 +80,11 @@ let superscriptReplacementText = [
   "ˢᵠᵘᵃʳᵉ⁽", "ᶜᵘᵇᵉ⁽",
   "ˢᵠʳᵗ⁽", "ᶜᵇʳᵗ⁽",
   "ᶠˡᵒᵒʳ⁽", "ᶜᵉᶦˡ⁽", "ʳᵒᵘⁿᵈ⁽",
-  "ᵃᵇˢ⁽", ","
+  "ᵃᵇˢ⁽", "𝄒"
 ];
 let actualEquation = '';
 let superScript = 0;
 
-let isOgOperation = (c) => {
-  if (c === '+' || c === '-' || c === 'x' || c === '/'
-      || c === '^' || c === '^' || c === '!' || c === 'nPr' || c === 'nCr'
-      || c == '%' || c == 'e')
-    return 1;
-  return 0;
-};
 //Clear input textbox
 function clrscr() {
   equation.value = "";
@@ -87,9 +96,9 @@ function clrscr() {
 function addToEquation(val) {
   let visualStr = equation.value.substring(0, cursorPos);
   let restOfVisualStr = equation.value.substring(cursorPos);
-  let str = actualEquation.substring(0, cursorPos);
-  let restOfStr = actualEquation.substring(cursorPos);
-  if (isOgOperation(val)) {
+  let str = actualEquation.substring(0, cursorPos + superScript);
+  let restOfStr = actualEquation.substring(cursorPos + superScript);
+  if (isOgOperation(val) && val !== "^") {
     superScript = 0;
   }
   if (val === "")
@@ -97,6 +106,10 @@ function addToEquation(val) {
   if (val === "^") {
     str += val;
     superScript = 1;
+  }
+  else if (val === '×') {
+    visualStr += '×';
+    str += '*';
   }
   else if (inbuilt_powers.includes(val)) {
     addToEquation("^");
@@ -130,22 +143,21 @@ function removeLastChar() {
   if (cursorPos === 0) {
     increase();
   }
-  let str = actualEquation.substring(0, cursorPos);
-  let restOfStr = actualEquation.substring(cursorPos);
+  let str = actualEquation.substring(0, cursorPos + 1);
+  let restOfStr = actualEquation.substring(cursorPos + 1);
   let lastChar = str[str.length - 1];
-  let lastCharVisible = equation.value[equation.value.length - 1];
   let less = 1;
   let lessForVisual = 1;
   if (lastChar === "^") {
     superScript = 0;
-    lessForVisual = 0;
+    lessForVisual = -1;
   }
   else if (lastChar === '(') {
-    less = getSubtractVal(functions, lastChar, str);
+    less = getSubtractVal(functions, [], lastChar, str);
     lessForVisual = less;
   }
   else if (isalpha(lastChar)) {
-    less = getSubtractVal(mathConsts, lastChar, str);
+    less = getSubtractVal(mathConsts, ["nPr", "nCr"], lastChar, str);
     lessForVisual = less;
   }
   let visibleStr = equation.value;
@@ -163,27 +175,38 @@ function removeLastChar() {
 //Set the mode to val. Update dynamic value buttons accordingly
 function setMode(val) {
   mode = val;
-  setOperation(mode - 1, "multiplySign", "divideSign", "inbuilt_logs", "inbuilt_powers");
+  setOperation(mode - 1);
 }
 //Set the value of buttons depending on the "mode"
 function setAddValue(str) {
   let index = mode - 1;
-  let valToAdd = eval(str + "[" + index + "]");
-  addToEquation(valToAdd);
+  let s = eval(str);
+  addToEquation(s[index]);
 }
 //Set value of dynamic button to index of array
-function setOperation(index, ...names) {
+function setOperation(index) {
   let indicesForArrays = 0;
   let valOfArray = '';
-  let arr = [];
-  for (let i = 0; i < names.length; i++) {
+  let arrays = [
+    multiplySign, 
+    divideSign, 
+    inbuilt_logs, 
+    inbuilt_powers,
+    sin, cos, tan
+  ];
+  let names = [
+    "multiplySign",
+    "divideSign",
+    "inbuilt_logs",
+    "inbuilt_powers",
+    "sin", "cos", "tan"
+  ];
+  for (let i = 0; i < arrays.length; i++) {
     indicesForArrays = index;
-    let str = names[i];
-    arr = eval(str);
-    if (index >= arr.length) {
-      indicesForArrays = arr.length - 1;
+    if (indicesForArrays >= arrays[i].length) {
+      indicesForArrays = arrays[i].length - 1;
     }
-    document.getElementById(names[i]).value = arr[indicesForArrays];
+    document.getElementById(names[i]).value = arrays[i][indicesForArrays];
   }
 }
 //Decrease cursor position
@@ -195,10 +218,11 @@ function decrease() {
   let lastChar = str[str.length - 1];
   let less = 1;
   if (lastChar === '(') {
-    less = getSubtractVal(functions, lastChar, str);
+    less = getSubtractVal(functions, [], lastChar, str);
+    console.log(less)
   }
   else if (isalpha(lastChar)) {
-    less = getSubtractVal(mathConsts, lastChar, str);
+    less = getSubtractVal(mathConsts, ["nPr", "nCr"], lastChar, str);
   }
   cursorPos -= less;
 }
@@ -207,30 +231,26 @@ function increase() {
   if (cursorPos === equation.value.length)
     return;
   let firstChar = equation.value.charAt(cursorPos);
-  if (islower(firstChar)) {
+  if (isalpha(firstChar)) {
     let s = firstChar;
     let lookback = 1;
-    while (equation.value.charAt(lookback) !== '(') {
-      s += equation.value.charAt(lookback);
+    while (equation.value.charAt(cursorPos + lookback) !== '(' && !mathConsts.includes(s)) {
+      s += equation.value.charAt(cursorPos + lookback);
       lookback++;
     }
-    s += "(";
-    if (functions.includes(s)) {
-      cursorPos = s.length;
-    }
+    if (!mathConsts.includes(s)) s += "(";
+    cursorPos += s.length;
   }
-  else if (isupper(firstChar)) {
-    let s = firstChar;
-    let lookback = 1;
-    while (!mathConsts.includes(s)) {
-      s += equation.value.charAt(lookback);
-      lookback++;
-    }
-    cursorPos = s.length;
-  }
-  else if (firstChar === "^" || firstChar === " ") {
+  else if (firstChar === "^") {
     increase();
   }
   else
     cursorPos++;
 }
+let isOgOperation = (c) => {
+  if (c === '+' || c === '-' || c === 'x' || c === '/'
+      || c === '^' || c === '^' || c === '!' || c === 'nPr' || c === 'nCr'
+      || c == '%' || c == 'e')
+    return 1;
+  return 0;
+};
