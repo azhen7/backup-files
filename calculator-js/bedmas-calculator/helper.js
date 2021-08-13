@@ -3,15 +3,11 @@ const PI = 3.141592653;
 const E = 2.718281828;
 const GOLDEN_RT = 1.618033988;
 const SILVER_RT = 2.414213562;
-const SQRT_2 = 1.414213562;
-const SQRT_3 = 1.732050807;
 const mathConsts = [
   "PI",
   "E",
   "GOLDEN_RT",
-  "SILVER_RT",
-  "SQRT_2",
-  "SQRT_3"
+  "SILVER_RT"
 ];
 
 //Return numbers present in equation
@@ -21,7 +17,7 @@ function convertFloat(input, startIndex, endIndex) {
   let multNeg = 1;
   let numNum = 1;
   let returnValueOfMathConstant = (input, i) => {
-    const repMathConstsChar = ["Z", "E", "G", "Y", "T", "R"];
+    const repMathConstsChar = ["Z", "E", "G", "Y"];
     let index = repMathConstsChar.indexOf(input[i]);
     return eval(mathConsts[index]);
   }
@@ -75,7 +71,8 @@ function setNum(operations, index, offset = -1) {
     return 0;
   }
   else {
-    if (operations[index + offset] === "*" || operations[index + offset] === "/" || (operations[index] === "^" && offset >= 0)) {
+    if (operations[index + offset] === "*" || operations[index + offset] === "/" || 
+        ((operations[index] === "*" || operations[index] === "/") && offset >= 0)) {
       return 1;
     }
     else {
@@ -128,200 +125,242 @@ function getPositionsOfNums(equation, arrSize) {
 }
 
 function getFunctionValue(nums, operations, functions, location, i, counter) {
-  //nth root
-  if (functions[i] === "0") {
-    let negative = 1;
-    if (nums[location] < 0 && nums[location + 1] % 2 !== 0) {
-      nums[location] *= -1;
-      if (nums[location + 1] === Math.floor(nums[location + 1])) {
-        negative = -1;
+  switch(functions[i]) {
+    //nth root
+    case "0": {
+      let negative = 1;
+      if (nums[location] < 0 && nums[location + 1] % 2 !== 0) {
+        nums[location] *= -1;
+        if (nums[location + 1] === Math.floor(nums[location + 1])) {
+          negative = -1;
+        }
       }
+      if (operations[location - 1] === '^') {
+        nums[location] = Math.pow(nums[location], 1 / nums[location + 1]);
+        nums[location + 1] = setNum(operations, location, 0);
+      }
+      else {
+        nums[location + 1] = Math.pow(nums[location], 1 / nums[location + 1]);
+        nums[location] = setNum(operations, location);
+      }
+      nums[location + 1] *= negative;
+      break;
     }
-    if (operations[location - 1] === '^') {
-      nums[location] = Math.pow(nums[location], 1 / nums[location + 1]);
-      nums[location + 1] = setNum(operations, location, 0);
+    //log
+    case "1": {
+      if (operations[location - 1] === '^') {
+        nums[location] = log_base(nums[location], nums[location + 1], 1);
+        nums[location + 1] = setNum(operations, location, 0);
+      }
+      else {
+        nums[location + 1] = log_base(nums[location], nums[location + 1]);
+        nums[location] = setNum(operations, location);
+      }
+      break;
     }
-    else {
-      nums[location + 1] = Math.pow(nums[location], 1 / nums[location + 1]);
-      nums[location] = setNum(operations, location);
+    //GCD
+    case "2": {
+      if (nums[location] !== Math.floor(nums[location]) || nums[location + 1] !== Math.floor(nums[location + 1])) {
+        nums[location + 1] = undefined;
+        return nums;
+      }
+      if (operations[location - 1] === '^') {
+        nums[location] = calculateGCD(nums[location], nums[location + 1], 1);
+        nums[location + 1] = setNum(operations, location, 0);
+      }
+      else {
+        nums[location + 1] = Math.abs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
+        nums[location] = setNum(operations, location);
+      }
+      break;
     }
-    nums[location + 1] *= negative;
-  }
-  //log
-  else if (functions[i] === "1") {
-    if (operations[location - 1] === '^') {
-      nums[location] = log_base(nums[location], nums[location + 1], 1);
-      nums[location + 1] = setNum(operations, location, 0);
+    //LCM
+    case "3": {
+      if (nums[location] !== Math.floor(nums[location]) || nums[location + 1] !== Math.floor(nums[location + 1])) {
+        nums[location + 1] = undefined;
+        return nums;
+      }
+      if (operations[location - 1] === '^') {
+        nums[location] = Math.abs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
+        nums[location + 1] = setNum(operations, location, 0);
+      }
+      else {
+        nums[location + 1] = Math.abs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
+        nums[location] = setNum(operations, location);
+      }
+      break;
     }
-    else {
-      nums[location + 1] = log_base(nums[location], nums[location + 1]);
-      nums[location] = setNum(operations, location);
+    //sin
+    case "4": {
+      if (nums[location] === 3.141592653) {
+        nums[location] = 0;
+      } 
+      else {
+        nums[location] = Math.sin(nums[location]);
+      }
+      break;
     }
-  }
-  //GCD
-  else if (functions[i] === "2") {
-    if (nums[location] !== Math.floor(nums[location]) || nums[location + 1] !== Math.floor(nums[location + 1])) {
-      nums[location + 1] = undefined;
-      return nums;
+    //cos
+    case "5":
+      nums[location] = Math.cos(nums[location]);
+      break;
+    //tan
+    case "6":
+      nums[location] = Math.tan(nums[location]);
+      break;
+    //cosecant
+    case "7":
+      nums[location] = cosec(nums[location]);
+      break;
+    //secant
+    case "8":
+      nums[location] = sec(nums[location]);
+      break;
+    //cotangent
+    case "9":
+      nums[location] = cot(nums[location]);
+      break;
+    //sinh
+    case "a":
+      nums[location] = Math.sinh(nums[location]);
+      break;
+    //cosh
+    case "b":
+      nums[location] = Math.cosh(nums[location]);
+      break;
+    //tanh
+    case "c":
+      nums[location] = Math.tanh(nums[location]);
+      break;
+    //arcsin
+    case "d":
+      nums[location] = Math.asin(nums[location]);
+      break;
+    //arccos
+    case "e":
+      nums[location] = Math.acos(nums[location]);
+      break;
+    //arctan
+    case "f":
+      nums[location] = Math.atan(nums[location]);
+      break;
+    //arcsinh
+    case "g":
+      nums[location] = Math.asinh(nums[location]);
+      break;
+    //arccosh
+    case "h":
+      nums[location] = Math.acosh(nums[location]);
+      break;
+    //atanh
+    case "i":
+      nums[location] = Math.atanh(nums[location]);
+      break;
+    //sinc
+    case "j":
+      nums[location] = sinc(nums[location]);
+      break;
+    //sqrt
+    case "k":
+      nums[location] = Math.sqrt(nums[location]);
+      break;
+    //cbrt
+    case "l":
+      nums[location] = Math.cbrt(nums[location]);
+      break;
+    //ln
+    case "o":
+      nums[location] = Math.log(nums[location]);
+      break;
+    //log
+    case "p":
+      nums[location] = Math.log10(nums[location]);
+      break;
+    //random number
+    case "q":
+      nums[location] = Math.random().toFixed(3);
+      break;
+    //abs
+    case "r":
+      nums[location] = Math.abs(nums[location]);
+      break;
+    //ceil
+    case "s":
+      nums[location] = Math.ceil(nums[location]);
+      break;
+    //floor
+    case "t":
+      nums[location] = Math.floor(nums[location]);
+      break;
+    //round
+    case "u":
+      nums[location] = round(nums[location]);
+      break;
+    //iterative log
+    case "A": {
+      if (operations[location] === '^') {
+        nums[location] = iterative_log(nums[location], nums[location + 1], 1);
+        nums[location + 1] = setNum(operations, location);
+      }
+      else {
+        nums[location + 1] = iterative_log(nums[location], nums[location + 1]);
+        nums[location] = setNum(operations, location);
+      }
+      break;
     }
-    if (operations[location - 1] === '^') {
-      nums[location] = calculateGCD(nums[location], nums[location + 1], 1);
-      nums[location + 1] = setNum(operations, location, 0);
-    }
-    else {
-      nums[location + 1] = Math.abs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
-      nums[location] = setNum(operations, location);
-    }
-  }
-  //LCM
-  else if (functions[i] === "3") {
-    if (nums[location] !== Math.floor(nums[location]) || nums[location + 1] !== Math.floor(nums[location + 1])) {
-      nums[location + 1] = undefined;
-      return nums;
-    }
-    if (operations[location - 1] === '^') {
-      nums[location] = Math.abs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
-      nums[location + 1] = setNum(operations, location, 0);
-    }
-    else {
-      nums[location + 1] = Math.abs(nums[location] * nums[location + 1]) / calculateGCD(nums[location], nums[location + 1]);
-      nums[location] = setNum(operations, location);
-    }
-  }
-  //sin
-  else if (functions[i] === "4") {
-    if (nums[location] === 3.141592653) {
-      nums[location] = 0;
-    } 
-    else {
-      nums[location] = Math.sin(nums[location]);
-    }
-  }
-  //cos
-  else if (functions[i] === "5") {
-    nums[location] = Math.cos(nums[location]);
-  }
-  //tan
-  else if (functions[i] === "6") {
-    nums[location] = Math.tan(nums[location]);
-  }
-  //cosecant
-  else if (functions[i] === "7") {
-    nums[location] = cosec(nums[location]);
-  }
-  //secant
-  else if (functions[i] === "8") {
-    nums[location] = sec(nums[location]);
-  }
-  //cotangent
-  else if (functions[i] === "9") {
-    nums[location] = cot(nums[location]);
-  }
-  //sinh
-  else if (functions[i] === "a") {
-    nums[location] = Math.sinh(nums[location]);
-  }
-  //cosh
-  else if (functions[i] === "b") {
-    nums[location] = Math.cosh(nums[location]);
-  }
-  //tanh
-  else if (functions[i] === "c") {
-    nums[location] = Math.tanh(nums[location]);
-  }
-  //arcsin
-  else if (functions[i] === "d") {
-    nums[location] = Math.asin(nums[location]);
-  }
-  //arccos
-  else if (functions[i] === "e") {
-    nums[location] = Math.acos(nums[location]);
-  }
-  //arctan
-  else if (functions[i] === "f") {
-    nums[location] = Math.atan(nums[location]);
-  }
-  //arcsinh
-  else if (functions[i] === "g") {
-    nums[location] = Math.asinh(nums[location]);
-  }
-  //arccosh
-  else if (functions[i] === "h") {
-    nums[location] = Math.acosh(nums[location]);
-  }
-  //arctanh
-  else if (functions[i] === "i") {
-    nums[location] = Math.atanh(nums[location]);
-  }
-  //sinc
-  else if (functions[i] === "j") {
-    nums[location] = sinc(nums[location]);
-  }
-  //sqrt
-  else if (functions[i] === "k") {
-    nums[location] = Math.sqrt(nums[location]);
-  }
-  //cbrt
-  else if (functions[i] === "l") {
-    nums[location] = Math.cbrt(nums[location]);
-  }
-  //natural log
-  else if (functions[i] === "o") {
-    nums[location] = Math.log(nums[location]);
-  }
-  //log base 10
-  else if (functions[i] === "p") {
-    nums[location] = Math.log10(nums[location]);
-  }
-  //random number
-  else if (functions[i] === "q") {
-    
-  }
-  //abs
-  else if (functions[i] === "r") {
-    nums[location] = Math.abs(nums[location]);
-  }
-  //ceil
-  else if (functions[i] === "s") {
-    nums[location] = Math.ceil(nums[location]);
-  }
-  //floor
-  else if (functions[i] === "t") {
-    nums[location] = Math.floor(nums[location]);
-  }
-  //round
-  else if (functions[i] === "u") {
-    nums[location] = round(nums[location]);
-  }
-  //iterative log
-  else if (functions[i] === "A") {
-    if (operations[location] === '^') {
-      nums[location] = iterative_log(nums[location], nums[location + 1], 1);
-      nums[location + 1] = setNum(operations, location);
-    }
-    else {
-      nums[location + 1] = iterative_log(nums[location], nums[location + 1]);
-      nums[location] = setNum(operations, location);
-    }
-  }
-  //tetration
-  else if (functions[i] === "B") {
-    if (Math.floor(nums[location + 1]) !== nums[location + 1]) {
-      return undefined;
-    }
-    if (operations[location] === '^') {
-      nums[location] = tetrate(nums[location], nums[location + 1], 1);
-      nums[location + 1] = setNum(operations, location);
-    }
-    else {
-      nums[location + 1] = tetrate(nums[location], nums[location + 1]);
-      nums[location] = setNum(operations, location);
+    //tetration
+    case "B": {
+      if (Math.floor(nums[location + 1]) !== nums[location + 1]) {
+        return undefined;
+      }
+      if (operations[location] === '^') {
+        nums[location] = tetrate(nums[location], nums[location + 1], 1);
+        nums[location + 1] = setNum(operations, location);
+      }
+      else {
+        nums[location + 1] = tetrate(nums[location], nums[location + 1]);
+        nums[location] = setNum(operations, location);
+      }
+      break;
     }
   }
   return nums;
 }
 
-function getLocation(i, times, positions, operations, operationPositions, functionPositions) {
+function getBracketResults(equation) {
+  let numOfLeft = 0;
+  let numOfRight = 0;
+  let startingPos = 0;
+  let endingPos = 0;
+  for (let indexOfEquation = 0; indexOfEquation < equation.length; indexOfEquation++) {
+    if (equation[indexOfEquation] === '(') {
+      if (numOfLeft === 0) {
+        startingPos = indexOfEquation;
+      }
+      numOfLeft++;
+    }
+    else if (equation[indexOfEquation] === ')') {
+      if (numOfLeft === 0) {
+        return null;
+      }
+      numOfRight++;
+    }
+    
+    if (numOfRight === numOfLeft && (numOfRight > 0 && numOfLeft > 0)) {
+      endingPos = indexOfEquation;
+      let str = equation.substring(startingPos + 1, endingPos);
+      str = solveEquation(str, '', 0);
+      equation = equation.substring(0, startingPos) + str + equation.substring(endingPos + 1);
+      
+      numOfLeft = 0;
+      numOfRight = 0;
+      startingPos = 0;
+      endingPos = 0;
+    }
+  }
+  return equation;
+}
+function getLocation(i, times, positions, operations, operationPositions, functionPositions, functions) {
   for (let j = 0; j < times + 1; j++) {
     if (functionPositions[i] < positions[j]) {
       //Check if function takes two inputs (e.g. GCD)
@@ -333,11 +372,11 @@ function getLocation(i, times, positions, operations, operationPositions, functi
               return j;
             }
             else {
-              return NaN;
+              return -1;
             }
           }
           else {
-            return NaN;
+            return -1;
           }
         }
         else if (operationPositions[j - 1] === undefined) {
@@ -345,7 +384,7 @@ function getLocation(i, times, positions, operations, operationPositions, functi
             return j;
           }
           else {
-            return NaN;
+            return -1;
           }
         }
       }
@@ -359,44 +398,30 @@ function getLocation(i, times, positions, operations, operationPositions, functi
             return j;
           }
           else {
-            return NaN;
+            return -1;
           }
         }
         else if (operationPositions[j - 1] === undefined) {
           return j;
         }
         else {
-          return NaN;
+          return -1;
         }
       }
     }
   }
-  return 0;
+  return -1;
 }
-let getSubtractVal = (arr, lastChar, str) => {
+function getSubtractVal(arr, secondArr, lastChar, str) {
   let funcOrConstStr = lastChar;
   let lookback = 2;
-  while (isalpha(str[str.length - lookback])) {
+  while (lookback <= str.length && (isalpha(str[str.length - lookback]))) {
     funcOrConstStr += str[str.length - lookback];
-    if (str.length === lookback) {
-      break;
-    }
     lookback++;
   }
   funcOrConstStr = invert_letters(funcOrConstStr);
-  if (arr.includes(funcOrConstStr)) {
+  if (arr.includes(funcOrConstStr) || secondArr.includes(funcOrConstStr)) {
     return funcOrConstStr.length;
   }
-  else if (["nPr", "nCr"].includes(funcOrConstStr)) {
-    return 3;
-  }
   return 1;
-};
-//Invert letters in a string
-let invert_letters = (input) => {
-  let invertedStr = "";
-  for (let i = input.length - 1; i >= 0; i--) {
-    invertedStr += input[i];
-  }
-  return invertedStr;
 };
