@@ -6,15 +6,6 @@ function solveEquation(input, strUserSees, returnMode = 1) {
   superScript = 0;
   console.clear();
   clrscr();
-  function setOperation(operations, index) {
-    let changedStrOperations = operations;
-    if (index > 0) {
-      if (operations[index - 1] !== 'C' && operations[index - 1] !== 'P') {
-        changedStrOperations = operations.substring(0, index) + operations[index - 1] + operations.substring(index + 1);
-      }
-    }
-    return changedStrOperations;
-  }
   counter += returnMode;
   let times = 0;
   let total = 0.0;
