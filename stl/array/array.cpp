@@ -71,6 +71,13 @@ namespace std_copy {
                 return numberOfElements_;
             }
             /**
+             * This function returns the underlying
+             * internal buffer of the array.
+            */
+            pointer data() {
+                return internalBuffer_;
+            }
+            /**
              * This function returns a boolean, depending
              * on whether the array is empty or not, i.e.,
              * whether there are no elements in the array.
@@ -139,6 +146,40 @@ namespace std_copy {
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
                 delete temp;
                 temp = nullptr;
+            }
+            /**
+             * This function removes the element at the beginning of the vector.
+             * If the vector is empty, a call to this function does nothing.
+             * This function is new.
+            */
+            void pop_front() {
+                if (numberOfElements_ == 0) return;
+                internalBuffer_++;
+                numberOfElements_--;
+            }
+            /**
+             * This function returns a reference to the
+             * first element in the array. If the vector
+             * is empty, this function throws an exception.
+            */
+            reference front() {
+                if (numberOfElements_ == 0) {
+                    std::cout << "Cannot access element in empty vector\n";
+                    exit(EXIT_FAILURE);
+                }
+                return internalBuffer_[0];
+            }
+            /**
+             * This function returns a reference to the
+             * last element in the array. If the vector 
+             * is empty, this function throws an exception.
+            */
+            reference back() {
+                if (numberOfElements_ == 0) {
+                    std::cout << "Cannot access element in empty vector\n";
+                    exit(EXIT_FAILURE);
+                }
+                return internalBuffer_[numberOfElements_ - 1];
             }
     };
 }

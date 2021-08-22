@@ -81,6 +81,13 @@ namespace std_copy {
                 return capacity_;
             }
             /**
+             * This function returns the underlying
+             * internal buffer of the array.
+            */
+            pointer data() {
+                return internalBuffer_;
+            }
+            /**
              * This function returns the maximum capacity
              * of the vector.
             */
@@ -151,6 +158,16 @@ namespace std_copy {
                 temp = nullptr;
             }
             /**
+             * This function removes the element at the beginning of the vector.
+             * If the vector is empty, a call to this function does nothing.
+             * This function is new.
+            */
+            void pop_front() {
+                if (numberOfElements_ == 0) return;
+                internalBuffer_++;
+                numberOfElements_--;
+            }
+            /**
              * This function assigns the vector newSize
              * elements with value val. It discards all the
              * elements previously in the vector.
@@ -197,6 +214,30 @@ namespace std_copy {
                 numberOfElements_ = n;
                 delete temp;
                 temp = nullptr;
+            }
+            /**
+             * This function returns a reference to the
+             * first element in the array. If the vector
+             * is empty, this function throws an exception.
+            */
+            reference front() {
+                if (numberOfElements_ == 0) {
+                    std::cout << "Cannot access element in empty vector\n";
+                    exit(EXIT_FAILURE);
+                }
+                return internalBuffer_[0];
+            }
+            /**
+             * This function returns a reference to the
+             * last element in the array. If the vector 
+             * is empty, this function throws an exception.
+            */
+            reference back() {
+                if (numberOfElements_ == 0) {
+                    std::cout << "Cannot access element in empty vector\n";
+                    exit(EXIT_FAILURE);
+                }
+                return internalBuffer_[numberOfElements_ - 1];
             }
             /**
              * This function shrinks the vector's capacity

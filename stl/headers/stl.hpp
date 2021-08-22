@@ -38,23 +38,6 @@ namespace std_copy {
                 return this->at(index);
             }
             /**
-             * This function returns the underlying
-             * internal buffer of the array.
-            */
-            pointer data() {
-                return internalBuffer_;
-            }
-            /**
-             * This function removes the element at the beginning of the vector.
-             * If the vector is empty, a call to this function does nothing.
-             * This function is new.
-            */
-            void pop_front() {
-                if (numberOfElements_ == 0) return;
-                internalBuffer_++;
-                numberOfElements_--;
-            }
-            /**
              * This function returns a reference to the
              * first element in the array. If the vector
              * is empty, this function throws an exception.
