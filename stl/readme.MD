@@ -1,10 +1,8 @@
-# adam workspace reamde
+# STL container implementation
 
-## stl implementation
+My own implementation of C++ STL containers such as std::vector, and
+std::array.
 
-This implementation is done in:
-
-1.
-2.
-3.
-
+STL containers implemented so far:
+- std::vector
+- std::array
