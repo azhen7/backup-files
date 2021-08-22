@@ -37,29 +37,5 @@ namespace std_copy {
             reference operator[](size_type index) {
                 return this->at(index);
             }
-            /**
-             * This function returns a reference to the
-             * first element in the array. If the vector
-             * is empty, this function throws an exception.
-            */
-            reference front() {
-                if (numberOfElements_ == 0) {
-                    std::cout << "Cannot access element in empty vector\n";
-                    exit(EXIT_FAILURE);
-                }
-                return internalBuffer_[0];
-            }
-            /**
-             * This function returns a reference to the
-             * last element in the array. If the vector 
-             * is empty, this function throws an exception.
-            */
-            reference back() {
-                if (numberOfElements_ == 0) {
-                    std::cout << "Cannot access element in empty vector\n";
-                    exit(EXIT_FAILURE);
-                }
-                return internalBuffer_[numberOfElements_ - 1];
-            }
     };
 }
