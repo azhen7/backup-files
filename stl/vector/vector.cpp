@@ -9,7 +9,6 @@
 #include <stdexcept>
 #include <exception>
 
-
 #include "stl.hpp"
 
 namespace std_copy {
