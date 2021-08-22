@@ -1,6 +1,6 @@
 #include <array>
-#include <algorithm>
 #include <iostream>
+
 #include <stdexcept>
 #include <exception>
 #include <cstdlib>
@@ -79,13 +79,6 @@ namespace std_copy {
             constexpr bool empty() {
                 return numberOfElements_ == 0;
             }
-            // /**
-            //  * This function returns the underlying
-            //  * internal buffer of the array.
-            // */
-            // pointer data() {
-            //     return internalBuffer_;
-            // }
             /**
              * This function returns the size of the
              * array.
