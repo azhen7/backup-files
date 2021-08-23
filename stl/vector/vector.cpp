@@ -36,7 +36,6 @@ namespace std_copy {
             
             size_type capacity_;
             allocator_type allocator;
-
         public:
             vector(size_type size = 0, const_reference val = value_type())
                 : capacity_(size)
@@ -109,15 +108,13 @@ namespace std_copy {
              * @param elem The element to add to the end of the vector.
             */
             void push_back(const_reference elem) {
-                pointer temp;
                 if (numberOfElements_ + 1 > capacity_ || capacity_ == 0) {
                     capacity_ = (capacity_ == 0) ? 1 : capacity_ * 2;
 
+                    pointer temp;
                     temp = internalBuffer_;
                     internalBuffer_ = new T[capacity_];
                     std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                    delete temp;
-                    temp = nullptr;
                 }
                 internalBuffer_[numberOfElements_] = elem;
                 numberOfElements_++;
@@ -137,8 +134,6 @@ namespace std_copy {
                 internalBuffer_[0] = elem;
                 std::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
                 numberOfElements_++;
-                delete temp;
-                temp = nullptr;
             }
             /**
              * This function removes the last element in the vector.
@@ -153,8 +148,6 @@ namespace std_copy {
                     capacity_ = (capacity_ == 1) ? 0 : capacity / 2;
                 internalBuffer_ = allocator.allocate(capacity_);
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                delete temp;
-                temp = nullptr;
             }
             /**
              * This function removes the element at the beginning of the vector.
@@ -191,8 +184,6 @@ namespace std_copy {
                 pointer temp = internalBuffer_;
                 internalBuffer_ = allocator.allocate(size);
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                delete temp;
-                temp = nullptr;
             }
             /**
              * This function resizes the vector to contain 
@@ -210,8 +201,6 @@ namespace std_copy {
                     }
                 }
                 numberOfElements_ = n;
-                delete temp;
-                temp = nullptr;
             }
             /**
              * This function returns a reference to the
@@ -310,9 +299,8 @@ bool operator>=(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) 
 
 
 int main() {
-    std_copy::vector<int> test(3, 5, 2, 4);
-    std::cout << "Hello World\n";
-    test += 5;
+    std_copy::vector<std::string> test;
+    test.push_back("Hello world");
     for (int i = 0; i < test.size(); i++) {
         std::cout << test.at(i) << "\n";
     }
