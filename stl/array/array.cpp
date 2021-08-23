@@ -12,6 +12,12 @@ namespace std_copy {
      * My own implementation of the STL array container, which
      * is defined in the <array> header. There are some new functions,
      * such as add(), add_front(), and others.
+     * @param T The type of the elements in the array.
+     * @param s The size of the array.
+     * The array STL container has the same functionality as normal
+     * static-sized C arrays, except you can assign one std::array
+     * to another, and you can return them from functions. They also
+     * come with a lot of helpful functions.
     */
     template <class T, std::size_t s>
     class array : public STL_CONTAINER<T> {
