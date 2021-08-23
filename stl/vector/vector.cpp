@@ -7,10 +7,11 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <exception>
-
-#include "stl.hpp"
+#include <algorithm>
 
 namespace std_copy {
+    #include "stl.hpp"
+
     /**
      * My own implementation of the STL vector container, defined in
      * the <vector> header. This implementation contains a few new functions, 
