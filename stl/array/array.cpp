@@ -184,15 +184,6 @@ namespace std_copy {
     };
 }
 
-std_copy::array<int, 5> foo() {
-    std_copy::array<int, 5> t(3, 1, 79, 4);
-    return t;
-}
-
-
 int main() {
-    std_copy::array<int, 5> test = foo();
-    for (int i = 0; i < test.size(); i++) {
-        std::cout << test[i] << "\n";
-    }
+    
 }
