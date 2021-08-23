@@ -138,8 +138,6 @@ namespace std_copy {
                 internalBuffer_[0] = elem;
                 std::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
                 numberOfElements_++;
-                delete temp;
-                temp = nullptr;
             }
             /**
              * This function removes the element at the end of
@@ -150,8 +148,6 @@ namespace std_copy {
                 pointer temp = internalBuffer_;
                 numberOfElements_--;
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                delete temp;
-                temp = nullptr;
             }
             /**
              * This function removes the element at the beginning of the vector.
