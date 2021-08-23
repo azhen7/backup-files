@@ -116,11 +116,11 @@ namespace std_copy {
                     temp = internalBuffer_;
                     internalBuffer_ = new T[capacity_];
                     std::copy(temp, temp + numberOfElements_, internalBuffer_);
+                    delete temp;
+                    temp = nullptr;
                 }
                 internalBuffer_[numberOfElements_] = elem;
                 numberOfElements_++;
-                delete temp;
-                temp = nullptr;
             }
             /**
              * This function adds an element at the beginning of the vector. 
@@ -251,6 +251,15 @@ namespace std_copy {
             allocator_type get_allocator() const {
                 return allocator;
             }
+            /**
+             * This overloaded operator adds an element
+             * onto the end of the vector.
+             * @param val The element to add onto the
+             * end of the vector.
+            */
+            void operator+=(const_reference val) {
+                this->push_back(val);
+            }
     };
 }
 
@@ -302,6 +311,8 @@ bool operator>=(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) 
 
 int main() {
     std_copy::vector<int> test(3, 5, 2, 4);
+    std::cout << "Hello World\n";
+    test += 5;
     for (int i = 0; i < test.size(); i++) {
         std::cout << test.at(i) << "\n";
     }
