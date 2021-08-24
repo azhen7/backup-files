@@ -31,7 +31,7 @@ namespace std_copy {
             typedef Alloc                                               allocator_type;
             typedef typename std_copy::iterator<vector<value_type, allocator_type>>        iterator;
 
-        protected:
+        private:
             using STL_CONTAINER<T>::internalBuffer_;
             using STL_CONTAINER<T>::numberOfElements_;
         
