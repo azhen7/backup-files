@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <stdexcept>
 #include <exception>
 
 #include "stl.hpp"
@@ -22,7 +21,7 @@ namespace std_copy {
     */
     template <class T, class Alloc = std::allocator<T>>
     class vector : public STL_CONTAINER<T> {
-        private:
+        public:
             //typedefs
             typedef typename STL_CONTAINER<T>::value_type               value_type;
             typedef typename STL_CONTAINER<T>::pointer                  pointer;
@@ -30,9 +29,9 @@ namespace std_copy {
             typedef typename STL_CONTAINER<T>::const_reference          const_reference;
             typedef typename STL_CONTAINER<T>::size_type                size_type;
             typedef Alloc                                               allocator_type;
-
             typedef typename std_copy::iterator<vector<value_type, allocator_type>>        iterator;
 
+        protected:
             using STL_CONTAINER<T>::internalBuffer_;
             using STL_CONTAINER<T>::numberOfElements_;
         
@@ -318,9 +317,11 @@ bool operator>=(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) 
 
 
 int main() {
-    std_copy::vector<std::string> test;
-    test.assign(5, "Hello world");
-    for (int i = 0; i < test.size(); i++) {
-        std::cout << test.at(i) << "\n";
+    std_copy::vector<int> test;
+    test.assign(5, 5);
+    test.push_back(0);
+    std_copy::vector<int>::iterator it;
+    for (it = test.begin(); it != test.end(); it++) {
+        std::cout << *it << "\n";
     }
 }
