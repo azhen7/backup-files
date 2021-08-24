@@ -1,7 +1,6 @@
 #include <array>
 #include <iostream>
 
-#include <stdexcept>
 #include <exception>
 #include <cstdlib>
 
@@ -21,13 +20,16 @@ namespace std_copy {
     */
     template <class T, std::size_t s>
     class array : public STL_CONTAINER<T> {
-        private:
+        public:
             //typdefs
             typedef typename STL_CONTAINER<T>::value_type            value_type;
             typedef typename STL_CONTAINER<T>::pointer               pointer;
             typedef typename STL_CONTAINER<T>::reference             reference;
             typedef typename STL_CONTAINER<T>::const_reference       const_reference;
             typedef typename STL_CONTAINER<T>::size_type             size_type;
+            typedef typename std_copy::iterator<vector<value_type, allocator_type>>        iterator;
+            
+        private:
 
             using STL_CONTAINER<T>::internalBuffer_;
             using STL_CONTAINER<T>::numberOfElements_;
