@@ -31,9 +31,11 @@ namespace std_copy {
             typedef typename STL_CONTAINER<T>::size_type                size_type;
             typedef Alloc                                               allocator_type;
 
+            typedef typename std_copy::iterator<vector<value_type, allocator_type>>        iterator;
+
             using STL_CONTAINER<T>::internalBuffer_;
             using STL_CONTAINER<T>::numberOfElements_;
-            
+        
             size_type capacity_;
             allocator_type allocator;
         public:
@@ -250,6 +252,21 @@ namespace std_copy {
             */
             void operator+=(const_reference val) {
                 this->push_back(val);
+            }
+            /**
+             * This function returns an iterator to
+             * the front of the array.
+            */
+            iterator begin() {
+                return iterator(internalBuffer_);
+            }
+            /**
+             * This function returns an iterator to
+             * the thereotical element after the last
+             * element in the array.
+            */
+            iterator end() {
+                return iterator(internalBuffer_ + numberOfElements_);
             }
     };
 }
