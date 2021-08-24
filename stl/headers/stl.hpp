@@ -1,6 +1,62 @@
 #include <algorithm>
+#include <string>
 
 namespace std_copy {
+    template <class T>
+    class iterator {
+        private:
+            //typedefs
+            typedef typename T::value_type                  value_type;
+            typedef typename T::pointer                     pointer;
+            typedef typename T::reference                   reference;
+            typedef typename T::const_reference             const_reference;
+
+            pointer internalPtr_;
+
+        public:
+            iterator(reference ptr)
+                : internalPtr_(ptr) {}
+
+            iterator(const iterator& it)
+                : internalPtr_(it.internalPtr_) {}
+            
+            /**
+             * Overloaded postfix increment operator
+            */
+            iterator& operator++() {
+                internalPtr_++;
+                return internalPtr_;
+            }
+            /**
+             * Overloaded prefix increment operator
+            */
+            iterator operator++(int) {
+                pointer ptrBeforeIncrement = internalPtr_;
+                ++internalPtr_;
+                return ptrBeforeIncrement;
+            }
+            /**
+             * Overloaded postfix decrement operator
+            */
+            iterator& operator--() {
+                internalPtr_--;
+                return internalPtr_;
+            }
+            /**
+             * Overloaded prefix decrement operator
+            */
+            iterator operator--(int) {
+                pointer ptrBeforeDecrement = internalPtr_;
+                --internalPtr_;
+                return ptrBeforeDecrement;
+            }
+            /**
+             * Overloaded equality operator
+            */
+            bool operator==(const iterator& it) {
+                return internalPtr_ == it.internalPtr_;
+            }
+    };
     template <class T>
     class STL_CONTAINER {
         protected:
