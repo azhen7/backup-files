@@ -42,7 +42,9 @@ namespace std_copy {
             {
                 numberOfElements_ = size;
                 internalBuffer_ = allocator.allocate(size);
-                std::fill_n(internalBuffer_, size, val);
+                for (int i = 0; i < numberOfElements_; i++) {
+                    internalBuffer_[i] = val;
+                }
             }
 
             template <class ...Args>
@@ -300,7 +302,7 @@ bool operator>=(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) 
 
 int main() {
     std_copy::vector<std::string> test;
-    test.push_back("Hello world");
+    test.assign(5, "Hello world");
     for (int i = 0; i < test.size(); i++) {
         std::cout << test.at(i) << "\n";
     }
