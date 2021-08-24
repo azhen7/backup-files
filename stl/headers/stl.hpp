@@ -1,20 +1,22 @@
 #include <algorithm>
 #include <string>
+#include <stdexcept>
 
 namespace std_copy {
     template <class T>
     class iterator {
         private:
             //typedefs
-            typedef typename T::value_type                  value_type;
-            typedef typename T::pointer                     pointer;
-            typedef typename T::reference                   reference;
-            typedef typename T::const_reference             const_reference;
+            typedef typename T::value_type           value_type;
+            typedef typename T::pointer          pointer;
+            typedef typename T::reference          reference;
+            typedef typename T::const_reference    const_reference;
 
             pointer internalPtr_;
 
         public:
-            iterator(reference ptr)
+            iterator() {}
+            iterator(pointer ptr)
                 : internalPtr_(ptr) {}
 
             iterator(const iterator& it)
@@ -25,28 +27,28 @@ namespace std_copy {
             */
             iterator& operator++() {
                 internalPtr_++;
-                return internalPtr_;
+                return *this;
             }
             /**
              * Overloaded prefix increment operator
             */
             iterator operator++(int) {
-                pointer ptrBeforeIncrement = internalPtr_;
-                ++internalPtr_;
-                return ptrBeforeIncrement;
+                iterator ptrBeforeIncrement = *this;
+                ++(*this);
+                return *this;
             }
             /**
              * Overloaded postfix decrement operator
             */
             iterator& operator--() {
                 internalPtr_--;
-                return internalPtr_;
+                return *this;
             }
             /**
              * Overloaded prefix decrement operator
             */
             iterator operator--(int) {
-                pointer ptrBeforeDecrement = internalPtr_;
+                iterator ptrBeforeDecrement = internalPtr_;
                 --internalPtr_;
                 return ptrBeforeDecrement;
             }
@@ -55,6 +57,24 @@ namespace std_copy {
             */
             bool operator==(const iterator& it) {
                 return internalPtr_ == it.internalPtr_;
+            }
+            /**
+             * Overloaded inequality operator
+            */
+            bool operator!=(const iterator& it) {
+                return internalPtr_ != it.internalPtr_;
+            }
+            /**
+             * Overloaded dereference operator
+            */
+            reference operator*() {
+                return *internalPtr_;
+            }
+            /**
+             * This function advances the iterator
+            */
+            void advance(int n) {
+                internalPtr_ += n;
             }
     };
     template <class T>
