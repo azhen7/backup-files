@@ -37,6 +37,7 @@ namespace std_copy {
         
             size_type capacity_;
             allocator_type allocator;
+            
         public:
             vector(size_type size = 0, const_reference val = value_type())
                 : capacity_(size)
