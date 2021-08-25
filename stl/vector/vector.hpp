@@ -40,7 +40,17 @@ namespace std_copy {
             allocator_type allocator;
             
         public:
-            vector(size_type size = 0, const_reference val = value_type())
+            void operator=(const vector<value_type, allocator_type>& t) {
+                if (this == &t) return;
+
+                allocator.deallocate(internalBuffer_, numberOfElements_);
+                numberOfElements_ = t.numberOfElements_;
+                capacity_ = t.capacity_;
+                internalBuffer_ = allocator.allocate(numberOfElements_);
+                std::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
+            }
+
+            explicit vector(size_type size = 0, const_reference val = value_type())
                 : capacity_(size)
             {
                 numberOfElements_ = size;
@@ -61,7 +71,10 @@ namespace std_copy {
             }
 
             vector(const vector<value_type, allocator_type>& copy) {
-                this = copy;
+                numberOfElements_ = copy.numberOfElements_;
+                capacity_ = copy.capacity_;
+                internalBuffer_ = allocator.allocate(numberOfElements_);
+                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
 
             //Destructor
