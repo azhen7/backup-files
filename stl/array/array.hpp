@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 #include "stl.hpp"
+#include "iterator.hpp"
 
 namespace std_copy {
     /**
@@ -27,7 +28,7 @@ namespace std_copy {
             typedef typename STL_CONTAINER<T>::reference             reference;
             typedef typename STL_CONTAINER<T>::const_reference       const_reference;
             typedef typename STL_CONTAINER<T>::size_type             size_type;
-            typedef typename std_copy::iterator<vector<value_type, allocator_type>>        iterator;
+            using iterator = iterator_type<array<T, s>>;
             
         private:
 
