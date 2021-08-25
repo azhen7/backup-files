@@ -30,7 +30,7 @@ namespace std_copy {
             typedef typename STL_CONTAINER<T>::const_reference          const_reference;
             typedef typename STL_CONTAINER<T>::size_type                size_type;
             typedef Alloc                                               allocator_type;
-            using iterator = iterator_type<vector<value_type, allocator_type>>;
+            typedef iterator_type<vector<value_type, allocator_type>>   iterator;
 
         private:
             using STL_CONTAINER<T>::internalBuffer_;
@@ -214,7 +214,7 @@ namespace std_copy {
             void resize(size_type n, const_reference val = value_type()) {
                 pointer temp = new value_type[numberOfElements_];
                 std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                allocator.deallocate(internalBuffer_, n);
+                allocator.deallocate(internalBuffer_, numberOfElements_);
                 internalBuffer_ = allocator.allocate(n);
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
                 if (n > numberOfElements_) {
