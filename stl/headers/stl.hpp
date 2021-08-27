@@ -36,7 +36,15 @@ namespace std_copy {
              * indexing.
              * @param index The index of the element to retrieve.
             */
-            reference operator[](size_type index) {
+            reference operator[](long long index) {
+                if (index < 0) {
+                    index += numberOfElements_;
+                    if (index < 0) {
+                        std::string err = "absolute value of index (which is " + std::to_string(index * -1)
+                                          + ") > this->size() (which is " + std::to_string(numberOfElements_) + ")";
+                        throw std::out_of_range(err)
+                    }
+                }
                 return this->at(index);
             }
     };
