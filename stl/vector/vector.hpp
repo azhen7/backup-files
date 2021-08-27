@@ -50,7 +50,7 @@ namespace std_copy {
             }
 
             template <class ...Args>
-            vector(Args ...args)
+            vector(Args&& ...args)
                 : capacity_(std::pow(2, (int) (std::log(sizeof...(Args)) / std::log(2) + 1)))
             {
                 numberOfElements_ = sizeof...(Args);
