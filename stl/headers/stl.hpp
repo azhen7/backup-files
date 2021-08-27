@@ -42,7 +42,7 @@ namespace std_copy {
                     if (index < 0) {
                         std::string err = "absolute value of index (which is " + std::to_string(index * -1)
                                           + ") > this->size() (which is " + std::to_string(numberOfElements_) + ")";
-                        throw std::out_of_range(err)
+                        throw std::out_of_range(err);
                     }
                 }
                 return this->at(index);
