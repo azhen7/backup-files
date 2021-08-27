@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <exception>
 
 #include "stl.hpp"
 #include "iterator.hpp"
@@ -40,16 +39,6 @@ namespace std_copy {
             allocator_type allocator;
             
         public:
-            void operator=(const vector<value_type, allocator_type>& t) {
-                if (this == &t) return;
-
-                allocator.deallocate(internalBuffer_, numberOfElements_);
-                numberOfElements_ = t.numberOfElements_;
-                capacity_ = t.capacity_;
-                internalBuffer_ = allocator.allocate(numberOfElements_);
-                std::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
-            }
-
             explicit vector(size_type size = 0, const_reference val = value_type())
                 : capacity_(size)
             {
@@ -299,6 +288,18 @@ namespace std_copy {
             */
             iterator end() {
                 return iterator(internalBuffer_ + numberOfElements_);
+            }
+            /**
+             * Overloaded assignment operator.
+            */
+            void operator=(const vector<value_type, allocator_type>& t) {
+                if (this == &t) return;
+
+                allocator.deallocate(internalBuffer_, numberOfElements_);
+                numberOfElements_ = t.numberOfElements_;
+                capacity_ = t.capacity_;
+                internalBuffer_ = allocator.allocate(numberOfElements_);
+                std::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
     };
 }
