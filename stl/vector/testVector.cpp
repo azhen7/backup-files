@@ -8,7 +8,9 @@ int main() {
     }
     std_copy::vector<int> t(r);
     std_copy::vector<int>::iterator it;
-    for (it = t.begin(); it != t.end(); it++) {
-        std::cout << *it << "\n";
-    }
+    it = r.begin();
+
+    std_copy::vector<int>::iterator newIt = std_copy::next(it, 4);
+    *newIt++;
+    std::cout << *newIt << "\n";
 }
