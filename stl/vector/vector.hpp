@@ -302,49 +302,47 @@ namespace std_copy {
                 std::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
     };
-}
+    //Overloaded == operator
+    template <class T, class Alloc = std::allocator<T>>
+    bool operator==(vector<T, Alloc> lhs, vector<T, Alloc> rhs) {
+        if (rhs.size() != lhs.size()) return false;
+        for (int i = 0; i < rhs.size(); i++) {
+            if (lhs.at(i) != rhs.at(i)) return false;
+        }
+        return true;
+    }
+    //Overloaded < operator
+    template <class T, class Alloc = std::allocator<T>>
+    bool operator<(vector<T, Alloc> lhs, vector<T, Alloc> rhs) {
+        int sizeL = lhs.size();
+        int sizeR = rhs.size();
+        if (sizeL != sizeR)
+            return sizeL < sizeR;
 
-//Overloaded == operator
-template <class T, class Alloc = std::allocator<T>>
-bool operator==(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) {
-    if (rhs.size() != lhs.size()) return false;
-    for (int i = 0; i < rhs.size(); i++) {
-        if (lhs.at(i) != rhs.at(i)) return false;
+        for (int i = 0; i < sizeL; i++) {
+            if (lhs.at(i) < rhs.at(i)) return true;
+            else if (lhs.at(i) > rhs.at(i)) return false;
+        }
+        return false;
     }
-    return true;
-}
-//Overloaded < operator
-template <class T, class Alloc = std::allocator<T>>
-bool operator<(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) {
-    int sizeL = lhs.size();
-    int sizeR = rhs.size();
-    if (sizeL != sizeR) {
-        return sizeL < sizeR;
+    //Overloaded != operator
+    template <class T, class Alloc = std::allocator<T>>
+    bool operator!=(vector<T, Alloc> lhs, vector<T, Alloc> rhs) {
+        return !(lhs == rhs);
     }
-
-    for (int i = 0; i < sizeL; i++) {
-        if (lhs.at(i) < rhs.at(i)) return true;
-        else if (lhs.at(i) > rhs.at(i)) return false;
+    //Overloaded > operator
+    template <class T, class Alloc = std::allocator<T>>
+    bool operator>(vector<T, Alloc> lhs, vector<T, Alloc> rhs) {
+        return rhs < lhs;
     }
-    return false;
-}
-//Overloaded != operator
-template <class T, class Alloc = std::allocator<T>>
-bool operator!=(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) {
-    return !(lhs == rhs);
-}
-//Overloaded > operator
-template <class T, class Alloc = std::allocator<T>>
-bool operator>(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) {
-    return rhs < lhs;
-}
-//Overloaded <= operator
-template <class T, class Alloc = std::allocator<T>>
-bool operator<=(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) {
-    return !(rhs < lhs);
-}
-//Overloaded >= operator
-template <class T, class Alloc = std::allocator<T>>
-bool operator>=(std_copy::vector<T, Alloc> lhs, std_copy::vector<T, Alloc> rhs) {
-    return !(lhs < rhs);
+    //Overloaded <= operator
+    template <class T, class Alloc = std::allocator<T>>
+    bool operator<=(vector<T, Alloc> lhs, vector<T, Alloc> rhs) {
+        return !(rhs < lhs);
+    }
+    //Overloaded >= operator
+    template <class T, class Alloc = std::allocator<T>>
+    bool operator>=(vector<T, Alloc> lhs, vector<T, Alloc> rhs) {
+        return !(lhs < rhs);
+    }
 }
