@@ -54,7 +54,7 @@ namespace std_copy {
                 : capacity_(std::pow(2, (int) (std::log(sizeof...(Args)) / std::log(2) + 1)))
             {
                 numberOfElements_ = sizeof...(Args);
-                allocator.allocate(internalBuffer_, numberOfElements_);
+                allocator.allocate(numberOfElements_, internalBuffer_);
                 size_type i = 0;
                 (void(internalBuffer_[i++] = args), ...);
             }
