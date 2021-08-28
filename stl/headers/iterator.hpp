@@ -15,9 +15,7 @@ namespace std_copy {
             pointer internalPtr_;
 
         public:
-            iterator_type() {}
-
-            iterator_type(pointer ptr)
+            iterator_type(pointer ptr = nullptr)
                 : internalPtr_(ptr) {}
 
             iterator_type(const iterator_type& it)
