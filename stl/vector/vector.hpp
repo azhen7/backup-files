@@ -206,6 +206,7 @@ namespace std_copy {
                 allocator.deallocate(internalBuffer_, numberOfElements_);
                 internalBuffer_ = allocator.allocate(size);
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
+                delete temp;
             }
             /**
              * This function resizes the vector to contain 
