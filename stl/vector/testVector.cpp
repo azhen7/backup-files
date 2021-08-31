@@ -1,16 +1,12 @@
 #include <iostream>
+#include <vector>
 #include "vector.hpp"
 
 int main() {
-    std_copy::vector<int> r;
-    for (int i = 1; i < 10; i++) {
-        r.push_back(i * i);
-    }
-    std_copy::vector<int> t(r);
+    std_copy::vector<int> r(1, 4, 9, 16, 25, 36, 49, 64, 81, 100);
+    r.erase(1, 3);
     std_copy::vector<int>::iterator it;
-    it = r.begin();
-
-    std_copy::vector<int>::iterator newIt = std_copy::next(it, 4);
-    *newIt++;
-    std::cout << *newIt << "\n";
+    for (it = r.begin(); it != r.end(); it++) {
+        std::cout << *it << "\n";
+    }
 }
