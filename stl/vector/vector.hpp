@@ -110,7 +110,7 @@ namespace std_copy {
             */
             void clear() {
                 numberOfElements_ = 0;
-                allocator.deallocate(internalBuffer_);
+                allocator.deallocate(internalBuffer_, numberOfElements_);
                 internalBuffer_ = allocator.allocate(0);
             }
             /**
