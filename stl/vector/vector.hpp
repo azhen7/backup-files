@@ -1,10 +1,11 @@
-//#pragma once
+#pragma once
 
 #include <iostream>
-#include <vector>
 
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
+#include <memory>
 
 #include "stl.hpp"
 #include "iterator.hpp"
@@ -32,6 +33,8 @@ namespace std_copy {
             typedef iterator_type<vector<value_type, allocator_type>>   iterator;
 
         private:
+            typedef vector<value_type, allocator_type>                  vector_type;
+
             using STL_CONTAINER<T>::internalBuffer_;
             using STL_CONTAINER<T>::numberOfElements_;
         
@@ -50,16 +53,16 @@ namespace std_copy {
             }
 
             template <class ...Args>
-            vector(Args&& ...args)
+            vector(Args ...args)
                 : capacity_(std::pow(2, (int) (std::log(sizeof...(Args)) / std::log(2) + 1)))
             {
                 numberOfElements_ = sizeof...(Args);
-                allocator.allocate(numberOfElements_, internalBuffer_);
+                internalBuffer_ = allocator.allocate(numberOfElements_);
                 size_type i = 0;
                 (void(internalBuffer_[i++] = args), ...);
             }
 
-            vector(const vector<value_type, allocator_type>& copy) {
+            vector(const vector_type& copy) {
                 numberOfElements_ = copy.numberOfElements_;
                 capacity_ = copy.capacity_;
                 internalBuffer_ = allocator.allocate(numberOfElements_);
@@ -179,6 +182,37 @@ namespace std_copy {
                 numberOfElements_--;
             }
             /**
+             * This function returns a reference to 
+             * the element at a specified index in 
+             * the vector.
+             * @param index The index of the element to retrieve.
+            */
+            reference at(size_type index) {
+                if (index >= numberOfElements_) {
+                    std::string err = "index (which is " + std::to_string(index) + ") >= this->size() (which is " + 
+                                    std::to_string(numberOfElements_) + ")";
+
+                    throw std::out_of_range(err);
+                }
+                return *(internalBuffer_ + index);
+            }
+            /**
+             * The [] operator is overloaded to provide C-style array
+             * indexing.
+             * @param index The index of the element to retrieve.
+            */
+            reference operator[](long long index) {
+                if (index < 0) {
+                    index += numberOfElements_;
+                    if (index < 0) {
+                        std::string err = "absolute value of index (which is " + std::to_string(index * -1)
+                                          + ") > this->size() (which is " + std::to_string(numberOfElements_) + ")";
+                        throw std::out_of_range(err);
+                    }
+                }
+                return this->at(index);
+            }
+            /**
              * This function assigns the vector newSize
              * elements with value val. It discards all
              * elements previously in the vector.
@@ -293,7 +327,7 @@ namespace std_copy {
             /**
              * Overloaded assignment operator.
             */
-            void operator=(const vector<value_type, allocator_type>& t) {
+            void operator=(const vector_type& t) {
                 if (this == &t) return;
 
                 allocator.deallocate(internalBuffer_, numberOfElements_);
@@ -301,6 +335,46 @@ namespace std_copy {
                 capacity_ = t.capacity_;
                 internalBuffer_ = allocator.allocate(numberOfElements_);
                 std::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
+            }
+            /**
+             * The function erases the elements from one index
+             * to another index.
+            */
+            vector_type& erase(size_type index1, size_type index2) {
+                if (index1 >= numberOfElements_) {
+                    std::cout << "index1 (which is " << index1
+                              << ") >= this->size() (which is "
+                              << numberOfElements_ << ")\n";
+                    exit(EXIT_FAILURE);
+                }
+                if (index2 >= numberOfElements_) {
+                    std::cout << "index2 (which is " << index2
+                              << ") >= this->size() (which is "
+                              << numberOfElements_ << ")\n";
+                    exit(EXIT_FAILURE);
+                }
+                if (index1 < 0) {
+                    std::cout << "index1 (which is " << index1 << ") < 0\n";
+                    exit(EXIT_FAILURE);
+                }
+                if (index2 < 0) {
+                    std::cout << "index2 (which is " << index2 << ") < 0\n";
+                    exit(EXIT_FAILURE);
+                }
+                pointer temp = new value_type[numberOfElements_];
+                size_type tempNumberOfElements = numberOfElements_;
+                std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
+                allocator.deallocate(internalBuffer_, numberOfElements_);
+                internalBuffer_ = allocator.allocate(0);
+                capacity_ = 0;
+                numberOfElements_ = 0;
+                for (int i = 0; i < tempNumberOfElements; i++) {
+                    if (i < index1 || i >= index2) {
+                        this->push_back(temp[i]);
+                    }
+                }
+                delete temp;
+                return *this;
             }
     };
     //Overloaded == operator
