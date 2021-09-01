@@ -12,42 +12,46 @@ namespace std_copy {
             typedef typename T::const_reference         const_reference;
 
         private:
+            typedef iterator_type<T>                    iterator_t;
+            typedef iterator_t&                         iterator_reference;
+            typedef const iterator_t&                   const_iterator_reference;
+
             pointer internalPtr_;
 
         public:
             iterator_type(pointer ptr = nullptr)
                 : internalPtr_(ptr) {}
 
-            iterator_type(const iterator_type& it)
+            iterator_type(const_iterator_reference it)
                 : internalPtr_(it.internalPtr_) {}
             
             /**
              * Overloaded postfix increment operator
             */
-            iterator_type& operator++() {
+            iterator_reference operator++() {
                 internalPtr_++;
                 return *this;
             }
             /**
              * Overloaded prefix increment operator
             */
-            iterator_type operator++(int) {
-                iterator_type ptrBeforeIncrement = *this;
+            iterator_t operator++(int) {
+                iterator_t ptrBeforeIncrement = *this;
                 ++(*this);
                 return *this;
             }
             /**
              * Overloaded postfix decrement operator
             */
-            iterator_type& operator--() {
+            iterator_reference operator--() {
                 internalPtr_--;
                 return *this;
             }
             /**
              * Overloaded prefix decrement operator
             */
-            iterator_type operator--(int) {
-                iterator_type ptrBeforeDecrement = internalPtr_;
+            iterator_t operator--(int) {
+                iterator_t ptrBeforeDecrement = internalPtr_;
                 --(*this);
                 return ptrBeforeDecrement;
             }
@@ -55,14 +59,14 @@ namespace std_copy {
              * Overloaded equality operator
              * @param it The iterator to compare against.
             */
-            bool operator==(const iterator_type& it) {
+            bool operator==(const_iterator_reference it) {
                 return internalPtr_ == it.internalPtr_;
             }
             /**
              * Overloaded inequality operator
              * @param it The iterator to compare against.
             */
-            bool operator!=(const iterator_type& it) {
+            bool operator!=(const_iterator_reference it) {
                 return !(*this == it);
             }
             /**
@@ -80,7 +84,7 @@ namespace std_copy {
             /**
              * Overloaded assignment operator
             */
-            void operator=(const iterator_type<T>& it) {
+            void operator=(const_iterator_reference it) {
                 internalPtr_ = it.internalPtr_;
             }
             /**
@@ -102,16 +106,16 @@ namespace std_copy {
      * @param it The iterator to advance.
      * @param n The number to advance the iterator by.
     */
-    template <class InputIterator>
-    void advance(InputIterator& it, long long n = 1) {
+    template <class Iterator>
+    void advance(Iterator& it, long long n = 1) {
         it += n;
     }
     /**
      * This function returns the distance between
      * two iterators.
     */
-    template <class InputIterator>
-    std::ptrdiff_t distance(InputIterator& it1, InputIterator& it2) {
+    template <class Iterator>
+    std::ptrdiff_t distance(Iterator& it1, Iterator& it2) {
         std::ptrdiff_t diff = (std::ptrdiff_t) (it1.operator->() - it2.operator->());
         diff += (diff < 0) ? -1 : 1;
         return diff;
@@ -122,9 +126,9 @@ namespace std_copy {
      * @param it The starting iterator position.
      * @param n The amount to add to the iterator.
     */
-    template <class InputIterator>
-    InputIterator next(InputIterator& it, long long n = 1) {
-        InputIterator newIterator = it;
+    template <class Iterator>
+    Iterator next(Iterator& it, long long n = 1) {
+        Iterator newIterator = it;
         newIterator += n;
         return newIterator;
     }
@@ -134,9 +138,9 @@ namespace std_copy {
      * @param it The starting iterator position.
      * @param n The amount to subtract from the iterator.
     */
-    template <class InputIterator>
-    InputIterator prev(InputIterator& it, long long n = 1) {
-        InputIterator newIterator = it;
+    template <class Iterator>
+    Iterator prev(Iterator& it, long long n = 1) {
+        Iterator newIterator = it;
         newIterator -= n;
         return newIterator;
     }
