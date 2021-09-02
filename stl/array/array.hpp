@@ -1,3 +1,5 @@
+#pragma once
+
 #include <array>
 #include <iostream>
 
@@ -28,7 +30,7 @@ namespace std_copy {
             typedef typename STL_CONTAINER<T>::reference             reference;
             typedef typename STL_CONTAINER<T>::const_reference       const_reference;
             typedef typename STL_CONTAINER<T>::size_type             size_type;
-            using iterator = iterator_type<array<T, s>>;
+            typedef iterator_type<array<T, s>>                       iterator;
             
         private:
 
@@ -60,9 +62,7 @@ namespace std_copy {
                 (void(internalBuffer_[i++] = args), ...);
             }
 
-            virtual ~array() {
-                delete internalBuffer_;
-            }
+            virtual ~array() = default;
 
             /**
              * This function fills the array with the
