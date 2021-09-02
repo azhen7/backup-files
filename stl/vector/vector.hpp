@@ -70,9 +70,8 @@ namespace std_copy {
             }
 
             //Destructor
-            virtual ~vector() {
-                allocator.deallocate(internalBuffer_, numberOfElements_);
-            }
+            virtual ~vector() = default;
+            
             /**
              * This function returns the size of the vector, 
              * i.e., how many elements are in the vector.
@@ -110,8 +109,7 @@ namespace std_copy {
             */
             void clear() {
                 numberOfElements_ = 0;
-                allocator.deallocate(internalBuffer_, numberOfElements_);
-                internalBuffer_ = allocator.allocate(0);
+                allocator.deallocate(internalBuffer_, capacity_);
             }
             /**
              * This function pushes an element onto the end of 
