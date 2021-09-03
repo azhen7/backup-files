@@ -1,7 +1,6 @@
 #include <memory>
-#include <map>
+#include <stdexcept>
 
-#include "iterator.hpp"
 #include "stl.hpp"
 
 namespace std_copy {
@@ -31,7 +30,10 @@ namespace std_copy {
             typedef const value_type&                       const_reference;
             typedef Alloc                                   allocator_type;
             typedef std::size_t                             size_type;
-            typedef iterator_type<map<T1, T2, Alloc>>       iterator;
+
+            class iterator {
+                
+            };
         
         private:
             using STL_CONTAINER<value_type>::internalBuffer_;
@@ -68,6 +70,32 @@ namespace std_copy {
                 numberOfElements_ = 0;
             }
             /**
+             * This function returns an iterator to the first element in the container
+            */
+            iterator begin() {
+                return iterator(internalBuffer_);
+            }
+            /**
+             * This function returns an iterator to the theoretical element after the last 
+             * element in the container;
+            */
+            iterator end() {
+                return iterator(internalBuffer_ + numberOfElements_);
+            }
+            /**
+             * This function returns a const iterator to the first element in the container
+            */
+            iterator begin() {
+                return (const_iterator) iterator(internalBuffer_);
+            }
+            /**
+             * This function returns a const iterator to the theoretical element after the last 
+             * element in the container;
+            */
+            iterator end() {
+                return (const_iterator) iterator(internalBuffer_ + numberOfElements_);
+            }
+            /**
              * Operator overload of operator[]. If the provided argument exists in the 
              * map, a reference to its mapped value is returned. Otherwise, the function
              * adds an element to the map with the key having the value of the argument.
@@ -95,6 +123,19 @@ namespace std_copy {
                 internalBuffer_[numberOfElements_].first = elem;
                 numberOfElements_++;
                 return internalBuffer_[numberOfElements_ - 1].second;
+            }
+            /**
+             * This function has the same functionality as operator[], except 
+             * instead of creating a new element if the provided key doesn't 
+             * exist, an out_of_range exception is thrown.
+            */
+            mapped_type& at(const key_type& key) {
+                for (int i = 0; i < numberOfElements_; i++) {
+                    if (internalBuffer_[i].first == key) {
+                        return internalBuffer_[i].second;
+                    }
+                }
+                throw std::out_of_range("map::at");
             }
     };
 }
