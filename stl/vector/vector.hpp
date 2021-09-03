@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "stl.hpp"
-#include "iterator.hpp"
 
 namespace std_copy {
     /**
