@@ -24,13 +24,14 @@ namespace std_copy {
     class vector : public STL_CONTAINER<T> {
         public:
             //typedefs
-            typedef typename STL_CONTAINER<T>::value_type               value_type;
-            typedef typename STL_CONTAINER<T>::pointer                  pointer;
-            typedef typename STL_CONTAINER<T>::reference                reference;
-            typedef typename STL_CONTAINER<T>::const_reference          const_reference;
-            typedef typename STL_CONTAINER<T>::size_type                size_type;
-            typedef Alloc                                               allocator_type;
-            typedef iterator_type<vector<value_type, allocator_type>>   iterator;
+            typedef typename STL_CONTAINER<T>::value_type                       value_type;
+            typedef typename STL_CONTAINER<T>::pointer                          pointer;
+            typedef typename STL_CONTAINER<T>::reference                        reference;
+            typedef typename STL_CONTAINER<T>::const_reference                  const_reference;
+            typedef typename STL_CONTAINER<T>::size_type                        size_type;
+            typedef Alloc                                                       allocator_type;
+            typedef iterator_type<vector<value_type, allocator_type>>           iterator;
+            typedef const iterator_type<vector<value_type, allocator_type>>     const_iterator;
 
         private:
             typedef vector<value_type, allocator_type>                  vector_type;
@@ -309,18 +310,33 @@ namespace std_copy {
             }
             /**
              * This function returns an iterator to
-             * the front of the array.
+             * the front of the vector.
             */
             iterator begin() {
                 return iterator(internalBuffer_);
             }
             /**
              * This function returns an iterator to
-             * the thereotical element after the last
-             * element in the array.
+             * the theoretical element after the last
+             * element in the vector.
             */
             iterator end() {
                 return iterator(internalBuffer_ + numberOfElements_);
+            }
+            /**
+             * This function returns a const iterator to the 
+             * first element in the vector.
+            */
+            const_iterator cbegin() {
+                return (const_iterator) iterator(internalBuffer_);
+            }
+            /**
+             * This function returns a const iterator to 
+             * the theoretical element after the last element 
+             * in the vector.
+            */
+            const_iterator cend() {
+                return (const_iterator) iterator(internalBuffer_ + numberOfElements_);
             }
             /**
              * Overloaded assignment operator.
