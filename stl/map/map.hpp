@@ -18,6 +18,11 @@ namespace std_copy {
             : first(p.first),
             second(p.second)
         {}
+
+        void assign(T1 f = T1(), T2 s = T2()) {
+            first = f;
+            second = s;
+        }
     };
     template <class T1, class T2, class Alloc = std::allocator<pair<T1, T2>>>
     class map : public STL_CONTAINER<pair<T1, T2>> {
@@ -30,10 +35,8 @@ namespace std_copy {
             typedef const value_type&                       const_reference;
             typedef Alloc                                   allocator_type;
             typedef std::size_t                             size_type;
-
-            class iterator {
-                
-            };
+            typedef pair<T1, T2>*                           iterator;
+            typedef const pair<T1, T2>*                     const_iterator;
         
         private:
             using STL_CONTAINER<value_type>::internalBuffer_;
@@ -85,14 +88,14 @@ namespace std_copy {
             /**
              * This function returns a const iterator to the first element in the container
             */
-            iterator begin() {
+            iterator cbegin() {
                 return (const_iterator) iterator(internalBuffer_);
             }
             /**
              * This function returns a const iterator to the theoretical element after the last 
              * element in the container;
             */
-            iterator end() {
+            iterator cend() {
                 return (const_iterator) iterator(internalBuffer_ + numberOfElements_);
             }
             /**
