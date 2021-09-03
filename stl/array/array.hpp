@@ -7,7 +7,6 @@
 #include <cstdlib>
 
 #include "stl.hpp"
-#include "iterator.hpp"
 
 namespace std_copy {
     /**
@@ -31,6 +30,7 @@ namespace std_copy {
             typedef typename STL_CONTAINER<T>::const_reference       const_reference;
             typedef typename STL_CONTAINER<T>::size_type             size_type;
             typedef iterator_type<array<T, s>>                       iterator;
+            typedef const iterator_type<array<T, s>>                 const_iterator;
             
         private:
 
@@ -108,6 +108,34 @@ namespace std_copy {
             */
             size_type max_size() const {
                 return size_;
+            }
+            /**
+             * This function returns an iterator to the first element 
+             * in the array container.
+            */
+            iterator begin() {
+                return iterator(internalBuffer_);
+            }
+            /**
+             * This function returns an iterator to the theoretical element 
+             * after the last element in the array container.
+            */
+            const_iterator end() {
+                return iterator(internalBuffer_ + numberOfElements_);
+            }
+            /**
+             * This function returns an const iterator to the first element 
+             * in the array container.
+            */
+            const_iterator cbegin() {
+                return iterator(internalBuffer_);
+            }
+            /**
+             * This function returns an const iterator to the theoretical element 
+             * after the last element in the array container.
+            */
+            iterator cend() {
+                return iterator(internalBuffer_ + numberOfElements_);
             }
             /**
              * This function pushes an element onto the end of
