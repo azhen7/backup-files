@@ -2,6 +2,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "iterator.hpp"
+
 namespace std_copy {
     template <class T>
     class STL_CONTAINER {
