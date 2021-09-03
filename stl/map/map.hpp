@@ -2,28 +2,9 @@
 #include <stdexcept>
 
 #include "stl.hpp"
+#include "pair.hpp"
 
 namespace std_copy {
-    template <class T1, class T2>
-    struct pair {
-        T1  first;
-        T2  second;
-
-        pair(T1 f = T1(), T2 s = T2())
-            : first(f), 
-            second(s) 
-        {}
-
-        pair (const pair& p)
-            : first(p.first),
-            second(p.second)
-        {}
-
-        void assign(T1 f = T1(), T2 s = T2()) {
-            first = f;
-            second = s;
-        }
-    };
     template <class T1, class T2, class Alloc = std::allocator<pair<T1, T2>>>
     class map : public STL_CONTAINER<pair<T1, T2>> {
         public:
