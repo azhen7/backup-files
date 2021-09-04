@@ -1,3 +1,6 @@
+#ifndef _STD_COPY_ITERATOR
+#define _STD_COPY_ITERATOR
+
 //#include <iterator>
 #include <cstddef>
 
@@ -82,7 +85,8 @@ namespace std_copy {
                 return internalPtr_;
             }
             /**
-             * Overloaded assignment operator
+             * Overloaded assignment operator -> assigns 
+             * the current iterator to a provided iterator.
             */
             void operator=(const_iterator_reference it) {
                 internalPtr_ = it.internalPtr_;
@@ -145,3 +149,5 @@ namespace std_copy {
         return newIterator;
     }
 }
+
+#endif /* _STD_COPY_ITERATOR */
