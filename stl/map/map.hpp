@@ -46,7 +46,7 @@ namespace std_copy {
                 std::fill_n(internalBuffer_, numberOfElements_, val);
             }
 
-            ~map() = default;
+            virtual ~map() = default;
 
             /**
              * This function returns the number of elements 
@@ -121,6 +121,7 @@ namespace std_copy {
                         return internalBuffer_[i].second;
                     }
                 }
+                int whereToInsert = 0;
                 if (capacity_ == 0) {
                     capacity_ = 1;
                     internalBuffer_ = allocator.allocate(1);
@@ -128,16 +129,28 @@ namespace std_copy {
                 else if (numberOfElements_ + 1 > capacity_) {
                     capacity_ *= 2;
 
-                    pointer temp = new value_type[numberOfElements_];
-                    std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                    allocator.deallocate(internalBuffer_, capacity_ / 2);
+                    pointer temp = internalBuffer_;
                     internalBuffer_ = allocator.allocate(capacity_);
-                    std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                    delete temp;
+                    for (int i = 0; i < numberOfElements_; i++) {
+                        if (temp[i].first >= elem) {
+                            for (int j = numberOfElements_ - 1; j >= i; j--) {
+                                internalBuffer_[j + 1] = temp[j];
+                            }
+                            whereToInsert = i;
+                            break;
+                        }
+                        else {
+                            internalBuffer_[i] = temp[i];
+                        }
+                        if (i == numberOfElements_ - 1) {
+                            whereToInsert = numberOfElements_;
+                        }
+                    }
+                    allocator.deallocate(temp, (int) capacity_ / 2);
                 }
-                internalBuffer_[numberOfElements_].first = elem;
                 numberOfElements_++;
-                return internalBuffer_[numberOfElements_ - 1].second;
+                internalBuffer_[whereToInsert].first = elem;
+                return internalBuffer_[whereToInsert].second;
             }
             /**
              * This function has the same functionality as operator[], except 
@@ -153,6 +166,62 @@ namespace std_copy {
                 throw std::out_of_range("map::at");
             }
             /**
+             * This function inserts an element into the container. It does not 
+             * insert an element when an element with the specified key already exists.
+            */
+            pair<iterator, bool> insert(const_reference pairToInsert) {
+                for (int i = 0; i < numberOfElements_; i++) {
+                    if (internalBuffer_[i].first == pairToInsert.first) {
+                        iterator it = iterator(internalBuffer_ + i);
+                        pair<iterator, bool> p(it, false);
+                        return p;
+                    }
+                }
+                int whereToInsert = 0;
+                if (capacity_ == 0) {
+                    capacity_ = 1;
+                    internalBuffer_ = allocator.allocate(1);
+                }
+                else if (numberOfElements_ + 1 > capacity_) {
+                    capacity_ *= 2;
+
+                    pointer temp = internalBuffer_;
+                    internalBuffer_ = allocator.allocate(capacity_);
+                    for (int i = 0; i < numberOfElements_; i++) {
+                        if (temp[i].first >= pairToInsert.first) {
+                            for (int j = numberOfElements_ - 1; j >= i; j--) {
+                                internalBuffer_[j + 1] = temp[j];
+                            }
+                            whereToInsert = i;
+                            break;
+                        }
+                        else {
+                            internalBuffer_[i] = temp[i];
+                        }
+                        if (i == numberOfElements_ - 1) {
+                            whereToInsert = numberOfElements_;
+                        }
+                    }
+                    allocator.deallocate(temp, (int) capacity_ / 2);
+                }
+                numberOfElements_++;
+                internalBuffer_[whereToInsert].first = pairToInsert.first;
+                internalBuffer_[whereToInsert].second = pairToInsert.second;
+                pair<iterator, bool> ret(iterator(internalBuffer_ + whereToInsert), true);
+                return ret;
+            }
+            /**
+             * This function does the same thing as insert(), except if the element with the specified 
+             * key already exists, that element gets assigned to the new mapped value instead.
+            */
+            pair<iterator, bool> insert_or_assign(const_reference pairToInsert) {
+                pair<iterator, bool> p = insert(pairToInsert);
+                if (p.second == false) {
+                    (*this)[p.first->first] = pairToInsert.second;
+                }
+                return p;
+            }
+            /**
              * This function copies one map to another.
             */
             void operator=(const map_type& s) {
@@ -162,8 +231,15 @@ namespace std_copy {
                 std::copy(s.internalBuffer_, s.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
             /**
+             * This function returns an object of the provided allocator type.
+            */
+            allocator_type get_allocator() {
+                return allocator;
+            }
+            /**
              * This function checks whether the container contains an 
              * element with a specified key.
+             * The equality operator has to be provided by the user.
             */
             bool contains(const key_type& key) {
                 for (int i = 0; i < numberOfElements_; i++) {
