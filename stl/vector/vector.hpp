@@ -1,9 +1,8 @@
-#pragma once
+#ifndef _STD_COPY_VECTOR
+#define _STD_COPY_VECTOR
 
-#include <iostream>
-
+#include <stdexcept>
 #include <cmath>
-#include <cstdlib>
 #include <algorithm>
 #include <memory>
 
@@ -62,12 +61,7 @@ namespace std_copy {
                 (void(internalBuffer_[i++] = args), ...);
             }
 
-            vector(const vector_type& copy) {
-                numberOfElements_ = copy.numberOfElements_;
-                capacity_ = copy.capacity_;
-                internalBuffer_ = allocator.allocate(numberOfElements_);
-                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
-            }
+            vector(const vector_type& copy) = default;
 
             //Destructor
             virtual ~vector() = default;
@@ -249,7 +243,7 @@ namespace std_copy {
             void resize(size_type n, const_reference val = value_type()) {
                 pointer temp = new value_type[numberOfElements_];
                 std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                allocator.deallocate(internalBuffer_, numberOfElements_);
+                allocator.deallocate(internalBuffer_, capacity_);
                 internalBuffer_ = allocator.allocate(n);
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
                 if (n > numberOfElements_) {
@@ -267,8 +261,7 @@ namespace std_copy {
             */
             reference front() {
                 if (numberOfElements_ == 0) {
-                    std::cout << "Cannot access element in empty vector\n";
-                    exit(EXIT_FAILURE);
+                    throw std::runtime_error("Cannot access element in empty vector");
                 }
                 return internalBuffer_[0];
             }
@@ -279,8 +272,7 @@ namespace std_copy {
             */
             reference back() {
                 if (numberOfElements_ == 0) {
-                    std::cout << "Cannot access element in empty vector\n";
-                    exit(EXIT_FAILURE);
+                    throw std::runtime_error("Cannot access element in empty vector");
                 }
                 return internalBuffer_[numberOfElements_ - 1];
             }
@@ -434,3 +426,5 @@ namespace std_copy {
         return !(lhs < rhs);
     }
 }
+
+#endif /* _STD_COPY_VECTOR */
