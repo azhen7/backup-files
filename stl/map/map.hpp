@@ -1,3 +1,6 @@
+#ifndef _STD_COPY_MAP
+#define _STD_COPY_MAP
+
 #include <memory>
 #include <stdexcept>
 
@@ -16,10 +19,11 @@ namespace std_copy {
             typedef const value_type&                       const_reference;
             typedef Alloc                                   allocator_type;
             typedef std::size_t                             size_type;
-            typedef pair<T1, T2>*                           iterator;
-            typedef const pair<T1, T2>*                     const_iterator;
+            typedef iterator_type<map<T1, T2, Alloc>>       iterator;
+            typedef const iterator_type<map<T1, T2, Alloc>> const_iterator;
         
         private:
+            typedef map<T1, T2, Alloc>                      map_type;
             using STL_CONTAINER<value_type>::internalBuffer_;
             using STL_CONTAINER<value_type>::numberOfElements_;
 
@@ -29,6 +33,17 @@ namespace std_copy {
         public:
             map() : capacity_(0) {
                 numberOfElements_ = 0;
+            }
+
+            map(const map_type&) = default;
+            map(map&&) = default;
+
+            map(size_type size, const_reference val = value_type())
+                : capacity_(size)
+            {
+                numberOfElements_ = size;
+                internalBuffer_ = allocator.allocate(size);
+                std::fill_n(internalBuffer_, numberOfElements_, val);
             }
 
             ~map() = default;
@@ -69,15 +84,31 @@ namespace std_copy {
             /**
              * This function returns a const iterator to the first element in the container
             */
-            iterator cbegin() {
+            const_iterator cbegin() {
                 return (const_iterator) iterator(internalBuffer_);
             }
             /**
              * This function returns a const iterator to the theoretical element after the last 
              * element in the container;
             */
-            iterator cend() {
+            const_iterator cend() {
                 return (const_iterator) iterator(internalBuffer_ + numberOfElements_);
+            }
+            /**
+             * This function erases the element pointed to by the provided iterator.
+            */
+            void erase(iterator pos) {
+                if (numberOfElements_ == 0) {
+                    throw std::runtime_error("No elements to erase");
+                }
+                map_type newMap;
+
+                for (iterator it = begin(); it != end(); it++) {
+                    if (it != pos) {
+                        newMap[it->first] = it->second;
+                    }
+                }
+                *this = newMap;
             }
             /**
              * Operator overload of operator[]. If the provided argument exists in the 
@@ -121,5 +152,27 @@ namespace std_copy {
                 }
                 throw std::out_of_range("map::at");
             }
+            /**
+             * This function copies one map to another.
+            */
+            void operator=(const map_type& s) {
+                allocator.deallocate(internalBuffer_, capacity_);
+                numberOfElements_ = s.numberOfElements_;
+                capacity_ = s.capacity_;
+                std::copy(s.internalBuffer_, s.internalBuffer_ + numberOfElements_, internalBuffer_);
+            }
+            /**
+             * This function checks whether the container contains an 
+             * element with a specified key.
+            */
+            bool contains(const key_type& key) {
+                for (int i = 0; i < numberOfElements_; i++) {
+                    if (internalBuffer_[i].first == key)
+                        return true;
+                }
+                return false;
+            }
     };
 }
+
+#endif /* _STD_COPY_MAP */
