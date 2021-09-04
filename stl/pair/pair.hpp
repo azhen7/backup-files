@@ -1,3 +1,6 @@
+#ifndef _STD_COPY_PAIR
+#define _STD_COPY_PAIR
+
 namespace std_copy {
     template <class T1, class T2>
     struct pair {
@@ -28,6 +31,7 @@ namespace std_copy {
         const pair& operator=(const pair& toAssign) {
             first = toAssign.first;
             second = toAssign.second;
+            return *this;
         }
     };
     template <class T1, class T2>
@@ -90,3 +94,5 @@ namespace std_copy {
         return !(lhs < rhs);
     }
 }
+
+#endif /* _STD_COPY_PAIR */
