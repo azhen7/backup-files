@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _STD_COPY_ARRAY
+#define _STD_COPY_ARRAY
 
 #include <array>
 #include <iostream>
@@ -247,3 +248,5 @@ namespace std_copy {
             }
     };
 }
+
+#endif /* _STD_COPY_ARRAY */
