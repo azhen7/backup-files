@@ -39,6 +39,10 @@ namespace std_copy {
         
             size_type capacity_;
             allocator_type allocator;
+
+            size_type calculateSmallestPowerOfTwoLargerThan(int x) {
+                return std::pow(2, (int) (std::log(x) / std::log(2) + 1));
+            }
             
         public:
             explicit vector(size_type size = 0, const_reference val = value_type())
@@ -53,7 +57,7 @@ namespace std_copy {
 
             template <class ...Args>
             vector(Args ...args)
-                : capacity_(std::pow(2, (int) (std::log(sizeof...(Args)) / std::log(2) + 1)))
+                : capacity_(calculateSmallestPowerOfTwoLargerThan(sizeof...(Args)))
             {
                 numberOfElements_ = sizeof...(Args);
                 internalBuffer_ = allocator.allocate(numberOfElements_);
@@ -61,7 +65,11 @@ namespace std_copy {
                 (void(internalBuffer_[i++] = args), ...);
             }
 
-            vector(const vector_type& copy) = default;
+            vector(const vector_type& copy) {
+                numberOfElements_ = copy.numberOfElements_;
+                capacity_ = copy.capacity_;
+                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+            }
 
             //Destructor
             virtual ~vector() = default;
@@ -118,12 +126,10 @@ namespace std_copy {
                 else if (numberOfElements_ + 1 > capacity_) {
                     capacity_ *= 2;
 
-                    pointer temp = new value_type[capacity_];
-                    std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                    allocator.deallocate(internalBuffer_, capacity_ / 2);
+                    pointer temp = internalBuffer_;
                     internalBuffer_ = allocator.allocate(capacity_);
                     std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                    delete temp;
+                    allocator.deallocate(temp, (int) capacity_ / 2);
                 }
                 internalBuffer_[numberOfElements_] = elem;
                 numberOfElements_++;
@@ -134,17 +140,14 @@ namespace std_copy {
              * @param elem The element to add to the front of the vector.
             */
             void push_front(const_reference elem) {
-                pointer temp = new value_type[numberOfElements_];
-                std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                allocator.deallocate(internalBuffer_, capacity_);
-                if (numberOfElements_ + 1 > capacity_ || capacity_ == 0) {
+                pointer temp = internalBuffer_;
+                if (numberOfElements_ == capacity_)
                     capacity_ = (capacity_ == 0) ? 1 : capacity_ * 2;
-                }
                 internalBuffer_ = allocator.allocate(capacity_);
-                internalBuffer_[0] = elem;
                 std::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
+                internalBuffer_[0] = elem;
+                allocator.deallocate(temp, (int) capacity_ / 2);
                 numberOfElements_++;
-                delete temp;
             }
             /**
              * This function removes the last element in the vector.
@@ -153,15 +156,14 @@ namespace std_copy {
             */
             void pop_back() {
                 if (numberOfElements_ == 0) return;
-                pointer temp = new value_type[numberOfElements_];
-                std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                allocator.deallocate(internalBuffer_, capacity_);
+                pointer t = internalBuffer_;
                 numberOfElements_--;
                 if (numberOfElements_ < capacity_ / 2)
                     capacity_ = (int) capacity_ / 2;
                 internalBuffer_ = allocator.allocate(capacity_);
-                std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                delete temp;
+                std::copy(t, t + numberOfElements_, internalBuffer_);
+                size_type deallocateAmount = (capacity_ == 0) ? 1 : capacity_ * 2;
+                allocator.deallocate(t, deallocateAmount);
             }
             /**
              * This function removes the element at the beginning of the vector.
@@ -213,7 +215,6 @@ namespace std_copy {
             */
             void assign(size_type newSize, const_reference val) {
                 allocator.deallocate(internalBuffer_, numberOfElements_);
-                allocator.allocate(0, internalBuffer_);
                 for (int i = 0; i < newSize; i++) {
                     this->push_back(val);
                 }
@@ -227,12 +228,10 @@ namespace std_copy {
                 if (size <= capacity_)
                     return;
                 capacity_ = size;
-                pointer temp = new value_type[numberOfElements_];
-                std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                allocator.deallocate(internalBuffer_, numberOfElements_);
+                pointer temp = internalBuffer_;
                 internalBuffer_ = allocator.allocate(size);
                 std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                delete temp;
+                allocator.deallocate(temp, capacity_);
             }
             /**
              * This function resizes the vector to contain 
@@ -241,18 +240,13 @@ namespace std_copy {
              * @param val The value used to populate the vector.
             */
             void resize(size_type n, const_reference val = value_type()) {
-                pointer temp = new value_type[numberOfElements_];
-                std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                allocator.deallocate(internalBuffer_, capacity_);
+                pointer temp = internalBuffer_;
                 internalBuffer_ = allocator.allocate(n);
-                std::copy(temp, temp + numberOfElements_, internalBuffer_);
-                if (n > numberOfElements_) {
-                    for (int i = numberOfElements_; i < n; i++) {
-                        internalBuffer_[i] = val;
-                    }
-                }
+                size_type upTo = (n > numberOfElements_) ? numberOfElements_ : n;
+                std::copy(temp, temp + upTo, internalBuffer_);
+                allocator.deallocate(temp, capacity_);
                 numberOfElements_ = n;
-                delete temp;
+                capacity_ = n;
             }
             /**
              * This function returns a reference to the
@@ -366,19 +360,17 @@ namespace std_copy {
                     std::cout << "index2 (which is " << index2 << ") < 0\n";
                     exit(EXIT_FAILURE);
                 }
-                pointer temp = new value_type[numberOfElements_];
-                size_type tempNumberOfElements = numberOfElements_;
-                std::copy(internalBuffer_, internalBuffer_ + numberOfElements_, temp);
-                allocator.deallocate(internalBuffer_, numberOfElements_);
-                internalBuffer_ = allocator.allocate(0);
-                capacity_ = 0;
-                numberOfElements_ = 0;
-                for (int i = 0; i < tempNumberOfElements; i++) {
+                pointer temp = internalBuffer_;
+                internalBuffer_ = allocator.allocate(capacity_);
+                for (int i = 0, j = 0; i < numberOfElements_; i++) {
                     if (i < index1 || i >= index2) {
-                        this->push_back(temp[i]);
+                        internalBuffer_[j] = temp[i];
+                        j++;
                     }
                 }
-                delete temp;
+                numberOfElements_ -= index2 - index1;
+                allocator.deallocate(temp, capacity_);
+                capacity_ = calculateSmallestPowerOfTwoLargerThan(numberOfElements_);
                 return *this;
             }
     };
