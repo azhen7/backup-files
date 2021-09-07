@@ -336,8 +336,9 @@ namespace std_copy {
                 std::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
             /**
-             * The function erases the elements from one index
-             * to another index.
+             * The function erases the elements in the range [index1, index2).
+             * @param index1 The start of the block to erase.
+             * @param index2 The end of the block to erase.
             */
             vector_type& erase(size_type index1, size_type index2) {
                 if (index1 >= numberOfElements_) {
