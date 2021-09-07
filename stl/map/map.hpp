@@ -96,6 +96,7 @@ namespace std_copy {
             }
             /**
              * This function erases the element pointed to by the provided iterator.
+             * @param pos The iterator which points to the element to erase.
             */
             void erase(iterator pos) {
                 if (numberOfElements_ == 0) {
@@ -114,10 +115,12 @@ namespace std_copy {
              * Operator overload of operator[]. If the provided argument exists in the 
              * map, a reference to its mapped value is returned. Otherwise, the function
              * adds an element to the map with the key having the value of the argument.
+             * @param key The key of the element to get, or in case an element with the same key 
+             * doesn't exist, creates it.
             */
-            mapped_type& operator[](const key_type& elem) {
+            mapped_type& operator[](const key_type& key) {
                 for (int i = 0; i < numberOfElements_; i++) {
-                    if (internalBuffer_[i].first == elem) {
+                    if (internalBuffer_[i].first == key) {
                         return internalBuffer_[i].second;
                     }
                 }
@@ -132,7 +135,7 @@ namespace std_copy {
                     pointer temp = internalBuffer_;
                     internalBuffer_ = allocator.allocate(capacity_);
                     for (int i = 0; i < numberOfElements_; i++) {
-                        if (temp[i].first >= elem) {
+                        if (temp[i].first >= key) {
                             for (int j = numberOfElements_ - 1; j >= i; j--) {
                                 internalBuffer_[j + 1] = temp[j];
                             }
@@ -149,13 +152,14 @@ namespace std_copy {
                     allocator.deallocate(temp, (int) capacity_ / 2);
                 }
                 numberOfElements_++;
-                internalBuffer_[whereToInsert].first = elem;
+                internalBuffer_[whereToInsert].first = key;
                 return internalBuffer_[whereToInsert].second;
             }
             /**
              * This function has the same functionality as operator[], except 
              * instead of creating a new element if the provided key doesn't 
              * exist, an out_of_range exception is thrown.
+             * @param key The key of the element to return.
             */
             mapped_type& at(const key_type& key) {
                 for (int i = 0; i < numberOfElements_; i++) {
@@ -168,6 +172,7 @@ namespace std_copy {
             /**
              * This function inserts an element into the container. It does not 
              * insert an element when an element with the specified key already exists.
+             * @param pairToInsert The element to insert into the map.
             */
             pair<iterator, bool> insert(const_reference pairToInsert) {
                 for (int i = 0; i < numberOfElements_; i++) {
@@ -213,6 +218,7 @@ namespace std_copy {
             /**
              * This function does the same thing as insert(), except if the element with the specified 
              * key already exists, that element gets assigned to the new mapped value instead.
+             * @param pairToInsert The element to insert into the map.
             */
             pair<iterator, bool> insert_or_assign(const_reference pairToInsert) {
                 pair<iterator, bool> p = insert(pairToInsert);
@@ -223,6 +229,7 @@ namespace std_copy {
             }
             /**
              * This function copies one map to another.
+             * @param s The map to copy to this.
             */
             void operator=(const map_type& s) {
                 allocator.deallocate(internalBuffer_, capacity_);
@@ -240,6 +247,7 @@ namespace std_copy {
              * This function checks whether the container contains an 
              * element with a specified key.
              * The equality operator has to be provided by the user.
+             * @param key The key to find.
             */
             bool contains(const key_type& key) {
                 for (int i = 0; i < numberOfElements_; i++) {
