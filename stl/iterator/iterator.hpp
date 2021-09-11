@@ -97,10 +97,22 @@ namespace std_copy {
                 internalPtr_ += n;
             }
             /**
+             * Overloaded + operator
+            */
+            std::ptrdiff_t operator+(std::ptrdiff_t n) {
+                return internalPtr_ + n;
+            }
+            /**
              * Overloaded -= operator
             */
             void operator-=(std::size_t n) {
                 internalPtr_ -= n;
+            }
+            /**
+             * Overloaded - operator
+            */
+            std::ptrdiff_t operator-(const iterator_t& it) {
+                return internalPtr_ - it.internalPtr_;
             }
             /**
              * Overloaded < operator
@@ -140,12 +152,13 @@ namespace std_copy {
     /**
      * This function returns the distance between
      * two iterators.
+     * @param first The first iterator.
+     * @param second The second iterator.
     */
     template <class Iterator>
-    std::ptrdiff_t distance(Iterator& it1, Iterator& it2) {
-        std::ptrdiff_t diff = (std::ptrdiff_t) (it1.operator->() - it2.operator->());
-        diff += (diff < 0) ? -1 : 1;
-        return diff;
+    std::ptrdiff_t distance(Iterator& first, Iterator& second) {
+        std::ptrdiff_t count = 0;
+        return second - first;
     }
     /**
      * This function returns an iterator to the element n positions 
