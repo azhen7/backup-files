@@ -1,9 +1,4 @@
-# std_copy: STL containers implementation
+# std_copy
 
-My own implementation of C++ STL containers such as std::vector, std::array, and
-std::deque.
-
-STL containers implemented so far:
-- std::vector
-- std::array
-- std::map
+This is my implementation of the STD C++ library. This implementation includes my own implementation 
+of STL containers (such as std::vector) and other libraries like <algorithm>.
