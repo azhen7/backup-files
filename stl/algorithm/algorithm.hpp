@@ -59,9 +59,8 @@ namespace std_copy {
         return last;
     }
     /**
-     * This function returns an iterator to the first element in the range 
-     * [first, last) for which func evaluates to true.
-     * exist between first and last.
+     * This function returns an iterator to the first element in the range [first, last) for 
+     * which func evaluates to true.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
      * @param func The function used to "test" the elements.
@@ -70,6 +69,23 @@ namespace std_copy {
     InputIt find_if(InputIt first, InputIt last, Function func) {
         while (first != last) {
             if (func(*first))
+                return first;
+            
+            first++;
+        }
+        return last;
+    }
+    /**
+     * This function returns an iterator to the first element in the range [first, last) for 
+     * which func evaluates to false.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param func The function used to "test" the elements.
+    */
+    template <class InputIt, class Function>
+    InputIt find_if_not(InputIt first, InputIt last, Function func) {
+        while (first != last) {
+            if (!func(*first))
                 return first;
             
             first++;
@@ -213,6 +229,17 @@ namespace std_copy {
             first++;
         }
         return false;
+    }
+    /**
+     * This function returns true if all elements in the range [first, last) 
+     * evaluate to false when passed to func.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param func The function used to test all the elements.
+    */
+    template <class InputIt, class Function>
+    bool none_of(InputIt first, InputIt last, Function func) {
+        return !all_of(first, last, func);
     }
     /**
      * This function compares all the elements in the range [first1, last1) and the 
@@ -544,7 +571,8 @@ namespace std_copy {
     /**
      * This function finds the first occurence of the sequence of elements in the range [first2, last2) 
      * in the sequence of elements in the range [first1, last1) and returns an iterator to the first 
-     * element.
+     * element. This function invokes operator==. 
+     * If the provided subsequence is not found, last1 is returned.
      * @param first1 An iterator to the initial position of the first sequence of elements.
      * @param last1 An iterator to the final position of the first sequence of elements.
      * @param first2 An iterator to the initial position of the second sequence of elements.
@@ -570,8 +598,39 @@ namespace std_copy {
         return last1;
     }
     /**
+     * This function finds the first occurence of the sequence of elements in the range [first2, last2) 
+     * in the sequence of elements in the range [first1, last1) and returns an iterator to the first 
+     * element. This function invokes a provided function to compare the elements. 
+     * If the provided subsequence is not found, last1 is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param last2 An iterator to the final position of the second sequence of elements.
+     * @param comp The function used to compare the elements.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    InputIt1 search(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp) {
+        while (first1 != last1) {
+            InputIt2 it2 = first2;
+            InputIt1 it1 = first1;
+            while (comp(*it1, *it2)) {
+                it1++;
+                it2++;
+                if (it2 == last2) {
+                    return first1;
+                }
+                if (it1 == last1) {
+                    return last1;
+                }
+            }
+            first1++;
+        }
+        return last1;
+    }
+    /**
      * This function returns an iterator to the first element in the range [first1, last1) that matches any of 
-     * the elements in the range [first2, last2).
+     * the elements in the range [first2, last2). This function invokes operator== to compare the elements. 
+     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
      * @param first1 An iterator to the initial position of the first sequence of elements.
      * @param last1 An iterator to the final position of the first sequence of elements.
      * @param first2 An iterator to the initial position of the second sequence of elements.
@@ -588,19 +647,42 @@ namespace std_copy {
         }
         return last1;
     }
+     /**
+     * This function returns an iterator to the first element in the range [first1, last1) that matches any of 
+     * the elements in the range [first2, last2). This function invokes a provided function to compare the 
+     * elements. 
+     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param last2 An iterator to the final position of the second sequence of elements.
+     * @param comp The function used to compare the elements.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp) {
+        while (first1 != last1) {
+            for (InputIt2 it = first2; it != last2; it++) {
+                if (comp(*it, *first1)) {
+                    return first1;
+                }
+            }
+        }
+        return last1;
+    }
     /**
      * This function returns an iterator to the last element in the range [first1, last1) that matches any of 
-     * the elements in the range [first2, last2).
+     * the elements in the range [first2, last2). This function invokes operator== to compare the elements. 
+     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
      * @param first1 An iterator to the initial position of the first sequence of elements.
      * @param last1 An iterator to the final position of the first sequence of elements.
      * @param first2 An iterator to the initial position of the second sequence of elements.
      * @param last2 An iterator to the final position of the second sequence of elements.
     */
     template <class InputIt1, class InputIt2>
-    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2) {
+    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2) {
         if (first1 == last1)
             return last1;
-            
+
         InputIt1 curr_elem_reverse = last1;
         while (curr_elem_reverse != first1) {
             for (InputIt2 it = first2; it != last2; it++) {
@@ -615,6 +697,167 @@ namespace std_copy {
             }
         }
         return last1;
+    }
+    /**
+     * This function returns an iterator to the last element in the range [first1, last1) that matches any of 
+     * the elements in the range [first2, last2). This function invokes a provided function to compare the elements. 
+     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param last2 An iterator to the final position of the second sequence of elements.
+     * @param comp The function used to compare the elements.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp) {
+        if (first1 == last1)
+            return last1;
+
+        InputIt1 curr_elem_reverse = last1;
+        while (curr_elem_reverse != first1) {
+            for (InputIt2 it = first2; it != last2; it++) {
+                if (comp(*curr_elem_reverse, *it)) {
+                    return curr_elem_reverse;
+                }
+            }
+        }
+        for (InputIt2 it = first2; it != last2; it++) {
+            if (comp(*first1, *it)) {
+                return first1;
+            }
+        }
+        return last1;
+    }
+    /**
+     * This function searches the elements in the range [first, last) for a sequence of count elements that all 
+     * are equal to val and returns an iterator to the first of these elements. This function invokes operator== 
+     * to compare the elements against val.
+     * If count elements (all equal to val) are found consecutively in the provided range, an iterator to the first 
+     * element is returned, and otherwise, last is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param count The number of elements that compare equal to val to search for.
+     * @param val The value that the elements get compared against.
+    */
+    template <class InputIt, class Size, class T>
+    InputIt search_n(InputIt first, InputIt last, Size count, const T& val) {
+        while (first != last) {
+            Size i = 0;
+            InputIt it = first;
+            while (*it == val) {
+                i++;
+                it++;
+                if (i == count) {
+                    return first;
+                }
+            }
+        }
+        return last;
+    }
+    /**
+     * This function searches the elements in the range [first, last) for a sequence of count elements that all 
+     * are equal to val and returns an iterator to the first of these elements. This function invokes a provided 
+     * function to compare the elements against val. 
+     * If count elements (all equal to val) are found consecutively in the provided range, an iterator to the first 
+     * element is returned, and otherwise, last is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param count The number of elements that compare equal to val to search for.
+     * @param val The value that the elements get compared against.
+     * @param comp The function used to compare the elements against val.
+    */
+    template <class InputIt, class Size, class T, class Compare>
+    InputIt search_n(InputIt first, InputIt last, Size count, const T& val, Compare comp) {
+        while (first != last) {
+            Size i = 0;
+            InputIt it = first;
+            while (comp(*it, val)) {
+                i++;
+                it++;
+                if (i == count) {
+                    return first;
+                }
+            }
+        }
+        return last;
+    }
+    /**
+     * This function returns the bounds of the subrange which includes elements with values all equal to val. 
+     * This function invokes operator== to compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param val The value of the elements in the subrange to search for.
+    */
+    template <class InputIt, class T>
+    pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val) {
+        InputIt start = lower_bound(first, last, val);
+        InputIt end = upper_bound(first, last, val);
+        return make_pair<start, end>;
+    }
+    /**
+     * This function returns the bounds of the subrange which includes elements with values all equal to val. 
+     * This function invokes a provided function to compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param val The value of the elements in the subrange to search for.
+    */
+    template <class InputIt, class T, class Compare>
+    pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val, Compare comp) {
+        InputIt start = lower_bound(first, last, val, comp);
+        InputIt end = upper_bound(first, last, val, comp);
+        return make_pair<start, end>;
+    }
+    /**
+     * This function invokes a provided function on each element in the range [first, last).
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param fn The function that is invoked on the elements.
+    */
+    template <class InputIt, class Function>
+    Function for_each(InputIt first, InputIt last, Function fn) {
+        while (first != last) {
+            fn(first);
+            first++;
+        }
+        return static_cast<Function&&>(fn);
+    }
+    /**
+     * This function invokes a function on the elements in the range [first, last) and stores 
+     * the result in the range starting from result.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the function results 
+     * are stored.
+     * @param fn A function which accepts one argument and returns a result.
+    */
+    template <class InputIt, class OutputIt, class Function>
+    OutputIt transform(InputIt first, InputIt last, OutputIt result, Function fn) {
+        while (first != last) {
+            *result = fn(*first);
+            first++;
+            result++;
+        }
+        return result;
+    }
+    /**
+     * This function invokes a function on the elements in the range [first1, last1) and the range 
+     * starting from first2 and stores the result in the range starting from result.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param result An iterator to the initial position of the range where the function results 
+     * are stored.
+     * @param binary_fn A function which accepts two argument and returns a result.
+    */
+    template <class InputIt, class OutputIt, class Function>
+    OutputIt transform(InputIt first1, InputIt last1, InputIt first2, OutputIt result, Function binary_fn) {
+        while (first1 != last1) {
+            *result = binary_fn(*first1, *first2);
+            first1++;
+            first2++;
+            result++;
+        }
+        return result;
     }
 }
 
