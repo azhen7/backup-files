@@ -66,9 +66,17 @@ namespace std_copy {
             }
 
             vector(const vector_type& copy) {
+                allocator.deallocate(internalBuffer_, capacity_);
                 numberOfElements_ = copy.numberOfElements_;
                 capacity_ = copy.capacity_;
+                internalBuffer_ = allocator.allocate(capacity_);
                 std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+            }
+
+            vector(vector_type&& copy) {
+                numberOfElements_ = copy.numberOfElements_;
+                internalBuffer_ = copy.internalBuffer_;
+                capacity_ = copy.capacity_;
             }
 
             //Destructor
