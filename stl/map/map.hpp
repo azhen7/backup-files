@@ -35,8 +35,20 @@ namespace std_copy {
                 numberOfElements_ = 0;
             }
 
-            map(const map_type&) = default;
-            map(map&&) = default;
+            map(const map_type& copy) {
+                allocator.deallocate(internalBuffer_, capacity_);
+                numberOfElements_ = copy.numberOfElements_;
+                capacity_ = copy.capacity_;
+                internalBuffer_ = allocator.allocate(capacity_);
+                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+            }
+
+            map(map_type&& copy) {
+                allocator.deallocate(internalBuffer_, capacity_);
+                capacity_ = copy.capacity_;
+                internalBuffer_ = copy.internalBuffer_;
+                numberOfElements_ = copy.numberOfElements_;
+            }
 
             map(size_type size, const_reference val = value_type())
                 : capacity_(size)
