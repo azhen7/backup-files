@@ -34,6 +34,7 @@ namespace std_copy {
             typedef const iterator_type<array<T, s>>                 const_iterator;
             
         private:
+            typedef array<T, s>         array_type;
 
             using STL_CONTAINER<T>::internalBuffer_;
             using STL_CONTAINER<T>::numberOfElements_;
@@ -41,7 +42,13 @@ namespace std_copy {
             const size_type size_;
 
         public:
-            array(const_reference val = value_type())
+            array() 
+                : size_(s)
+            {
+                numberOfElements_ = 0;
+                internalBuffer_ = new value_type[size_];
+            }
+            array(const_reference val)
                 : size_(s)
             {
                 internalBuffer_ = new value_type[s];
@@ -61,6 +68,21 @@ namespace std_copy {
                     exit(EXIT_FAILURE);
                 }
                 (void(internalBuffer_[i++] = args), ...);
+            }
+
+            array(const array_type& copy)
+                : size_(s)
+            {
+                internalBuffer_ = new value_type[size_];
+                numberOfElements_ = copy.numberOfElements_;
+                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+            }
+
+            array(array_type&& copy)
+                : size_(s)
+            {
+                internalBuffer_ = copy.internalBuffer_;
+                numberOfElements_ = copy.numberOfElements_;
             }
 
             virtual ~array() = default;
