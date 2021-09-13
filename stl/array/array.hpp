@@ -1,11 +1,8 @@
 #ifndef _STD_COPY_ARRAY
 #define _STD_COPY_ARRAY
 
-#include <array>
-#include <iostream>
-
-#include <exception>
-#include <cstdlib>
+#include <stdexcept>
+#include <string>
 
 #include "stl.hpp"
 
@@ -64,8 +61,7 @@ namespace std_copy {
                 size_type i = 0;
                 numberOfElements_ = sizeof...(Args);
                 if (sizeof...(Args) > size_) {
-                    std::cout << "Too many elements in initialization list\n";
-                    exit(EXIT_FAILURE);
+                    throw std::runtime_error("Too many elements in initialization list");
                 }
                 (void(internalBuffer_[i++] = args), ...);
             }
@@ -251,8 +247,7 @@ namespace std_copy {
             */
             reference front() {
                 if (numberOfElements_ == 0) {
-                    std::cout << "Cannot access element in empty vector\n";
-                    exit(EXIT_FAILURE);
+                    throw std::runtime_error("Cannot access element in empty array");
                 }
                 return internalBuffer_[0];
             }
@@ -263,8 +258,7 @@ namespace std_copy {
             */
             reference back() {
                 if (numberOfElements_ == 0) {
-                    std::cout << "Cannot access element in empty vector\n";
-                    exit(EXIT_FAILURE);
+                    throw std::runtime_error("Cannot access element in empty array");
                 }
                 return internalBuffer_[numberOfElements_ - 1];
             }
