@@ -4,12 +4,13 @@
 #include <memory>
 #include <stdexcept>
 
-#include "stl.hpp"
+#include "algorithm.hpp"
+#include "iterator.hpp"
 #include "pair.hpp"
 
 namespace std_copy {
     template <class T1, class T2, class Alloc = std::allocator<pair<T1, T2>>>
-    class map : public STL_CONTAINER<pair<T1, T2>> {
+    class map {
         public:
             typedef T1                                      key_type;
             typedef T2                                      mapped_type;
@@ -24,38 +25,40 @@ namespace std_copy {
         
         private:
             typedef map<T1, T2, Alloc>                      map_type;
-            using STL_CONTAINER<value_type>::internalBuffer_;
-            using STL_CONTAINER<value_type>::numberOfElements_;
-
+            
+            pointer internalBuffer_;
+            size_type numberOfElements_;
             size_type capacity_;
             allocator_type allocator;
 
         public:
-            map() : capacity_(0) {
-                numberOfElements_ = 0;
+            map() 
+                : capacity_(0),
+                numberOfElements_(0)
+            {
             }
 
-            map(const map_type& copy) {
-                allocator.deallocate(internalBuffer_, capacity_);
-                numberOfElements_ = copy.numberOfElements_;
-                capacity_ = copy.capacity_;
+            map(const map_type& copy)
+                : capacity_(copy.capacity_),
+                numberOfElements_(copy.numberOfElements_)
+            {
                 internalBuffer_ = allocator.allocate(capacity_);
-                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+                std_copy::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
 
-            map(map_type&& copy) {
-                allocator.deallocate(internalBuffer_, capacity_);
-                capacity_ = copy.capacity_;
-                internalBuffer_ = copy.internalBuffer_;
-                numberOfElements_ = copy.numberOfElements_;
+            map(map_type&& copy)
+                : capacity_(copy.capacity_),
+                internalBuffer_(copy.internalBuffer_),
+                numberOfElements_(copy.numberOfElements_)
+            {
             }
 
             map(size_type size, const_reference val = value_type())
-                : capacity_(size)
+                : capacity_(size),
+                numberOfElements_(size)
             {
-                numberOfElements_ = size;
                 internalBuffer_ = allocator.allocate(size);
-                std::fill_n(internalBuffer_, numberOfElements_, val);
+                std_copy::fill_n(internalBuffer_, numberOfElements_, val);
             }
 
             virtual ~map() = default;
@@ -247,7 +250,7 @@ namespace std_copy {
                 allocator.deallocate(internalBuffer_, capacity_);
                 numberOfElements_ = s.numberOfElements_;
                 capacity_ = s.capacity_;
-                std::copy(s.internalBuffer_, s.internalBuffer_ + numberOfElements_, internalBuffer_);
+                std_copy::copy(s.internalBuffer_, s.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
             /**
              * This function returns an object of the provided allocator type.

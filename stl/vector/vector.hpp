@@ -3,10 +3,10 @@
 
 #include <stdexcept>
 #include <cmath>
-#include <algorithm>
+#include "algorithm.hpp"
 #include <memory>
 
-#include "stl.hpp"
+#include "iterator.hpp"
 
 namespace std_copy {
     /**
@@ -19,24 +19,23 @@ namespace std_copy {
      * used for containing the values.
     */
     template <class T, class Alloc = std::allocator<T>>
-    class vector : public STL_CONTAINER<T> {
+    class vector {
         public:
             //typedefs
-            typedef typename STL_CONTAINER<T>::value_type                       value_type;
-            typedef typename STL_CONTAINER<T>::pointer                          pointer;
-            typedef typename STL_CONTAINER<T>::reference                        reference;
-            typedef typename STL_CONTAINER<T>::const_reference                  const_reference;
-            typedef typename STL_CONTAINER<T>::size_type                        size_type;
-            typedef Alloc                                                       allocator_type;
-            typedef iterator_type<vector<value_type, allocator_type>>           iterator;
-            typedef const iterator_type<vector<value_type, allocator_type>>     const_iterator;
+            typedef T                                               value_type;
+            typedef T*                                              pointer;
+            typedef T&                                              reference;
+            typedef const T&                                        const_reference;
+            typedef std::size_t                                     size_type;
+            typedef Alloc                                           allocator_type;
+            typedef iterator_type<vector<T, Alloc>>                 iterator;
+            typedef const iterator_type<vector<T, Alloc>>           const_iterator;
 
         private:
             typedef vector<value_type, allocator_type>                  vector_type;
 
-            using STL_CONTAINER<T>::internalBuffer_;
-            using STL_CONTAINER<T>::numberOfElements_;
-        
+            pointer internalBuffer_;
+            size_type numberOfElements_;
             size_type capacity_;
             allocator_type allocator;
 
@@ -57,26 +56,27 @@ namespace std_copy {
 
             template <class ...Args>
             vector(Args ...args)
-                : capacity_(calculateSmallestPowerOfTwoLargerThan(sizeof...(Args)))
+                : capacity_(calculateSmallestPowerOfTwoLargerThan(sizeof...(Args))),
+                numberOfElements_(sizeof...(Args))
             {
-                numberOfElements_ = sizeof...(Args);
                 internalBuffer_ = allocator.allocate(numberOfElements_);
                 size_type i = 0;
                 (void(internalBuffer_[i++] = args), ...);
             }
 
-            vector(const vector_type& copy) {
-                allocator.deallocate(internalBuffer_, capacity_);
-                numberOfElements_ = copy.numberOfElements_;
-                capacity_ = copy.capacity_;
+            vector(const vector_type& copy)
+                : numberOfElements_(copy.numberOfElements_),
+                capacity_(copy.capacity_)
+            {
                 internalBuffer_ = allocator.allocate(capacity_);
-                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+                std_copy::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
 
-            vector(vector_type&& copy) {
-                numberOfElements_ = copy.numberOfElements_;
-                internalBuffer_ = copy.internalBuffer_;
-                capacity_ = copy.capacity_;
+            vector(vector_type&& copy)
+                :capacity_(copy.capacity_),
+                numberOfElements_(copy.numberOfElements_),
+                internalBuffer_(copy.internalBuffer_)
+            {
             }
 
             //Destructor
@@ -136,7 +136,7 @@ namespace std_copy {
 
                     pointer temp = internalBuffer_;
                     internalBuffer_ = allocator.allocate(capacity_);
-                    std::copy(temp, temp + numberOfElements_, internalBuffer_);
+                    std_copy::copy(temp, temp + numberOfElements_, internalBuffer_);
                     allocator.deallocate(temp, (int) capacity_ / 2);
                 }
                 internalBuffer_[numberOfElements_] = elem;
@@ -152,7 +152,7 @@ namespace std_copy {
                 if (numberOfElements_ == capacity_)
                     capacity_ = (capacity_ == 0) ? 1 : capacity_ * 2;
                 internalBuffer_ = allocator.allocate(capacity_);
-                std::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
+                std_copy::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
                 internalBuffer_[0] = elem;
                 allocator.deallocate(temp, (int) capacity_ / 2);
                 numberOfElements_++;
@@ -169,7 +169,7 @@ namespace std_copy {
                 if (numberOfElements_ < capacity_ / 2)
                     capacity_ = (int) capacity_ / 2;
                 internalBuffer_ = allocator.allocate(capacity_);
-                std::copy(t, t + numberOfElements_, internalBuffer_);
+                std_copy::copy(t, t + numberOfElements_, internalBuffer_);
                 size_type deallocateAmount = (capacity_ == 0) ? 1 : capacity_ * 2;
                 allocator.deallocate(t, deallocateAmount);
             }
@@ -238,7 +238,7 @@ namespace std_copy {
                 capacity_ = size;
                 pointer temp = internalBuffer_;
                 internalBuffer_ = allocator.allocate(size);
-                std::copy(temp, temp + numberOfElements_, internalBuffer_);
+                std_copy::copy(temp, temp + numberOfElements_, internalBuffer_);
                 allocator.deallocate(temp, capacity_);
             }
             /**
@@ -251,7 +251,7 @@ namespace std_copy {
                 pointer temp = internalBuffer_;
                 internalBuffer_ = allocator.allocate(n);
                 size_type upTo = (n > numberOfElements_) ? numberOfElements_ : n;
-                std::copy(temp, temp + upTo, internalBuffer_);
+                std_copy::copy(temp, temp + upTo, internalBuffer_);
                 allocator.deallocate(temp, capacity_);
                 numberOfElements_ = n;
                 capacity_ = n;
@@ -341,10 +341,11 @@ namespace std_copy {
                 numberOfElements_ = t.numberOfElements_;
                 capacity_ = t.capacity_;
                 internalBuffer_ = allocator.allocate(numberOfElements_);
-                std::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
+                std_copy::copy(t.internalBuffer_, t.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
             /**
-             * The function erases the elements in the range [index1, index2).
+             * The function erases the elements in the range [index1, index2). Note that index1 and 
+             * index2 are integers.
              * @param index1 The start of the block to erase.
              * @param index2 The end of the block to erase.
             */
@@ -381,6 +382,15 @@ namespace std_copy {
                 allocator.deallocate(temp, capacity_);
                 capacity_ = calculateSmallestPowerOfTwoLargerThan(numberOfElements_);
                 return *this;
+            }
+            /**
+             * The function erases the elements in the range [start, end). Note that start and 
+             * end are iterators.
+             * @param start The start of the block to erase.
+             * @param end The end of the block to erase.
+            */
+            vector_type& erase(iterator start, iterator end) {
+                
             }
     };
     //Overloaded == operator

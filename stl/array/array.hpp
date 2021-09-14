@@ -4,7 +4,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "stl.hpp"
+#include "iterator.hpp"
+#include "algorithm.hpp"
 
 namespace std_copy {
     /**
@@ -19,23 +20,22 @@ namespace std_copy {
      * come with a lot of helpful functions.
     */
     template <class T, std::size_t s>
-    class array : public STL_CONTAINER<T> {
+    class array {
         public:
             //typdefs
-            typedef typename STL_CONTAINER<T>::value_type            value_type;
-            typedef typename STL_CONTAINER<T>::pointer               pointer;
-            typedef typename STL_CONTAINER<T>::reference             reference;
-            typedef typename STL_CONTAINER<T>::const_reference       const_reference;
-            typedef typename STL_CONTAINER<T>::size_type             size_type;
-            typedef iterator_type<array<T, s>>                       iterator;
-            typedef const iterator_type<array<T, s>>                 const_iterator;
+            typedef T                                               value_type;
+            typedef T*                                              pointer;
+            typedef T&                                              reference;
+            typedef const T&                                        const_reference;
+            typedef std::size_t                                     size_type;
+            typedef iterator_type<array<T, s>>                      iterator;
+            typedef const iterator_type<array<T, s>>                const_iterator;
             
         private:
             typedef array<T, s>         array_type;
 
-            using STL_CONTAINER<T>::internalBuffer_;
-            using STL_CONTAINER<T>::numberOfElements_;
-
+            pointer internalBuffer_;
+            size_type numberOfElements_;
             const size_type size_;
 
         public:
@@ -50,7 +50,7 @@ namespace std_copy {
             {
                 internalBuffer_ = new value_type[s];
                 numberOfElements_ = s;
-                std::fill_n(internalBuffer_, size_, val);
+                std_copy::fill_n(internalBuffer_, size_, val);
             }
 
             template <class ...Args>
@@ -71,7 +71,7 @@ namespace std_copy {
             {
                 internalBuffer_ = new value_type[size_];
                 numberOfElements_ = copy.numberOfElements_;
-                std::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+                std_copy::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
 
             array(array_type&& copy)
@@ -89,7 +89,7 @@ namespace std_copy {
              * @param val The value used to fill the array.
             */
             void fill(const_reference val) {
-                std::fill_n(internalBuffer_, size_, val);
+                std_copy::fill_n(internalBuffer_, size_, val);
             }
             /**
              * This function returns the number of elements
@@ -162,7 +162,7 @@ namespace std_copy {
              * This function is new.
              * @param elem The element to add to the end of the array.
             */
-            void push_back(const_reference elem) {
+            void add(const_reference elem) {
                 if (size_ == 0) {
                     throw std::out_of_range("Array was declared with size 0; cannot add any more elements");
                 }
@@ -177,7 +177,7 @@ namespace std_copy {
              * the array. This function is new.
              * @param elem The element to add to the end of the array.
             */
-            void push_front(const_reference elem) {
+            void add_front(const_reference elem) {
                 if (size_ == 0) {
                     throw std::out_of_range("Array was declared with size 0; cannot add any more elements");
                 }
@@ -186,7 +186,7 @@ namespace std_copy {
                 }
                 pointer temp = internalBuffer_;
                 internalBuffer_[0] = elem;
-                std::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
+                std_copy::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
                 numberOfElements_++;
             }
             /**
@@ -197,7 +197,7 @@ namespace std_copy {
                 if (numberOfElements_ == 0) return;
                 pointer temp = internalBuffer_;
                 numberOfElements_--;
-                std::copy(temp, temp + numberOfElements_, internalBuffer_);
+                std_copy::copy(temp, temp + numberOfElements_, internalBuffer_);
             }
             /**
              * This function removes the element at the beginning of the vector.
