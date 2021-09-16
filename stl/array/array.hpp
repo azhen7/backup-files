@@ -55,11 +55,11 @@ namespace std_copy {
 
             template <class ...Args>
             array(Args ...args)
-                : size_(s)
+                : size_(s), 
+                numberOfElements_(sizeof...(Args))
             {
                 internalBuffer_ = new value_type[s];
                 size_type i = 0;
-                numberOfElements_ = sizeof...(Args);
                 if (sizeof...(Args) > size_) {
                     throw std::runtime_error("Too many elements in initialization list");
                 }
@@ -67,18 +67,18 @@ namespace std_copy {
             }
 
             array(const array_type& copy)
-                : size_(s)
+                : size_(s),
+                numberOfElements_(copy.numberOfElements_)
             {
                 internalBuffer_ = new value_type[size_];
-                numberOfElements_ = copy.numberOfElements_;
                 std_copy::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
 
             array(array_type&& copy)
-                : size_(s)
+                : size_(s), 
+                numberOfElements_(copy.numberOfElements_)
             {
                 internalBuffer_ = copy.internalBuffer_;
-                numberOfElements_ = copy.numberOfElements_;
             }
 
             virtual ~array() = default;

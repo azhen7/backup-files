@@ -2,15 +2,16 @@
 #include <iostream>
 #include <algorithm>
 
-bool func(int elem, int elem2) {
-    return elem > elem2;
+bool func(int elem) {
+    return elem == 5;
 }
 
 int main() {
     int arr[10] = {1, 2, 3, 4, 6, 7, 8};
-    int arr2[6];
-    int arr3[4] = {4, 5, 6, 7};
+    int arr2[10];
 
-    auto k = std::find_first_of(arr, &arr[7], arr3, arr3 + 4);
-    std::cout << *k << "\n";
+    std_copy::copy_backward(arr, &arr[9], &arr2[9]);
+    for (int i = 0; i < 10; i++) {
+        std::cout << arr2[i] << "\n";
+    }
 }

@@ -1,7 +1,8 @@
-#include "pair.hpp"
-
 #ifndef _STD_COPY_ALGORITHM
 #define _STD_COPY_ALGORITHM
+
+#include "pair.hpp"
+#include "move.hpp"
 
 namespace std_copy {
     /**
@@ -122,14 +123,13 @@ namespace std_copy {
      * This function copies the elements in the range [first, last) to result.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
-     * @param result The start of where to copy the elements to.
+     * @param result An iterator to the initial position of the range where the elements 
+     * are stored.
     */
     template <class InputIt, class OutputIt>
     OutputIt copy(InputIt first, InputIt last, OutputIt result) {
         while (first != last) {
-            *result = *first;
-            first++;
-            result++;
+            *result++ = *first++;
         }
         return result;
     }
@@ -137,23 +137,23 @@ namespace std_copy {
      * This function copies the first n elements starting from first to result.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param n The number of elements after first to assign.
-     * @param result The start of where to copy the elements to.
+     * @param result An iterator to the initial position of the range where the elements 
+     * are stored.
     */
     template <class InputIt, class Size, class OutputIt>
     OutputIt copy_n(InputIt first, Size n, OutputIt result) {
         for (int i = 0; i < n; i++) {
-            *result = *first;
-            first++;
-            result++;
+            *result++ = *first++;
         }
         return result;
     }
     /**
      * This function copies the elements in the range [first, last) for which func 
-     * evaluates to true.
+     * evaluates to true to result.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
-     * @param result The start of where to copy the elements to.
+     * @param result An iterator to the initial position of the range where the elements 
+     * are stored.
      * @param func The function which accepts an element as argument and returns either true 
      * and false. The element is copied if true is returned.
     */
@@ -161,10 +161,24 @@ namespace std_copy {
     OutputIt copy_if(InputIt first, InputIt last, OutputIt result, Function func) {
         while (first != last) {
             if (func(*first)) {
-                *result = *first;
-                result++;
+                *result++ = *first;
             }
             first++;
+        }
+        return result;
+    }
+    /**
+     * This function copies the elements in the range [first, second) in backwards 
+     * order to the range ending at result.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the elements 
+     * are stored.
+    */
+    template <class InputIt, class OutputIt>
+    OutputIt copy_backward(InputIt first, InputIt last, OutputIt result) {
+        while (first != last) {
+            *(--result) = *(--last);
         }
         return result;
     }
@@ -760,8 +774,8 @@ namespace std_copy {
      * function to compare the elements against val. 
      * If count elements (all equal to val) are found consecutively in the provided range, an iterator to the first 
      * element is returned, and otherwise, last is returned.
-     * @param first1 An iterator to the initial position of the first sequence of elements.
-     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first An iterator to the initial position of the first sequence of elements.
+     * @param last An iterator to the final position of the first sequence of elements.
      * @param count The number of elements that compare equal to val to search for.
      * @param val The value that the elements get compared against.
      * @param comp The function used to compare the elements against val.
@@ -816,10 +830,25 @@ namespace std_copy {
     template <class InputIt, class Function>
     Function for_each(InputIt first, InputIt last, Function fn) {
         while (first != last) {
-            fn(first);
+            fn(*first);
             first++;
         }
-        return static_cast<Function&&>(fn);
+        return move(fn);
+    }
+    /**
+     * This function invokes a provided function on the first n elements in the range starting 
+     * from first.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param n The number of elements to invoke the function on.
+     * @param fn The function that is invoked on the elements.
+    */
+    template <class InputIt, class Size, class Function>
+    InputIt for_each_n(InputIt first, Size n, Function fn) {
+        for (int i = 0; i < n; i++) {
+            fn(*first);
+            first++;
+        }
+        return first;
     }
     /**
      * This function invokes a function on the elements in the range [first, last) and stores 
@@ -852,10 +881,182 @@ namespace std_copy {
     template <class InputIt, class OutputIt, class Function>
     OutputIt transform(InputIt first1, InputIt last1, InputIt first2, OutputIt result, Function binary_fn) {
         while (first1 != last1) {
-            *result = binary_fn(*first1, *first2);
+            *result++ = binary_fn(*first1, *first2);
             first1++;
             first2++;
-            result++;
+        }
+        return result;
+    }
+    /**
+     * This function removes all the elements in the range [first, second) that compares equal to val.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param val The value used to compare against the elements in the range.
+    */
+    template <class InputIt, class T>
+    InputIt remove(InputIt first, InputIt last, const T& val) {
+        for (InputIt it = first; it != last; it++) {
+            if (*it != val) {
+                *first++ = move(*it);
+            }
+        }
+        return first;
+    }
+    /**
+     * This function removes all the elements in the range [first, second) for which pred returns true.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param pred The function that is invoked on each element in the range.
+    */
+    template <class InputIt, class Function>
+    InputIt remove_if(InputIt first, InputIt last, Function pred) {
+        for (InputIt it = first; it != last; it++) {
+            if (!pred(*it)) {
+                *first++ = move(*it);
+            }
+        }
+        return first;
+    }
+    /**
+     * This function copies the elements from the range [first, last) to the range beginning at result 
+     * that do not compare equal to val.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the elements are stored.
+     * @param val The value which the elements are compared against.
+    */
+    template <class InputIt, class OutputIt, class T>
+    OutputIt remove_copy(InputIt first, InputIt last, OutputIt result, const T& val) {
+        while (first != last) {
+            if (*first != val) {
+                *result++ = *first;
+            }
+            first++;
+        }
+        return result;
+    }
+    /**
+     * This function copies the elements from the range [first, last) to the range beginning at result 
+     * for which pred returns false.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the elements are stored.
+     * @param pred The function that is invoked on each of the elements.
+    */
+    template <class InputIt, class OutputIt, class Function>
+    OutputIt remove_copy_if(InputIt first, InputIt last, OutputIt result, Function pred) {
+        while (first != last) {
+            if (!pred(*first)) {
+                *result++ = *first;
+            }
+            first++;
+        }
+        return result;
+    }
+    /**
+     * This function searches the elements in the range [first, last) for two adjacent elements which are 
+     * equal. This function invokes operator==.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+    */
+    template <class InputIt>
+    InputIt adjacent_find(InputIt first, InputIt last) {
+        while (first != last) {
+            if (*first == *(first + 1)) {
+                return first;
+            }
+            first++;
+        }
+        return last;
+    }
+    /**
+     * This function searches the elements in the range [first, last) for two adjacent elements which are 
+     * equal. This function invokes a provided function to compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param func The function used to compare the elements.
+    */
+    template <class InputIt, class Function>
+    InputIt adjacent_find(InputIt first, InputIt last, Function func) {
+        while (first != last) {
+            if (func(*first, *(first + 1))) {
+                return first;
+            }
+            first++;
+        }
+        return last;
+    }
+    /**
+     * This function replaces all the elements in the range [first, last) that compare equal to old_val 
+     * with new_val. This function invokes operator==.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param old_val The value that gets replaced with new_val.
+     * @param new_val The value that replaces old_val. 
+    */
+    template <class InputIt, class T>
+    void replace(InputIt first, InputIt last, const T& old_val, const T& new_val) {
+        while (first != last) {
+            if (*first == old_val) {
+                *first = new_val;
+            }
+            first++;
+        }
+    }
+    /**
+     * This function replaces all the elements in the range [first, last) that compare equal to old_val 
+     * with new_val. This function invokes a provided function to compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param func The function that determines which elements get replaced with new_val.
+     * @param new_val The value that replaces all the elements for which func returns true.
+    */
+    template <class InputIt, class Function, class T>
+    void replace_if(InputIt first, InputIt last, Function func, const T& new_val) {
+        while (first != last) {
+            if (func(*first)) {
+                *first = new_val;
+            }
+            first++;
+        }
+    }
+    /**
+     * This function copies the elements in the range [first, last) to the range starting at result, 
+     * replacing all the elements that are equal to old_val with new_val. This function invokes 
+     * operator==.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the elements are stored.
+     * @param old_val The value that gets replaced with new_val.
+     * @param new_val The value that replaces old_val.
+    */
+    template <class InputIt, class OutputIt, class T>
+    OutputIt replace_copy(InputIt first, InputIt last, OutputIt result, const T& old_val, 
+                            const T& new_val) 
+    {
+        while (first != last) {
+            *result++ = (*first == old_val) ? new_val : *first;
+            first++;
+        }
+        return result;
+    }
+    /**
+     * This function copies the elements in the range [first, last) to the range starting at result, 
+     * replacing all the elements for which func returns true with new_val. This function invokes 
+     * a provided function to compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the elements are stored.
+     * @param func The function that determines which elements get replaced with new_val.
+     * @param new_val The value that replaces all the elements for which func returns true.
+    */
+    template <class InputIt, class OutputIt, class Function, class T>
+    OutputIt replace_copy_if(InputIt first, InputIt last, OutputIt result, Function func, 
+                            const T& new_val) 
+    {
+        while (first != last) {
+            *result++ = func(*first) ? new_val : *first;
+            first++;
         }
         return result;
     }
