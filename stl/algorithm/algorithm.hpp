@@ -1060,6 +1060,11 @@ namespace std_copy {
         }
         return result;
     }
+    /**
+     * This function shifts the elements in the range [first, last) left by n places.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+    */
 }
 
 #endif /* _STD_COPY_ALGORITHM */

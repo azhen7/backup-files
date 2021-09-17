@@ -36,17 +36,15 @@ namespace std_copy {
 
             pointer internalBuffer_;
             size_type numberOfElements_;
-            const size_type size_;
+            const size_type size_{s};
 
         public:
-            array() 
-                : size_(s)
+            array()
             {
                 numberOfElements_ = 0;
                 internalBuffer_ = new value_type[size_];
             }
             array(const_reference val)
-                : size_(s)
             {
                 internalBuffer_ = new value_type[s];
                 numberOfElements_ = s;
@@ -55,8 +53,7 @@ namespace std_copy {
 
             template <class ...Args>
             array(Args ...args)
-                : size_(s), 
-                numberOfElements_(sizeof...(Args))
+                : numberOfElements_(sizeof...(Args))
             {
                 internalBuffer_ = new value_type[s];
                 size_type i = 0;
@@ -67,16 +64,14 @@ namespace std_copy {
             }
 
             array(const array_type& copy)
-                : size_(s),
-                numberOfElements_(copy.numberOfElements_)
+                : numberOfElements_(copy.numberOfElements_)
             {
                 internalBuffer_ = new value_type[size_];
                 std_copy::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
             }
 
             array(array_type&& copy)
-                : size_(s), 
-                numberOfElements_(copy.numberOfElements_)
+                : numberOfElements_(copy.numberOfElements_)
             {
                 internalBuffer_ = copy.internalBuffer_;
             }
