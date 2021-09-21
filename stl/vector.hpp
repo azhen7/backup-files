@@ -20,16 +20,20 @@ namespace std_copy {
     */
     template <class T, class Alloc = std::allocator<T>>
     class vector {
+        private:
+            typedef iterator<vector<T, Alloc>>                      iterator_type;
         public:
             //typedefs
             typedef T                                               value_type;
             typedef T*                                              pointer;
+            typedef const T*                                        const_pointer;
             typedef T&                                              reference;
             typedef const T&                                        const_reference;
             typedef std::size_t                                     size_type;
+            typedef std::ptrdiff_t                                  difference_type;
             typedef Alloc                                           allocator_type;
-            typedef iterator_type<vector<T, Alloc>>                 iterator;
-            typedef const iterator_type<vector<T, Alloc>>           const_iterator;
+            typedef iterator_type                                   iterator;
+            typedef const iterator                                  const_iterator;
 
         private:
             typedef vector<value_type, allocator_type>                  vector_type;
@@ -263,7 +267,7 @@ namespace std_copy {
             */
             reference front() {
                 if (numberOfElements_ == 0) {
-                    throw std::runtime_error("Cannot access element in empty vector");
+                    throw std::length_error("Cannot access element in empty vector");
                 }
                 return internalBuffer_[0];
             }
@@ -274,7 +278,7 @@ namespace std_copy {
             */
             reference back() {
                 if (numberOfElements_ == 0) {
-                    throw std::runtime_error("Cannot access element in empty vector");
+                    throw std::length_error("Cannot access element in empty vector");
                 }
                 return internalBuffer_[numberOfElements_ - 1];
             }
@@ -345,33 +349,27 @@ namespace std_copy {
             }
             /**
              * The function erases the elements in the range [index1, index2). Note that index1 and 
-             * index2 are integers.
+             * index2 are integers. 
+             * This function is new.
              * @param index1 The start of the block to erase.
              * @param index2 The end of the block to erase.
             */
             vector_type& erase(size_type index1, size_type index2) {
                 if (index1 >= numberOfElements_) {
-                    std::cout << "index1 (which is " << index1
-                              << ") >= this->size() (which is "
-                              << numberOfElements_ << ")\n";
-                    exit(EXIT_FAILURE);
+                    std::string err = "index1 (which is " + std::to_string(index1) 
+                                      + ") >= this->size() (which is " + 
+                                      std::to_string(numberOfElements_) + ")";
+                    throw std::out_of_range(err);
                 }
                 if (index2 >= numberOfElements_) {
-                    std::cout << "index2 (which is " << index2
-                              << ") >= this->size() (which is "
-                              << numberOfElements_ << ")\n";
-                    exit(EXIT_FAILURE);
-                }
-                if (index1 < 0) {
-                    std::cout << "index1 (which is " << index1 << ") < 0\n";
-                    exit(EXIT_FAILURE);
-                }
-                if (index2 < 0) {
-                    std::cout << "index2 (which is " << index2 << ") < 0\n";
-                    exit(EXIT_FAILURE);
+                    std::string err = "index2 (which is " + std::to_string(index2) 
+                                      + ") >= this->size() (which is " + 
+                                      std::to_string(numberOfElements_) + ")";
+                    throw std::out_of_range(err);
                 }
                 pointer temp = internalBuffer_;
-                internalBuffer_ = allocator.allocate(capacity_);
+                size_type newCapacity = calculateSmallestPowerOfTwoLargerThan(numberOfElements_ - index2 + index1);
+                internalBuffer_ = allocator.allocate(newCapacity);
                 for (int i = 0, j = 0; i < numberOfElements_; i++) {
                     if (i < index1 || i >= index2) {
                         internalBuffer_[j] = temp[i];
@@ -390,7 +388,20 @@ namespace std_copy {
              * @param end The end of the block to erase.
             */
             vector_type& erase(iterator start, iterator end) {
-                
+                pointer temp = internalBuffer_;
+                size_type newCapacity = calculateSmallestPowerOfTwoLargerThan(numberOfElements_ - distance(end, start));
+                internalBuffer_ = allocator.allocate(newCapacity);
+                int j = 0;
+                for (iterator it = iterator(temp); it != iterator(temp + numberOfElements_); it++) {
+                    if (it < start || it >= end) {
+                        internalBuffer_[j] = *it;
+                        j++;
+                    }
+                }
+                numberOfElements_ -= start - end;
+                allocator.deallocate(temp, capacity_);
+                capacity_ = calculateSmallestPowerOfTwoLargerThan(numberOfElements_);
+                return *this;
             }
     };
     //Overloaded == operator
@@ -435,6 +446,17 @@ namespace std_copy {
     template <class T, class Alloc = std::allocator<T>>
     bool operator>=(vector<T, Alloc> lhs, vector<T, Alloc> rhs) {
         return !(lhs < rhs);
+    }
+    /**
+     * This function swaps the contents of two vectors.
+     * @param lhs The first vector.
+     * @param rhs The second vector.
+    */
+    template <class T, class Alloc = std::allocator<T>>
+    constexpr void swap(vector<T, Alloc>& lhs, vector<T, Alloc>& rhs) {
+        for (int i = 0; i < lhs.size(); i++) {
+
+        }
     }
 }
 

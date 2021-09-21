@@ -4,3 +4,5 @@
 # Ignore all exe files
 *.exe
 
+# Ignore all cpp files
+*.cpp

@@ -25,9 +25,11 @@ namespace std_copy {
             //typdefs
             typedef T                                               value_type;
             typedef T*                                              pointer;
+            typedef const T*                                        const_pointer;
             typedef T&                                              reference;
             typedef const T&                                        const_reference;
             typedef std::size_t                                     size_type;
+            typedef std::ptrdiff_t                                  difference_type;
             typedef iterator_type<array<T, s>>                      iterator;
             typedef const iterator_type<array<T, s>>                const_iterator;
             

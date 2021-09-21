@@ -1064,7 +1064,73 @@ namespace std_copy {
      * This function shifts the elements in the range [first, last) left by n places.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
+     * @param n The number of places to shift left by.
     */
+    template <class InputIt>
+    InputIt shift_left(InputIt first, InputIt last, long long n) {
+        if (n == 0 || n > last - first) {
+            return first;
+        }
+        for (int i = 0; i < n; i++) {
+            *(first + i + n) = move(*(first + i));
+        }
+        return first + (last - first - n);
+    }
+    /**
+     * This function shifts the elements in the range [first, last) right by n places.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param n The number of places to shift right by.
+    */
+    template <class InputIt>
+    InputIt shift_right(InputIt first, InputIt last, long long n) {
+        if (n == 0 || n > last - first) {
+            return first;
+        }
+        for (int i = n; i >= 0; i--) {
+            *(first + n) = move(*(first + (n << 1)));
+        }
+        return first + n;
+    }
+    /**
+     * This function moves the elements from the range [first, last) to the range 
+     * starting at result.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the function results 
+     * are stored.
+    */
+    template <class InputIt, class OutputIt>
+    OutputIt move(InputIt first, InputIt last, OutputIt result) {
+        while (first != last) {
+            *result++ = move(*first++);
+        }
+        return result;
+    }
+    /**
+     * This function moves the elements from the range [first, last) to the range 
+     * starting at result in backwards order.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the function results 
+     * are stored.
+    */
+    template <class InputIt, class OutputIt>
+    OutputIt move_backward(InputIt first, InputIt last, OutputIt result) {
+        while (first != last) {
+            *(--result) = move(*(--last));
+        }
+        return result;
+    }
+    /**
+     * This function swaps the values of two iterators.
+     * @param a The first iterator.
+     * @param b The second iterator.
+    */
+    template <class InputIt1, class InputIt2>
+    void iter_swap(InputIt1 a, InputIt2 b) {
+        
+    }
 }
 
 #endif /* _STD_COPY_ALGORITHM */

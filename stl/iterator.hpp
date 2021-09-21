@@ -5,26 +5,37 @@
 
 namespace std_copy {
     template <class T>
-    class iterator_type {
-        public:
-            //typedefs
+    struct iterator_traits {
+        //typedefs
+        typedef typename T::value_type              value_type;
+        typedef typename T::pointer                 pointer;
+        typedef typename T::const_pointer           const_pointer;
+        typedef typename T::reference               reference;
+        typedef typename T::const_reference         const_reference;
+        typedef typename T::size_type               size_type;
+        typedef typename T::difference_type         difference_type;
+    };
+    template <class T>
+    class iterator {
+        private:
             typedef typename T::value_type              value_type;
             typedef typename T::pointer                 pointer;
+            typedef typename T::const_pointer           const_pointer;
             typedef typename T::reference               reference;
             typedef typename T::const_reference         const_reference;
-
-        private:
-            typedef iterator_type<T>                    iterator_t;
+            typedef typename T::size_type               size_type;
+            typedef typename T::difference_type         difference_type;
+            typedef iterator<T>                         iterator_t;
             typedef iterator_t&                         iterator_reference;
             typedef const iterator_t&                   const_iterator_reference;
 
             pointer internalPtr_;
 
         public:
-            iterator_type(pointer ptr = nullptr)
+            iterator(pointer ptr = nullptr)
                 : internalPtr_(ptr) {}
 
-            iterator_type(const_iterator_reference it)
+            iterator(const_iterator_reference it)
                 : internalPtr_(it.internalPtr_) {}
             
             /**
@@ -111,7 +122,7 @@ namespace std_copy {
             /**
              * Overloaded - operator
             */
-            std::ptrdiff_t operator-(const iterator_t& it) {
+            std::ptrdiff_t operator-(const_iterator_reference it) {
                 return internalPtr_ - it.internalPtr_;
             }
             /**
@@ -157,7 +168,6 @@ namespace std_copy {
     */
     template <class Iterator>
     std::ptrdiff_t distance(Iterator& first, Iterator& second) {
-        std::ptrdiff_t count = 0;
         return second - first;
     }
     /**

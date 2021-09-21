@@ -18,6 +18,11 @@ namespace std_copy {
             second(p.second)
         {
         }
+        pair (pair&& p)
+            : first(p.first),
+            second(p.second)
+        {
+        }
 
         void swap(pair& p) {
             T1 temp = first;

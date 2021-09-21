@@ -12,16 +12,18 @@ namespace std_copy {
     template <class T1, class T2, class Alloc = std::allocator<pair<T1, T2>>>
     class map {
         public:
-            typedef T1                                      key_type;
-            typedef T2                                      mapped_type;
-            typedef pair<T1, T2>                            value_type;
-            typedef value_type*                             pointer;
-            typedef value_type&                             reference;
-            typedef const value_type&                       const_reference;
-            typedef Alloc                                   allocator_type;
-            typedef std::size_t                             size_type;
-            typedef iterator_type<map<T1, T2, Alloc>>       iterator;
-            typedef const iterator_type<map<T1, T2, Alloc>> const_iterator;
+            typedef T1                                          key_type;
+            typedef T2                                          mapped_type;
+            typedef pair<T1, T2>                                value_type;
+            typedef value_type*                                 pointer;
+            typedef const value_type*                           const_pointer;
+            typedef value_type&                                 reference;
+            typedef const value_type&                           const_reference;
+            typedef Alloc                                       allocator_type;
+            typedef std::size_t                                 size_type;
+            typedef std::ptrdiff_t                              difference_type;
+            typedef iterator_type<map<T1, T2, Alloc>>           iterator;
+            typedef const iterator_type<map<T1, T2, Alloc>>     const_iterator;
         
         private:
             typedef map<T1, T2, Alloc>                      map_type;
