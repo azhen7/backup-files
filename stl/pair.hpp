@@ -44,6 +44,12 @@ namespace std_copy {
         pair<T1, T2> p(f, s);
         return p;
     }
+    template <class T1, class T2>
+    void swap(pair<T1, T2> lhs, pair<T1, T2> rhs) {
+        T1 temp = lhs.first;
+        lhs.first = rhs.first;
+        rhs.first = temp;
+    }
 
     /**
      * Check if two pair objects are equal.
@@ -63,17 +69,12 @@ namespace std_copy {
      * Check if one pair object is less than the other one.
     */
     template <class T1, class T2>
-    bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) {
-        if (lhs.first < rhs.first)
-            return true;
-        else if (lhs.first < rhs.first)
-            return false;
-        else {
-            if (lhs.second < rhs.second)
-                return true;
-            else
-                return false;
-        }
+    bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) 
+    {
+        if (lhs.first != rhs.first)
+            return (lhs.first < rhs.first);
+        else
+            return (lhs.second < rhs.second);
     }
     /**
      * Check if one pair object is less than or equal to the other pair 

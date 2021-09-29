@@ -1,8 +1,6 @@
 #ifndef _STD_COPY_ITERATOR
 #define _STD_COPY_ITERATOR
 
-#include <cstddef>
-
 namespace std_copy {
     template <class T>
     struct iterator_traits {
@@ -15,6 +13,7 @@ namespace std_copy {
         typedef typename T::size_type               size_type;
         typedef typename T::difference_type         difference_type;
     };
+    
     template <class T>
     class iterator {
         private:
@@ -110,19 +109,25 @@ namespace std_copy {
             /**
              * Overloaded + operator
             */
-            std::ptrdiff_t operator+(std::ptrdiff_t n) {
-                return internalPtr_ + n;
+            iterator_t operator+(difference_type n) {
+                return iterator_t(internalPtr_ + n);
             }
             /**
              * Overloaded -= operator
             */
-            void operator-=(std::size_t n) {
+            void operator-=(size_type n) {
                 internalPtr_ -= n;
             }
             /**
-             * Overloaded - operator
+             * Overloaded - operator; decrements the iterator by a certain amount.
             */
-            std::ptrdiff_t operator-(const_iterator_reference it) {
+            iterator_t operator-(difference_type n) {
+                return iterator_t(internalPtr_ - n);
+            }
+            /**
+             * Overloaded - operator; finds the distance between two iterators.
+            */
+            difference_type operator-(const_iterator_reference it) {
                 return internalPtr_ - it.internalPtr_;
             }
             /**
@@ -167,8 +172,13 @@ namespace std_copy {
      * @param second The second iterator.
     */
     template <class Iterator>
-    std::ptrdiff_t distance(Iterator& first, Iterator& second) {
-        return second - first;
+    long long distance(Iterator start, Iterator last) {
+        long long n = 0;
+        while (start != last) {
+            start++;
+            n++;
+        }
+        return n;
     }
     /**
      * This function returns an iterator to the element n positions 
@@ -177,10 +187,8 @@ namespace std_copy {
      * @param n The amount to add to the iterator.
     */
     template <class Iterator>
-    Iterator next(Iterator& it, long long n = 1) {
-        Iterator newIterator = it;
-        newIterator += n;
-        return newIterator;
+    Iterator next(Iterator it, long long n = 1) {
+        return it + n;
     }
     /**
      * This function returns an iterator to the element n positions 
@@ -189,10 +197,8 @@ namespace std_copy {
      * @param n The amount to subtract from the iterator.
     */
     template <class Iterator>
-    Iterator prev(Iterator& it, long long n = 1) {
-        Iterator newIterator = it;
-        newIterator -= n;
-        return newIterator;
+    Iterator prev(Iterator it, long long n = 1) {
+        return it - n;
     }
 }
 

@@ -1,8 +1,7 @@
 #ifndef _STD_COPY_ALGORITHM
 #define _STD_COPY_ALGORITHM
 
-#include "pair.hpp"
-#include "move.hpp"
+#include "utility.hpp"
 
 namespace std_copy {
     /**
@@ -1123,13 +1122,95 @@ namespace std_copy {
         return result;
     }
     /**
+     * This function copies the elements from [first, last) to a new range, for which a 
+     * past-the-end iterator gets returned. This function invokes operator== to compare the 
+     * elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+    */
+    template <class InputIt>
+    InputIt unique(InputIt first, InputIt last) {
+        InputIt result = first;
+        while (first != last) {
+            if (!(*result == *first) && result != first) {
+                *result = move(*first);
+                result++;
+            }
+            first++;
+        }
+        return ++result;
+    }
+    /**
+     * This function copies the elements from [first, last) to a new range, for which a 
+     * past-the-end iterator gets returned. This function invokes a provided function to 
+     * compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param comp The function used to compare the elements.
+    */
+    template <class InputIt, class Compare>
+    InputIt unique(InputIt first, InputIt last, Compare comp) {
+        InputIt result = first;
+        while (first != last) {
+            if (!comp(*result, *first) && result != first) {
+                *result = move(*first);
+                result++;
+            }
+            first++;
+        }
+        return ++result;
+    }
+    /**
+     * This function copies the elements from [first, last) to the range starting at 
+     * result. This function invokes operator== to compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the function results 
+     * are stored.
+    */
+    template <class InputIt, class OutputIt>
+    OutputIt unique_copy(InputIt first, InputIt last, OutputIt result) {
+        if (first == last) 
+            return result;
+            
+        while (first != last) {
+            if (!(*(first + 1) == *first) || first + 1 == last) {
+                *result++ = *first;
+            }
+            first++;
+        }
+        return ++result;
+    }
+    /**
+     * This function copies the elements from [first, last) to the range starting at 
+     * result. This function invokes a provided function to compare the elements.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param result An iterator to the initial position of the range where the function results 
+     * are stored.
+     * @param comp The function used to compare the elements.
+    */
+    template <class InputIt, class OutputIt, class Compare>
+    OutputIt unique_copy(InputIt first, InputIt last, OutputIt result, Compare comp) {
+        if (first == last) 
+            return result;
+
+        while (first != last) {
+            if (!comp(*(first + 1), *first) || first + 1 == last) {
+                *result++ = *first;
+            }
+            first++;
+        }
+        return ++result;
+    }
+    /**
      * This function swaps the values of two iterators.
      * @param a The first iterator.
      * @param b The second iterator.
     */
     template <class InputIt1, class InputIt2>
     void iter_swap(InputIt1 a, InputIt2 b) {
-        
+        swap(*a, *b);
     }
 }
 

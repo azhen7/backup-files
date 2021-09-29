@@ -21,6 +21,8 @@ namespace std_copy {
     */
     template <class T, std::size_t s>
     class array {
+        private:
+            typedef iterator<array<T, s>>                           iterator_type;
         public:
             //typdefs
             typedef T                                               value_type;
@@ -30,8 +32,8 @@ namespace std_copy {
             typedef const T&                                        const_reference;
             typedef std::size_t                                     size_type;
             typedef std::ptrdiff_t                                  difference_type;
-            typedef iterator_type<array<T, s>>                      iterator;
-            typedef const iterator_type<array<T, s>>                const_iterator;
+            typedef iterator_type                                   iterator;
+            typedef const iterator_type                             const_iterator;
             
         private:
             typedef array<T, s>         array_type;
@@ -42,14 +44,15 @@ namespace std_copy {
 
         public:
             array()
+                : numberOfElements_(0),
+                internalBuffer_(new value_type[size_])
             {
-                numberOfElements_ = 0;
-                internalBuffer_ = new value_type[size_];
             }
+
             array(const_reference val)
+                : numberOfElements_(s),
+                internalBuffer_(new value_type[s])
             {
-                internalBuffer_ = new value_type[s];
-                numberOfElements_ = s;
                 std_copy::fill_n(internalBuffer_, size_, val);
             }
 
@@ -76,6 +79,17 @@ namespace std_copy {
                 : numberOfElements_(copy.numberOfElements_)
             {
                 internalBuffer_ = copy.internalBuffer_;
+            }
+
+            template <class InputIt>
+            array(InputIt start, InputIt last)
+                : numberOfElements_(distance(start, last)),
+                internalBuffer_(new value_type[s])
+            {
+                size_type i = 0;
+                while (start != last) {
+                    internalBuffer_[i++] = *start++;
+                }
             }
 
             virtual ~array() = default;

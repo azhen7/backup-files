@@ -4,9 +4,14 @@
 #include "type_traits.hpp"
 
 namespace std_copy {
+    /**
+     * This function returns an rvalue reference to the argument 
+     * passed in, allowing for efficient transportation.
+     * @param val The object to "move".
+    */
     template <class T>
-    constexpr typename remove_reference<T>::type&& move(T&& val) {
-        return static_cast<typename remove_reference<T>::type&&>(val);
+    constexpr remove_reference_t<T>&& move(T&& val) {
+        return static_cast<remove_reference_t<T>&&>(val);
     }
 }
 

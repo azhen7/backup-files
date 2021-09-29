@@ -32,4 +32,4 @@ namespace std_copy {
     }
 }
 
-#endif
+#endif /* _STD_COPY_UTILITY */
