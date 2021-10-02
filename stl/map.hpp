@@ -22,8 +22,8 @@ namespace std_copy {
             typedef value_type&                                 reference;
             typedef const value_type&                           const_reference;
             typedef Alloc                                       allocator_type;
-            typedef std::size_t                                 size_type;
-            typedef std::ptrdiff_t                              difference_type;
+            typedef unsigned long long                          size_type;
+            typedef long long                                   difference_type;
             typedef iterator_type                               iterator;
             typedef const iterator_type                         const_iterator;
         
@@ -274,6 +274,23 @@ namespace std_copy {
                         return true;
                 }
                 return false;
+            }
+            /**
+             * This function swaps the contents of *this with s.
+             * @param s The map to swap with.
+            */
+            void swap(const map_type& s) {
+                pointer temp = s.internalBuffer_;
+                s.internalBuffer_ = internalBuffer_;
+                internalBuffer_ = temp;
+
+                size_type tempCapacity = s.capacity_;
+                s.capacity_ = capacity_;
+                capacity_ = tempCapacity;
+
+                size_type tempNumberOfElems = s.numberOfElements_;
+                s.numberOfElements_ = numberOfElements_;
+                numberOfElements_ = tempNumberOfElems;
             }
     };
 }

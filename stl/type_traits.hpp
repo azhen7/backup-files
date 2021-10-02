@@ -1,8 +1,6 @@
 #ifndef _STD_COPY_TYPE_TRAITS
 #define _STD_COPY_TYPE_TRAITS
 
-#include <type_traits>
-
 namespace std_copy {
     //integral_constant
     template <class T, T v>
@@ -249,6 +247,20 @@ namespace std_copy {
 
     //Type properties
 
+    //is_void
+    template <class T>
+    struct is_void
+        : false_type
+    {
+    };
+    template <>
+    struct is_void<void>
+        : true_type
+    {
+    };
+    template <class T>
+    using is_void_v = is_void<T>::value;
+
     //is_array
     template <class T>
     struct is_array
@@ -382,6 +394,16 @@ namespace std_copy {
     struct conditional<false, ifTrue, ifFalse> {
         typedef ifFalse  type;
     };
+
+    //Operations of traits
+
+    //negation
+    template <class B>
+    struct negation
+        : bool_constant<!bool(B::value)>
+    {
+    };
+
 }
 
 #endif /* _STD_COPY_TYPE_TRAITS */

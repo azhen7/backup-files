@@ -30,8 +30,8 @@ namespace std_copy {
             typedef const T*                                        const_pointer;
             typedef T&                                              reference;
             typedef const T&                                        const_reference;
-            typedef std::size_t                                     size_type;
-            typedef std::ptrdiff_t                                  difference_type;
+            typedef unsigned long long                              size_type;
+            typedef long long                                       difference_type;
             typedef iterator_type                                   iterator;
             typedef const iterator_type                             const_iterator;
             

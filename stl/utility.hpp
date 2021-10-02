@@ -12,9 +12,9 @@ namespace std_copy {
     */
     template <class T>
     void swap(T& a, T& b) {
-        T temp = a;
-        a = b;
-        b = temp;
+        T temp = move(a);
+        a = move(b);
+        b = move(temp);
     }
     /**
      * This function swaps the values of the elements of 
@@ -25,9 +25,9 @@ namespace std_copy {
     template <class T, unsigned long long N>
     void swap(T (&a)[N], T (&b)[N]) {
         for (unsigned long long i = 0; i < N; i++) {
-            T temp = a[i];
-            a[i] = b[i];
-            b[i] = temp;
+            T temp = move(a[i]);
+            a[i] = move(b[i]);
+            b[i] = move(temp);
         }
     }
 }

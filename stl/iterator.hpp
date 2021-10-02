@@ -1,6 +1,8 @@
 #ifndef _STD_COPY_ITERATOR
 #define _STD_COPY_ITERATOR
 
+#include <iostream>
+
 namespace std_copy {
     template <class T>
     struct iterator_traits {
@@ -187,7 +189,7 @@ namespace std_copy {
      * @param n The amount to add to the iterator.
     */
     template <class Iterator>
-    Iterator next(Iterator it, long long n = 1) {
+    Iterator next(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1) {
         return it + n;
     }
     /**
@@ -197,7 +199,7 @@ namespace std_copy {
      * @param n The amount to subtract from the iterator.
     */
     template <class Iterator>
-    Iterator prev(Iterator it, long long n = 1) {
+    Iterator prev(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1) {
         return it - n;
     }
 }
