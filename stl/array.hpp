@@ -19,7 +19,7 @@ namespace std_copy {
      * to another, and you can return them from functions. They also
      * come with a lot of helpful functions.
     */
-    template <class T, std::size_t s>
+    template <class T, unsigned long long s>
     class array {
         private:
             typedef iterator<array<T, s>>                           iterator_type;
@@ -40,19 +40,19 @@ namespace std_copy {
 
             pointer internalBuffer_;
             size_type numberOfElements_;
-            const size_type size_{s};
+            const size_type size_ = s;
 
         public:
             array()
-                : numberOfElements_(0),
-                internalBuffer_(new value_type[size_])
+                : numberOfElements_(0)
             {
+                internalBuffer_ = new value_type[s];
             }
 
             array(const_reference val)
-                : numberOfElements_(s),
-                internalBuffer_(new value_type[s])
+                : numberOfElements_(s)
             {
+                internalBuffer_ = new value_type[s];
                 std_copy::fill_n(internalBuffer_, size_, val);
             }
 
@@ -68,7 +68,7 @@ namespace std_copy {
                 (void(internalBuffer_[i++] = args), ...);
             }
 
-            array(const array_type& copy)
+            array(const array_type& copy) 
                 : numberOfElements_(copy.numberOfElements_)
             {
                 internalBuffer_ = new value_type[size_];
@@ -201,26 +201,6 @@ namespace std_copy {
                 numberOfElements_++;
             }
             /**
-             * This function removes the element at the end of
-             * the array. This function is new.
-            */
-            void pop_back() {
-                if (numberOfElements_ == 0) return;
-                pointer temp = internalBuffer_;
-                numberOfElements_--;
-                std_copy::copy(temp, temp + numberOfElements_, internalBuffer_);
-            }
-            /**
-             * This function removes the element at the beginning of the vector.
-             * If the vector is empty, a call to this function does nothing.
-             * This function is new.
-            */
-            void pop_front() {
-                if (numberOfElements_ == 0) return;
-                internalBuffer_++;
-                numberOfElements_--;
-            }
-            /**
              * This function returns a reference to 
              * the element at a specified index in 
              * the vector.
@@ -240,16 +220,8 @@ namespace std_copy {
              * indexing.
              * @param index The index of the element to retrieve.
             */
-            reference operator[](long long index) {
-                if (index < 0) {
-                    index += numberOfElements_;
-                    if (index < 0) {
-                        std::string err = "absolute value of index (which is " + std::to_string(index * -1)
-                                          + ") > this->size() (which is " + std::to_string(numberOfElements_) + ")";
-                        throw std::out_of_range(err);
-                    }
-                }
-                return this->at(index);
+            reference operator[](size_type index) {
+                return internalBuffer_[index];
             }
             /**
              * This function returns a reference to the
@@ -273,7 +245,38 @@ namespace std_copy {
                 }
                 return internalBuffer_[numberOfElements_ - 1];
             }
+            /**
+             * This function swaps the contents of *this and toSwap.
+             * @param toSwap The array to swap the contents with.
+            */
+            void swap(const array_type& toSwap) {
+                pointer temp = internalBuffer_;
+                internalBuffer_ = toSwap.internalBuffer_;
+                toSwap.internalBuffer_ = temp;
+
+                size_type tempNumberOfElems = numberOfElements_;
+                numberOfElements_ = toSwap.numberOfElements_;
+                toSwap.numberOfElements_ = tempNumberOfElems;
+            }
     };
+
+    /**
+     * This function swaps the contents of two arrays.
+     * @param lhs The first array.
+     * @param rhs The second array.
+    */
+    template <class T, unsigned long long N>
+    void swap(const array<T, N>& lhs, const array<T, N>& rhs) {
+        lhs.swap(rhs);
+    }
+    /**
+     * This function converts a builtin array to a std::array.
+     * @param arr The array to convert.
+    */
+    template <class T, unsigned long long N>
+    constexpr array<T, N> to_array(T (&arr)[N]) {
+        return array<T, N>(&arr[0], &arr[N]);
+    }
 }
 
 #endif /* _STD_COPY_ARRAY */
