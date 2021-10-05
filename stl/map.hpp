@@ -241,7 +241,7 @@ namespace std_copy {
             */
             pair<iterator, bool> insert_or_assign(const_reference pairToInsert) {
                 pair<iterator, bool> p = insert(pairToInsert);
-                if (p.second == false) {
+                if (!p.second) {
                     (*this)[p.first->first] = pairToInsert.second;
                 }
                 return p;
@@ -293,6 +293,15 @@ namespace std_copy {
                 numberOfElements_ = tempNumberOfElems;
             }
     };
+    /**
+     * This function swaps the contents of two maps.
+     * @param lhs The first map.
+     * @param rhs The second map.
+    */
+    template <class T1, class T2, class Alloc>
+    void swap(const map<T1, T2, Alloc>& lhs, const map<T1, T2, Alloc>& rhs) {
+        lhs.swap(rhs);
+    }
 }
 
 #endif /* _STD_COPY_MAP */
