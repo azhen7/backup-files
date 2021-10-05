@@ -5,6 +5,7 @@
 #include <cmath>
 #include "algorithm.hpp"
 #include <memory>
+#include "move.hpp"
 
 #include "iterator.hpp"
 
@@ -160,16 +161,16 @@ namespace std_copy {
              * This function returns the underlying
              * internal buffer of the array.
             */
-            pointer data() {
+            pointer data() const {
                 return internalBuffer_;
             }
             /**
              * This function returns the maximum capacity
              * of the vector.
             */
-            size_type max_size() {
+            size_type max_size() const {
                 return std::min(std::pow(2, (int) (8 * sizeof(size_type) / sizeof(value_type))),
-                                std::pow(2, (8 * sizeof(std::ptrdiff_t))));
+                                std::pow(2, (8 * sizeof(difference_type))));
             }
             /**
              * This functions clears the vector, i.e., 
@@ -201,6 +202,26 @@ namespace std_copy {
                 internalBuffer_[numberOfElements_++] = elem;
             }
             /**
+             * This function has the same functionality as push_back(const T&), 
+             * except it pushes rvalue references.
+             * @param elem The rvalue reference to push back.
+            */
+            void push_back(T&& elem) {
+                if (!capacity_) {
+                    internalBuffer_ = allocator.allocate(1);
+                    capacity_ = 1;
+                }
+                else if (numberOfElements_ + 1 > capacity_) {
+                    capacity_ *= 2;
+
+                    pointer temp = internalBuffer_;
+                    internalBuffer_ = allocator.allocate(capacity_);
+                    std_copy::copy(temp, temp + numberOfElements_, internalBuffer_);
+                    allocator.deallocate(temp, (int) capacity_ / 2);
+                }
+                internalBuffer_[numberOfElements_++] = move(elem);
+            }
+            /**
              * This function adds an element at the beginning of the vector. 
              * This function is new.
              * @param elem The element to add to the front of the vector.
@@ -223,17 +244,11 @@ namespace std_copy {
              * undefined behavior happens.
             */
             void pop_back() {
-                if (numberOfElements_ == 0) return;
-                pointer t = internalBuffer_;
+                if (numberOfElements_ == 0)
+                    throw std::length_error("Cannot delete element in empty vector");
+
+                (internalBuffer_ + numberOfElements_)->~T();
                 numberOfElements_--;
-
-                if (numberOfElements_ < capacity_ / 2)
-                    capacity_ /= 2;
-
-                internalBuffer_ = allocator.allocate(capacity_);
-                std_copy::copy(t, t + numberOfElements_, internalBuffer_);
-                size_type deallocateAmount = (capacity_ == 0) ? 1 : capacity_ * 2;
-                allocator.deallocate(t, deallocateAmount);
             }
             /**
              * This function removes the element at the beginning of the vector.
@@ -241,10 +256,31 @@ namespace std_copy {
              * This function is new.
             */
             void pop_front() {
-                if (numberOfElements_ == 0) return;
-                internalBuffer_++;
-                numberOfElements_--;
+                if (numberOfElements_ == 0)
+                    throw std::length_error("Cannot delete element in empty vector");
+                
+                std_copy::copy(internalBuffer_ + 1, internalBuffer_ + numberOfElements_, internalBuffer_);
+                pop_back();
             }
+            /**
+             * This function constructs elements in place.
+             * @param args The elements to construct in place.
+            */
+            template <class ...Args>
+            constexpr reference emplace_back(Args&&... args) {
+                value_type elemToAdd(forward<Args>(args)...);
+                if (numberOfElements_ + 1 > capacity_) {
+                    capacity_++;
+                    std::allocator_traits<allocator_type>::construct(allocator, internalBuffer_ + numberOfElements_, elemToAdd);
+                }
+                else {
+                    internalBuffer_[numberOfElements_] = elemToAdd;
+                }
+                numberOfElements_++;
+                
+                return back();
+            }
+
             /**
              * This function returns a reference to 
              * the element at a specified index in 
@@ -276,10 +312,11 @@ namespace std_copy {
              * @param val The value which is assigned to each element in the vector.
             */
             void assign(size_type newSize, const_reference val) {
-                allocator.deallocate(internalBuffer_, numberOfElements_);
-                for (int i = 0; i < newSize; i++) {
-                    push_back(val);
-                }
+                clear();
+                numberOfElements_ = newSize;
+                capacity_ = newSize;
+                internalBuffer_ = allocator.allocate(newSize);
+                std_copy::fill(internalBuffer_, internalBuffer_ + newSize, val);
             }
             /**
              * This function changes the capacity to
@@ -289,11 +326,13 @@ namespace std_copy {
             void reserve(size_type size) {
                 if (size <= capacity_)
                     return;
+                
+                size_type originalCapacity = capacity_;
                 capacity_ = size;
                 pointer temp = internalBuffer_;
                 internalBuffer_ = allocator.allocate(size);
                 std_copy::copy(temp, temp + numberOfElements_, internalBuffer_);
-                allocator.deallocate(temp, capacity_);
+                allocator.deallocate(temp, originalCapacity);
             }
             /**
              * This function resizes the vector to contain 
@@ -307,8 +346,8 @@ namespace std_copy {
                 size_type upTo = (n > numberOfElements_) ? numberOfElements_ : n;
                 std_copy::copy(temp, temp + upTo, internalBuffer_);
                 allocator.deallocate(temp, capacity_);
-                numberOfElements_ = n;
-                capacity_ = n;
+                numberOfElements_ = (n < numberOfElements_) ? n : numberOfElements_;
+                capacity_ = numberOfElements_;
             }
             /**
              * This function returns a reference to the
@@ -351,16 +390,6 @@ namespace std_copy {
                 return allocator;
             }
             /**
-             * This overloaded operator adds an element 
-             * onto the end of the vector. 
-             * This function is new.
-             * @param val The element to add onto the
-             * end of the vector.
-            */
-            void operator+=(const_reference val) {
-                this->push_back(val);
-            }
-            /**
              * This function returns an iterator to the front of the vector.
             */
             iterator begin() {
@@ -393,7 +422,8 @@ namespace std_copy {
              * Overloaded assignment operator.
             */
             void operator=(const vector_type& t) {
-                if (this == &t) return;
+                if (this == &t)
+                    return;
 
                 allocator.deallocate(internalBuffer_, numberOfElements_);
                 numberOfElements_ = t.numberOfElements_;
@@ -484,39 +514,35 @@ namespace std_copy {
                                       std::to_string(numberOfElements_) + ")";
                     throw std::out_of_range(err);
                 }
-                pointer temp = internalBuffer_;
-                size_type newCapacity = calculateSmallestPowerOfTwoLargerThan(numberOfElements_ - index2 + index1);
-                internalBuffer_ = allocator.allocate(newCapacity);
-                for (int i = 0, j = 0; i < numberOfElements_; i++) {
+                unsigned int j = 0;
+                for (unsigned int i = 0; i < numberOfElements_; i++) {
                     if (i < index1 || i >= index2) {
-                        internalBuffer_[j++] = temp[i];
+                        internalBuffer_[j++] = internalBuffer_[i];
                     }
                 }
+                for (; j < numberOfElements_; j++) {
+                    (internalBuffer_ + j)->~T();
+                }
                 numberOfElements_ -= index2 - index1;
-                allocator.deallocate(temp, capacity_);
-                capacity_ = calculateSmallestPowerOfTwoLargerThan(numberOfElements_);
                 return *this;
             }
             /**
              * This function erases the elements in the range [start, end). Note that start and 
              * end are iterators.
-             * @param start The start of the block to erase.
-             * @param end The end of the block to erase.
+             * @param first The start of the block to erase.
+             * @param last The end of the block to erase.
             */
-            vector_type& erase(iterator start, iterator end) {
-                pointer temp = internalBuffer_;
-                const difference_type dist = distance(start, end);
-                size_type newCapacity = calculateSmallestPowerOfTwoLargerThan(numberOfElements_ - dist);
-                internalBuffer_ = allocator.allocate(newCapacity);
-                int j = 0;
-                for (iterator it = iterator(temp); it != iterator(temp + numberOfElements_); it++) {
-                    if (it < start || it >= end) {
-                        internalBuffer_[j++] = *it;
+            vector_type& erase(iterator first, iterator last) {
+                unsigned int i = 0;
+                for (iterator it = begin(); it != end(); it++) {
+                    if (it < first || it >= last) {
+                        internalBuffer_[i++] = *it;
                     }
                 }
-                numberOfElements_ -= dist;
-                allocator.deallocate(temp, capacity_);
-                capacity_ = newCapacity;
+                for (; i < numberOfElements_; i++) {
+                    (internalBuffer_ + i)->~T();
+                }
+                numberOfElements_ -= distance(first, last);
                 return *this;
             }
             /**
@@ -524,19 +550,22 @@ namespace std_copy {
              * @param pos The iterator pointing to the element to be erased.
             */
             vector_type& erase(iterator pos) {
-                pointer temp = internalBuffer_;
-                numberOfElements_--;
-                size_type newCapacity = calculateSmallestPowerOfTwoLargerThan(numberOfElements_);
-                internalBuffer_ = allocator.allocate(newCapacity);
-                int j = 0;
-                for (iterator it = iterator(temp); it != iterator(temp + numberOfElements_); it++) {
+                unsigned int i = 0;
+                for (iterator it = begin(); it != end(); it++) {
                     if (it != pos) {
-                        internalBuffer_[j++] = *it;
+                        internalBuffer_[i++] = *it;
                     }
                 }
-                allocator.deallocate(temp, capacity_);
-                capacity_ = newCapacity;
+                pop_back();
                 return *this;
+            }
+            /**
+             * This function checks for whether the vector contains an 
+             * element. This function is new.
+             * @param elem The element to check for.
+            */
+            bool contains(const_reference elem) {
+                return find(begin(), end(), elem) != end();
             }
             /**
              * This function swaps the contents of *this and s.
@@ -567,43 +596,6 @@ namespace std_copy {
                 return false;
         }
         return true;
-    }
-    //Overloaded < operator
-    template <class T, class Alloc = std::allocator<T>>
-    bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-        int sizeL = lhs.size();
-        int sizeR = rhs.size();
-        if (sizeL != sizeR)
-            return sizeL < sizeR;
-
-        for (int i = 0; i < sizeL; i++) {
-            if (lhs.at(i) < rhs.at(i)) 
-                return true;
-
-            else if (lhs.at(i) > rhs.at(i)) 
-                return false;
-        }
-        return false;
-    }
-    //Overloaded != operator
-    template <class T, class Alloc = std::allocator<T>>
-    bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-        return !(lhs == rhs);
-    }
-    //Overloaded > operator
-    template <class T, class Alloc = std::allocator<T>>
-    bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-        return rhs < lhs;
-    }
-    //Overloaded <= operator
-    template <class T, class Alloc = std::allocator<T>>
-    bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-        return !(rhs < lhs);
-    }
-    //Overloaded >= operator
-    template <class T, class Alloc = std::allocator<T>>
-    bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
-        return !(lhs < rhs);
     }
     /**
      * This function swaps the contents of two vectors.
