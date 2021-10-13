@@ -247,6 +247,20 @@ namespace std_copy {
 
     //Type properties
 
+    //is_same
+    template <class T, class U>
+    struct is_same
+        : false_type
+    {
+    };
+    template <class T>
+    struct is_same<T, T>
+        : true_type
+    {
+    };
+    template <class T, class U>
+    using is_same_v = is_same<T, U>::value;
+
     //is_void
     template <class T>
     struct is_void
@@ -261,24 +275,35 @@ namespace std_copy {
     template <class T>
     using is_void_v = is_void<T>::value;
 
-    //is_array
+    //is_integral
     template <class T>
-    struct is_array
-        : false_type
+    struct is_integral
+        : bool_constant<
+            is_same<short, remove_cv_t<T>>::value       ||
+            is_same<int, remove_cv_t<T>>::value         ||
+            is_same<long, remove_cv_t<T>>::value        ||
+            is_same<long long, remove_cv_t<T>>::value   ||
+            is_same<bool, remove_cv_t<T>>::value        ||
+            is_same<char, remove_cv_t<T>>::value        ||
+            is_same<char8_t, remove_cv_t<T>>::value     ||
+            is_same<char16_t, remove_cv_t<T>>::value    ||
+            is_same<char32_t, remove_cv_t<T>>::value    ||
+            is_same<wchar_t, remove_cv_t<T>>::value
+        >
+    {
+    };
+
+    //is_floating_point
+    template <class T>
+    struct is_floating_point
+        : bool_constant<
+            is_same<float, remove_cv_t<T>>::value   ||
+            is_same<double, remove_cv_t<T>>::value  ||
+            is_same<long double, remove_cv_t<T>>::value>
     {
     };
     template <class T>
-    struct is_array<T[]>
-        : true_type
-    {
-    };
-    template <class T, unsigned long long N>
-    struct is_array<T[N]>
-        : true_type
-    {
-    };
-    template <class T>
-    using is_array_v = is_array<T>::value;
+    using is_floating_point_v = is_floating_point<T>::value;
 
     //is_bounded_array
     template <class T>
@@ -307,6 +332,17 @@ namespace std_copy {
     };
     template <class T>
     using is_unbounded_array_v = is_unbounded_array<T>::value;
+
+    //is_array
+    template <class T>
+    struct is_array
+        : bool_constant<
+            is_unbounded_array<T>::value ||
+            is_bounded_array<T>::value>
+    {
+    };
+    template <class T>
+    using is_array_v = is_array<T>::value;
 
     //is_lvalue_reference
     template <class T>
@@ -339,17 +375,9 @@ namespace std_copy {
     //is_reference
     template <class T>
     struct is_reference
-        : false_type
-    {
-    };
-    template <class T>
-    struct is_reference<T&>
-        : true_type
-    {
-    };
-    template <class T>
-    struct is_reference<T&&>
-        : true_type
+        : bool_constant<
+            is_lvalue_reference<T>::value ||
+            is_rvalue_reference<T>::value>
     {
     };
     template <class T>
@@ -383,6 +411,23 @@ namespace std_copy {
     template <class T>
     using is_volatile_v = is_volatile<T>::value;
 
+    //is_class
+    template <class T>
+    class is_class {
+        private:
+            typedef char     yes;
+            typedef int      no;
+
+            template <class C>
+            static yes& test(int C::*);
+
+            template <class C>
+            static no& test(...);
+        
+        public:
+            static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+    };
+
     //Miscellaneous transformations
 
     //conditional
@@ -394,8 +439,20 @@ namespace std_copy {
     struct conditional<false, ifTrue, ifFalse> {
         typedef ifFalse  type;
     };
+    template <bool B, class ifTrue, class ifFalse>
+    using conditional_t = typename conditional<B, ifTrue, ifFalse>::type;
 
-    //Operations of traits
+    //enable_if
+    template <bool B, class T = void>
+    struct enable_if {};
+    template <class T>
+    struct enable_if<true, T> {
+        typedef T   type;
+    };
+    template <bool B, class T = void>
+    using enable_if_t = typename enable_if<B, T>::type;
+
+    //Operations on traits
 
     //negation
     template <class B>

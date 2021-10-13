@@ -1,18 +1,13 @@
 #ifndef _STD_COPY_ITERATOR
 #define _STD_COPY_ITERATOR
 
-#include <iostream>
-
 namespace std_copy {
     template <class T>
     struct iterator_traits {
         //typedefs
         typedef typename T::value_type              value_type;
         typedef typename T::pointer                 pointer;
-        typedef typename T::const_pointer           const_pointer;
         typedef typename T::reference               reference;
-        typedef typename T::const_reference         const_reference;
-        typedef typename T::size_type               size_type;
         typedef typename T::difference_type         difference_type;
     };
     
@@ -21,66 +16,59 @@ namespace std_copy {
         private:
             typedef typename T::value_type              value_type;
             typedef typename T::pointer                 pointer;
-            typedef typename T::const_pointer           const_pointer;
             typedef typename T::reference               reference;
-            typedef typename T::const_reference         const_reference;
-            typedef typename T::size_type               size_type;
             typedef typename T::difference_type         difference_type;
-            typedef iterator<T>                         iterator_t;
-            typedef iterator_t&                         iterator_reference;
-            typedef const iterator_t&                   const_iterator_reference;
+            typedef iterator<T>                         iterator_type;
 
             pointer internalPtr_;
 
         public:
             iterator(pointer ptr = nullptr)
                 : internalPtr_(ptr) {}
-
-            iterator(const_iterator_reference it)
-                : internalPtr_(it.internalPtr_) {}
             
             /**
              * Overloaded postfix increment operator
             */
-            iterator_reference operator++() {
+            iterator_type operator++() {
                 internalPtr_++;
                 return *this;
             }
             /**
              * Overloaded prefix increment operator
             */
-            iterator_t operator++(int) {
-                iterator_t ptrBeforeIncrement = *this;
+            iterator_type operator++(int) {
+                iterator_type ptrBeforeIncrement = *this;
                 ++(*this);
                 return *this;
             }
             /**
              * Overloaded postfix decrement operator
             */
-            iterator_reference operator--() {
+            iterator_type operator--() {
                 internalPtr_--;
                 return *this;
             }
             /**
              * Overloaded prefix decrement operator
             */
-            iterator_t operator--(int) {
-                iterator_t ptrBeforeDecrement = internalPtr_;
+            iterator_type operator--(int) {
+                iterator_type ptrBeforeDecrement = internalPtr_;
                 --(*this);
                 return ptrBeforeDecrement;
             }
             /**
-             * Overloaded equality operator
+             * Overloaded equality operator. Compares against 
+             * another iterator.
              * @param it The iterator to compare against.
             */
-            bool operator==(const_iterator_reference it) {
+            bool operator==(iterator_type it) {
                 return internalPtr_ == it.internalPtr_;
             }
             /**
-             * Overloaded inequality operator
+             * Overloaded inequality operator.
              * @param it The iterator to compare against.
             */
-            bool operator!=(const_iterator_reference it) {
+            bool operator!=(iterator_type it) {
                 return !(*this == it);
             }
             /**
@@ -99,62 +87,68 @@ namespace std_copy {
              * Overloaded assignment operator -> assigns 
              * the current iterator to a provided iterator.
             */
-            void operator=(const_iterator_reference it) {
+            void operator=(iterator_type it) {
                 internalPtr_ = it.internalPtr_;
             }
             /**
              * Overloaded += operator
             */
-            void operator+=(std::size_t n) {
+            void operator+=(difference_type n) {
                 internalPtr_ += n;
             }
             /**
              * Overloaded + operator
             */
-            iterator_t operator+(difference_type n) {
-                return iterator_t(internalPtr_ + n);
+            iterator_type operator+(difference_type n) {
+                return iterator_type(internalPtr_ + n);
             }
             /**
              * Overloaded -= operator
             */
-            void operator-=(size_type n) {
+            void operator-=(difference_type n) {
                 internalPtr_ -= n;
             }
             /**
              * Overloaded - operator; decrements the iterator by a certain amount.
             */
-            iterator_t operator-(difference_type n) {
-                return iterator_t(internalPtr_ - n);
+            iterator_type operator-(difference_type n) {
+                return iterator_type(internalPtr_ - n);
             }
             /**
              * Overloaded - operator; finds the distance between two iterators.
             */
-            difference_type operator-(const_iterator_reference it) {
+            difference_type operator-(iterator_type it) {
                 return internalPtr_ - it.internalPtr_;
             }
             /**
              * Overloaded < operator
             */
-            bool operator<(const_iterator_reference i) {
+            bool operator<(iterator_type i) {
                 return internalPtr_ < i.internalPtr_;
             }
             /**
              * Overloaded > operator
             */
-            bool operator>(const_iterator_reference i) {
+            bool operator>(iterator_type i) {
                 return internalPtr_> i.internalPtr_;
             }
             /**
              * Overloaded >= operator
             */
-            bool operator>=(const_iterator_reference i) {
+            bool operator>=(iterator_type i) {
                 return internalPtr_ >= i.internalPtr_;
             }
             /**
              * Overloaded <= operator
             */
-            bool operator<=(const_iterator_reference i) {
+            bool operator<=(iterator_type i) {
                 return internalPtr_ <= i.internalPtr_;
+            }
+            /**
+             * Overloaded ! operator
+            */
+            bool operator!() {
+                return !internalPtr_;
             }
     };
     /**
@@ -168,7 +162,7 @@ namespace std_copy {
         it += n;
     }
     /**
-     * This function returns the distance between
+     * This function returns the distance between 
      * two iterators.
      * @param first The first iterator.
      * @param second The second iterator.

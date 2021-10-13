@@ -63,7 +63,7 @@ namespace std_copy {
                 internalBuffer_ = new value_type[s];
                 size_type i = 0;
                 if (sizeof...(Args) > size_) {
-                    throw std::runtime_error("Too many elements in initialization list");
+                    throw std::length_error("Too many elements in initialization list");
                 }
                 (void(internalBuffer_[i++] = args), ...);
             }
@@ -83,7 +83,7 @@ namespace std_copy {
 
             template <class InputIt>
             array(InputIt start, InputIt last)
-                : numberOfElements_(distance(start, last)),
+                : numberOfElements_(std_copy::distance(start, last)),
                 internalBuffer_(new value_type[s])
             {
                 size_type i = 0;
@@ -133,13 +133,6 @@ namespace std_copy {
                 return size_;
             }
             /**
-             * This function returns the maximum number
-             * of elements in the array.
-            */
-            size_type max_size() const {
-                return size_;
-            }
-            /**
              * This function returns an iterator to the first element 
              * in the array container.
             */
@@ -174,9 +167,6 @@ namespace std_copy {
              * @param elem The element to add to the end of the array.
             */
             void add(const_reference elem) {
-                if (size_ == 0) {
-                    throw std::out_of_range("Array was declared with size 0; cannot add any more elements");
-                }
                 if (numberOfElements_ >= size_) {
                     throw std::out_of_range("Array is full; cannot add any more elements");
                 }
@@ -189,9 +179,6 @@ namespace std_copy {
              * @param elem The element to add to the end of the array.
             */
             void add_front(const_reference elem) {
-                if (size_ == 0) {
-                    throw std::out_of_range("Array was declared with size 0; cannot add any more elements");
-                }
                 if (numberOfElements_ >= size_) {
                     throw std::out_of_range("Array is full; cannot add any more elements");
                 }
@@ -230,7 +217,7 @@ namespace std_copy {
             */
             reference front() {
                 if (numberOfElements_ == 0) {
-                    throw std::runtime_error("Cannot access element in empty array");
+                    throw std::length_error("Cannot access element in empty array");
                 }
                 return internalBuffer_[0];
             }
@@ -241,7 +228,7 @@ namespace std_copy {
             */
             reference back() {
                 if (numberOfElements_ == 0) {
-                    throw std::runtime_error("Cannot access element in empty array");
+                    throw std::length_error("Cannot access element in empty array");
                 }
                 return internalBuffer_[numberOfElements_ - 1];
             }

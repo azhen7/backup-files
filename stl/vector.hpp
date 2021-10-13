@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <cmath>
 #include "algorithm.hpp"
-#include <memory>
+#include "allocator.hpp"
 #include "move.hpp"
 
 #include "iterator.hpp"
@@ -19,10 +19,12 @@ namespace std_copy {
      * @param Alloc The type of the object used to allocate the underlying buffer
      * used for containing the values.
     */
-    template <class T, class Alloc = std::allocator<T>>
+    template <class T, class Alloc = std_copy::allocator<T>>
     class vector {
         private:
-            typedef iterator<vector<T, Alloc>>                      iterator_type;
+            typedef vector<T, Alloc>                                vector_type;
+            typedef iterator<vector_type>                           iterator_type;
+
         public:
             //typedefs
             typedef T                                               value_type;
@@ -37,22 +39,21 @@ namespace std_copy {
             typedef const iterator                                  const_iterator;
 
         private:
-            typedef vector<value_type, allocator_type>                  vector_type;
-
             pointer internalBuffer_;
             size_type numberOfElements_;
             size_type capacity_;
             allocator_type allocator;
 
             size_type calculateSmallestPowerOfTwoLargerThan(int x) {
-                return std::pow(2, (int) (std::log(x) / std::log(2) + 1));
+                return std::pow(2, (int) (std::log(x) / std::log(2)) + 1);
             }
             
         public:
             //Default constructor
             vector()
                 : numberOfElements_(0),
-                capacity_(0)
+                capacity_(0),
+                internalBuffer_(nullptr)
             {
             }
             /**
@@ -89,9 +90,9 @@ namespace std_copy {
             */
             template <class InputIt>
             vector(InputIt start, InputIt end)
-                : numberOfElements_(distance(start, end)),
-                capacity_(distance(start, end))
+                : numberOfElements_(std_copy::distance(start, end))
             {
+                capacity_ = numberOfElements_;
                 internalBuffer_ = new value_type[numberOfElements_];
                 size_type i = 0;
                 while (start != end)
@@ -169,16 +170,20 @@ namespace std_copy {
              * of the vector.
             */
             size_type max_size() const {
-                return std::min(std::pow(2, (int) (8 * sizeof(size_type) / sizeof(value_type))),
-                                std::pow(2, (8 * sizeof(difference_type))));
+                size_type first = std::pow(2, (int) (8 * sizeof(size_type) / sizeof(value_type)));
+                size_type second = std::pow(2, (8 * sizeof(difference_type)));
+                if (first < second)
+                    return first;
+                return second;
             }
             /**
              * This functions clears the vector, i.e., 
              * destroys all the elements and sets the
              * size to 0.
             */
-            void clear() {
+            constexpr void clear() {
                 numberOfElements_ = 0;
+                capacity_ = 0;
                 allocator.deallocate(internalBuffer_, capacity_);
             }
             /**
@@ -247,7 +252,7 @@ namespace std_copy {
                 if (numberOfElements_ == 0)
                     throw std::length_error("Cannot delete element in empty vector");
 
-                (internalBuffer_ + numberOfElements_)->~T();
+                (internalBuffer_ + numberOfElements_)->~value_type();
                 numberOfElements_--;
             }
             /**
@@ -271,7 +276,7 @@ namespace std_copy {
                 value_type elemToAdd(forward<Args>(args)...);
                 if (numberOfElements_ + 1 > capacity_) {
                     capacity_++;
-                    std::allocator_traits<allocator_type>::construct(allocator, internalBuffer_ + numberOfElements_, elemToAdd);
+                    std_copy::allocator_traits<allocator_type>::construct(allocator, internalBuffer_ + numberOfElements_, elemToAdd);
                 }
                 else {
                     internalBuffer_[numberOfElements_] = elemToAdd;
@@ -465,12 +470,12 @@ namespace std_copy {
             */
             template <class InputIt>
             iterator insert(iterator pos, InputIt first, InputIt last) {
-                const difference_type dist = distance(first, last);
+                const difference_type dist = std_copy::distance(first, last);
                 if (dist == 0)
                     return pos;
                 numberOfElements_ += dist;
                 if (numberOfElements_ > capacity_) {
-                    difference_type addToGetPos = distance(begin(), pos);
+                    difference_type addToGetPos = std_copy::distance(begin(), pos);
                     size_type originalCapacity = capacity_;
                     capacity_ = calculateSmallestPowerOfTwoLargerThan(numberOfElements_);
 
@@ -488,7 +493,7 @@ namespace std_copy {
                     if (i == dist)
                         break;
                 }
-                i = distance(begin(), pos);
+                i = std_copy::distance(begin(), pos);
                 while (first != last) {
                     internalBuffer_[i++] = *first++;
                 }
@@ -521,7 +526,7 @@ namespace std_copy {
                     }
                 }
                 for (; j < numberOfElements_; j++) {
-                    (internalBuffer_ + j)->~T();
+                    (internalBuffer_ + j)->~value_type();
                 }
                 numberOfElements_ -= index2 - index1;
                 return *this;
@@ -540,9 +545,9 @@ namespace std_copy {
                     }
                 }
                 for (; i < numberOfElements_; i++) {
-                    (internalBuffer_ + i)->~T();
+                    (internalBuffer_ + i)->~value_type();
                 }
-                numberOfElements_ -= distance(first, last);
+                numberOfElements_ -= std_copy::distance(first, last);
                 return *this;
             }
             /**
@@ -564,8 +569,8 @@ namespace std_copy {
              * element. This function is new.
              * @param elem The element to check for.
             */
-            bool contains(const_reference elem) {
-                return find(begin(), end(), elem) != end();
+            constexpr bool contains(const_reference elem) {
+                return std_copy::find(begin(), end(), elem) != end();
             }
             /**
              * This function swaps the contents of *this and s.
@@ -586,7 +591,7 @@ namespace std_copy {
             }
     };
     //Overloaded == operator
-    template <class T, class Alloc = std::allocator<T>>
+    template <class T, class Alloc = std_copy::allocator<T>>
     bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
         if (rhs.size() != lhs.size()) 
             return false;
@@ -602,8 +607,8 @@ namespace std_copy {
      * @param lhs The first vector.
      * @param rhs The second vector.
     */
-    template <class T, class Alloc>
-    void swap(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+    template <class T, class Alloc = std_copy::allocator<T>>
+    constexpr void swap(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
         lhs.swap(rhs);
     }
 }

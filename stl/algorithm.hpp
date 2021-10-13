@@ -101,8 +101,7 @@ namespace std_copy {
     template <class InputIt, class T>
     void fill(InputIt first, InputIt last, const T& val) {
         while (first != last) {
-            *first = val;
-            first++;
+            *first++ = val;
         }
     }
     /**
@@ -114,8 +113,7 @@ namespace std_copy {
     template <class InputIt, class Size,  class T>
     void fill_n(InputIt first, Size n, const T& val) {
         for (int i = 0; i < n; i++) {
-            *first = val;
-            first++;
+            *first++ = val;
         }
     }
     /**
@@ -191,8 +189,7 @@ namespace std_copy {
     template <class InputIt, class Generator>
     void generate(InputIt first, InputIt last, Generator gen) {
         while (first != last) {
-            *first = gen();
-            first++;
+            *first++ = gen();
         }
     }
     /**
@@ -205,8 +202,7 @@ namespace std_copy {
     template <class InputIt, class Size, class Generator>
     void generate_n(InputIt first, Size n, Generator gen) {
         for (int i = 0; i < n; i++) {
-            *first = gen();
-            first++;
+            *first++ = gen();
         }
     }
     /**
@@ -252,7 +248,7 @@ namespace std_copy {
     */
     template <class InputIt, class Function>
     bool none_of(InputIt first, InputIt last, Function func) {
-        return !all_of(first, last, func);
+        return !std_copy::all_of(first, last, func);
     }
     /**
      * This function compares all the elements in the range [first1, last1) and the 
@@ -534,8 +530,8 @@ namespace std_copy {
     template <class T>
     pair<T, T> minmax(const T& a, const T& b) {
         if (a < b)
-            return make_pair(a, b);
-        return make_pair(b, a);
+            return std_copy::make_pair(a, b);
+        return std_copy::make_pair(b, a);
     }
     /**
      * This function returns a pair with first as an iterator pointing to the smallest element in 
@@ -545,9 +541,9 @@ namespace std_copy {
     */
     template <class InputIt>
     pair<InputIt, InputIt> minmax_element(InputIt first, InputIt second) {
-        InputIt largest = max_element(first, second);
-        InputIt smallest = min_element(first, second);
-        return make_pair(smallest, largest);
+        InputIt largest = std_copy::max_element(first, second);
+        InputIt smallest = std_copy::min_element(first, second);
+        return std_copy::make_pair(smallest, largest);
     }
     /**
      * This function compares the elements in the ranges [first1, last1) and the sequence of elements 
@@ -562,7 +558,7 @@ namespace std_copy {
         while (first1 != last1 && *first1 == *first2) {
             first1++;
         }
-        return make_pair(first1, first2);
+        return std_copy::make_pair(first1, first2);
     }
     /**
      * This function compares the elements in the ranges [first1, last1) and the sequence of elements 
@@ -579,7 +575,7 @@ namespace std_copy {
         while (first1 != last1 && pred(*first1, *first2)) {
             first1++;
         }
-        return make_pair(first1, first2);
+        return std_copy::make_pair(first1, first2);
     }
     /**
      * This function finds the first occurence of the sequence of elements in the range [first2, last2) 
@@ -803,9 +799,9 @@ namespace std_copy {
     */
     template <class InputIt, class T>
     pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val) {
-        InputIt start = lower_bound(first, last, val);
-        InputIt end = upper_bound(first, last, val);
-        return make_pair<start, end>;
+        InputIt start = std_copy::lower_bound(first, last, val);
+        InputIt end = std_copy::upper_bound(first, last, val);
+        return std_copy::make_pair<start, end>;
     }
     /**
      * This function returns the bounds of the subrange which includes elements with values all equal to val. 
@@ -816,9 +812,9 @@ namespace std_copy {
     */
     template <class InputIt, class T, class Compare>
     pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val, Compare comp) {
-        InputIt start = lower_bound(first, last, val, comp);
-        InputIt end = upper_bound(first, last, val, comp);
-        return make_pair<start, end>;
+        InputIt start = std_copy::lower_bound(first, last, val, comp);
+        InputIt end = std_copy::upper_bound(first, last, val, comp);
+        return std_copy::make_pair<start, end>;
     }
     /**
      * This function invokes a provided function on each element in the range [first, last).
@@ -832,7 +828,7 @@ namespace std_copy {
             fn(*first);
             first++;
         }
-        return move(fn);
+        return std_copy::move(fn);
     }
     /**
      * This function invokes a provided function on the first n elements in the range starting 
@@ -896,7 +892,7 @@ namespace std_copy {
     InputIt remove(InputIt first, InputIt last, const T& val) {
         for (InputIt it = first; it != last; it++) {
             if (*it != val) {
-                *first++ = move(*it);
+                *first++ = std_copy::move(*it);
             }
         }
         return first;
@@ -911,7 +907,7 @@ namespace std_copy {
     InputIt remove_if(InputIt first, InputIt last, Function pred) {
         for (InputIt it = first; it != last; it++) {
             if (!pred(*it)) {
-                *first++ = move(*it);
+                *first++ = std_copy::move(*it);
             }
         }
         return first;
@@ -1071,7 +1067,7 @@ namespace std_copy {
             return first;
         }
         for (int i = 0; i < n; i++) {
-            *(first + i + n) = move(*(first + i));
+            *(first + i + n) = std_copy::move(*(first + i));
         }
         return first + (last - first - n);
     }
@@ -1087,7 +1083,7 @@ namespace std_copy {
             return first;
         }
         for (int i = n; i >= 0; i--) {
-            *(first + n) = move(*(first + (n << 1)));
+            *(first + n) = std_copy::move(*(first + (n << 1)));
         }
         return first + n;
     }
@@ -1102,7 +1098,7 @@ namespace std_copy {
     template <class InputIt, class OutputIt>
     OutputIt move(InputIt first, InputIt last, OutputIt result) {
         while (first != last) {
-            *result++ = move(*first++);
+            *result++ = std_copy::move(*first++);
         }
         return result;
     }
@@ -1117,7 +1113,7 @@ namespace std_copy {
     template <class InputIt, class OutputIt>
     OutputIt move_backward(InputIt first, InputIt last, OutputIt result) {
         while (first != last) {
-            *(--result) = move(*(--last));
+            *(--result) = std_copy::move(*(--last));
         }
         return result;
     }
@@ -1133,7 +1129,7 @@ namespace std_copy {
         InputIt result = first;
         while (first != last) {
             if (!(*result == *first) && result != first) {
-                *result = move(*first);
+                *result = std_copy::move(*first);
                 result++;
             }
             first++;
@@ -1153,7 +1149,7 @@ namespace std_copy {
         InputIt result = first;
         while (first != last) {
             if (!comp(*result, *first) && result != first) {
-                *result = move(*first);
+                *result = std_copy::move(*first);
                 result++;
             }
             first++;
@@ -1209,8 +1205,34 @@ namespace std_copy {
      * @param b The second iterator.
     */
     template <class InputIt1, class InputIt2>
-    void iter_swap(InputIt1 a, InputIt2 b) {
-        swap(*a, *b);
+    constexpr void iter_swap(InputIt1 a, InputIt2 b) {
+        std_copy::swap(*a, *b);
+    }
+    /**
+     * This function reverses the order of the values in the range 
+     * [first, last).
+     * @param first An iterator to the start of the sequence.
+     * @param last An iterator to the end of the sequence.
+    */
+    template <class InputIt>
+    constexpr void reverse(InputIt first, InputIt last) {
+        while (first != last) {
+            std_copy::iter_swap(first, last);
+            first++;
+        }
+    }
+    /**
+     * This function copies the elements from [first, last) to the 
+     * range starting at result.
+     * @param first An iterator to the start of the sequence.
+     * @param last An iterator to the end of the sequence.
+     * @param result An iterator to the start of the new sequence.
+    */
+    template <class InputIt, class OutputIt>
+    constexpr void reverse_copy(InputIt first, InputIt last, OutputIt result) {
+        while (last != first) {
+            *result++ = *(--last);
+        }
     }
 }
 

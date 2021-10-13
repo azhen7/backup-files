@@ -12,9 +12,9 @@ namespace std_copy {
     */
     template <class T>
     void swap(T& a, T& b) {
-        T temp = move(a);
-        a = move(b);
-        b = move(temp);
+        T temp = std_copy::move(a);
+        a = std_copy::move(b);
+        b = std_copy::move(temp);
     }
     /**
      * This function swaps the values of the elements of 
@@ -25,10 +25,31 @@ namespace std_copy {
     template <class T, unsigned long long N>
     void swap(T (&a)[N], T (&b)[N]) {
         for (unsigned long long i = 0; i < N; i++) {
-            T temp = move(a[i]);
-            a[i] = move(b[i]);
-            b[i] = move(temp);
+            T temp = std_copy::move(a[i]);
+            a[i] = std_copy::move(b[i]);
+            b[i] = std_copy::move(temp);
         }
+    }
+    /**
+     * This function exchanges the value of obj with 
+     * new_value and returns the old value of obj.
+     * @param obj The object to exchange the value with new_value.
+     * @param new_value The value to replace the old value of obj.
+    */
+    template <class T, class U = T>
+    T exchange(T& obj, U&& new_value) {
+        T old_val = std_copy::move(obj);
+        old_val = new_value;
+        return old_val;
+    }
+    /**
+     * This function returns an lvalue reference to const type 
+     * of t.
+     * @param t The object to return as const.
+    */
+    template <class T>
+    constexpr add_const_t<T>& as_const(T& t) {
+        return t;
     }
 }
 

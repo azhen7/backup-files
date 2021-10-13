@@ -4,51 +4,82 @@
 namespace std_copy {
     template <class T1, class T2>
     struct pair {
-        T1  first;
-        T2  second;
+        private:
+            typedef pair<T1, T2>    pair_type;
 
-        pair(T1 f = T1(), T2 s = T2())
-            : first(f), 
-            second(s) 
-        {
-        }
+        public:
+            typedef T1  first_type;
+            typedef T2  second_type;
 
-        pair (const pair& p)
-            : first(p.first),
-            second(p.second)
-        {
-        }
-        pair (pair&& p)
-            : first(p.first),
-            second(p.second)
-        {
-        }
+            first_type  first;
+            second_type  second;
 
-        void swap(pair& p) {
-            T1 temp = first;
-            first = p.first;
-            p.first = temp;
+            /**
+             * This function constructs a pair from two arguments.
+             * @param f The argument that first gets set to.
+             * @param s The argument that second gets set to.
+            */
+            pair(const first_type& f, const second_type& s)
+                : first(std_copy::move(f)),
+                second(std_copy::move(s))
+            {
+            }
+            /**
+             * This function constructs a pair from the given pair.
+             * @param p The pair used to construct the current pair object.
+            */
+            pair(const pair_type& p)
+                : first(p.first),
+                second(p.second)
+            {
+            }
+            /**
+             * This function constructs a pair from the given rvalue 
+             * reference pair.
+             * @param p The pair used to construct the current pair object.
+            */
+            pair(pair_type&& p)
+                : first(p.first),
+                second(p.second)
+            {
+            }
 
-            T2 temp2 = second;
-            second = p.second;
-            p.second = temp2;
-        }
-        const pair& operator=(const pair& toAssign) {
-            first = toAssign.first;
-            second = toAssign.second;
-            return *this;
-        }
+            void swap(const pair_type& p) {
+                first_type temp = first;
+                first = p.first;
+                p.first = temp;
+
+                second_type temp2 = second;
+                second = p.second;
+                p.second = temp2;
+            }
+            const pair_type& operator=(const pair_type& toAssign) {
+                first = std_copy::move(toAssign.first);
+                second = std_copy::move(toAssign.second);
+                return *this;
+            }
     };
+    /**
+     * Returns a pair object constructed from f and s.
+     * @param f The argument that gets assigned to first.
+     * @param s The argument that gets assigned to second,
+    */
     template <class T1, class T2>
     pair<T1, T2> make_pair(T1 f, T2 s) {
-        pair<T1, T2> p(f, s);
-        return p;
+        return pair<T1, T2>(f, s);
     }
+    /**
+     * @brief Swaps the member variables of two pair objects.
+    */
     template <class T1, class T2>
     void swap(pair<T1, T2> lhs, pair<T1, T2> rhs) {
-        T1 temp = lhs.first;
+        T1 tempFirst = lhs.first;
         lhs.first = rhs.first;
-        rhs.first = temp;
+        rhs.first = tempFirst;
+
+        T2 tempSecond = lhs.second;
+        lhs.second = rhs.second;
+        rhs.second = tempSecond;
     }
 
     /**
