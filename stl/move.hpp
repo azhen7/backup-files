@@ -12,7 +12,7 @@ namespace std_copy {
     template <class T>
     constexpr remove_reference_t<T>&& move(T&& val) {
         return static_cast<remove_reference_t<T>&&>(val);
-    }
+    } 
     /**
      * This function forwards an lvalue. This function is used to 
      * implement "perfect forwarding".
