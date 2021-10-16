@@ -11,7 +11,8 @@ namespace std_copy {
      * @param b The second paremeter.
     */
     template <class T>
-    void swap(T& a, T& b) {
+    void swap(T& a, T& b)
+    {
         T temp = std_copy::move(a);
         a = std_copy::move(b);
         b = std_copy::move(temp);
@@ -23,8 +24,10 @@ namespace std_copy {
      * @param b The second array.
     */
     template <class T, unsigned long long N>
-    void swap(T (&a)[N], T (&b)[N]) {
-        for (unsigned long long i = 0; i < N; i++) {
+    void swap(T (&a)[N], T (&b)[N])
+    {
+        for (unsigned long long i = 0; i < N; i++)
+        {
             T temp = std_copy::move(a[i]);
             a[i] = std_copy::move(b[i]);
             b[i] = std_copy::move(temp);
@@ -37,7 +40,8 @@ namespace std_copy {
      * @param new_value The value to replace the old value of obj.
     */
     template <class T, class U = T>
-    T exchange(T& obj, U&& new_value) {
+    T exchange(T& obj, U&& new_value)
+    {
         T old_val = std_copy::move(obj);
         old_val = new_value;
         return old_val;
@@ -48,7 +52,8 @@ namespace std_copy {
      * @param t The object to return as const.
     */
     template <class T>
-    constexpr add_const_t<T>& as_const(T& t) {
+    constexpr add_const_t<T>& as_const(T& t)
+    {
         return t;
     }
 }

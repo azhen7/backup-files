@@ -452,6 +452,25 @@ namespace std_copy {
     template <bool B, class T = void>
     using enable_if_t = typename enable_if<B, T>::type;
 
+    //void_t
+    template <class ...>
+    using void_t = void;
+
+    //detector
+    //General detector struct
+    template <class Default, class AlwaysVoid, template <typename...> class Template, class ...Args>
+    struct detector
+    {
+        using type = Default;
+    };
+    template <class Default, template <typename...> class Template, class ...Args>
+    struct detector<Default, void_t<Template<Args...>>, Template, Args...>
+    {
+        using type = Template<Args...>;
+    };
+    template <class Default, template <typename...> class Template, class ...Args>
+    using detector_t = typename detector<Default, void, Template, Args...>::type;
+
     //Operations on traits
 
     //negation

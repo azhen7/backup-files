@@ -7,7 +7,8 @@
 #include "iterator.hpp"
 #include "algorithm.hpp"
 
-namespace std_copy {
+namespace std_copy
+{
     /**
      * My own implementation of the STL array container, which
      * is defined in the <array> header. There are some new functions,
@@ -20,9 +21,11 @@ namespace std_copy {
      * come with a lot of helpful functions.
     */
     template <class T, unsigned long long s>
-    class array {
+    class array
+    {
         private:
             typedef iterator<array<T, s>>                           iterator_type;
+            
         public:
             //typdefs
             typedef T                                               value_type;
@@ -62,7 +65,8 @@ namespace std_copy {
             {
                 internalBuffer_ = new value_type[s];
                 size_type i = 0;
-                if (sizeof...(Args) > size_) {
+                if (sizeof...(Args) > size_)
+                {
                     throw std::length_error("Too many elements in initialization list");
                 }
                 (void(internalBuffer_[i++] = args), ...);
@@ -87,7 +91,8 @@ namespace std_copy {
                 internalBuffer_(new value_type[s])
             {
                 size_type i = 0;
-                while (start != last) {
+                while (start != last)
+                {
                     internalBuffer_[i++] = *start++;
                 }
             }
@@ -99,21 +104,24 @@ namespace std_copy {
              * designated value.
              * @param val The value used to fill the array.
             */
-            void fill(const_reference val) {
+            void fill(const_reference val)
+            {
                 std_copy::fill_n(internalBuffer_, size_, val);
             }
             /**
              * This function returns the number of elements
              * in the array. This function is new.
             */
-            size_type quantity() {
+            size_type quantity()
+            {
                 return numberOfElements_;
             }
             /**
              * This function returns the underlying
              * internal buffer of the array.
             */
-            pointer data() {
+            pointer data()
+            {
                 return internalBuffer_;
             }
             /**
@@ -122,7 +130,8 @@ namespace std_copy {
              * whether there are no elements in the array.
              * This function is new.
             */
-            constexpr bool empty() {
+            constexpr bool empty()
+            {
                 return numberOfElements_ == 0;
             }
             /**
@@ -136,28 +145,32 @@ namespace std_copy {
              * This function returns an iterator to the first element 
              * in the array container.
             */
-            iterator begin() {
+            iterator begin()
+            {
                 return iterator(internalBuffer_);
             }
             /**
              * This function returns an iterator to the theoretical element 
              * after the last element in the array container.
             */
-            const_iterator end() {
+            const_iterator end()
+            {
                 return iterator(internalBuffer_ + numberOfElements_);
             }
             /**
              * This function returns an const iterator to the first element 
              * in the array container.
             */
-            const_iterator cbegin() {
+            const_iterator cbegin()
+            {
                 return iterator(internalBuffer_);
             }
             /**
              * This function returns an const iterator to the theoretical element 
              * after the last element in the array container.
             */
-            iterator cend() {
+            iterator cend()
+            {
                 return iterator(internalBuffer_ + numberOfElements_);
             }
             /**
@@ -166,8 +179,10 @@ namespace std_copy {
              * This function is new.
              * @param elem The element to add to the end of the array.
             */
-            void add(const_reference elem) {
-                if (numberOfElements_ >= size_) {
+            void add(const_reference elem)
+            {
+                if (numberOfElements_ >= size_)
+                {
                     throw std::out_of_range("Array is full; cannot add any more elements");
                 }
                 internalBuffer_[numberOfElements_] = elem;
@@ -178,8 +193,10 @@ namespace std_copy {
              * the array. This function is new.
              * @param elem The element to add to the end of the array.
             */
-            void add_front(const_reference elem) {
-                if (numberOfElements_ >= size_) {
+            void add_front(const_reference elem)
+            {
+                if (numberOfElements_ >= size_)
+                {
                     throw std::out_of_range("Array is full; cannot add any more elements");
                 }
                 pointer temp = internalBuffer_;
@@ -193,8 +210,10 @@ namespace std_copy {
              * the vector.
              * @param index The index of the element to retrieve.
             */
-            reference at(size_type index) {
-                if (index >= numberOfElements_) {
+            reference at(size_type index)
+            {
+                if (index >= numberOfElements_)
+                {
                     std::string err = "index (which is " + std::to_string(index) + ") >= this->size() (which is " + 
                                     std::to_string(numberOfElements_) + ")";
 
@@ -207,7 +226,8 @@ namespace std_copy {
              * indexing.
              * @param index The index of the element to retrieve.
             */
-            reference operator[](size_type index) {
+            reference operator[](size_type index)
+            {
                 return internalBuffer_[index];
             }
             /**
@@ -215,8 +235,10 @@ namespace std_copy {
              * first element in the array. If the vector
              * is empty, this function throws an exception.
             */
-            reference front() {
-                if (numberOfElements_ == 0) {
+            reference front()
+            {
+                if (numberOfElements_ == 0)
+                {
                     throw std::length_error("Cannot access element in empty array");
                 }
                 return internalBuffer_[0];
@@ -226,8 +248,10 @@ namespace std_copy {
              * last element in the array. If the vector 
              * is empty, this function throws an exception.
             */
-            reference back() {
-                if (numberOfElements_ == 0) {
+            reference back()
+            {
+                if (numberOfElements_ == 0)
+                {
                     throw std::length_error("Cannot access element in empty array");
                 }
                 return internalBuffer_[numberOfElements_ - 1];
@@ -236,7 +260,8 @@ namespace std_copy {
              * This function swaps the contents of *this and toSwap.
              * @param toSwap The array to swap the contents with.
             */
-            void swap(const array_type& toSwap) {
+            void swap(const array_type& toSwap)
+            {
                 pointer temp = internalBuffer_;
                 internalBuffer_ = toSwap.internalBuffer_;
                 toSwap.internalBuffer_ = temp;
@@ -253,7 +278,8 @@ namespace std_copy {
      * @param rhs The second array.
     */
     template <class T, unsigned long long N>
-    void swap(const array<T, N>& lhs, const array<T, N>& rhs) {
+    void swap(const array<T, N>& lhs, const array<T, N>& rhs)
+    {
         lhs.swap(rhs);
     }
     /**
@@ -261,7 +287,8 @@ namespace std_copy {
      * @param arr The array to convert.
     */
     template <class T, unsigned long long N>
-    constexpr array<T, N> to_array(T (&arr)[N]) {
+    constexpr array<T, N> to_array(T (&arr)[N])
+    {
         return array<T, N>(&arr[0], &arr[N]);
     }
 }

@@ -1,9 +1,11 @@
 #ifndef _STD_COPY_ITERATOR
 #define _STD_COPY_ITERATOR
 
-namespace std_copy {
+namespace std_copy
+{
     template <class T>
-    struct iterator_traits {
+    struct iterator_traits
+    {
         //typedefs
         typedef typename T::value_type              value_type;
         typedef typename T::pointer                 pointer;
@@ -12,7 +14,8 @@ namespace std_copy {
     };
     
     template <class T>
-    class iterator {
+    class iterator
+    {
         private:
             typedef typename T::value_type              value_type;
             typedef typename T::pointer                 pointer;
@@ -29,14 +32,16 @@ namespace std_copy {
             /**
              * Overloaded postfix increment operator
             */
-            iterator_type operator++() {
+            iterator_type operator++()
+            {
                 internalPtr_++;
                 return *this;
             }
             /**
              * Overloaded prefix increment operator
             */
-            iterator_type operator++(int) {
+            iterator_type operator++(int)
+            {
                 iterator_type ptrBeforeIncrement = *this;
                 ++(*this);
                 return *this;
@@ -44,14 +49,16 @@ namespace std_copy {
             /**
              * Overloaded postfix decrement operator
             */
-            iterator_type operator--() {
+            iterator_type operator--()
+            {
                 internalPtr_--;
                 return *this;
             }
             /**
              * Overloaded prefix decrement operator
             */
-            iterator_type operator--(int) {
+            iterator_type operator--(int)
+            {
                 iterator_type ptrBeforeDecrement = internalPtr_;
                 --(*this);
                 return ptrBeforeDecrement;
@@ -61,93 +68,108 @@ namespace std_copy {
              * another iterator.
              * @param it The iterator to compare against.
             */
-            bool operator==(iterator_type it) {
+            bool operator==(iterator_type it)
+            {
                 return internalPtr_ == it.internalPtr_;
             }
             /**
              * Overloaded inequality operator.
              * @param it The iterator to compare against.
             */
-            bool operator!=(iterator_type it) {
+            bool operator!=(iterator_type it)
+            {
                 return !(*this == it);
             }
             /**
              * Overloaded dereference operator
             */
-            reference operator*() {
+            reference operator*()
+            {
                 return *internalPtr_;
             }
             /**
              * Overloaded arrow operator
             */
-            pointer operator->() {
+            pointer operator->()
+            {
                 return internalPtr_;
             }
             /**
              * Overloaded assignment operator -> assigns 
              * the current iterator to a provided iterator.
             */
-            void operator=(iterator_type it) {
+            void operator=(iterator_type it)
+            {
                 internalPtr_ = it.internalPtr_;
             }
             /**
              * Overloaded += operator
             */
-            void operator+=(difference_type n) {
+            void operator+=(difference_type n)
+            {
                 internalPtr_ += n;
             }
             /**
              * Overloaded + operator
             */
-            iterator_type operator+(difference_type n) {
+            iterator_type operator+(difference_type n)
+            {
                 return iterator_type(internalPtr_ + n);
             }
             /**
              * Overloaded -= operator
             */
-            void operator-=(difference_type n) {
+            void operator-=(difference_type n)
+            {
                 internalPtr_ -= n;
             }
             /**
              * Overloaded - operator; decrements the iterator by a certain amount.
             */
-            iterator_type operator-(difference_type n) {
+            iterator_type operator-(difference_type n)
+            {
                 return iterator_type(internalPtr_ - n);
             }
             /**
              * Overloaded - operator; finds the distance between two iterators.
             */
-            difference_type operator-(iterator_type it) {
+            difference_type operator-(iterator_type it)
+            {
                 return internalPtr_ - it.internalPtr_;
             }
             /**
              * Overloaded < operator
             */
-            bool operator<(iterator_type i) {
+            bool operator<(iterator_type i)
+            {
                 return internalPtr_ < i.internalPtr_;
             }
             /**
              * Overloaded > operator
             */
-            bool operator>(iterator_type i) {
+            bool operator>(iterator_type i)
+            {
                 return internalPtr_> i.internalPtr_;
             }
             /**
              * Overloaded >= operator
             */
-            bool operator>=(iterator_type i) {
+            bool operator>=(iterator_type i)
+            {
                 return internalPtr_ >= i.internalPtr_;
             }
             /**
              * Overloaded <= operator
             */
-            bool operator<=(iterator_type i) {
+            bool operator<=(iterator_type i)
+            {
                 return internalPtr_ <= i.internalPtr_;
             }
             /**
              * Overloaded ! operator
             */
-            bool operator!() {
+            bool operator!()
+            {
                 return !internalPtr_;
             }
     };
@@ -158,7 +180,8 @@ namespace std_copy {
      * @param n The number to advance the iterator by.
     */
     template <class Iterator>
-    void advance(Iterator& it, long long n = 1) {
+    void advance(Iterator& it, long long n = 1)
+    {
         it += n;
     }
     /**
@@ -168,9 +191,11 @@ namespace std_copy {
      * @param second The second iterator.
     */
     template <class Iterator>
-    long long distance(Iterator start, Iterator last) {
+    long long distance(Iterator start, Iterator last)
+    {
         long long n = 0;
-        while (start != last) {
+        while (start != last)
+        {
             start++;
             n++;
         }
@@ -183,7 +208,8 @@ namespace std_copy {
      * @param n The amount to add to the iterator.
     */
     template <class Iterator>
-    Iterator next(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1) {
+    Iterator next(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1)
+    {
         return it + n;
     }
     /**
@@ -193,7 +219,8 @@ namespace std_copy {
      * @param n The amount to subtract from the iterator.
     */
     template <class Iterator>
-    Iterator prev(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1) {
+    Iterator prev(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1)
+    {
         return it - n;
     }
 }

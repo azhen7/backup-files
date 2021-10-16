@@ -3,7 +3,8 @@
 
 #include "utility.hpp"
 
-namespace std_copy {
+namespace std_copy
+{
     /**
      * This function counts how many elements with the same value as 
      * val exist between first and last.
@@ -12,9 +13,11 @@ namespace std_copy {
      * @param val The value for which to compare against.
     */
     template <class InputIt, class T>
-    long long int count(InputIt first, InputIt last, const T& val) {
+    long long int count(InputIt first, InputIt last, const T& val)
+    {
         long long int c = 0;
-        while (first != last) {
+        while (first != last)
+        {
             if (*first == val)
                 c++;
             
@@ -31,9 +34,11 @@ namespace std_copy {
      * @param func The function used to "test" the elements.
     */
     template <class InputIt, class Function>
-    long long int count_if(InputIt first, InputIt last, Function func) {
+    long long int count_if(InputIt first, InputIt last, Function func)
+    {
         long long int c = 0;
-        while (first != last) {
+        while (first != last)
+        {
             if (func(*first))
                 c++;
             
@@ -49,8 +54,10 @@ namespace std_copy {
      * @param val The value used to compare against the current element.
     */
     template <class InputIt, class T>
-    InputIt find(InputIt first, InputIt last, const T& val) {
-        while (first != last) {
+    InputIt find(InputIt first, InputIt last, const T& val)
+    {
+        while (first != last)
+        {
             if (*first == val)
                 return first;
 
@@ -66,8 +73,10 @@ namespace std_copy {
      * @param func The function used to "test" the elements.
     */
     template <class InputIt, class Function>
-    InputIt find_if(InputIt first, InputIt last, Function func) {
-        while (first != last) {
+    InputIt find_if(InputIt first, InputIt last, Function func)
+    {
+        while (first != last)
+        {
             if (func(*first))
                 return first;
             
@@ -83,8 +92,10 @@ namespace std_copy {
      * @param func The function used to "test" the elements.
     */
     template <class InputIt, class Function>
-    InputIt find_if_not(InputIt first, InputIt last, Function func) {
-        while (first != last) {
+    InputIt find_if_not(InputIt first, InputIt last, Function func)
+    {
+        while (first != last)
+        {
             if (!func(*first))
                 return first;
             
@@ -99,8 +110,10 @@ namespace std_copy {
      * @param val The value that each element gets assigned to in the range [first, last).
     */
     template <class InputIt, class T>
-    void fill(InputIt first, InputIt last, const T& val) {
-        while (first != last) {
+    void fill(InputIt first, InputIt last, const T& val)
+    {
+        while (first != last)
+        {
             *first++ = val;
         }
     }
@@ -111,8 +124,10 @@ namespace std_copy {
      * @param val The value that each element gets assigned to.
     */
     template <class InputIt, class Size,  class T>
-    void fill_n(InputIt first, Size n, const T& val) {
-        for (int i = 0; i < n; i++) {
+    void fill_n(InputIt first, Size n, const T& val)
+    {
+        for (int i = 0; i < n; i++)
+        {
             *first++ = val;
         }
     }
@@ -124,8 +139,10 @@ namespace std_copy {
      * are stored.
     */
     template <class InputIt, class OutputIt>
-    OutputIt copy(InputIt first, InputIt last, OutputIt result) {
-        while (first != last) {
+    OutputIt copy(InputIt first, InputIt last, OutputIt result)
+    {
+        while (first != last)
+        {
             *result++ = *first++;
         }
         return result;
@@ -138,8 +155,10 @@ namespace std_copy {
      * are stored.
     */
     template <class InputIt, class Size, class OutputIt>
-    OutputIt copy_n(InputIt first, Size n, OutputIt result) {
-        for (int i = 0; i < n; i++) {
+    OutputIt copy_n(InputIt first, Size n, OutputIt result)
+    {
+        for (int i = 0; i < n; i++)
+        {
             *result++ = *first++;
         }
         return result;
@@ -155,9 +174,12 @@ namespace std_copy {
      * and false. The element is copied if true is returned.
     */
     template <class InputIt, class OutputIt, class Function>
-    OutputIt copy_if(InputIt first, InputIt last, OutputIt result, Function func) {
-        while (first != last) {
-            if (func(*first)) {
+    OutputIt copy_if(InputIt first, InputIt last, OutputIt result, Function func)
+    {
+        while (first != last)
+        {
+            if (func(*first))
+            {
                 *result++ = *first;
             }
             first++;
@@ -173,8 +195,10 @@ namespace std_copy {
      * are stored.
     */
     template <class InputIt, class OutputIt>
-    OutputIt copy_backward(InputIt first, InputIt last, OutputIt result) {
-        while (first != last) {
+    OutputIt copy_backward(InputIt first, InputIt last, OutputIt result)
+    {
+        while (first != last)
+        {
             *(--result) = *(--last);
         }
         return result;
@@ -187,8 +211,10 @@ namespace std_copy {
      * @param gen The generator function.
     */
     template <class InputIt, class Generator>
-    void generate(InputIt first, InputIt last, Generator gen) {
-        while (first != last) {
+    void generate(InputIt first, InputIt last, Generator gen)
+    {
+        while (first != last)
+        {
             *first++ = gen();
         }
     }
@@ -200,8 +226,10 @@ namespace std_copy {
      * @param gen The generator function.
     */
     template <class InputIt, class Size, class Generator>
-    void generate_n(InputIt first, Size n, Generator gen) {
-        for (int i = 0; i < n; i++) {
+    void generate_n(InputIt first, Size n, Generator gen)
+    {
+        for (int i = 0; i < n; i++)
+        {
             *first++ = gen();
         }
     }
@@ -213,9 +241,12 @@ namespace std_copy {
      * @param func The function used to test all the elements.
     */
     template <class InputIt, class Function>
-    bool all_of(InputIt first, InputIt last, Function func) {
-        while (first != last) {
-            if (!func(*first)) {
+    bool all_of(InputIt first, InputIt last, Function func)
+    {
+        while (first != last)
+        {
+            if (!func(*first))
+            {
                 return false;
             }
             first++;
@@ -230,9 +261,12 @@ namespace std_copy {
      * @param func The function used to test all the elements.
     */
     template <class InputIt, class Function>
-    bool any_of(InputIt first, InputIt last, Function func) {
-        while (first != last) {
-            if (func(*first)) {
+    bool any_of(InputIt first, InputIt last, Function func)
+    {
+        while (first != last)
+        {
+            if (func(*first))
+            {
                 return true;
             }
             first++;
@@ -247,7 +281,8 @@ namespace std_copy {
      * @param func The function used to test all the elements.
     */
     template <class InputIt, class Function>
-    bool none_of(InputIt first, InputIt last, Function func) {
+    bool none_of(InputIt first, InputIt last, Function func)
+    {
         return !std_copy::all_of(first, last, func);
     }
     /**
@@ -258,9 +293,12 @@ namespace std_copy {
      * @param first2 An iterator to the initial position of the second sequence of elements.
     */
     template <class InputIt1, class InputIt2>
-    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2) {
-        while (first1 != last1) {
-            if (*first1 != *first2) {
+    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+    {
+        while (first1 != last1)
+        {
+            if (*first1 != *first2)
+            {
                 return false;
             }
             first1++;
@@ -277,9 +315,12 @@ namespace std_copy {
      * @param first2 An iterator to the initial position of the second sequence of elements.
     */
     template <class InputIt1, class InputIt2, class Compare>
-    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare pred) {
-        while (first1 != last1) {
-            if (!pred(*first1, *first2)) {
+    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare pred)
+    {
+        while (first1 != last1)
+        {
+            if (!pred(*first1, *first2))
+            {
                 return false;
             }
             first1++;
@@ -295,18 +336,22 @@ namespace std_copy {
      * @param val The value that the elements get compared to.
     */
     template <class InputIt, class T>
-    InputIt lower_bound(InputIt first, InputIt last, const T& val) {
+    InputIt lower_bound(InputIt first, InputIt last, const T& val)
+    {
         unsigned long long count, half;
         count = distance(first, last);
         InputIt curr_elem;
-        while (count > 0) {
+        while (count > 0)
+        {
             half = count / 2;
             curr_elem = first + half;
-            if (*curr_elem < val) {
+            if (*curr_elem < val)
+            {
                 first = curr_elem + 1;
                 count -= half + 1;
             }
-            else {
+            else
+            {
                 count = half;
             }
         }
@@ -322,18 +367,22 @@ namespace std_copy {
      * @param comp The function used to compare the values.
     */
     template <class InputIt, class T, class Compare>
-    InputIt lower_bound(InputIt first, InputIt last, const T& val, Compare comp) {
+    InputIt lower_bound(InputIt first, InputIt last, const T& val, Compare comp)
+    {
         unsigned long long count, half;
         count = distance(first, last);
         InputIt curr_elem;
-        while (count > 0) {
+        while (count > 0)
+        {
             half = count / 2;
             curr_elem = first + half;
-            if (comp(*curr_elem, val)) {
+            if (comp(*curr_elem, val))
+            {
                 first = curr_elem + 1;
                 count -= half + 1;
             }
-            else {
+            else
+            {
                 count = half;
             }
         }
@@ -347,18 +396,22 @@ namespace std_copy {
      * @param val The value that the elements get compared to.
     */
     template <class InputIt, class T>
-    InputIt upper_bound(InputIt first, InputIt last, const T& val) {
+    InputIt upper_bound(InputIt first, InputIt last, const T& val)
+    {
         unsigned long long count, half;
         count = distance(first, last);
         InputIt curr_elem;
-        while (count > 0) {
+        while (count > 0)
+        {
             half = count / 2;
             curr_elem = first + half;
-            if (!(val < *curr_elem)) {
+            if (!(val < *curr_elem))
+            {
                 first = curr_elem + 1;
                 count -= half + 1;
             }
-            else {
+            else
+            {
                 count = half;
             }
         }
@@ -374,18 +427,22 @@ namespace std_copy {
      * @param comp The function that is used to compare the elements.
     */
     template <class InputIt, class T, class Compare>
-    InputIt upper_bound(InputIt first, InputIt last, const T& val, Compare comp) {
+    InputIt upper_bound(InputIt first, InputIt last, const T& val, Compare comp)
+    {
         unsigned long long count, half;
         count = distance(first, last);
         InputIt curr_elem;
-        while (count > 0) {
+        while (count > 0)
+        {
             half = count / 2;
             curr_elem = first + half;
-            if (!comp(val, *curr_elem)) {
+            if (!comp(val, *curr_elem))
+            {
                 first = curr_elem + 1;
                 count -= half + 1;
             }
-            else {
+            else
+            {
                 count = half;
             }
         }
@@ -398,7 +455,8 @@ namespace std_copy {
      * @param b The second element.
     */
     template <class T>
-    const T& max(const T& a, const T& b) {
+    const T& max(const T& a, const T& b)
+    {
         if (b < a)
             return a;
         return b;
@@ -411,7 +469,8 @@ namespace std_copy {
      * @param comp The function that is invoked.
     */
     template <class T, class Compare>
-    const T& max(const T& a, const T& b, Compare comp) {
+    const T& max(const T& a, const T& b, Compare comp)
+    {
         if (comp(b, a))
             return a;
         return b;
@@ -423,7 +482,8 @@ namespace std_copy {
      * @param b The second element.
     */
     template <class T>
-    const T& min(const T& a, const T& b) {
+    const T& min(const T& a, const T& b)
+    {
         if (a < b)
             return a;
         return b;
@@ -436,7 +496,8 @@ namespace std_copy {
      * @param comp The function that is invoked.
     */
     template <class T, class Compare>
-    const T& min(const T& a, const T& b, Compare comp) {
+    const T& min(const T& a, const T& b, Compare comp)
+    {
         if (comp(a, b))
             return a;
         return b;
@@ -448,11 +509,14 @@ namespace std_copy {
      * @param last An iterator to the final position of the sequence of elements.
     */
     template <class InputIt>
-    InputIt max_element(InputIt first, InputIt second) {
+    InputIt max_element(InputIt first, InputIt second)
+    {
         InputIt largest = first;
 
-        while (first != second) {
-            if (*largest < *first) {
+        while (first != second)
+        {
+            if (*largest < *first)
+            {
                 largest = first;
             }
             first++;
@@ -469,11 +533,14 @@ namespace std_copy {
      * @param comp The function used to compare the element.
     */
     template <class InputIt, class Compare>
-    InputIt max_element(InputIt first, InputIt second, Compare comp) {
+    InputIt max_element(InputIt first, InputIt second, Compare comp)
+    {
         InputIt largest = first;
 
-        while (first != second) {
-            if (comp(*largest, *first)) {
+        while (first != second)
+        {
+            if (comp(*largest, *first))
+            {
                 largest = first;
             }
             first++;
@@ -488,11 +555,14 @@ namespace std_copy {
      * @param last An iterator to the final position of the sequence of elements.
     */
     template <class InputIt>
-    InputIt min_element(InputIt first, InputIt second) {
+    InputIt min_element(InputIt first, InputIt second)
+    {
         InputIt smallest = first;
 
-        while (first != second) {
-            if (*first < *smallest) {
+        while (first != second)
+        {
+            if (*first < *smallest)
+            {
                 smallest = first;
             }
             first++;
@@ -509,11 +579,14 @@ namespace std_copy {
      * @param comp The function used to compare the elements.
     */
     template <class InputIt, class Compare>
-    InputIt min_element(InputIt first, InputIt second, Compare comp) {
+    InputIt min_element(InputIt first, InputIt second, Compare comp)
+    {
         InputIt smallest = first;
 
-        while (first != second) {
-            if (comp(*first, *smallest)) {
+        while (first != second)
+        {
+            if (comp(*first, *smallest))
+            {
                 smallest = first;
             }
             first++;
@@ -528,7 +601,8 @@ namespace std_copy {
      * @param b The second element.
     */
     template <class T>
-    pair<T, T> minmax(const T& a, const T& b) {
+    pair<T, T> minmax(const T& a, const T& b)
+    {
         if (a < b)
             return std_copy::make_pair(a, b);
         return std_copy::make_pair(b, a);
@@ -540,7 +614,8 @@ namespace std_copy {
      * @param last An iterator to the final position of the sequence of elements.
     */
     template <class InputIt>
-    pair<InputIt, InputIt> minmax_element(InputIt first, InputIt second) {
+    pair<InputIt, InputIt> minmax_element(InputIt first, InputIt second)
+    {
         InputIt largest = std_copy::max_element(first, second);
         InputIt smallest = std_copy::min_element(first, second);
         return std_copy::make_pair(smallest, largest);
@@ -554,8 +629,10 @@ namespace std_copy {
      * @param first2 An iterator to the initial position of the second sequence of elements.
     */
     template <class InputIt1, class InputIt2>
-    pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2) {
-        while (first1 != last1 && *first1 == *first2) {
+    pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+    {
+        while (first1 != last1 && *first1 == *first2)
+        {
             first1++;
         }
         return std_copy::make_pair(first1, first2);
@@ -571,8 +648,10 @@ namespace std_copy {
      * @param pred The function used to compare the elements.
     */
     template <class InputIt1, class InputIt2, class Compare>
-    pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare pred) {
-        while (first1 != last1 && pred(*first1, *first2)) {
+    pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare pred)
+    {
+        while (first1 != last1 && pred(*first1, *first2))
+        {
             first1++;
         }
         return std_copy::make_pair(first1, first2);
@@ -588,17 +667,22 @@ namespace std_copy {
      * @param last2 An iterator to the final position of the second sequence of elements.
     */
     template <class InputIt1, class InputIt2>
-    InputIt1 search(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2) {
-        while (first1 != last1) {
+    InputIt1 search(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+    {
+        while (first1 != last1)
+        {
             InputIt2 it2 = first2;
             InputIt1 it1 = first1;
-            while (*it1 == *it2) {
+            while (*it1 == *it2)
+            {
                 it1++;
                 it2++;
-                if (it2 == last2) {
+                if (it2 == last2)
+                {
                     return first1;
                 }
-                if (it1 == last1) {
+                if (it1 == last1)
+                {
                     return last1;
                 }
             }
@@ -618,17 +702,22 @@ namespace std_copy {
      * @param comp The function used to compare the elements.
     */
     template <class InputIt1, class InputIt2, class Compare>
-    InputIt1 search(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp) {
-        while (first1 != last1) {
+    InputIt1 search(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+    {
+        while (first1 != last1)
+        {
             InputIt2 it2 = first2;
             InputIt1 it1 = first1;
-            while (comp(*it1, *it2)) {
+            while (comp(*it1, *it2))
+            {
                 it1++;
                 it2++;
-                if (it2 == last2) {
+                if (it2 == last2)
+                {
                     return first1;
                 }
-                if (it1 == last1) {
+                if (it1 == last1)
+                {
                     return last1;
                 }
             }
@@ -646,10 +735,14 @@ namespace std_copy {
      * @param last2 An iterator to the final position of the second sequence of elements.
     */
     template <class InputIt1, class InputIt2>
-    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2) {
-        while (first1 != last1) {
-            for (InputIt2 it = first2; it != last2; it++) {
-                if (*it == *first1) {
+    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+    {
+        while (first1 != last1)
+        {
+            for (InputIt2 it = first2; it != last2; it++)
+            {
+                if (*it == *first1)
+                {
                     return first1;
                 }
             }
@@ -668,10 +761,14 @@ namespace std_copy {
      * @param comp The function used to compare the elements.
     */
     template <class InputIt1, class InputIt2, class Compare>
-    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp) {
-        while (first1 != last1) {
-            for (InputIt2 it = first2; it != last2; it++) {
-                if (comp(*it, *first1)) {
+    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+    {
+        while (first1 != last1)
+        {
+            for (InputIt2 it = first2; it != last2; it++)
+            {
+                if (comp(*it, *first1))
+                {
                     return first1;
                 }
             }
@@ -688,20 +785,26 @@ namespace std_copy {
      * @param last2 An iterator to the final position of the second sequence of elements.
     */
     template <class InputIt1, class InputIt2>
-    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2) {
+    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+    {
         if (first1 == last1)
             return last1;
 
         InputIt1 curr_elem_reverse = last1;
-        while (curr_elem_reverse != first1) {
-            for (InputIt2 it = first2; it != last2; it++) {
-                if (*curr_elem_reverse == *it) {
+        while (curr_elem_reverse != first1)
+        {
+            for (InputIt2 it = first2; it != last2; it++)
+            {
+                if (*curr_elem_reverse == *it)
+                {
                     return curr_elem_reverse;
                 }
             }
         }
-        for (InputIt2 it = first2; it != last2; it++) {
-            if (*first1 == *it) {
+        for (InputIt2 it = first2; it != last2; it++)
+        {
+            if (*first1 == *it)
+            {
                 return first1;
             }
         }
@@ -718,20 +821,26 @@ namespace std_copy {
      * @param comp The function used to compare the elements.
     */
     template <class InputIt1, class InputIt2, class Compare>
-    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp) {
+    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+    {
         if (first1 == last1)
             return last1;
 
         InputIt1 curr_elem_reverse = last1;
-        while (curr_elem_reverse != first1) {
-            for (InputIt2 it = first2; it != last2; it++) {
-                if (comp(*curr_elem_reverse, *it)) {
+        while (curr_elem_reverse != first1)
+        {
+            for (InputIt2 it = first2; it != last2; it++)
+            {
+                if (comp(*curr_elem_reverse, *it))
+                {
                     return curr_elem_reverse;
                 }
             }
         }
-        for (InputIt2 it = first2; it != last2; it++) {
-            if (comp(*first1, *it)) {
+        for (InputIt2 it = first2; it != last2; it++)
+        {
+            if (comp(*first1, *it))
+            {
                 return first1;
             }
         }
@@ -749,14 +858,18 @@ namespace std_copy {
      * @param val The value that the elements get compared against.
     */
     template <class InputIt, class Size, class T>
-    InputIt search_n(InputIt first, InputIt last, Size count, const T& val) {
-        while (first != last) {
+    InputIt search_n(InputIt first, InputIt last, Size count, const T& val)
+    {
+        while (first != last)
+        {
             Size i = 0;
             InputIt it = first;
-            while (*it == val) {
+            while (*it == val)
+            {
                 i++;
                 it++;
-                if (i == count) {
+                if (i == count)
+                {
                     return first;
                 }
             }
@@ -776,14 +889,18 @@ namespace std_copy {
      * @param comp The function used to compare the elements against val.
     */
     template <class InputIt, class Size, class T, class Compare>
-    InputIt search_n(InputIt first, InputIt last, Size count, const T& val, Compare comp) {
-        while (first != last) {
+    InputIt search_n(InputIt first, InputIt last, Size count, const T& val, Compare comp)
+    {
+        while (first != last)
+        {
             Size i = 0;
             InputIt it = first;
-            while (comp(*it, val)) {
+            while (comp(*it, val))
+            {
                 i++;
                 it++;
-                if (i == count) {
+                if (i == count)
+                {
                     return first;
                 }
             }
@@ -798,7 +915,8 @@ namespace std_copy {
      * @param val The value of the elements in the subrange to search for.
     */
     template <class InputIt, class T>
-    pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val) {
+    pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val)
+    {
         InputIt start = std_copy::lower_bound(first, last, val);
         InputIt end = std_copy::upper_bound(first, last, val);
         return std_copy::make_pair<start, end>;
@@ -811,7 +929,8 @@ namespace std_copy {
      * @param val The value of the elements in the subrange to search for.
     */
     template <class InputIt, class T, class Compare>
-    pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val, Compare comp) {
+    pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val, Compare comp)
+    {
         InputIt start = std_copy::lower_bound(first, last, val, comp);
         InputIt end = std_copy::upper_bound(first, last, val, comp);
         return std_copy::make_pair<start, end>;
@@ -823,8 +942,10 @@ namespace std_copy {
      * @param fn The function that is invoked on the elements.
     */
     template <class InputIt, class Function>
-    Function for_each(InputIt first, InputIt last, Function fn) {
-        while (first != last) {
+    Function for_each(InputIt first, InputIt last, Function fn)
+    {
+        while (first != last)
+        {
             fn(*first);
             first++;
         }
@@ -838,8 +959,10 @@ namespace std_copy {
      * @param fn The function that is invoked on the elements.
     */
     template <class InputIt, class Size, class Function>
-    InputIt for_each_n(InputIt first, Size n, Function fn) {
-        for (int i = 0; i < n; i++) {
+    InputIt for_each_n(InputIt first, Size n, Function fn)
+    {
+        for (int i = 0; i < n; i++)
+        {
             fn(*first);
             first++;
         }
@@ -855,8 +978,10 @@ namespace std_copy {
      * @param fn A function which accepts one argument and returns a result.
     */
     template <class InputIt, class OutputIt, class Function>
-    OutputIt transform(InputIt first, InputIt last, OutputIt result, Function fn) {
-        while (first != last) {
+    OutputIt transform(InputIt first, InputIt last, OutputIt result, Function fn)
+    {
+        while (first != last)
+        {
             *result = fn(*first);
             first++;
             result++;
@@ -874,8 +999,10 @@ namespace std_copy {
      * @param binary_fn A function which accepts two argument and returns a result.
     */
     template <class InputIt, class OutputIt, class Function>
-    OutputIt transform(InputIt first1, InputIt last1, InputIt first2, OutputIt result, Function binary_fn) {
-        while (first1 != last1) {
+    OutputIt transform(InputIt first1, InputIt last1, InputIt first2, OutputIt result, Function binary_fn)
+    {
+        while (first1 != last1)
+        {
             *result++ = binary_fn(*first1, *first2);
             first1++;
             first2++;
@@ -889,11 +1016,12 @@ namespace std_copy {
      * @param val The value used to compare against the elements in the range.
     */
     template <class InputIt, class T>
-    InputIt remove(InputIt first, InputIt last, const T& val) {
-        for (InputIt it = first; it != last; it++) {
-            if (*it != val) {
+    InputIt remove(InputIt first, InputIt last, const T& val)
+    {
+        for (InputIt it = first; it != last; it++)
+        {
+            if (*it != val)
                 *first++ = std_copy::move(*it);
-            }
         }
         return first;
     }
@@ -904,11 +1032,12 @@ namespace std_copy {
      * @param pred The function that is invoked on each element in the range.
     */
     template <class InputIt, class Function>
-    InputIt remove_if(InputIt first, InputIt last, Function pred) {
-        for (InputIt it = first; it != last; it++) {
-            if (!pred(*it)) {
+    InputIt remove_if(InputIt first, InputIt last, Function pred)
+    {
+        for (InputIt it = first; it != last; it++)
+        {
+            if (!pred(*it))
                 *first++ = std_copy::move(*it);
-            }
         }
         return first;
     }
@@ -921,9 +1050,12 @@ namespace std_copy {
      * @param val The value which the elements are compared against.
     */
     template <class InputIt, class OutputIt, class T>
-    OutputIt remove_copy(InputIt first, InputIt last, OutputIt result, const T& val) {
-        while (first != last) {
-            if (*first != val) {
+    OutputIt remove_copy(InputIt first, InputIt last, OutputIt result, const T& val)
+    {
+        while (first != last)
+        {
+            if (*first != val)
+            {
                 *result++ = *first;
             }
             first++;
@@ -939,9 +1071,12 @@ namespace std_copy {
      * @param pred The function that is invoked on each of the elements.
     */
     template <class InputIt, class OutputIt, class Function>
-    OutputIt remove_copy_if(InputIt first, InputIt last, OutputIt result, Function pred) {
-        while (first != last) {
-            if (!pred(*first)) {
+    OutputIt remove_copy_if(InputIt first, InputIt last, OutputIt result, Function pred)
+    {
+        while (first != last)
+        {
+            if (!pred(*first))
+            {
                 *result++ = *first;
             }
             first++;
@@ -955,9 +1090,12 @@ namespace std_copy {
      * @param last An iterator to the final position of the sequence of elements.
     */
     template <class InputIt>
-    InputIt adjacent_find(InputIt first, InputIt last) {
-        while (first != last) {
-            if (*first == *(first + 1)) {
+    InputIt adjacent_find(InputIt first, InputIt last)
+    {
+        while (first != last)
+        {
+            if (*first == *(first + 1))
+            {
                 return first;
             }
             first++;
@@ -972,9 +1110,12 @@ namespace std_copy {
      * @param func The function used to compare the elements.
     */
     template <class InputIt, class Function>
-    InputIt adjacent_find(InputIt first, InputIt last, Function func) {
-        while (first != last) {
-            if (func(*first, *(first + 1))) {
+    InputIt adjacent_find(InputIt first, InputIt last, Function func)
+    {
+        while (first != last)
+        {
+            if (func(*first, *(first + 1)))
+            {
                 return first;
             }
             first++;
@@ -990,9 +1131,12 @@ namespace std_copy {
      * @param new_val The value that replaces old_val. 
     */
     template <class InputIt, class T>
-    void replace(InputIt first, InputIt last, const T& old_val, const T& new_val) {
-        while (first != last) {
-            if (*first == old_val) {
+    void replace(InputIt first, InputIt last, const T& old_val, const T& new_val)
+    {
+        while (first != last)
+        {
+            if (*first == old_val)
+            {
                 *first = new_val;
             }
             first++;
@@ -1007,9 +1151,12 @@ namespace std_copy {
      * @param new_val The value that replaces all the elements for which func returns true.
     */
     template <class InputIt, class Function, class T>
-    void replace_if(InputIt first, InputIt last, Function func, const T& new_val) {
-        while (first != last) {
-            if (func(*first)) {
+    void replace_if(InputIt first, InputIt last, Function func, const T& new_val)
+    {
+        while (first != last)
+        {
+            if (func(*first))
+            {
                 *first = new_val;
             }
             first++;
@@ -1029,7 +1176,8 @@ namespace std_copy {
     OutputIt replace_copy(InputIt first, InputIt last, OutputIt result, const T& old_val, 
                             const T& new_val) 
     {
-        while (first != last) {
+        while (first != last)
+        {
             *result++ = (*first == old_val) ? new_val : *first;
             first++;
         }
@@ -1049,7 +1197,8 @@ namespace std_copy {
     OutputIt replace_copy_if(InputIt first, InputIt last, OutputIt result, Function func, 
                             const T& new_val) 
     {
-        while (first != last) {
+        while (first != last)
+        {
             *result++ = func(*first) ? new_val : *first;
             first++;
         }
@@ -1062,11 +1211,14 @@ namespace std_copy {
      * @param n The number of places to shift left by.
     */
     template <class InputIt>
-    InputIt shift_left(InputIt first, InputIt last, long long n) {
-        if (n == 0 || n > last - first) {
+    InputIt shift_left(InputIt first, InputIt last, long long n)
+    {
+        if (n == 0 || n > last - first)
+        {
             return first;
         }
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
+        {
             *(first + i + n) = std_copy::move(*(first + i));
         }
         return first + (last - first - n);
@@ -1078,11 +1230,14 @@ namespace std_copy {
      * @param n The number of places to shift right by.
     */
     template <class InputIt>
-    InputIt shift_right(InputIt first, InputIt last, long long n) {
-        if (n == 0 || n > last - first) {
+    InputIt shift_right(InputIt first, InputIt last, long long n)
+    {
+        if (n == 0 || n > last - first)
+        {
             return first;
         }
-        for (int i = n; i >= 0; i--) {
+        for (int i = n; i >= 0; i--)
+        {
             *(first + n) = std_copy::move(*(first + (n << 1)));
         }
         return first + n;
@@ -1096,8 +1251,10 @@ namespace std_copy {
      * are stored.
     */
     template <class InputIt, class OutputIt>
-    OutputIt move(InputIt first, InputIt last, OutputIt result) {
-        while (first != last) {
+    OutputIt move(InputIt first, InputIt last, OutputIt result)
+    {
+        while (first != last)
+        {
             *result++ = std_copy::move(*first++);
         }
         return result;
@@ -1111,8 +1268,10 @@ namespace std_copy {
      * are stored.
     */
     template <class InputIt, class OutputIt>
-    OutputIt move_backward(InputIt first, InputIt last, OutputIt result) {
-        while (first != last) {
+    OutputIt move_backward(InputIt first, InputIt last, OutputIt result)
+    {
+        while (first != last)
+        {
             *(--result) = std_copy::move(*(--last));
         }
         return result;
@@ -1125,10 +1284,13 @@ namespace std_copy {
      * @param last An iterator to the final position of the sequence of elements.
     */
     template <class InputIt>
-    InputIt unique(InputIt first, InputIt last) {
+    InputIt unique(InputIt first, InputIt last)
+    {
         InputIt result = first;
-        while (first != last) {
-            if (!(*result == *first) && result != first) {
+        while (first != last)
+        {
+            if (!(*result == *first) && result != first)
+            {
                 *result = std_copy::move(*first);
                 result++;
             }
@@ -1145,10 +1307,13 @@ namespace std_copy {
      * @param comp The function used to compare the elements.
     */
     template <class InputIt, class Compare>
-    InputIt unique(InputIt first, InputIt last, Compare comp) {
+    InputIt unique(InputIt first, InputIt last, Compare comp)
+    {
         InputIt result = first;
-        while (first != last) {
-            if (!comp(*result, *first) && result != first) {
+        while (first != last)
+        {
+            if (!comp(*result, *first) && result != first)
+            {
                 *result = std_copy::move(*first);
                 result++;
             }
@@ -1165,12 +1330,15 @@ namespace std_copy {
      * are stored.
     */
     template <class InputIt, class OutputIt>
-    OutputIt unique_copy(InputIt first, InputIt last, OutputIt result) {
+    OutputIt unique_copy(InputIt first, InputIt last, OutputIt result)
+    {
         if (first == last) 
             return result;
             
-        while (first != last) {
-            if (!(*(first + 1) == *first) || first + 1 == last) {
+        while (first != last)
+        {
+            if (!(*(first + 1) == *first) || first + 1 == last)
+            {
                 *result++ = *first;
             }
             first++;
@@ -1187,12 +1355,15 @@ namespace std_copy {
      * @param comp The function used to compare the elements.
     */
     template <class InputIt, class OutputIt, class Compare>
-    OutputIt unique_copy(InputIt first, InputIt last, OutputIt result, Compare comp) {
+    OutputIt unique_copy(InputIt first, InputIt last, OutputIt result, Compare comp)
+    {
         if (first == last) 
             return result;
 
-        while (first != last) {
-            if (!comp(*(first + 1), *first) || first + 1 == last) {
+        while (first != last)
+        {
+            if (!comp(*(first + 1), *first) || first + 1 == last)
+            {
                 *result++ = *first;
             }
             first++;
@@ -1205,7 +1376,8 @@ namespace std_copy {
      * @param b The second iterator.
     */
     template <class InputIt1, class InputIt2>
-    constexpr void iter_swap(InputIt1 a, InputIt2 b) {
+    constexpr void iter_swap(InputIt1 a, InputIt2 b)
+    {
         std_copy::swap(*a, *b);
     }
     /**
@@ -1215,8 +1387,10 @@ namespace std_copy {
      * @param last An iterator to the end of the sequence.
     */
     template <class InputIt>
-    constexpr void reverse(InputIt first, InputIt last) {
-        while (first != last) {
+    constexpr void reverse(InputIt first, InputIt last)
+    {
+        while (first != last)
+        {
             std_copy::iter_swap(first, last);
             first++;
         }
@@ -1229,8 +1403,10 @@ namespace std_copy {
      * @param result An iterator to the start of the new sequence.
     */
     template <class InputIt, class OutputIt>
-    constexpr void reverse_copy(InputIt first, InputIt last, OutputIt result) {
-        while (last != first) {
+    constexpr void reverse_copy(InputIt first, InputIt last, OutputIt result)
+    {
+        while (last != first)
+        {
             *result++ = *(--last);
         }
     }

@@ -1,9 +1,11 @@
 #ifndef _STD_COPY_PAIR
 #define _STD_COPY_PAIR
 
-namespace std_copy {
+namespace std_copy
+{
     template <class T1, class T2>
-    struct pair {
+    struct pair
+    {
         private:
             typedef pair<T1, T2>    pair_type;
 
@@ -14,6 +16,7 @@ namespace std_copy {
             first_type  first;
             second_type  second;
 
+            pair() {}
             /**
              * This function constructs a pair from two arguments.
              * @param f The argument that first gets set to.
@@ -44,7 +47,8 @@ namespace std_copy {
             {
             }
 
-            void swap(const pair_type& p) {
+            void swap(const pair_type& p)
+            {
                 first_type temp = first;
                 first = p.first;
                 p.first = temp;
@@ -53,7 +57,8 @@ namespace std_copy {
                 second = p.second;
                 p.second = temp2;
             }
-            const pair_type& operator=(const pair_type& toAssign) {
+            const pair_type& operator=(const pair_type& toAssign)
+            {
                 first = std_copy::move(toAssign.first);
                 second = std_copy::move(toAssign.second);
                 return *this;
@@ -65,14 +70,16 @@ namespace std_copy {
      * @param s The argument that gets assigned to second,
     */
     template <class T1, class T2>
-    pair<T1, T2> make_pair(T1 f, T2 s) {
+    pair<T1, T2> make_pair(T1 f, T2 s)
+    {
         return pair<T1, T2>(f, s);
     }
     /**
      * @brief Swaps the member variables of two pair objects.
     */
     template <class T1, class T2>
-    void swap(pair<T1, T2> lhs, pair<T1, T2> rhs) {
+    void swap(pair<T1, T2> lhs, pair<T1, T2> rhs)
+    {
         T1 tempFirst = lhs.first;
         lhs.first = rhs.first;
         rhs.first = tempFirst;
@@ -86,14 +93,16 @@ namespace std_copy {
      * Check if two pair objects are equal.
     */
     template <class T1, class T2>
-    bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) {
+    bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    {
         return (lhs.first == rhs.first) && (lhs.second == rhs.second);
     }
     /**
      * Check if two pair objects are unequal.
     */
     template <class T1, class T2>
-    bool operator!=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) {
+    bool operator!=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    {
         return !(lhs == rhs);
     }
     /**
@@ -112,14 +121,16 @@ namespace std_copy {
      * object.
     */
     template <class T1, class T2>
-    bool operator<=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) {
+    bool operator<=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    {
         return !(rhs < lhs);
     }
     /**
      * Check if one pair object is greater than the other pair object.
     */
     template <class T1, class T2>
-    bool operator>(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) {
+    bool operator>(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    {
         return rhs < lhs;
     }
     /**
@@ -127,7 +138,8 @@ namespace std_copy {
      * object.
     */
     template <class T1, class T2>
-    bool operator>=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs) {
+    bool operator>=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    {
         return !(lhs < rhs);
     }
 }
