@@ -11,7 +11,7 @@ namespace std_copy {
      * @param b The second paremeter.
     */
     template <class T>
-    void swap(T& a, T& b)
+    constexpr void swap(T& a, T& b)
     {
         T temp = std_copy::move(a);
         a = std_copy::move(b);
@@ -24,7 +24,7 @@ namespace std_copy {
      * @param b The second array.
     */
     template <class T, unsigned long long N>
-    void swap(T (&a)[N], T (&b)[N])
+    constexpr void swap(T (&a)[N], T (&b)[N])
     {
         for (unsigned long long i = 0; i < N; i++)
         {
@@ -43,7 +43,7 @@ namespace std_copy {
     T exchange(T& obj, U&& new_value)
     {
         T old_val = std_copy::move(obj);
-        old_val = new_value;
+        old_val = std_copy::move(new_value);
         return old_val;
     }
     /**

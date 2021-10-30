@@ -2,6 +2,7 @@
 #define _STD_COPY_ALGORITHM
 
 #include "utility.hpp"
+#include "iterator_traits.hpp"
 
 namespace std_copy
 {
@@ -127,9 +128,7 @@ namespace std_copy
     void fill_n(InputIt first, Size n, const T& val)
     {
         for (int i = 0; i < n; i++)
-        {
             *first++ = val;
-        }
     }
     /**
      * This function copies the elements in the range [first, last) to result.
@@ -142,9 +141,8 @@ namespace std_copy
     OutputIt copy(InputIt first, InputIt last, OutputIt result)
     {
         while (first != last)
-        {
             *result++ = *first++;
-        }
+
         return result;
     }
     /**
@@ -158,9 +156,8 @@ namespace std_copy
     OutputIt copy_n(InputIt first, Size n, OutputIt result)
     {
         for (int i = 0; i < n; i++)
-        {
             *result++ = *first++;
-        }
+
         return result;
     }
     /**
@@ -179,9 +176,8 @@ namespace std_copy
         while (first != last)
         {
             if (func(*first))
-            {
                 *result++ = *first;
-            }
+                
             first++;
         }
         return result;
@@ -198,9 +194,8 @@ namespace std_copy
     OutputIt copy_backward(InputIt first, InputIt last, OutputIt result)
     {
         while (first != last)
-        {
             *(--result) = *(--last);
-        }
+
         return result;
     }
     /**
@@ -246,9 +241,8 @@ namespace std_copy
         while (first != last)
         {
             if (!func(*first))
-            {
                 return false;
-            }
+
             first++;
         }
         return true;
@@ -266,9 +260,8 @@ namespace std_copy
         while (first != last)
         {
             if (func(*first))
-            {
                 return true;
-            }
+
             first++;
         }
         return false;
@@ -297,12 +290,8 @@ namespace std_copy
     {
         while (first1 != last1)
         {
-            if (*first1 != *first2)
-            {
+            if (*first1++ != *first2++)
                 return false;
-            }
-            first1++;
-            first2++;
         }
         return true;
     }
@@ -319,12 +308,8 @@ namespace std_copy
     {
         while (first1 != last1)
         {
-            if (!pred(*first1, *first2))
-            {
+            if (!pred(*first1++, *first2++))
                 return false;
-            }
-            first1++;
-            first2++;
         }
         return true;
     }
@@ -562,9 +547,8 @@ namespace std_copy
         while (first != second)
         {
             if (*first < *smallest)
-            {
                 smallest = first;
-            }
+
             first++;
         }
 
@@ -586,9 +570,7 @@ namespace std_copy
         while (first != second)
         {
             if (comp(*first, *smallest))
-            {
                 smallest = first;
-            }
             first++;
         }
 
@@ -632,9 +614,8 @@ namespace std_copy
     pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2)
     {
         while (first1 != last1 && *first1 == *first2)
-        {
             first1++;
-        }
+
         return std_copy::make_pair(first1, first2);
     }
     /**
@@ -651,9 +632,8 @@ namespace std_copy
     pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare pred)
     {
         while (first1 != last1 && pred(*first1, *first2))
-        {
             first1++;
-        }
+
         return std_copy::make_pair(first1, first2);
     }
     /**
@@ -678,13 +658,10 @@ namespace std_copy
                 it1++;
                 it2++;
                 if (it2 == last2)
-                {
                     return first1;
-                }
+                    
                 if (it1 == last1)
-                {
                     return last1;
-                }
             }
             first1++;
         }
@@ -713,13 +690,10 @@ namespace std_copy
                 it1++;
                 it2++;
                 if (it2 == last2)
-                {
                     return first1;
-                }
+
                 if (it1 == last1)
-                {
                     return last1;
-                }
             }
             first1++;
         }
@@ -742,9 +716,7 @@ namespace std_copy
             for (InputIt2 it = first2; it != last2; it++)
             {
                 if (*it == *first1)
-                {
                     return first1;
-                }
             }
         }
         return last1;
@@ -768,17 +740,13 @@ namespace std_copy
             for (InputIt2 it = first2; it != last2; it++)
             {
                 if (comp(*it, *first1))
-                {
                     return first1;
-                }
             }
         }
         return last1;
     }
     /**
-     * This function returns an iterator to the last element in the range [first1, last1) that matches any of 
-     * the elements in the range [first2, last2). This function invokes operator== to compare the elements. 
-     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
+     * Finds the sequence [first1, last1) for a subsequence defined by [first2, last2).
      * @param first1 An iterator to the initial position of the first sequence of elements.
      * @param last1 An iterator to the final position of the first sequence of elements.
      * @param first2 An iterator to the initial position of the second sequence of elements.
@@ -787,28 +755,25 @@ namespace std_copy
     template <class InputIt1, class InputIt2>
     InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
     {
-        if (first1 == last1)
-            return last1;
+        InputIt1 ret = last1;
+        while (first1++ != last1)
+        {
+            InputIt1 it1 = first1;
+            InputIt2 it2 = first2;
+            while (*it1++ == *it2++)
+            {
 
-        InputIt1 curr_elem_reverse = last1;
-        while (curr_elem_reverse != first1)
-        {
-            for (InputIt2 it = first2; it != last2; it++)
-            {
-                if (*curr_elem_reverse == *it)
+                if (it2 == last2)
                 {
-                    return curr_elem_reverse;
+                    ret = first1;
+                    break;
                 }
+                
+                if (it1 == last1)
+                    return ret;
             }
         }
-        for (InputIt2 it = first2; it != last2; it++)
-        {
-            if (*first1 == *it)
-            {
-                return first1;
-            }
-        }
-        return last1;
+        return ret;
     }
     /**
      * This function returns an iterator to the last element in the range [first1, last1) that matches any of 
@@ -823,28 +788,25 @@ namespace std_copy
     template <class InputIt1, class InputIt2, class Compare>
     InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
     {
-        if (first1 == last1)
-            return last1;
+        InputIt1 ret = last1;
+        while (first1++ != last1)
+        {
+            InputIt1 it1 = first1;
+            InputIt2 it2 = first2;
+            while (comp(*it1++, *it2++))
+            {
 
-        InputIt1 curr_elem_reverse = last1;
-        while (curr_elem_reverse != first1)
-        {
-            for (InputIt2 it = first2; it != last2; it++)
-            {
-                if (comp(*curr_elem_reverse, *it))
+                if (it2 == last2)
                 {
-                    return curr_elem_reverse;
+                    ret = first1;
+                    break;
                 }
+                
+                if (it1 == last1)
+                    return ret;
             }
         }
-        for (InputIt2 it = first2; it != last2; it++)
-        {
-            if (comp(*first1, *it))
-            {
-                return first1;
-            }
-        }
-        return last1;
+        return ret;
     }
     /**
      * This function searches the elements in the range [first, last) for a sequence of count elements that all 
@@ -869,9 +831,7 @@ namespace std_copy
                 i++;
                 it++;
                 if (i == count)
-                {
                     return first;
-                }
             }
         }
         return last;
@@ -900,9 +860,7 @@ namespace std_copy
                 i++;
                 it++;
                 if (i == count)
-                {
                     return first;
-                }
             }
         }
         return last;
@@ -919,7 +877,7 @@ namespace std_copy
     {
         InputIt start = std_copy::lower_bound(first, last, val);
         InputIt end = std_copy::upper_bound(first, last, val);
-        return std_copy::make_pair<start, end>;
+        return std_copy::make_pair(start, end);
     }
     /**
      * This function returns the bounds of the subrange which includes elements with values all equal to val. 
@@ -933,7 +891,7 @@ namespace std_copy
     {
         InputIt start = std_copy::lower_bound(first, last, val, comp);
         InputIt end = std_copy::upper_bound(first, last, val, comp);
-        return std_copy::make_pair<start, end>;
+        return std_copy::make_pair(start, end);
     }
     /**
      * This function invokes a provided function on each element in the range [first, last).
@@ -1055,9 +1013,8 @@ namespace std_copy
         while (first != last)
         {
             if (*first != val)
-            {
                 *result++ = *first;
-            }
+
             first++;
         }
         return result;
@@ -1076,9 +1033,8 @@ namespace std_copy
         while (first != last)
         {
             if (!pred(*first))
-            {
                 *result++ = *first;
-            }
+
             first++;
         }
         return result;
@@ -1095,9 +1051,8 @@ namespace std_copy
         while (first != last)
         {
             if (*first == *(first + 1))
-            {
                 return first;
-            }
+
             first++;
         }
         return last;
@@ -1115,9 +1070,8 @@ namespace std_copy
         while (first != last)
         {
             if (func(*first, *(first + 1)))
-            {
                 return first;
-            }
+
             first++;
         }
         return last;
@@ -1136,9 +1090,8 @@ namespace std_copy
         while (first != last)
         {
             if (*first == old_val)
-            {
                 *first = new_val;
-            }
+
             first++;
         }
     }
@@ -1156,9 +1109,8 @@ namespace std_copy
         while (first != last)
         {
             if (func(*first))
-            {
                 *first = new_val;
-            }
+
             first++;
         }
     }
@@ -1211,16 +1163,14 @@ namespace std_copy
      * @param n The number of places to shift left by.
     */
     template <class InputIt>
-    InputIt shift_left(InputIt first, InputIt last, long long n)
+    InputIt shift_left(InputIt first, InputIt last, long long n = 1)
     {
         if (n == 0 || n > last - first)
-        {
             return first;
-        }
-        for (int i = 0; i < n; i++)
-        {
-            *(first + i + n) = std_copy::move(*(first + i));
-        }
+
+        for (int i = 0; i < last - first - n; i++)
+            *(first + i) = std_copy::move(*(first + i + n));
+
         return first + (last - first - n);
     }
     /**
@@ -1230,16 +1180,14 @@ namespace std_copy
      * @param n The number of places to shift right by.
     */
     template <class InputIt>
-    InputIt shift_right(InputIt first, InputIt last, long long n)
+    InputIt shift_right(InputIt first, InputIt last, long long n = 1)
     {
         if (n == 0 || n > last - first)
-        {
-            return first;
-        }
-        for (int i = n; i >= 0; i--)
-        {
-            *(first + n) = std_copy::move(*(first + (n << 1)));
-        }
+            return last;
+
+        for (int i = last - first; i >= n; i--)
+            *(first + i) = std_copy::move(*(first + i - n));
+
         return first + n;
     }
     /**
@@ -1254,9 +1202,23 @@ namespace std_copy
     OutputIt move(InputIt first, InputIt last, OutputIt result)
     {
         while (first != last)
-        {
             *result++ = std_copy::move(*first++);
-        }
+        
+        return result;
+    }
+    /**
+     * This function moves the first n elements in the range starting at  
+     * first to the range starting at result.
+     * @param first The start of the sequence to move from.
+     * @param n The number of elements to move.
+     * @param result The start of the range to move to.
+    */
+    template <class InputIt, class Size, class OutputIt>
+    OutputIt move_n(InputIt first, Size n, OutputIt result)
+    {
+        for (int i = 0; i < n; i++)
+            *result++ = std_copy::move(*first++);
+
         return result;
     }
     /**
@@ -1271,9 +1233,8 @@ namespace std_copy
     OutputIt move_backward(InputIt first, InputIt last, OutputIt result)
     {
         while (first != last)
-        {
             *(--result) = std_copy::move(*(--last));
-        }
+
         return result;
     }
     /**
@@ -1289,11 +1250,9 @@ namespace std_copy
         InputIt result = first;
         while (first != last)
         {
-            if (!(*result == *first) && result != first)
-            {
-                *result = std_copy::move(*first);
-                result++;
-            }
+            if (!(*result == *first))
+                *(++result) = std_copy::move(*first);
+
             first++;
         }
         return ++result;
@@ -1312,11 +1271,9 @@ namespace std_copy
         InputIt result = first;
         while (first != last)
         {
-            if (!comp(*result, *first) && result != first)
-            {
-                *result = std_copy::move(*first);
-                result++;
-            }
+            if (!comp(*result, *first))
+                *(++result) = std_copy::move(*first);
+
             first++;
         }
         return ++result;
@@ -1335,15 +1292,16 @@ namespace std_copy
         if (first == last) 
             return result;
             
+        InputIt temp = first;
         while (first != last)
         {
-            if (!(*(first + 1) == *first) || first + 1 == last)
-            {
+            if (!(*(first + 1) == *first) || ++temp == last)
                 *result++ = *first;
-            }
+
             first++;
         }
-        return ++result;
+        result++;
+        return result;
     }
     /**
      * This function copies the elements from [first, last) to the range starting at 
@@ -1360,12 +1318,12 @@ namespace std_copy
         if (first == last) 
             return result;
 
+        InputIt temp = first;
         while (first != last)
         {
-            if (!comp(*(first + 1), *first) || first + 1 == last)
-            {
+            if (!comp(*(first + 1), *first) || ++temp == last)
                 *result++ = *first;
-            }
+
             first++;
         }
         return ++result;
@@ -1393,6 +1351,7 @@ namespace std_copy
         {
             std_copy::iter_swap(first, last);
             first++;
+            last--;
         }
     }
     /**
@@ -1406,9 +1365,7 @@ namespace std_copy
     constexpr void reverse_copy(InputIt first, InputIt last, OutputIt result)
     {
         while (last != first)
-        {
             *result++ = *(--last);
-        }
     }
 }
 

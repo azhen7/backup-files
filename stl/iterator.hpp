@@ -1,27 +1,23 @@
 #ifndef _STD_COPY_ITERATOR
 #define _STD_COPY_ITERATOR
 
+#include "iterator_traits.hpp"
+#include "type_traits.hpp"
+
 namespace std_copy
 {
     template <class T>
-    struct iterator_traits
-    {
-        //typedefs
-        typedef typename T::value_type              value_type;
-        typedef typename T::pointer                 pointer;
-        typedef typename T::reference               reference;
-        typedef typename T::difference_type         difference_type;
-    };
-    
-    template <class T>
     class iterator
     {
+        public:
+            typedef typename T::value_type                  value_type;
+            typedef typename T::pointer                     pointer;
+            typedef typename T::reference                   reference;
+            typedef typename T::difference_type             difference_type;
+            typedef std_copy::random_access_iterator_tag    iterator_category;
+
         private:
-            typedef typename T::value_type              value_type;
-            typedef typename T::pointer                 pointer;
-            typedef typename T::reference               reference;
-            typedef typename T::difference_type         difference_type;
-            typedef iterator<T>                         iterator_type;
+            typedef iterator<T>                             iterator_type;
 
             pointer internalPtr_;
 
@@ -43,8 +39,8 @@ namespace std_copy
             iterator_type operator++(int)
             {
                 iterator_type ptrBeforeIncrement = *this;
-                ++(*this);
-                return *this;
+                internalPtr_++;
+                return ptrBeforeIncrement;
             }
             /**
              * Overloaded postfix decrement operator
@@ -60,7 +56,7 @@ namespace std_copy
             iterator_type operator--(int)
             {
                 iterator_type ptrBeforeDecrement = internalPtr_;
-                --(*this);
+                internalPtr_--;
                 return ptrBeforeDecrement;
             }
             /**
@@ -91,6 +87,13 @@ namespace std_copy
              * Overloaded arrow operator
             */
             pointer operator->()
+            {
+                return internalPtr_;
+            }
+            /**
+             * Returns the iterator's internal pointer
+            */
+            pointer base()
             {
                 return internalPtr_;
             }
@@ -179,10 +182,18 @@ namespace std_copy
      * @param it The iterator to advance.
      * @param n The number to advance the iterator by.
     */
-    template <class Iterator>
-    void advance(Iterator& it, long long n = 1)
+    template <class InputIt>
+    void advance(InputIt& it, unsigned long long n = 1)
     {
-        it += n;
+        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _random_access_tag = std_copy::random_access_iterator_tag;
+        if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
+            it += n;
+        else
+        {
+            for (unsigned long long i = 0; i < n; i++)
+                it++;
+        }
     }
     /**
      * This function returns the distance between 
@@ -190,16 +201,19 @@ namespace std_copy
      * @param first The first iterator.
      * @param second The second iterator.
     */
-    template <class Iterator>
-    long long distance(Iterator start, Iterator last)
+    template <class InputIt>
+    long long distance(InputIt start, InputIt last)
     {
+        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _random_access_tag = std_copy::random_access_iterator_tag;
+
+        if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
+            return last - start;
         long long n = 0;
-        while (start != last)
-        {
-            start++;
+        while (start++ != last)
             n++;
-        }
         return n;
+        
     }
     /**
      * This function returns an iterator to the element n positions 
@@ -207,10 +221,18 @@ namespace std_copy
      * @param it The starting iterator position.
      * @param n The amount to add to the iterator.
     */
-    template <class Iterator>
-    Iterator next(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1)
+    template <class InputIt>
+    InputIt next(InputIt it, unsigned long long n)
     {
-        return it + n;
+        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _random_access_tag = std_copy::random_access_iterator_tag;
+
+        if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
+            return it + n;
+        
+        for (unsigned int i = 0; i < n; i++)
+            it++;
+        return it;
     }
     /**
      * This function returns an iterator to the element n positions 
@@ -218,10 +240,18 @@ namespace std_copy
      * @param it The starting iterator position.
      * @param n The amount to subtract from the iterator.
     */
-    template <class Iterator>
-    Iterator prev(Iterator it, typename iterator_traits<Iterator>::difference_type n = 1)
+    template <class InputIt>
+    InputIt prev(InputIt it, unsigned long long n)
     {
-        return it - n;
+        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _random_access_tag = std_copy::random_access_iterator_tag;
+
+        if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
+            return it - n;
+        
+        for (unsigned int i = 0; i < n; i++)
+            it--;
+        return it;
     }
 }
 

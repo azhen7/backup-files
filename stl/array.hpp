@@ -11,12 +11,11 @@ namespace std_copy
 {
     /**
      * My own implementation of the STL array container, which
-     * is defined in the <array> header. There are some new functions,
-     * such as add(), add_front(), and others.
+     * is defined in the <array> header.
      * @param T The type of the elements in the array.
      * @param s The size of the array.
      * The array STL container has the same functionality as normal
-     * static-sized C arrays, except you can assign one std::array
+     * static-sized C arrays, except you can assign one std_copy::array
      * to another, and you can return them from functions. They also
      * come with a lot of helpful functions.
     */
@@ -59,19 +58,6 @@ namespace std_copy
                 std_copy::fill_n(internalBuffer_, size_, val);
             }
 
-            template <class ...Args>
-            array(Args ...args)
-                : numberOfElements_(sizeof...(Args))
-            {
-                internalBuffer_ = new value_type[s];
-                size_type i = 0;
-                if (sizeof...(Args) > size_)
-                {
-                    throw std::length_error("Too many elements in initialization list");
-                }
-                (void(internalBuffer_[i++] = args), ...);
-            }
-
             array(const array_type& copy) 
                 : numberOfElements_(copy.numberOfElements_)
             {
@@ -85,20 +71,17 @@ namespace std_copy
                 internalBuffer_ = copy.internalBuffer_;
             }
 
-            template <class InputIt>
-            array(InputIt start, InputIt last)
-                : numberOfElements_(std_copy::distance(start, last)),
-                internalBuffer_(new value_type[s])
-            {
-                size_type i = 0;
-                while (start != last)
-                {
-                    internalBuffer_[i++] = *start++;
-                }
-            }
-
             virtual ~array() = default;
 
+            /**
+             * Assigns one array to another.
+             * @param assign The array to get assigned.
+            */
+            void operator=(const array_type& assign)
+            {
+                for (int i = 0; i < size_; i++)
+                    internalBuffer_[i] = assign.internalBuffer_[i];
+            }
             /**
              * This function fills the array with the
              * designated value.
@@ -112,7 +95,7 @@ namespace std_copy
              * This function returns the number of elements
              * in the array. This function is new.
             */
-            size_type quantity()
+            size_type quantity() const noexcept
             {
                 return numberOfElements_;
             }
@@ -120,7 +103,7 @@ namespace std_copy
              * This function returns the underlying
              * internal buffer of the array.
             */
-            pointer data()
+            pointer data() const noexcept
             {
                 return internalBuffer_;
             }
@@ -172,37 +155,6 @@ namespace std_copy
             iterator cend()
             {
                 return iterator(internalBuffer_ + numberOfElements_);
-            }
-            /**
-             * This function pushes an element onto the end of
-             * the array, i.e., adds an element at the end of it.
-             * This function is new.
-             * @param elem The element to add to the end of the array.
-            */
-            void add(const_reference elem)
-            {
-                if (numberOfElements_ >= size_)
-                {
-                    throw std::out_of_range("Array is full; cannot add any more elements");
-                }
-                internalBuffer_[numberOfElements_] = elem;
-                numberOfElements_++;
-            }
-            /**
-             * This function adds an element at the front of
-             * the array. This function is new.
-             * @param elem The element to add to the end of the array.
-            */
-            void add_front(const_reference elem)
-            {
-                if (numberOfElements_ >= size_)
-                {
-                    throw std::out_of_range("Array is full; cannot add any more elements");
-                }
-                pointer temp = internalBuffer_;
-                internalBuffer_[0] = elem;
-                std_copy::copy(temp, temp + numberOfElements_, internalBuffer_ + 1);
-                numberOfElements_++;
             }
             /**
              * This function returns a reference to 
@@ -289,7 +241,10 @@ namespace std_copy
     template <class T, unsigned long long N>
     constexpr array<T, N> to_array(T (&arr)[N])
     {
-        return array<T, N>(&arr[0], &arr[N]);
+        array<T, N> converted;
+        for (int i = 0; i < N; i++)
+            converted[i] = arr[i];
+        return converted;
     }
 }
 
