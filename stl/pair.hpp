@@ -3,8 +3,13 @@
 
 namespace std_copy
 {
+    /**
+     * My implementation of std::pair.
+     * @param T1 The type of the first member.
+     * @param T2 The type of the second member.
+    */
     template <class T1, class T2>
-    struct pair
+    class pair
     {
         private:
             typedef pair<T1, T2>    pair_type;

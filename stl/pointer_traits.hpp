@@ -21,23 +21,23 @@ namespace std_copy
 
             //Gets first argument of template parameters
             template <class T>
-            struct get_first_arg_
+            struct _get_first_arg
             {
                 using type = undefined_;
             };
             template <template <typename, typename...> class Template, class T, class ...Args>
-            struct get_first_arg_<Template<T, Args...>>
+            struct _get_first_arg<Template<T, Args...>>
             {
                 using type = T;
             };
 
             //Replace first argument of template parameters; used for rebind
             template <class T, class U>
-            struct replace_first_arg_ 
+            struct _replace_first_arg 
             {
             };
             template <template <typename, typename...> class Template, class T, class U, class ...Args>
-            struct replace_first_arg_<Template<T, Args...>, U>
+            struct _replace_first_arg<Template<T, Args...>, U>
             {
                 using type = Template<U, Args...>;
             };
@@ -48,21 +48,20 @@ namespace std_copy
             template <class T>
             using _diff_type        =   typename T::difference_type;
             template <class T, class U>
-            using _rebind           =   typename replace_first_arg_<T, U>::type;
+            using _rebind           =   typename _replace_first_arg<T, U>::type;
 
             template <class T>
-            using get_first_arg_t   =   typename get_first_arg_<T>::type;
+            using _get_first_arg_t   =   typename _get_first_arg<T>::type;
             template <class T, class U>
-            using replace_first_arg_t = typename replace_first_arg_<T, U>::type;
+            using _replace_first_arg_t = typename _replace_first_arg<T, U>::type;
 
-            
         public:
             using pointer           =   Ptr;
-            using element_type      =   detector_t<get_first_arg_t<Ptr>, _element_type, Ptr>;
-            using difference_type   =   detector_t<long long, _diff_type, Ptr>;
+            using element_type      =   _std_copy_hidden::_detector_t<_get_first_arg_t<Ptr>, _element_type, Ptr>;
+            using difference_type   =   _std_copy_hidden::_detector_t<long long, _diff_type, Ptr>;
 
             template <class U>
-            using rebind            =   detector_t<replace_first_arg_t<Ptr, U>, _rebind, Ptr, U>;
+            using rebind            =   _std_copy_hidden::_detector_t<_replace_first_arg_t<Ptr, U>, _rebind, Ptr, U>;
 
             /**
              * Constructs a dereferenceable pointer to its argument.

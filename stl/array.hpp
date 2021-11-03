@@ -23,7 +23,8 @@ namespace std_copy
     class array
     {
         private:
-            typedef iterator<array<T, s>>                           iterator_type;
+            typedef array<T, s>                                     array_type;
+            typedef iterator<array_type>                            iterator_type;
             
         public:
             //typdefs
@@ -38,37 +39,36 @@ namespace std_copy
             typedef const iterator_type                             const_iterator;
             
         private:
-            typedef array<T, s>         array_type;
-
-            pointer internalBuffer_;
-            size_type numberOfElements_;
-            const size_type size_ = s;
+            pointer _internalBuffer;
+            size_type _numberOfElements;
+            const size_type _size = s;
 
         public:
             array()
-                : numberOfElements_(0)
+                : _numberOfElements(0)
             {
-                internalBuffer_ = new value_type[s];
+                _internalBuffer = new value_type[s];
             }
 
             array(const_reference val)
-                : numberOfElements_(s)
+                : _numberOfElements(s)
             {
-                internalBuffer_ = new value_type[s];
-                std_copy::fill_n(internalBuffer_, size_, val);
+                _internalBuffer = new value_type[s];
+                std_copy::fill_n(_internalBuffer, _size, val);
             }
 
             array(const array_type& copy) 
-                : numberOfElements_(copy.numberOfElements_)
+                : _numberOfElements(copy._numberOfElements)
             {
-                internalBuffer_ = new value_type[size_];
-                std_copy::copy(copy.internalBuffer_, copy.internalBuffer_ + numberOfElements_, internalBuffer_);
+                _internalBuffer = new value_type[_size];
+                std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
             array(array_type&& copy)
-                : numberOfElements_(copy.numberOfElements_)
+                : _numberOfElements(copy._numberOfElements)
             {
-                internalBuffer_ = copy.internalBuffer_;
+                _internalBuffer = new value_type[_size];
+                std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
             virtual ~array() = default;
@@ -79,8 +79,8 @@ namespace std_copy
             */
             void operator=(const array_type& assign)
             {
-                for (int i = 0; i < size_; i++)
-                    internalBuffer_[i] = assign.internalBuffer_[i];
+                for (int i = 0; i < _size; i++)
+                    _internalBuffer[i] = assign._internalBuffer[i];
             }
             /**
              * This function fills the array with the
@@ -89,7 +89,7 @@ namespace std_copy
             */
             void fill(const_reference val)
             {
-                std_copy::fill_n(internalBuffer_, size_, val);
+                std_copy::fill_n(_internalBuffer, _size, val);
             }
             /**
              * This function returns the number of elements
@@ -97,7 +97,7 @@ namespace std_copy
             */
             size_type quantity() const noexcept
             {
-                return numberOfElements_;
+                return _numberOfElements;
             }
             /**
              * This function returns the underlying
@@ -105,7 +105,7 @@ namespace std_copy
             */
             pointer data() const noexcept
             {
-                return internalBuffer_;
+                return _internalBuffer;
             }
             /**
              * This function returns a boolean, depending
@@ -113,16 +113,17 @@ namespace std_copy
              * whether there are no elements in the array.
              * This function is new.
             */
-            constexpr bool empty()
+            bool empty() const noexcept
             {
-                return numberOfElements_ == 0;
+                return _numberOfElements == 0;
             }
             /**
              * This function returns the size of the
              * array.
             */
-            size_type size() const {
-                return size_;
+            size_type size() const noexcept
+            {
+                return _size;
             }
             /**
              * This function returns an iterator to the first element 
@@ -130,7 +131,7 @@ namespace std_copy
             */
             iterator begin()
             {
-                return iterator(internalBuffer_);
+                return iterator(_internalBuffer);
             }
             /**
              * This function returns an iterator to the theoretical element 
@@ -138,7 +139,7 @@ namespace std_copy
             */
             const_iterator end()
             {
-                return iterator(internalBuffer_ + numberOfElements_);
+                return iterator(_internalBuffer + _numberOfElements);
             }
             /**
              * This function returns an const iterator to the first element 
@@ -146,7 +147,7 @@ namespace std_copy
             */
             const_iterator cbegin()
             {
-                return iterator(internalBuffer_);
+                return iterator(_internalBuffer);
             }
             /**
              * This function returns an const iterator to the theoretical element 
@@ -154,7 +155,7 @@ namespace std_copy
             */
             iterator cend()
             {
-                return iterator(internalBuffer_ + numberOfElements_);
+                return iterator(_internalBuffer + _numberOfElements);
             }
             /**
              * This function returns a reference to 
@@ -164,23 +165,23 @@ namespace std_copy
             */
             reference at(size_type index)
             {
-                if (index >= numberOfElements_)
+                if (index >= _numberOfElements)
                 {
                     std::string err = "index (which is " + std::to_string(index) + ") >= this->size() (which is " + 
-                                    std::to_string(numberOfElements_) + ")";
+                                    std::to_string(_numberOfElements) + ")";
 
                     throw std::out_of_range(err);
                 }
-                return *(internalBuffer_ + index);
+                return *(_internalBuffer + index);
             }
             /**
-             * The [] operator is overloaded to provide C-style array
+             * operator[] is overloaded to provide C-style array
              * indexing.
              * @param index The index of the element to retrieve.
             */
             reference operator[](size_type index)
             {
-                return internalBuffer_[index];
+                return _internalBuffer[index];
             }
             /**
              * This function returns a reference to the
@@ -189,11 +190,10 @@ namespace std_copy
             */
             reference front()
             {
-                if (numberOfElements_ == 0)
-                {
+                if (_numberOfElements == 0)
                     throw std::length_error("Cannot access element in empty array");
-                }
-                return internalBuffer_[0];
+
+                return _internalBuffer[0];
             }
             /**
              * This function returns a reference to the
@@ -202,11 +202,10 @@ namespace std_copy
             */
             reference back()
             {
-                if (numberOfElements_ == 0)
-                {
+                if (_numberOfElements == 0)
                     throw std::length_error("Cannot access element in empty array");
-                }
-                return internalBuffer_[numberOfElements_ - 1];
+
+                return _internalBuffer[_numberOfElements - 1];
             }
             /**
              * This function swaps the contents of *this and toSwap.
@@ -214,13 +213,13 @@ namespace std_copy
             */
             void swap(const array_type& toSwap)
             {
-                pointer temp = internalBuffer_;
-                internalBuffer_ = toSwap.internalBuffer_;
-                toSwap.internalBuffer_ = temp;
+                pointer temp = _internalBuffer;
+                _internalBuffer = toSwap._internalBuffer;
+                toSwap._internalBuffer = temp;
 
-                size_type tempNumberOfElems = numberOfElements_;
-                numberOfElements_ = toSwap.numberOfElements_;
-                toSwap.numberOfElements_ = tempNumberOfElems;
+                size_type tempNumberOfElems = _numberOfElements;
+                _numberOfElements = toSwap._numberOfElements;
+                toSwap._numberOfElements = tempNumberOfElems;
             }
     };
 

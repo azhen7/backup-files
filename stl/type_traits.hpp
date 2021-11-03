@@ -1,6 +1,25 @@
 #ifndef _STD_COPY_TYPE_TRAITS
 #define _STD_COPY_TYPE_TRAITS
 
+namespace _std_copy_hidden
+{
+    template <class ...>
+    using _void_t = void;
+
+    template <class Default, class AlwaysVoid, template <typename...> class Template, class ...Args>
+    struct _detector
+    {
+        using type = Default;
+    };
+    template <class Default, template <typename...> class Template, class ...Args>
+    struct _detector<Default, _void_t<Template<Args...>>, Template, Args...>
+    {
+        using type = Template<Args...>;
+    };
+    template <class Default, template <typename...> class Template, class ...Args>
+    using _detector_t = typename _detector<Default, void, Template, Args...>::type;
+}
+
 namespace std_copy {
     //integral_constant
     template <class T, T v>
@@ -455,21 +474,6 @@ namespace std_copy {
     //void_t
     template <class ...>
     using void_t = void;
-
-    //detector
-    //General detector struct
-    template <class Default, class AlwaysVoid, template <typename...> class Template, class ...Args>
-    struct detector
-    {
-        using type = Default;
-    };
-    template <class Default, template <typename...> class Template, class ...Args>
-    struct detector<Default, void_t<Template<Args...>>, Template, Args...>
-    {
-        using type = Template<Args...>;
-    };
-    template <class Default, template <typename...> class Template, class ...Args>
-    using detector_t = typename detector<Default, void, Template, Args...>::type;
 
     //Operations on traits
 

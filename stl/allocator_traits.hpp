@@ -67,11 +67,10 @@ namespace std_copy
                     static constexpr bool value = sizeof(test<C>(0)) == sizeof(yes);
             };
             
-            //pointer_traits_rebind_
+            //_pointer_traits_rebind
             template <class Ptr, class T>
-            using pointer_traits_rebind_ = typename pointer_traits<Ptr>::rebind<T>;
+            using _pointer_traits_rebind = typename pointer_traits<Ptr>::rebind<T>;
 
-            
             template <class T>
             using _pointer             =    typename T::pointer;
             template <class T>
@@ -88,12 +87,12 @@ namespace std_copy
         public:
             using allocator_type       =    Alloc;
             using value_type           =    typename Alloc::value_type;
-            using pointer              =    detector_t<value_type*, _pointer, Alloc>;
-            using const_pointer        =    detector_t<pointer_traits_rebind_<pointer, const value_type*>, _const_pointer, Alloc>;
-            using void_pointer         =    detector_t<pointer_traits_rebind_<pointer, void>, _void_pointer, Alloc>;
-            using const_void_pointer   =    detector_t<pointer_traits_rebind_<pointer, const void>, _const_void_pointer, Alloc>;
-            using difference_type      =    detector_t<long long, _diff_type, Alloc>;
-            using size_type            =    detector_t<unsigned long long, _size_type, Alloc>;
+            using pointer              =    _std_copy_hidden::_detector_t<value_type*, _pointer, Alloc>;
+            using const_pointer        =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, const value_type*>, _const_pointer, Alloc>;
+            using void_pointer         =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, void>, _void_pointer, Alloc>;
+            using const_void_pointer   =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, const void>, _const_void_pointer, Alloc>;
+            using difference_type      =    _std_copy_hidden::_detector_t<long long, _diff_type, Alloc>;
+            using size_type            =    _std_copy_hidden::_detector_t<unsigned long long, _size_type, Alloc>;
 
             /**
              * This function allocates n elements and returns a 
@@ -113,7 +112,7 @@ namespace std_copy
             */
             static constexpr void deallocate(allocator_type& a, pointer ptr, size_type n)
             {
-               a.deallocate(ptr, n);
+                a.deallocate(ptr, n);
             }
             /**
              * This function constructs an element at ptr.
@@ -161,7 +160,7 @@ namespace std_copy
     class allocator_traits<std_copy::allocator<T>>
     {
         public:
-            using allocator_type       =    std_copy::allocator<T>;
+            typedef std_copy::allocator<T>  allocator_type;
             typedef T                       value_type;
             typedef T*                      pointer;
             typedef const T*                const_pointer;

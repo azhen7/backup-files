@@ -8,13 +8,16 @@
 #include "iterator.hpp"
 #include "pair.hpp"
 #include "allocator.hpp"
+#include "allocator_traits.hpp"
 
 namespace std_copy
 {
     /**
-     * My implementation of std::map, defined in the <map> header file. 
-     * This implementation contains some new functions, aside from the 
-     * ones in the original implementation.
+     * My implementation of std::map, defined in the <map> header file.
+     * @param Key The type of the keys in the map.
+     * @param T The type of the mapped values in the map.
+     * @param Compare The comparison struct used to sort the keys.
+     * @param Alloc The object used to allocate space for the map.
     */
     template <class Key, class T, class Compare = std::less<Key>, class Alloc = std_copy::allocator<pair<Key, T>>>
     class map
@@ -41,11 +44,10 @@ namespace std_copy
         private:
             typedef pair<iterator, bool>                        iterator_and_bool;
 
-            pointer internalBuffer_;
-            size_type numberOfElements_;
-            size_type capacity_;
-            allocator_type allocator;
-            key_compare compare_keys;
+            pointer _internalBuffer;
+            size_type _numberOfElements;
+            size_type _capacity;
+            key_compare _key_compare;
 
             class value_compare
                 : std::binary_function<value_type, value_type, bool>
@@ -61,19 +63,17 @@ namespace std_copy
                     }
             };
 
-            void copyAndFindInsertPos(pointer copyFrom, const key_type& key, int& pos)
+            void _copyAndFindInsertPos(pointer copyFrom, const key_type& key, int& pos)
             {
-                for (int i = 0; i < numberOfElements_; i++)
+                for (int i = 0; i < _numberOfElements; i++)
                 {
-                    if (!compare_keys(copyFrom[i].first, key))
+                    if (!_key_compare(copyFrom[i].first, key))
                     {
-                        for (int j = numberOfElements_ - 1; j >= i; j--)
-                            internalBuffer_[j + 1] = std_copy::move(copyFrom[i]);
-
+                        std_copy::move_backward(copyFrom + i, copyFrom + _numberOfElements, _internalBuffer + _numberOfElements);
                         pos = i;
                         break;
                     }
-                    internalBuffer_[i] = std_copy::move(copyFrom[i]);
+                    _internalBuffer[i] = std_copy::move(copyFrom[i]);
                 }
             }
 
@@ -83,18 +83,18 @@ namespace std_copy
                     return iterator_and_bool(this->find(elemToConstruct.first), false);
 
                 int whereToInsert = 0;
-                if (numberOfElements_ + 1 > capacity_)
+                if (_numberOfElements + 1 > _capacity)
                 {
-                    capacity_ = (capacity_ == 0) ? 1 : capacity_ * 2;
+                    _capacity = (_capacity == 0) ? 1 : _capacity * 2;
 
-                    pointer temp = internalBuffer_;
-                    internalBuffer_ = allocator.allocate(capacity_);
-                    copyAndFindInsertPos(temp, elemToConstruct.first, whereToInsert);
-                    allocator.deallocate(temp, (int) capacity_ / 2);
+                    pointer temp = _internalBuffer;
+                    _internalBuffer = allocator_type::allocate(_capacity);
+                    _copyAndFindInsertPos(temp, elemToConstruct.first, whereToInsert);
+                    allocator_type::deallocate(temp, (int) _capacity / 2);
                 }
-                std_copy::allocator_traits<allocator_type>::construct(allocator, internalBuffer_ + numberOfElements_, std_copy::move(elemToConstruct));
-                numberOfElements_++;
-                return iterator_and_bool(iterator(internalBuffer_ + numberOfElements_), true);
+                std_copy::allocator_traits<allocator_type>::construct(_allocator, _internalBuffer + whereToInsert, std_copy::move(elemToConstruct));
+                _numberOfElements++;
+                return iterator_and_bool(iterator(_internalBuffer + whereToInsert), true);
             }
 
         public:
@@ -102,8 +102,8 @@ namespace std_copy
              * Default constructor
             */
             map() 
-                : capacity_(0),
-                numberOfElements_(0)
+                : _capacity(0),
+                _numberOfElements(0)
             {
             }
             /**
@@ -111,20 +111,20 @@ namespace std_copy
              * @param copy The map used to construct the current map object.
             */
             map(const map_type& copy)
-                : capacity_(copy.capacity_),
-                numberOfElements_(copy.numberOfElements_)
+                : _capacity(copy._capacity),
+                _numberOfElements(copy._numberOfElements)
             {
-                internalBuffer_ = allocator.allocate(capacity_);
-                for (size_type i = 0; i < numberOfElements_; i++)
-                    internalBuffer_[i] = copy.internalBuffer_[i];
+                _internalBuffer = allocator_type::allocate(_capacity);
+                for (size_type i = 0; i < _numberOfElements; i++)
+                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
             }
             map(const map_type& copy, const allocator_type& alloc)
-                : capacity_(copy.capacity_),
-                numberOfElements_(copy.numberOfElements_)
+                : _capacity(copy._capacity),
+                _numberOfElements(copy._numberOfElements)
             {
-                internalBuffer_ = alloc.allocate(capacity_);
-                for (size_type i = 0; i < numberOfElements_; i++)
-                    internalBuffer_[i] = copy.internalBuffer_[i];
+                _internalBuffer = alloc.allocate(_capacity);
+                for (size_type i = 0; i < _numberOfElements; i++)
+                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
             }
             /**
              * This function constructs a map from a given rvalue reference 
@@ -132,16 +132,26 @@ namespace std_copy
              * @param copy The map used to construct the current map object.
             */
             map(map_type&& copy)
-                : capacity_(copy.capacity_),
-                internalBuffer_(copy.internalBuffer_),
-                numberOfElements_(copy.numberOfElements_)
+                : _capacity(copy._capacity),
+                _internalBuffer(copy._internalBuffer)
             {
+                _internalBuffer = allocator_type::allocate(_capacity);
+                for (size_type i = 0; i < _numberOfElements; i++)
+                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
+            }
+            map(map_type&& copy, const allocator_type& a)
+                : _capacity(copy._capacity),
+                _internalBuffer(copy._internalBuffer)
+            {
+                _internalBuffer = a.allocate(_capacity);
+                for (size_type i = 0; i < _numberOfElements; i++)
+                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
             }
 
             virtual ~map()
             {
-                for (int i = 0; i < numberOfElements_; i++)
-                    internalBuffer_[i].~value_type();
+                for (int i = 0; i < _numberOfElements; i++)
+                    _internalBuffer[i].~value_type();
             }
 
             /**
@@ -150,30 +160,30 @@ namespace std_copy
             */
             size_type size() const noexcept
             {
-                return numberOfElements_;
+                return _numberOfElements;
             }
             /**
              * This function checks whether the map is empty (i.e. has no elements).
             */
             bool empty() const noexcept
             {
-                return numberOfElements_ == 0;
+                return _numberOfElements == 0;
             }
             /**
              * This function clears the map.
             */
             void clear()
             {
-                allocator.deallocate(internalBuffer_, capacity_);
-                numberOfElements_ = 0;
-                capacity_ = 0;
+                allocator_type::deallocate(_internalBuffer, _capacity);
+                _numberOfElements = 0;
+                _capacity = 0;
             }
             /**
              * This function returns an iterator to the first element in the container
             */
             iterator begin()
             {
-                return iterator(internalBuffer_);
+                return iterator(_internalBuffer);
             }
             /**
              * This function returns an iterator to the theoretical element after the last 
@@ -181,14 +191,14 @@ namespace std_copy
             */
             iterator end()
             {
-                return iterator(internalBuffer_ + numberOfElements_);
+                return iterator(_internalBuffer + _numberOfElements);
             }
             /**
              * This function returns a const iterator to the first element in the container
             */
             const_iterator cbegin()
             {
-                return (const_iterator) iterator(internalBuffer_);
+                return (const_iterator) iterator(_internalBuffer);
             }
             /**
              * This function returns a const iterator to the theoretical element after the last 
@@ -196,7 +206,7 @@ namespace std_copy
             */
             const_iterator cend()
             {
-                return (const_iterator) iterator(internalBuffer_ + numberOfElements_);
+                return (const_iterator) iterator(_internalBuffer + _numberOfElements);
             }
             /**
              * This function erases the element pointed to by the provided iterator.
@@ -204,17 +214,17 @@ namespace std_copy
             */
             iterator erase(iterator pos)
             {
-                if (numberOfElements_ == 0)
+                if (_numberOfElements == 0)
                     throw std::length_error("No elements to erase");
                 
                 size_type index = 0;
                 for (iterator it = this->begin(); it != this->end(); it++)
                 {
                     if (it != pos)
-                        internalBuffer_[index++] = *it;
+                        _internalBuffer[index++] = *it;
                 }
-                numberOfElements_--;
-                (internalBuffer_ + numberOfElements_)->~value_type();
+                _numberOfElements--;
+                (_internalBuffer + _numberOfElements)->~value_type();
                 return pos;
             }
             /**
@@ -224,19 +234,19 @@ namespace std_copy
             */
             iterator erase(const_iterator first, const_iterator last)
             {
-                if (numberOfElements_ == 0)
+                if (_numberOfElements == 0)
                     throw std::length_error("No elements to erase");
 
                 size_type index = 0;
                 for (iterator it = this->begin(); it != this->end(); it++)
                 {
                     if (it < first || it >= last)
-                        internalBuffer_[index++] = *it;
+                        _internalBuffer[index++] = *it;
                 }
                 for (int i = 0; i < last - first; i++)
-                    (internalBuffer_ + numberOfElements_ - 1 - i)->~value_type();
+                    (_internalBuffer + _numberOfElements - 1 - i)->~value_type();
 
-                numberOfElements_ = index;
+                _numberOfElements = index;
                 return last;
             }
             /**
@@ -251,19 +261,19 @@ namespace std_copy
                 if (this->contains(key))
                     return find(key)->second;
                     
-                int whereToInsert = numberOfElements_;
-                if (numberOfElements_ + 1 > capacity_)
+                int whereToInsert = _numberOfElements;
+                if (_numberOfElements + 1 > _capacity)
                 {
-                    capacity_ = (capacity_ == 0) ? 1 : capacity_ * 2;
+                    _capacity = (_capacity == 0) ? 1 : _capacity * 2;
 
-                    pointer temp = internalBuffer_;
-                    internalBuffer_ = allocator.allocate(capacity_);
-                    copyAndFindInsertPos(temp, key, whereToInsert);
-                    allocator.deallocate(temp, capacity_ / 2);
+                    pointer temp = _internalBuffer;
+                    _internalBuffer = allocator_type::allocate(_capacity);
+                    _copyAndFindInsertPos(temp, key, whereToInsert);
+                    allocator_type::deallocate(temp, _capacity / 2);
                 }
-                numberOfElements_++;
-                internalBuffer_[whereToInsert] = pair<key_type, mapped_type>(key, mapped_type());
-                return internalBuffer_[whereToInsert].second;
+                _numberOfElements++;
+                _internalBuffer[whereToInsert] = std_copy::make_pair(key, mapped_type());
+                return _internalBuffer[whereToInsert].second;
             }
             /**
              * This function has the same functionality as operator[], except 
@@ -274,7 +284,7 @@ namespace std_copy
             mapped_type& at(const key_type& key)
             {
                 if (this->contains(key))
-                    return find(key)->second;
+                    return this->find(key)->second;
 
                 throw std::out_of_range("map::at");
             }
@@ -288,19 +298,19 @@ namespace std_copy
                 if (this->contains(pairToInsert.first))
                     return iterator_and_bool(this->find(pairToInsert.first), false);
                 
-                int whereToInsert = numberOfElements_;
-                if (numberOfElements_ + 1 > capacity_)
+                int whereToInsert = _numberOfElements;
+                if (_numberOfElements + 1 > _capacity)
                 {
-                    capacity_ = (capacity_ == 0) ? 1 : capacity_ * 2;
+                    _capacity = (_capacity == 0) ? 1 : _capacity * 2;
 
-                    pointer temp = internalBuffer_;
-                    internalBuffer_ = allocator.allocate(capacity_);
-                    copyAndFindInsertPos(temp, pairToInsert.first, whereToInsert);
-                    allocator.deallocate(temp, (int) capacity_ / 2);
+                    pointer temp = _internalBuffer;
+                    _internalBuffer = allocator_type::allocate(_capacity);
+                    _copyAndFindInsertPos(temp, pairToInsert.first, whereToInsert);
+                    allocator_type::deallocate(temp, (int) _capacity / 2);
                 }
-                numberOfElements_++;
-                internalBuffer_[whereToInsert] = pairToInsert;
-                return iterator_and_bool(iterator(internalBuffer_ + whereToInsert), true);
+                _numberOfElements++;
+                _internalBuffer[whereToInsert] = pairToInsert;
+                return iterator_and_bool(iterator(_internalBuffer + whereToInsert), true);
             }
             /**
              * This function does the same thing as insert(), except if the element with the specified 
@@ -349,17 +359,17 @@ namespace std_copy
             */
             void operator=(const map_type& s)
             {
-                allocator.deallocate(internalBuffer_, capacity_);
-                numberOfElements_ = s.numberOfElements_;
-                capacity_ = s.capacity_;
-                std_copy::copy(s.internalBuffer_, s.internalBuffer_ + numberOfElements_, internalBuffer_);
+                allocator_type::deallocate(_internalBuffer, _capacity);
+                _numberOfElements = s._numberOfElements;
+                _capacity = s._capacity;
+                std_copy::copy(s._internalBuffer, s._internalBuffer + _numberOfElements, _internalBuffer);
             }
             /**
-             * This function returns an object of the provided allocator type.
+             * This function returns an object of the provided _allocator type.
             */
             allocator_type get_allocator() const noexcept
             {
-                return allocator;
+                return allocator_type();
             }
             /**
              * This function returns an iterator to the element with the 
@@ -368,12 +378,12 @@ namespace std_copy
             */
             iterator find(const key_type& key)
             {
-                if (!numberOfElements_)
+                if (!_numberOfElements)
                     return this->end();
 
-                pointer start = internalBuffer_;
-                pointer finish = internalBuffer_ + numberOfElements_;
-                size_type tempNumberOfElements = numberOfElements_;
+                pointer start = _internalBuffer;
+                pointer finish = _internalBuffer + _numberOfElements;
+                size_type tempNumberOfElements = _numberOfElements;
                 while (finish >= start)
                 {
                     size_type addToGetMiddle = (tempNumberOfElements % 2 != 0) ? (tempNumberOfElements / 2) : (tempNumberOfElements / 2 - 1);
@@ -409,17 +419,17 @@ namespace std_copy
             */
             void swap(const map_type& s)
             {
-                pointer temp = s.internalBuffer_;
-                s.internalBuffer_ = internalBuffer_;
-                internalBuffer_ = temp;
+                pointer temp = s._internalBuffer;
+                s._internalBuffer = _internalBuffer;
+                _internalBuffer = temp;
 
-                size_type tempCapacity = s.capacity_;
-                s.capacity_ = capacity_;
-                capacity_ = tempCapacity;
+                size_type tempCapacity = s._capacity;
+                s._capacity = _capacity;
+                _capacity = tempCapacity;
 
-                size_type tempNumberOfElems = s.numberOfElements_;
-                s.numberOfElements_ = numberOfElements_;
-                numberOfElements_ = tempNumberOfElems;
+                size_type tempNumberOfElems = s._numberOfElements;
+                s._numberOfElements = _numberOfElements;
+                _numberOfElements = tempNumberOfElems;
             }
             /**
              * This function returns an iterator to the first element with 
@@ -429,12 +439,12 @@ namespace std_copy
             */
             iterator lower_bound(const key_type& key)
             {
-                if (!numberOfElements_)
+                if (!_numberOfElements)
                     return this->end();
 
-                pointer start = internalBuffer_;
-                pointer finish = internalBuffer_ + numberOfElements_;
-                size_type tempNumberOfElements = numberOfElements_;
+                pointer start = _internalBuffer;
+                pointer finish = _internalBuffer + _numberOfElements;
+                size_type tempNumberOfElements = _numberOfElements;
                 while (finish >= start)
                 {
                     size_type addToGetMiddle = (tempNumberOfElements % 2 != 0) ? (tempNumberOfElements / 2) : (tempNumberOfElements / 2 - 1);
@@ -457,12 +467,12 @@ namespace std_copy
             */
             iterator upper_bound(const key_type& key)
             {
-                if (!numberOfElements_)
+                if (!_numberOfElements)
                     return this->end();
 
-                pointer start = internalBuffer_;
-                pointer finish = internalBuffer_ + numberOfElements_;
-                size_type tempNumberOfElements = numberOfElements_;
+                pointer start = _internalBuffer;
+                pointer finish = _internalBuffer + _numberOfElements;
+                size_type tempNumberOfElements = _numberOfElements;
                 while (finish >= start)
                 {
                     size_type addToGetMiddle = (tempNumberOfElements % 2 != 0) ? (tempNumberOfElements / 2) : (tempNumberOfElements / 2 - 1);
@@ -482,14 +492,14 @@ namespace std_copy
             */
             key_compare key_comp() const noexcept
             {
-                return compare_keys;
+                return _key_compare;
             }
             /**
              * Returns the object used to compare the mapped values.
             */
             value_compare value_comp() const noexcept
             {
-                return value_compare(compare_keys);
+                return value_compare(_key_compare);
             }
     };
     /**
