@@ -3,6 +3,39 @@
 
 #include "utility.hpp"
 #include "iterator_traits.hpp"
+#include "iterator.hpp"
+#include "type_traits.hpp"
+
+namespace _std_copy_hidden
+{
+    namespace _detail
+    {
+        template <class T, class U>
+        concept _is_same_concept = std_copy::is_same<T, U>::value;
+    }
+    
+    //Checks if Iterator is actually an iterator/pointer
+    template <class Iterator>
+    concept _is_iterator =
+    requires(Iterator it)
+    {
+        {*it};
+    };
+    //Checks if Fn is callable
+    template <class Fn>
+    concept _is_function =
+    requires(Fn f)
+    {
+        {f()};
+    };
+    //Checks if Fn returns a value of type T
+    template <class Fn, class T>
+    concept _is_function_and_returns = 
+    requires(Fn f)
+    {
+        {f()} -> _detail::_is_same_concept<T>;
+    };
+}
 
 namespace std_copy
 {
@@ -15,6 +48,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     long long int count(InputIt first, InputIt last, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         long long int c = 0;
         while (first != last)
@@ -36,6 +70,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     long long int count_if(InputIt first, InputIt last, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         long long int c = 0;
         while (first != last)
@@ -56,6 +91,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     InputIt find(InputIt first, InputIt last, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         while (first != last)
         {
@@ -75,6 +111,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     InputIt find_if(InputIt first, InputIt last, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -94,6 +131,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     InputIt find_if_not(InputIt first, InputIt last, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -112,6 +150,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     void fill(InputIt first, InputIt last, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         while (first != last)
         {
@@ -126,6 +165,7 @@ namespace std_copy
     */
     template <class InputIt, class Size,  class T>
     void fill_n(InputIt first, Size n, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         for (int i = 0; i < n; i++)
             *first++ = val;
@@ -139,6 +179,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt>
     OutputIt copy(InputIt first, InputIt last, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         while (first != last)
             *result++ = *first++;
@@ -154,6 +195,7 @@ namespace std_copy
     */
     template <class InputIt, class Size, class OutputIt>
     OutputIt copy_n(InputIt first, Size n, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         for (int i = 0; i < n; i++)
             *result++ = *first++;
@@ -172,6 +214,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt, class Function>
     OutputIt copy_if(InputIt first, InputIt last, OutputIt result, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -192,6 +235,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt>
     OutputIt copy_backward(InputIt first, InputIt last, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         while (first != last)
             *(--result) = *(--last);
@@ -207,6 +251,7 @@ namespace std_copy
     */
     template <class InputIt, class Generator>
     void generate(InputIt first, InputIt last, Generator gen)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Generator, typename std_copy::iterator_traits<InputIt>::value_type>
     {
         while (first != last)
         {
@@ -222,6 +267,7 @@ namespace std_copy
     */
     template <class InputIt, class Size, class Generator>
     void generate_n(InputIt first, Size n, Generator gen)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Generator, typename std_copy::iterator_traits<InputIt>::value_type>
     {
         for (int i = 0; i < n; i++)
         {
@@ -237,6 +283,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     bool all_of(InputIt first, InputIt last, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -256,6 +303,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     bool any_of(InputIt first, InputIt last, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -275,6 +323,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     bool none_of(InputIt first, InputIt last, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         return !std_copy::all_of(first, last, func);
     }
@@ -287,6 +336,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2>
     bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2>
     {
         while (first1 != last1)
         {
@@ -305,6 +355,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2, class Compare>
     bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare pred)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         while (first1 != last1)
         {
@@ -322,6 +373,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     InputIt lower_bound(InputIt first, InputIt last, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         unsigned long long count, half;
         count = distance(first, last);
@@ -353,6 +405,7 @@ namespace std_copy
     */
     template <class InputIt, class T, class Compare>
     InputIt lower_bound(InputIt first, InputIt last, const T& val, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         unsigned long long count, half;
         count = distance(first, last);
@@ -382,6 +435,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     InputIt upper_bound(InputIt first, InputIt last, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         unsigned long long count, half;
         count = distance(first, last);
@@ -413,6 +467,7 @@ namespace std_copy
     */
     template <class InputIt, class T, class Compare>
     InputIt upper_bound(InputIt first, InputIt last, const T& val, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         unsigned long long count, half;
         count = distance(first, last);
@@ -455,6 +510,7 @@ namespace std_copy
     */
     template <class T, class Compare>
     const T& max(const T& a, const T& b, Compare comp)
+        requires _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         if (comp(b, a))
             return a;
@@ -482,6 +538,7 @@ namespace std_copy
     */
     template <class T, class Compare>
     const T& min(const T& a, const T& b, Compare comp)
+        requires _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         if (comp(a, b))
             return a;
@@ -495,6 +552,7 @@ namespace std_copy
     */
     template <class InputIt>
     InputIt max_element(InputIt first, InputIt second)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         InputIt largest = first;
 
@@ -519,6 +577,7 @@ namespace std_copy
     */
     template <class InputIt, class Compare>
     InputIt max_element(InputIt first, InputIt second, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         InputIt largest = first;
 
@@ -541,6 +600,7 @@ namespace std_copy
     */
     template <class InputIt>
     InputIt min_element(InputIt first, InputIt second)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         InputIt smallest = first;
 
@@ -564,6 +624,7 @@ namespace std_copy
     */
     template <class InputIt, class Compare>
     InputIt min_element(InputIt first, InputIt second, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         InputIt smallest = first;
 
@@ -597,6 +658,7 @@ namespace std_copy
     */
     template <class InputIt>
     pair<InputIt, InputIt> minmax_element(InputIt first, InputIt second)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         InputIt largest = std_copy::max_element(first, second);
         InputIt smallest = std_copy::min_element(first, second);
@@ -612,6 +674,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2>
     pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2>
     {
         while (first1 != last1 && *first1 == *first2)
             first1++;
@@ -630,6 +693,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2, class Compare>
     pair<InputIt1, InputIt2> mismatch(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare pred)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         while (first1 != last1 && pred(*first1, *first2))
             first1++;
@@ -648,6 +712,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2>
     InputIt1 search(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2>
     {
         while (first1 != last1)
         {
@@ -680,6 +745,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2, class Compare>
     InputIt1 search(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         while (first1 != last1)
         {
@@ -710,6 +776,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2>
     InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2>
     {
         while (first1 != last1)
         {
@@ -734,6 +801,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2, class Compare>
     InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         while (first1 != last1)
         {
@@ -754,6 +822,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2>
     InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2>
     {
         InputIt1 ret = last1;
         while (first1++ != last1)
@@ -787,6 +856,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2, class Compare>
     InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         InputIt1 ret = last1;
         while (first1++ != last1)
@@ -821,6 +891,7 @@ namespace std_copy
     */
     template <class InputIt, class Size, class T>
     InputIt search_n(InputIt first, InputIt last, Size count, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         while (first != last)
         {
@@ -850,6 +921,7 @@ namespace std_copy
     */
     template <class InputIt, class Size, class T, class Compare>
     InputIt search_n(InputIt first, InputIt last, Size count, const T& val, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         while (first != last)
         {
@@ -874,6 +946,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         InputIt start = std_copy::lower_bound(first, last, val);
         InputIt end = std_copy::upper_bound(first, last, val);
@@ -888,6 +961,7 @@ namespace std_copy
     */
     template <class InputIt, class T, class Compare>
     pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         InputIt start = std_copy::lower_bound(first, last, val, comp);
         InputIt end = std_copy::upper_bound(first, last, val, comp);
@@ -901,6 +975,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     Function for_each(InputIt first, InputIt last, Function fn)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function<Function>
     {
         while (first != last)
         {
@@ -918,6 +993,7 @@ namespace std_copy
     */
     template <class InputIt, class Size, class Function>
     InputIt for_each_n(InputIt first, Size n, Function fn)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function<Function>
     {
         for (int i = 0; i < n; i++)
         {
@@ -937,6 +1013,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt, class Function>
     OutputIt transform(InputIt first, InputIt last, OutputIt result, Function fn)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt> &&  _std_copy_hidden::_is_function<Function>
     {
         while (first != last)
         {
@@ -958,6 +1035,8 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt, class Function>
     OutputIt transform(InputIt first1, InputIt last1, InputIt first2, OutputIt result, Function binary_fn)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt> && 
+                 _std_copy_hidden::_is_function_and_returns<Function, typename std_copy::iterator_traits<InputIt>::value_type>
     {
         while (first1 != last1)
         {
@@ -975,6 +1054,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     InputIt remove(InputIt first, InputIt last, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         for (InputIt it = first; it != last; it++)
         {
@@ -991,6 +1071,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     InputIt remove_if(InputIt first, InputIt last, Function pred)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         for (InputIt it = first; it != last; it++)
         {
@@ -1009,6 +1090,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt, class T>
     OutputIt remove_copy(InputIt first, InputIt last, OutputIt result, const T& val)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         while (first != last)
         {
@@ -1029,6 +1111,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt, class Function>
     OutputIt remove_copy_if(InputIt first, InputIt last, OutputIt result, Function pred)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -1047,10 +1130,12 @@ namespace std_copy
     */
     template <class InputIt>
     InputIt adjacent_find(InputIt first, InputIt last)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
+        InputIt temp = first;
         while (first != last)
         {
-            if (*first == *(first + 1))
+            if (*first == *(++temp))
                 return first;
 
             first++;
@@ -1066,10 +1151,12 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     InputIt adjacent_find(InputIt first, InputIt last, Function func)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
+        InputIt temp = first;
         while (first != last)
         {
-            if (func(*first, *(first + 1)))
+            if (func(*first, *(++temp)))
                 return first;
 
             first++;
@@ -1086,6 +1173,7 @@ namespace std_copy
     */
     template <class InputIt, class T>
     void replace(InputIt first, InputIt last, const T& old_val, const T& new_val)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         while (first != last)
         {
@@ -1105,6 +1193,7 @@ namespace std_copy
     */
     template <class InputIt, class Function, class T>
     void replace_if(InputIt first, InputIt last, Function func, const T& new_val)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -1126,7 +1215,8 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt, class T>
     OutputIt replace_copy(InputIt first, InputIt last, OutputIt result, const T& old_val, 
-                            const T& new_val) 
+                            const T& new_val)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         while (first != last)
         {
@@ -1148,6 +1238,7 @@ namespace std_copy
     template <class InputIt, class OutputIt, class Function, class T>
     OutputIt replace_copy_if(InputIt first, InputIt last, OutputIt result, Function func, 
                             const T& new_val) 
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt> && _std_copy_hidden::_is_function_and_returns<Function, bool>
     {
         while (first != last)
         {
@@ -1155,40 +1246,6 @@ namespace std_copy
             first++;
         }
         return result;
-    }
-    /**
-     * This function shifts the elements in the range [first, last) left by n places.
-     * @param first An iterator to the initial position of the sequence of elements.
-     * @param last An iterator to the final position of the sequence of elements.
-     * @param n The number of places to shift left by.
-    */
-    template <class InputIt>
-    InputIt shift_left(InputIt first, InputIt last, long long n = 1)
-    {
-        if (n == 0 || n > last - first)
-            return first;
-
-        for (int i = 0; i < last - first - n; i++)
-            *(first + i) = std_copy::move(*(first + i + n));
-
-        return first + (last - first - n);
-    }
-    /**
-     * This function shifts the elements in the range [first, last) right by n places.
-     * @param first An iterator to the initial position of the sequence of elements.
-     * @param last An iterator to the final position of the sequence of elements.
-     * @param n The number of places to shift right by.
-    */
-    template <class InputIt>
-    InputIt shift_right(InputIt first, InputIt last, long long n = 1)
-    {
-        if (n == 0 || n > last - first)
-            return last;
-
-        for (int i = last - first; i >= n; i--)
-            *(first + i) = std_copy::move(*(first + i - n));
-
-        return first + n;
     }
     /**
      * This function moves the elements from the range [first, last) to the range 
@@ -1200,6 +1257,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt>
     OutputIt move(InputIt first, InputIt last, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         while (first != last)
             *result++ = std_copy::move(*first++);
@@ -1215,6 +1273,7 @@ namespace std_copy
     */
     template <class InputIt, class Size, class OutputIt>
     OutputIt move_n(InputIt first, Size n, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         for (int i = 0; i < n; i++)
             *result++ = std_copy::move(*first++);
@@ -1231,11 +1290,48 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt>
     OutputIt move_backward(InputIt first, InputIt last, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         while (first != last)
             *(--result) = std_copy::move(*(--last));
 
         return result;
+    }
+    /**
+     * This function shifts the elements in the range [first, last) left by n places.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param n The number of places to shift left by.
+    */
+    template <class InputIt>
+    InputIt shift_left(InputIt first, InputIt last, unsigned long long n = 1)
+        requires _std_copy_hidden::_is_iterator<InputIt>
+    {
+        if (n == 0 || n > last - first)
+            return first;
+
+        InputIt mid = std_copy::next(first, n);
+        if (mid == last)
+            return first;
+        return std_copy::move(std_copy::move(mid), std_copy::move(last), std_copy::move(first));
+    }
+    /**
+     * This function shifts the elements in the range [first, last) right by n places.
+     * @param first An iterator to the initial position of the sequence of elements.
+     * @param last An iterator to the final position of the sequence of elements.
+     * @param n The number of places to shift right by.
+    */
+    template <class InputIt>
+    InputIt shift_right(InputIt first, InputIt last, unsigned long long n = 1)
+        requires _std_copy_hidden::_is_iterator<InputIt>
+    {
+        if (n == 0 || n > last - first)
+            return last;
+
+        InputIt mid = std_copy::next(first, n);
+        if (mid == first)
+            return last;
+        return std_copy::move_backward(std_copy::move(first), std_copy::move(mid), std_copy::move(last));
     }
     /**
      * This function copies the elements from [first, last) to a new range, for which a 
@@ -1246,6 +1342,7 @@ namespace std_copy
     */
     template <class InputIt>
     InputIt unique(InputIt first, InputIt last)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         InputIt result = first;
         while (first != last)
@@ -1267,6 +1364,7 @@ namespace std_copy
     */
     template <class InputIt, class Compare>
     InputIt unique(InputIt first, InputIt last, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         InputIt result = first;
         while (first != last)
@@ -1288,6 +1386,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt>
     OutputIt unique_copy(InputIt first, InputIt last, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         if (first == last) 
             return result;
@@ -1295,7 +1394,8 @@ namespace std_copy
         InputIt temp = first;
         while (first != last)
         {
-            if (!(*(first + 1) == *first) || ++temp == last)
+            temp++;
+            if (!(*temp == *first) || temp == last)
                 *result++ = *first;
 
             first++;
@@ -1314,6 +1414,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt, class Compare>
     OutputIt unique_copy(InputIt first, InputIt last, OutputIt result, Compare comp)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt> && _std_copy_hidden::_is_function_and_returns<Compare, bool>
     {
         if (first == last) 
             return result;
@@ -1321,7 +1422,8 @@ namespace std_copy
         InputIt temp = first;
         while (first != last)
         {
-            if (!comp(*(first + 1), *first) || ++temp == last)
+            temp++;
+            if (!comp(*temp, *first) || temp == last)
                 *result++ = *first;
 
             first++;
@@ -1335,6 +1437,7 @@ namespace std_copy
     */
     template <class InputIt1, class InputIt2>
     constexpr void iter_swap(InputIt1 a, InputIt2 b)
+        requires _std_copy_hidden::_is_iterator<InputIt1> && _std_copy_hidden::_is_iterator<InputIt2>
     {
         std_copy::swap(*a, *b);
     }
@@ -1346,6 +1449,7 @@ namespace std_copy
     */
     template <class InputIt>
     constexpr void reverse(InputIt first, InputIt last)
+        requires _std_copy_hidden::_is_iterator<InputIt>
     {
         while (first != last)
         {
@@ -1363,6 +1467,7 @@ namespace std_copy
     */
     template <class InputIt, class OutputIt>
     constexpr void reverse_copy(InputIt first, InputIt last, OutputIt result)
+        requires _std_copy_hidden::_is_iterator<InputIt> && _std_copy_hidden::_is_iterator<OutputIt>
     {
         while (last != first)
             *result++ = *(--last);
