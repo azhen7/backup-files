@@ -488,6 +488,14 @@ namespace std_copy
                 return this->end();
             }
             /**
+             * Returns a range containing all elements with the given key in the container.
+             * @param key The key to search for.
+            */
+            pair<iterator, iterator> equal_range(const key_type& key)
+            {
+                return std_copy::make_pair(this->lower_bound(), this->upper_bound());
+            }
+            /**
              * Returns the object used to compare the keys.
             */
             key_compare key_comp() const noexcept
