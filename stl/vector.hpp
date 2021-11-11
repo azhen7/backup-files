@@ -65,7 +65,7 @@ namespace std_copy
             }
             inline size_type _calculateSmallestPowerOfTwoGreaterThan(size_type x)
             {
-                return _exponent(2, (int) (std::log(x) / std::log(2)) + 1);
+                return _exponent(2, (size_type) (std::log(x) / std::log(2)) + 1);
             }
             constexpr void _realloc(size_type newAmount, size_type previousAmount, size_type copyUpTo)
             {
@@ -303,7 +303,7 @@ namespace std_copy
             constexpr void pop_back()
             {
                 if (_numberOfElements == 0)
-                    throw std::length_error("Cannot delete element in empty vector");
+                    throw std::length_error("vector::pop_back: Cannot delete element in empty vector");
 
                 _numberOfElements--;
                 (_internalBuffer + _numberOfElements)->~value_type();
@@ -316,7 +316,7 @@ namespace std_copy
             constexpr void pop_front()
             {
                 if (_numberOfElements == 0)
-                    throw std::length_error("Cannot delete element in empty vector");
+                    throw std::length_error("vector::pop_front: Cannot delete element in empty vector");
                 
                 std_copy::move(_internalBuffer + 1, _internalBuffer + _numberOfElements, _internalBuffer);
                 this->pop_back();
@@ -369,7 +369,7 @@ namespace std_copy
             {
                 if (index >= _numberOfElements)
                 {
-                    std::string err = "index (which is " + std::to_string(index) + ") >= this->size() (which is " + 
+                    std::string err = "vector::at: index (which is " + std::to_string(index) + ") >= this->size() (which is " + 
                                     std::to_string(_numberOfElements) + ")";
 
                     throw std::out_of_range(err);
@@ -465,11 +465,14 @@ namespace std_copy
             */
             constexpr void resize(size_type n)
             {
-                allocator_type::deallocate(_internalBuffer);
+                pointer temp = _internalBuffer;
+                _internalBuffer = allocator_type::allocate(_capacity);
+                size_type copyUpTo = (n > _numberOfElements) ? _numberOfElements : n;
+                std_copy::move(temp, temp + copyUpTo, _internalBuffer);
+                allocator_type::deallocate(temp, _capacity);
                 _numberOfElements = n;
                 _capacity = n;
-                _internalBuffer = allocator_type::allocate(_capacity)
-;            }
+            }
             /**
              * This function returns a reference to the
              * first element in the array. If the vector
@@ -478,7 +481,7 @@ namespace std_copy
             constexpr reference front()
             {
                 if (_numberOfElements == 0)
-                    throw std::length_error("Cannot access element in empty vector");
+                    throw std::length_error("vector::front: Cannot access element in empty vector");
                 
                 return *_internalBuffer;
             }
@@ -490,7 +493,7 @@ namespace std_copy
             constexpr reference back()
             {
                 if (_numberOfElements == 0)
-                    throw std::length_error("Cannot access element in empty vector");
+                    throw std::length_error("vector::back: Cannot access element in empty vector");
 
                 return *(_internalBuffer + _numberOfElements - 1);
             }
@@ -503,7 +506,7 @@ namespace std_copy
                 pointer temp = _internalBuffer;
                 _internalBuffer = allocator_type::allocate(_numberOfElements);
                 std_copy::move(temp, temp + _numberOfElements, _internalBuffer);
-                allocator_type::deallocate(_internalBuffer, _capacity);
+                allocator_type::deallocate(temp, _capacity);
                 _capacity = _numberOfElements;
             }
             /**
@@ -522,9 +525,7 @@ namespace std_copy
                 return iterator(_internalBuffer);
             }
             /**
-             * This function returns an iterator to
-             * the theoretical element after the last
-             * element in the vector.
+             * This function returns an iterator to the theoretical element after the last element in the vector.
             */
             constexpr iterator end()
             {
@@ -631,14 +632,14 @@ namespace std_copy
             {
                 if (index1 >= _numberOfElements)
                 {
-                    std::string err = "index1 (which is " + std::to_string(index1) 
+                    std::string err = "vector::erase: index1 (which is " + std::to_string(index1) 
                                       + ") >= this->size() (which is " + 
                                       std::to_string(_numberOfElements) + ")";
                     throw std::out_of_range(err);
                 }
                 if (index2 >= _numberOfElements)
                 {
-                    std::string err = "index2 (which is " + std::to_string(index2) 
+                    std::string err = "vector::erase: index2 (which is " + std::to_string(index2) 
                                       + ") >= this->size() (which is " + 
                                       std::to_string(_numberOfElements) + ")";
                     throw std::out_of_range(err);
