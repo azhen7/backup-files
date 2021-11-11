@@ -106,7 +106,7 @@ namespace _std_copy_hidden
             */
             static constexpr int_type eof()
             {
-                return static_cast<int_type>(-1);
+                return -1;
             }
             /**
              * Returns a value that is not equal to EOF.
