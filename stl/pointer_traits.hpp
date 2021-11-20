@@ -14,16 +14,16 @@ namespace std_copy
     {
         private:
             /**
-             * undefined_: Replicates the behaviour of the value from other languages 
+             * _undefined: Replicates the behaviour of the value from other languages 
              * with "undefined" property such as "None" from Python and "undefined" from JS.
             */
-            struct undefined_;
+            struct _undefined;
 
             //Gets first argument of template parameters
             template <class T>
             struct _get_first_arg
             {
-                using type = undefined_;
+                using type = _undefined;
             };
             template <template <typename, typename...> class Template, class T, class ...Args>
             struct _get_first_arg<Template<T, Args...>>
@@ -98,4 +98,4 @@ namespace std_copy
     };
 }
 
-#endif
+#endif /* _STD_COPY_POINTER_TRAITS */
