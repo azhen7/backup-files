@@ -4,8 +4,9 @@
 #include <stdexcept>
 #include <functional>
 
+#include "functional_comp.hpp"
 #include "algorithm.hpp"
-#include "iterator.hpp"
+#include "iterator_funcs.hpp"
 #include "pair.hpp"
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
@@ -19,12 +20,12 @@ namespace std_copy
      * @param Compare The comparison struct used to sort the keys.
      * @param Alloc The object used to allocate space for the map.
     */
-    template <class Key, class T, class Compare = std::less<Key>, class Alloc = std_copy::allocator<pair<Key, T>>>
+    template <class Key, class T, class Compare = less<Key>, class Alloc = allocator<pair<Key, T>>>
     class map
     {
         private:
-            typedef map<Key, T, Compare, Alloc>                 map_type;
-            typedef iterator<map_type>                          iterator_type;
+            typedef map<Key, T, Compare, Alloc>                 _map_type;
+            typedef _std_copy_hidden::_std_copy_stl_containers::iterator<_map_type> _iterator_type;
             
         public:
             typedef Key                                         key_type;
@@ -38,11 +39,11 @@ namespace std_copy
             typedef Alloc                                       allocator_type;
             typedef unsigned long long                          size_type;
             typedef long long                                   difference_type;
-            typedef iterator_type                               iterator;
-            typedef const iterator_type                         const_iterator;
+            typedef _iterator_type                              iterator;
+            typedef const _iterator_type                        const_iterator;
         
         private:
-            typedef pair<iterator, bool>                        iterator_and_bool;
+            typedef pair<iterator, bool>                        _iterator_and_bool;
 
             pointer _internalBuffer;
             size_type _numberOfElements;
@@ -69,18 +70,19 @@ namespace std_copy
                 {
                     if (!_key_compare(copyFrom[i].first, key))
                     {
-                        std_copy::move_backward(copyFrom + i, copyFrom + _numberOfElements, _internalBuffer + _numberOfElements);
+                        move_backward(copyFrom + i, copyFrom + _numberOfElements, _internalBuffer + _numberOfElements);
                         pos = i;
                         break;
                     }
-                    _internalBuffer[i] = std_copy::move(copyFrom[i]);
+                    _internalBuffer[i] = move(copyFrom[i]);
                 }
             }
 
-            iterator_and_bool _emplace(const_reference elemToConstruct)
+            _iterator_and_bool _emplace(const_reference elemToConstruct)
             {
-                if (this->contains(elemToConstruct.first))
-                    return iterator_and_bool(this->find(elemToConstruct.first), false);
+                iterator pos = this->find(elemToConstruct.first);
+                if (pos != this->end())
+                    return _iterator_and_bool(pos, false);
 
                 int whereToInsert = 0;
                 if (_numberOfElements + 1 > _capacity)
@@ -92,60 +94,56 @@ namespace std_copy
                     _copyAndFindInsertPos(temp, elemToConstruct.first, whereToInsert);
                     allocator_type::deallocate(temp, (int) _capacity / 2);
                 }
-                std_copy::allocator_traits<allocator_type>::construct(_allocator, _internalBuffer + whereToInsert, std_copy::move(elemToConstruct));
+                construct_at(_internalBuffer + whereToInsert, move(elemToConstruct));
                 _numberOfElements++;
-                return iterator_and_bool(iterator(_internalBuffer + whereToInsert), true);
+                return _iterator_and_bool(iterator(_internalBuffer + whereToInsert), true);
             }
 
         public:
             /**
              * Default constructor
             */
-            map() 
-                : _capacity(0),
-                _numberOfElements(0)
-            {
-            }
+            map() : _capacity(0), _numberOfElements(0) {}
             /**
              * This function constructs a map from a given map object.
              * @param copy The map used to construct the current map object.
             */
-            map(const map_type& copy)
+            map(const _map_type& copy)
                 : _capacity(copy._capacity),
                 _numberOfElements(copy._numberOfElements)
             {
                 _internalBuffer = allocator_type::allocate(_capacity);
                 for (size_type i = 0; i < _numberOfElements; i++)
-                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
+                    _internalBuffer[i] = move(copy._internalBuffer[i]);
             }
-            map(const map_type& copy, const allocator_type& alloc)
+            map(const _map_type& copy, const allocator_type& alloc)
                 : _capacity(copy._capacity),
                 _numberOfElements(copy._numberOfElements)
             {
                 _internalBuffer = alloc.allocate(_capacity);
                 for (size_type i = 0; i < _numberOfElements; i++)
-                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
+                    _internalBuffer[i] = move(copy._internalBuffer[i]);
             }
             /**
              * This function constructs a map from a given rvalue reference 
              * map object.
              * @param copy The map used to construct the current map object.
             */
-            map(map_type&& copy)
+            map(_map_type&& copy)
                 : _capacity(copy._capacity),
                 _internalBuffer(copy._internalBuffer)
             {
                 _internalBuffer = allocator_type::allocate(_capacity);
                 for (size_type i = 0; i < _numberOfElements; i++)
-                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
+                    _internalBuffer[i] = move(copy._internalBuffer[i]);
             }
-            map(map_type&& copy, const allocator_type& a)
+            map(_map_type&& copy, const allocator_type& a)
                 : _capacity(copy._capacity),
                 _internalBuffer(copy._internalBuffer)
             {
                 _internalBuffer = a.allocate(_capacity);
                 for (size_type i = 0; i < _numberOfElements; i++)
-                    _internalBuffer[i] = std_copy::move(copy._internalBuffer[i]);
+                    _internalBuffer[i] = move(copy._internalBuffer[i]);
             }
 
             virtual ~map()
@@ -262,14 +260,19 @@ namespace std_copy
                     return find(key)->second;
                     
                 int whereToInsert = _numberOfElements;
-                if (_numberOfElements + 1 > _capacity)
+                if (_numberOfElements == 0)
                 {
-                    _capacity = (_capacity == 0) ? 1 : _capacity * 2;
+                    _internalBuffer = allocator_type::allocate(1);
+                    _capacity = 1;
+                }
+                else if (_numberOfElements + 1 > _capacity)
+                {
+                    _capacity *= 2;
 
                     pointer temp = _internalBuffer;
                     _internalBuffer = allocator_type::allocate(_capacity);
                     _copyAndFindInsertPos(temp, key, whereToInsert);
-                    allocator_type::deallocate(temp, _capacity / 2);
+                    allocator_type::deallocate(temp, (int) _capacity / 2);
                 }
                 _numberOfElements++;
                 _internalBuffer[whereToInsert] = std_copy::make_pair(key, mapped_type());
@@ -293,15 +296,21 @@ namespace std_copy
              * insert an element when an element with the specified key already exists.
              * @param pairToInsert The element to insert into the map.
             */
-            iterator_and_bool insert(const_reference pairToInsert)
+            _iterator_and_bool insert(const_reference pairToInsert)
             {
-                if (this->contains(pairToInsert.first))
-                    return iterator_and_bool(this->find(pairToInsert.first), false);
+                iterator pos = this->find(pairToInsert.first);
+                if (pos != this->end())
+                    return _iterator_and_bool(pos, false);
                 
                 int whereToInsert = _numberOfElements;
-                if (_numberOfElements + 1 > _capacity)
+                if (_numberOfElements == 0)
                 {
-                    _capacity = (_capacity == 0) ? 1 : _capacity * 2;
+                    _internalBuffer = allocator_type::allocate(1);
+                    _capacity = 1;
+                }
+                else if (_numberOfElements + 1 > _capacity)
+                {
+                    _capacity *= 2;
 
                     pointer temp = _internalBuffer;
                     _internalBuffer = allocator_type::allocate(_capacity);
@@ -310,16 +319,16 @@ namespace std_copy
                 }
                 _numberOfElements++;
                 _internalBuffer[whereToInsert] = pairToInsert;
-                return iterator_and_bool(iterator(_internalBuffer + whereToInsert), true);
+                return _iterator_and_bool(iterator(_internalBuffer + whereToInsert), true);
             }
             /**
              * This function does the same thing as insert(), except if the element with the specified 
              * key already exists, that element gets assigned to the new mapped value instead.
              * @param pairToInsert The element to insert into the map.
             */
-            iterator_and_bool insert_or_assign(const_reference pairToInsert)
+            _iterator_and_bool insert_or_assign(const_reference pairToInsert)
             {
-                iterator_and_bool p = this->insert(pairToInsert);
+                _iterator_and_bool p = this->insert(pairToInsert);
                 if (!p.second)
                     (*this)[p.first->first] = pairToInsert.second;
                 return p;
@@ -329,7 +338,7 @@ namespace std_copy
              * the container.
              * @param elemToConstruct The element to construct in place.
             */
-            iterator_and_bool emplace(const_reference elemToConstruct)
+            _iterator_and_bool emplace(const_reference elemToConstruct)
             {
                 return _emplace(elemToConstruct);
             }
@@ -339,9 +348,9 @@ namespace std_copy
              * @param args The arguments forwarded to the constructor.
             */
             template <class ...Args>
-            iterator_and_bool emplace(Args&&... args)
+            _iterator_and_bool emplace(Args&&... args)
             {
-                return _emplace(value_type(std_copy::forward<Args>(args)...));
+                return _emplace(value_type(forward<Args>(args)...));
             }
             /**
              * Behaves like emplace() except args is forwarded to the constructed element's second parameter.
@@ -349,19 +358,20 @@ namespace std_copy
              * @param args The arguments forwarded to the constructed element's second parameter.
             */
             template <class ...Args>
-            iterator_and_bool try_emplace(const key_type& key, Args&&... args)
+            _iterator_and_bool try_emplace(const key_type& key, Args&&... args)
             {
-                return _emplace(value_type(std_copy::move(key), mapped_type(std_copy::forward<Args>(args)...)));
+                return _emplace(value_type(move(key), mapped_type(forward<Args>(args)...)));
             }
             /**
              * This function copies one map to another.
              * @param s The map to copy to this.
             */
-            void operator=(const map_type& s)
+            void operator=(const _map_type& s)
             {
                 allocator_type::deallocate(_internalBuffer, _capacity);
                 _numberOfElements = s._numberOfElements;
                 _capacity = s._capacity;
+                _internalBuffer = allocator_type::allocate(_capacity);
                 std_copy::copy(s._internalBuffer, s._internalBuffer + _numberOfElements, _internalBuffer);
             }
             /**
@@ -378,7 +388,7 @@ namespace std_copy
             */
             iterator find(const key_type& key)
             {
-                if (!_numberOfElements)
+                if (_numberOfElements == 0)
                     return this->end();
 
                 pointer start = _internalBuffer;
@@ -417,7 +427,7 @@ namespace std_copy
              * This function swaps the contents of *this with s.
              * @param s The map to swap with.
             */
-            void swap(const map_type& s)
+            void swap(const _map_type& s)
             {
                 pointer temp = s._internalBuffer;
                 s._internalBuffer = _internalBuffer;
@@ -526,11 +536,12 @@ namespace std_copy
      * @param pred The function used to erase elements.
     */
     template <class T1, class T2, class Compare, class Alloc, class Function>
-    typename std_copy::map<T1, T2, Compare, Alloc>::size_type 
-        erase_if(std_copy::map<T1, T2, Compare, Alloc>& c, Function func)
+    typename map<T1, T2, Compare, Alloc>::size_type 
+        erase_if(map<T1, T2, Compare, Alloc>& c, Function func)
+        requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
     {
         unsigned long long oldSize = c.size();
-        for (typename std_copy::map<T1, T2, Compare, Alloc>::iterator it = c.begin(); it != c.end(); )
+        for (typename map<T1, T2, Compare, Alloc>::iterator it = c.begin(); it != c.end(); )
         {
             if (func(*it))
                 c.erase(it);
