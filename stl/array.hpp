@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "iterator.hpp"
+#include "iterator_funcs.hpp"
 #include "algorithm.hpp"
 
 namespace std_copy
@@ -23,8 +23,8 @@ namespace std_copy
     class array
     {
         private:
-            typedef array<T, s>                                     array_type;
-            typedef iterator<array_type>                            iterator_type;
+            typedef array<T, s>                                     _array_type;
+            typedef _std_copy_hidden::_std_copy_stl_containers::iterator<_array_type> _iterator_type;
             
         public:
             //typdefs
@@ -35,8 +35,8 @@ namespace std_copy
             typedef const T&                                        const_reference;
             typedef unsigned long long                              size_type;
             typedef long long                                       difference_type;
-            typedef iterator_type                                   iterator;
-            typedef const iterator_type                             const_iterator;
+            typedef _iterator_type                                  iterator;
+            typedef const _iterator_type                            const_iterator;
             
         private:
             pointer _internalBuffer;
@@ -57,14 +57,14 @@ namespace std_copy
                 std_copy::fill_n(_internalBuffer, _size, val);
             }
 
-            array(const array_type& copy) 
+            array(const _array_type& copy) 
                 : _numberOfElements(copy._numberOfElements)
             {
                 _internalBuffer = new value_type[_size];
                 std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
-            array(array_type&& copy)
+            array(_array_type&& copy)
                 : _numberOfElements(copy._numberOfElements)
             {
                 _internalBuffer = new value_type[_size];
@@ -77,7 +77,7 @@ namespace std_copy
              * Assigns one array to another.
              * @param assign The array to get assigned.
             */
-            void operator=(const array_type& assign)
+            void operator=(const _array_type& assign)
             {
                 for (int i = 0; i < _size; i++)
                     _internalBuffer[i] = assign._internalBuffer[i];
@@ -211,7 +211,7 @@ namespace std_copy
              * This function swaps the contents of *this and toSwap.
              * @param toSwap The array to swap the contents with.
             */
-            void swap(const array_type& toSwap)
+            void swap(const _array_type& toSwap)
             {
                 pointer temp = _internalBuffer;
                 _internalBuffer = toSwap._internalBuffer;
@@ -244,6 +244,24 @@ namespace std_copy
         for (int i = 0; i < N; i++)
             converted[i] = arr[i];
         return converted;
+    }
+    /**
+     * Returns the Nth element of arr. N is a template parameter.
+     * @param arr The array from which to get the Nth element.
+    */
+    template <unsigned long long I, class T, unsigned long long N>
+    T&& get(array<T, N>& arr)
+    {
+        return move(arr[I]);
+    }
+    /**
+     * Returns the Nth element of arr. N is a template parameter.
+     * @param arr The array from which to get the Nth element.
+    */
+    template <unsigned long long I, class T, unsigned long long N>
+    T& get(array<T, N>& arr)
+    {
+        return arr[I];
     }
 }
 
