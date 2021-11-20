@@ -6,18 +6,36 @@
 
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
-#include "iterator.hpp"
+#include "iterator_funcs.hpp"
 #include "char_traits.hpp"
 #include "algorithm.hpp"
 
+namespace _std_copy_hidden
+{
+    namespace _std_copy_string
+    {
+        template <class CharT>
+        concept _is_valid_char_type = 
+        requires(CharT c1, CharT c2)
+        {
+            {c1 == c2} -> std_copy::same_as<bool>;
+            {c1 != c2} -> std_copy::same_as<bool>;
+            {c1 = c2};
+            {c1 < c2} -> std_copy::same_as<bool>;
+            {CharT()};
+        };
+    }
+}
+
 namespace std_copy
 {
-    template <class CharT, class Traits = std_copy::char_traits<CharT>, class Alloc = std_copy::allocator<CharT>>
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    requires _std_copy_hidden::_std_copy_string::_is_valid_char_type<CharT>
     class basic_string
     {
         private:
             typedef basic_string<CharT, Traits, Alloc>      _basic_string_type;
-            typedef iterator<_basic_string_type>            _iterator_type;
+            typedef _std_copy_hidden::_std_copy_stl_containers::iterator<_basic_string_type> _iterator_type;
             typedef std_copy::allocator_traits<Alloc>       _alloc_traits;
 
         public:
@@ -61,7 +79,7 @@ namespace std_copy
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
-                std_copy::move(first, last, _internalString);
+                move(first, last, _internalString);
                 _internalString[i] = value_type();
             }
 
@@ -85,6 +103,8 @@ namespace std_copy
             }
             size_type _calculateSmallestPowerOfTwoGreaterThan(size_type x)
             {
+                if (x == 0)
+                    return 1;
                 return _exponent(2, (size_type) (std::log(x) / std::log(2)) + 1);
             }
             void _realloc(size_type n, size_type copyUpTo)
@@ -301,7 +321,7 @@ namespace std_copy
             {
                 pointer temp = _internalString;
                 _internalString = allocator_type::allocate(_length);
-                std_copy::move(temp, temp + _length, _internalString);
+                move(temp, temp + _length, _internalString);
                 allocator_type::deallocate(temp, _capacity);
             }
             /**
@@ -366,6 +386,7 @@ namespace std_copy
             */
             template <class InputIt>
             constexpr _basic_string_type& append(InputIt first, InputIt last)
+                requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
             {
                 const difference_type dist = std_copy::distance(first, last);
                 if (_length + dist > _capacity)
@@ -373,7 +394,7 @@ namespace std_copy
 
                 size_type i = _length;
                 while (first != last)
-                    _internalString[i++] = std_copy::move(*first++);
+                    _internalString[i++] = move(*first++);
                 
                 _internalString[i] = value_type();
                 _length += dist;
@@ -430,8 +451,8 @@ namespace std_copy
                 const difference_type dist = pos - begin();
                 pointer temp = _internalString;
                 _internalString = allocator_type::allocate(_capacity);
-                std_copy::move(temp, temp + dist, _internalString);
-                std_copy::move(temp + dist + 1, temp + _length, _internalString + dist);
+                move(temp, temp + dist, _internalString);
+                move(temp + dist + 1, temp + _length, _internalString + dist);
                 _length--;
                 _internalString[_length] = value_type();
                 allocator_type::deallocate(temp, _capacity);
@@ -448,8 +469,8 @@ namespace std_copy
                 const difference_type dist_last = last - begin();
                 pointer temp = _internalString;
                 _internalString = allocator_type::allocate(_capacity);
-                std_copy::move(temp, temp + dist_first, _internalString);
-                std_copy::move(temp + dist_last, temp + _length, _internalString + dist_first);
+                move(temp, temp + dist_first, _internalString);
+                move(temp + dist_last, temp + _length, _internalString + dist_first);
                 _length -= dist_last - dist_first;
                 _internalString[_length] = value_type();
                 allocator_type::deallocate(temp, _capacity);
@@ -470,8 +491,8 @@ namespace std_copy
 
                 pointer temp = _internalString;
                 _internalString = allocator_type::allocate(_capacity);
-                std_copy::move(temp, temp + pos, _internalString);
-                std_copy::move(temp + pos + count, temp + _length, _internalString + pos);
+                move(temp, temp + pos, _internalString);
+                move(temp + pos + count, temp + _length, _internalString + pos);
                 _length -= count;
                 _internalString[_length] = value_type();
                 allocator_type::deallocate(temp, _capacity);
@@ -843,21 +864,6 @@ namespace std_copy
                 return this->resize(count, value_type());
             }
             /**
-             * Replaces the substring [pos, pos + count) of *this with str.
-             * @param pos The index from which to start replacing.
-             * @param count The number of characters after pos to replace.
-             * @param str The basic_string object to replace the substring with.
-            */
-            constexpr _basic_string_type& replace(size_type pos, size_type count, const _basic_string_type& str)
-            {
-                if (pos >= _length)
-                    throw std::out_of_range("basic_string::replace: pos > size()");
-                if (count > _length - pos)
-                    count = _length - pos;
-                
-                return this->replace(begin() + pos, begin() + pos + count, str);
-            }
-            /**
              * Replaces the range [first, last) of *this with str.
              * @param first An iterator pointing to the start of the range to erase.
              * @param last An iterator pointing to the end of the range to erase.
@@ -865,32 +871,226 @@ namespace std_copy
             */
             constexpr _basic_string_type& replace(iterator first, iterator last, const _basic_string_type& str)
             {
-                const difference_type count = last - first;
-                const difference_type pos = first - begin();
+                return this->replace(first - this->begin(), last - first, str);
+            }
+            /**
+             * Replaces the substring [pos, pos + count) of *this with str.
+             * @param pos The index from which to start replacing.
+             * @param count The number of characters after pos to replace.
+             * @param str The basic_string object to replace the substring with.
+            */
+            constexpr _basic_string_type& replace(size_type pos, size_type count, const _basic_string_type& str)
+            {
+                if (pos > _length)
+                    throw std::out_of_range("basic_string::replace: pos > size()");
+                if (count > _length - pos)
+                    count = _length - pos;
+                
                 if (count == str._length)
                     traits_type::move(_internalString + pos, str._internalString, count);
                 else
                 {
-                    if (_length - count + str._length > _capacity)
-                    {
-                        _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + str._length) / _capacity);
-                        pointer temp = _internalString;
-                        _internalString = allocator_type::allocate(_capacity);
-                        std_copy::move(temp, temp + pos, _internalString);
-                        std_copy::move(str._internalString, str._internalString + str._length, _internalString + pos);
-                        std_copy::move(temp + pos + count, temp + _length, _internalString + pos + str._length);
-                    }
-                    else
-                    {
-                        std_copy::move_backward(_internalString + pos + count, _internalString + _length, _internalString + _length - count + str._length);
-                        std_copy::move(str._internalString, str._internalString + str._length, _internalString + pos);
-                    }
+                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + str._length) / _capacity);
+                    pointer temp = _internalString;
+                    _internalString = allocator_type::allocate(_capacity);
+                    move(temp, temp + pos, _internalString);
+                    move(str._internalString, str._internalString + str._length, _internalString + pos);
+                    move(temp + pos + count, temp + _length, _internalString + pos + str._length);
                     _length -= count - str._length;
                     _internalString[_length] = value_type();
                 }
                 return *this;
             }
+            /**
+             * Replaces the substring [pos1, pos1 + count1) of *this with the substring [pos2, pos2 + count2) 
+             * of str.
+             * @param pos1 The index from which to start replacing.
+             * @param count1 The number of characters after pos to replace.
+             * @param str The basic_string object to replace the substring with.
+             * @param pos2 The index of str to start replacing the substring [pos, pos + count) in *this.
+             * @param count2 The number of characters after pos2 to start replacing the substring [pos, pos + count) in *this.
+            */
+            constexpr _basic_string_type& replace(size_type pos1, size_type count1, const _basic_string_type& str, size_type pos2, size_type count2)
+            {
+                if (pos1 > _length)
+                    throw std::out_of_range("basic_string::replace: pos1 > size()");
+                if (pos2 > str._length)
+                    throw std::out_of_range("basic_string::replace: pos2 > str.size()");
+                count1 = (count1 > _length - pos1) ? _length - pos1 : count1;
+                count2 = (count2 > str._length - pos2) ? str._length - pos2 : count2;
+
+                return this->replace(pos1, count1, str._internalString + pos2, str._internalString + pos2 + count2);
+            }
+            /**
+             * Replaces the range [first, last) of *this with s.
+             * @param first An iterator pointing to the start of the range to erase.
+             * @param last An iterator pointing to the end of the range to erase.
+             * @param s The character sequence to replace the range.
+            */
+            constexpr _basic_string_type& replace(iterator first, iterator last, pointer s)
+            {
+                return this->replace(first - this->begin(), last - first, s);
+            }
+            /**
+             * Replaces the substring [pos, pos + count) of *this with s.
+             * @param pos The index from which to start replacing.
+             * @param count The number of characters after pos to replace.
+             * @param s The character sequence to replace the range.
+            */
+            constexpr _basic_string_type& replace(size_type pos, size_type count, pointer s)
+            {
+                if (pos > _length)
+                    throw std::out_of_range("basic_string::replace: pos > size()");
+                if (count > _length - pos)
+                    count = _length - pos;
+
+                const size_type len = traits_type::length(s);
+                if (count == len)
+                    traits_type::move(_internalString + pos, s, count);
+                else
+                {
+                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + len) / _capacity);
+                    pointer temp = _internalString;
+                    _internalString = allocator_type::allocate(_capacity);
+                    move(temp, temp + pos, _internalString);
+                    move(s, s + len, _internalString + pos);
+                    move(temp + pos + count, temp + _length, _internalString + pos + len);
+                    _length -= count - len;
+                    _internalString[_length] = value_type();
+                }
+                return *this;
+            }
+            /**
+             * Replaces the substring [pos, pos + count1) of *this with the first count2 
+             * characters of s.
+             * @param pos The index from which to start replacing.
+             * @param count1 The number of characters after pos to replace.
+             * @param s The character sequence to replace the range.
+             * @param count2 The number of characters in s to replace with.
+            */
+            constexpr _basic_string_type& replace(size_type pos, size_type count1, pointer s, size_type count2)
+            {
+                const size_type len = traits_type::length(s);
+                if (pos > _length)
+                    throw std::out_of_range("basic_string::replace: pos > size()");
+                if (count1 > _length - pos)
+                    count1 = _length - pos;
+                count2 = (count2 > len) ? len : count2;
+
+                return this->replace(this->begin() + pos, this->begin() + pos + count1, s, s + count2);
+            }
+            /**
+             * Replaces the range [first, last) of *this with the first count2 
+             * characters of s.
+             * @param first An iterator to the start of the range to replace.
+             * @param last An iterator to the end of the range to replace.
+             * @param s The character sequence to replace the range.
+             * @param count2 The number of characters in s to replace with.
+            */
+            constexpr _basic_string_type& replace(iterator first, iterator last, pointer s, size_type count2)
+            {
+                return this->replace(first, last, s, s + count2);
+            }
+            /**
+             * Replaces the range [first, last) of *this with the range [first2, last2).
+             * @param first An iterator pointing to the start of the range to erase.
+             * @param last An iterator pointing to the end of the range to erase.
+             * @param first2 An iterator to the start of the range to replace [first, last).
+             * @param last2 An iterator to the end of the range to replace [first, last).
+            */
+            template <class InputIt>
+            constexpr _basic_string_type& replace(iterator first, iterator last, InputIt first2, InputIt last2)
+                requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            {
+                return this->replace(first - this->begin(), last - first, first2, last2);
+            }
+            /**
+             * Replaces the substring [pos, pos + count) of *this with the range [first2, last2).
+             * @param pos The index from which to start replacing.
+             * @param count The number of characters after pos to replace.
+             * @param first An iterator to the start of the range to replace [first, last).
+             * @param last An iterator to the end of the range to replace [first, last).
+            */
+            template <class InputIt>
+            constexpr _basic_string_type& replace(size_type pos, size_type count, InputIt first, InputIt last)
+                requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            {
+                if (pos > _length)
+                    throw std::out_of_range("basic_string::replace: pos > size()");
+                if (count > _length - pos)
+                    count = _length - pos;
+                    
+                const size_type len = std_copy::distance(first, last);
+                if (count == len)
+                    move(first, last, _internalString + pos);
+                else
+                {
+                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + len) / _capacity);
+                    pointer temp = _internalString;
+                    _internalString = allocator_type::allocate(_capacity);
+                    move(temp, temp + pos, _internalString);
+                    move(first, last, _internalString + pos);
+                    move(temp + pos + count, temp + _length, _internalString + pos + len);
+                    _length -= count - len;
+                    _internalString[_length] = value_type();
+                }
+                return *this;
+            }
+            /**
+             * Replaces the substring [pos, pos + count) with count elements of value ch.
+             * @param pos The index to start replacing from.
+             * @param count The number of characters after pos to replace.
+             * @param count2 The number of elements to replace the range with.
+             * @param ch The value of each element.
+            */
+            constexpr _basic_string_type& replace(size_type pos, size_type count, size_type count2, const_reference ch)
+            {
+                if (count == count2)
+                    traits_type::assign(_internalString + pos, count2, ch);
+                else
+                {
+                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + count2) / _capacity);
+                    pointer temp = _internalString;
+                    _internalString = allocator_type::allocate(_capacity);
+                    move(temp, temp + pos, _internalString);
+                    traits_type::assign(_internalString + pos, count2, ch);
+                    move(temp + pos + count, temp + _length, _internalString + pos + count2);
+                    _length -= count - count2;
+                    _internalString[_length] = value_type();
+                }
+                return *this;
+            }
+            /**
+             * Replaces the range [first, last) with count elements of value ch.
+             * @param first An iterator pointing to the start of the range to erase.
+             * @param last An iterator pointing to the end of the range to erase.
+             * @param count The number of elements to replace the range with.
+             * @param ch The value of each element.
+            */
+            constexpr _basic_string_type& replace(iterator first, iterator last, size_type count, const_reference ch)
+            {
+                return this->replace(first - this->begin(), last - first, count, ch);
+            }
     };
+
+    /**
+     * Gets the Nth element from str. N is a template parameter.
+     * @param str The basic_string object from which to get the element.
+    */
+    template <unsigned long long N, class CharT, class CharTraits = std_copy::char_traits<CharT>, class Alloc = std_copy::allocator<CharT>>
+    CharT&& get(basic_string<CharT, CharTraits, Alloc>& str)
+    {
+        return move(str[N]);
+    }
+    /**
+     * Gets the Nth element from str. N is a template parameter.
+     * @param str The basic_string object from which to get the element.
+    */
+    template <unsigned long long N, class CharT, class CharTraits = std_copy::char_traits<CharT>, class Alloc = std_copy::allocator<CharT>>
+    CharT& get(basic_string<CharT, CharTraits, Alloc>& str)
+    {
+        return str[N];
+    }
 
     typedef basic_string<char>      string;
     typedef basic_string<wchar_t>   wstring;
