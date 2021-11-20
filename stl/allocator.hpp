@@ -68,8 +68,9 @@ namespace std_copy
             */
             static constexpr void deallocate(value_type* ptr, size_type n)
             {
-                for (size_type i = 0; i < n; i++)
-                    (ptr + i)->~value_type();
+                if (n == 0)
+                    return;
+                ::operator delete(ptr, n * sizeof(T));
             }
     };
     
