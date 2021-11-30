@@ -2,7 +2,7 @@
 #define _STD_COPY_POINTER_TRAITS
 
 #include "type_traits.hpp"
-#include "move.hpp"
+#include "construct_destroy.hpp"
 
 namespace std_copy
 {
@@ -93,7 +93,7 @@ namespace std_copy
             */
             static pointer pointer_to(element_type& arg)
             {
-                return std_copy::addressof(arg);
+                return addressof(arg);
             }
     };
 }
