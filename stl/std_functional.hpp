@@ -7,16 +7,19 @@
 namespace std_copy
 {
     /**
-     * My implementation of std::function from the header <functional>
+     * My implementation of std::function from the header <functional>.
+     * @param ResType The return type of the internal function object.
+     * @param Args The types of the arguments that the internal function 
+     * object accepts.
     */
-    template <class T, class ...Args>
-    class function {};
-    template <class T, class ...Args>
-    class function<T(Args...)>
+    template <class ResType, class ...Args>
+    class function;
+    template <class ResType, class ...Args>
+    class function<ResType(Args...)>
     {
         private:
-            typedef function<T(Args...)>    _function_type;
-            typedef T (*_internalFunctionType)(Args...);
+            typedef function<ResType(Args...)>    _function_type;
+            typedef ResType (*_internalFunctionType)(Args...);
 
             _internalFunctionType _target;
 
@@ -62,7 +65,7 @@ namespace std_copy
                 _target = swapTemp;
             }
 
-            bool operator bool()
+            operator bool()
             {
                 return _target != nullptr;
             }
@@ -71,7 +74,7 @@ namespace std_copy
                 return _target != nullptr;
             }
 
-            T operator()(Args... args)
+            ResType operator()(Args... args)
             {
                 if (!_target)
                     throw std::bad_function_call();
