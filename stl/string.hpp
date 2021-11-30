@@ -35,7 +35,6 @@ namespace std_copy
     {
         private:
             typedef basic_string<CharT, Traits, Alloc>      _basic_string_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::iterator<_basic_string_type> _iterator_type;
             typedef std_copy::allocator_traits<Alloc>       _alloc_traits;
 
         public:
@@ -48,7 +47,7 @@ namespace std_copy
             typedef const CharT&                            const_reference;
             typedef _alloc_traits::pointer                  pointer;
             typedef const pointer                           const_pointer;
-            typedef _iterator_type                          iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_basic_string_type> iterator;
             typedef const iterator                          const_iterator;
 
         private:
@@ -1099,4 +1098,4 @@ namespace std_copy
     typedef basic_string<char32_t>  u32string;
 }
 
-#endif
+#endif /* _STD_COPY_STRING */
