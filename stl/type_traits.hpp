@@ -372,7 +372,7 @@ namespace std_copy
             is_same<double, remove_cv_t<T>>::value  ||
             is_same<long double, remove_cv_t<T>>::value> {};
     template <class T>
-    constexpr bool is_floating_point_v = std_copy::is_floating_point<T>::value;
+    constexpr bool is_floating_point_v = is_floating_point<T>::value;
 
     //is_null_pointer
     template <class T>
@@ -382,8 +382,8 @@ namespace std_copy
     template <class T>
     struct is_arithmetic
         : bool_constant<
-            std_copy::is_integral<remove_cv_t<T>>::value      ||
-            std_copy::is_floating_point<remove_cv_t<T>>::value> {};
+            is_integral<remove_cv_t<T>>::value      ||
+            is_floating_point<remove_cv_t<T>>::value> {};
     template <class T>
     constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
 
@@ -581,6 +581,18 @@ namespace _std_copy_hidden
             {
             };
         }
+        namespace _detail_is_base_of
+        {
+            template <class T>
+            std_copy::true_type test_if_ptr_convertible(const volatile T*);
+            template <class>
+            std_copy::false_type test_if_ptr_convertible(const volatile void*);
+
+            template <class T, class D>
+            auto test_if_base(...) -> std_copy::true_type;
+            template <class T, class D>
+            auto test_if_base(int) -> decltype(test_if_ptr_convertible<T>(static_cast<D*>(nullptr)));
+        }
     }
 }
 
@@ -599,6 +611,15 @@ namespace std_copy
         : _std_copy_hidden::_std_copy_type_traits::_detail_is_unsigned::_is_unsigned_helper<T> {};
     template <class T>
     constexpr bool is_unsigned_v = is_unsigned<T>::value;
+
+    //is_base_of
+    template <class T, class U>
+    struct is_base_of
+        : bool_constant<
+            is_class<T>::value && is_class<U>::value &&
+            decltype(_std_copy_hidden::_std_copy_type_traits::_detail_is_base_of::test_if_base<T, U>(0))::value
+        >
+    {};
 }
 
 #endif /* _STD_COPY_TYPE_TRAITS */
