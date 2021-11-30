@@ -25,7 +25,7 @@ namespace std_copy
     {
         private:
             typedef map<Key, T, Compare, Alloc>                 _map_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::iterator<_map_type> _iterator_type;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_map_type> _iterator_type;
             
         public:
             typedef Key                                         key_type;
@@ -51,7 +51,7 @@ namespace std_copy
             key_compare _key_compare;
 
             class value_compare
-                : std::binary_function<value_type, value_type, bool>
+                : binary_function<value_type, value_type, bool>
             {
                 private:
                     key_compare comp;
