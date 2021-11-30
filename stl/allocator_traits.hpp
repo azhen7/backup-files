@@ -2,6 +2,9 @@
 #define _STD_COPY_ALLOCATOR_TRAITS
 
 #include "allocator.hpp"
+#include "pointer_traits.hpp"
+#include "construct_destroy.hpp"
+#include "type_traits.hpp"
 
 namespace std_copy
 {
@@ -125,9 +128,9 @@ namespace std_copy
             static constexpr void construct(allocator_type& a, pointer ptr, Args&&... args)
             {
                 if constexpr(_has_construct<allocator_type>::value)
-                    a.construct(ptr, std_copy::forward<Args>(args)...);
+                    a.construct(ptr, forward<Args>(args)...);
                 else
-                    std_copy::construct_at(ptr, std_copy::forward<Args>(args)...);
+                    construct_at(ptr, forward<Args>(args)...);
             }
             /**
              * This function destroys an object.
@@ -139,7 +142,7 @@ namespace std_copy
                 if constexpr(_has_destroy<allocator_type>::value)
                     a.destroy(ptr);
                 else
-                    std_copy::destroy_at(ptr);
+                    destroy_at(ptr);
             }
             /**
              * This function obtains an allocator to be used for 
@@ -154,13 +157,13 @@ namespace std_copy
             }
     };
     /**
-     * Partial specialization for std_copy::allocator<T>.
+     * Partial specialization for allocator<T>.
     */
     template <class T>
-    class allocator_traits<std_copy::allocator<T>>
+    class allocator_traits<allocator<T>>
     {
         public:
-            typedef std_copy::allocator<T>  allocator_type;
+            typedef allocator<T>            allocator_type;
             typedef T                       value_type;
             typedef T*                      pointer;
             typedef const T*                const_pointer;
@@ -199,7 +202,7 @@ namespace std_copy
             template <class ...Args>
             static constexpr void construct(allocator_type& a, pointer ptr, Args&&... args)
             {
-                std_copy::construct_at(ptr, std_copy::forward<Args>(args)...);
+                construct_at(ptr, forward<Args>(args)...);
             }
             /**
              * This function destroys an object.
@@ -208,7 +211,7 @@ namespace std_copy
             */
             static constexpr void destroy(allocator_type& a, pointer ptr)
             {
-                std_copy::destroy_at(ptr);
+                destroy_at(ptr);
             }
             /**
              * This function obtains an allocator to be used for 
