@@ -24,7 +24,7 @@ namespace std_copy
     {
         private:
             typedef array<T, s>                                     _array_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::iterator<_array_type> _iterator_type;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_array_type> _iterator_type;
             
         public:
             //typdefs
