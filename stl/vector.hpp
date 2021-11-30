@@ -25,7 +25,7 @@ namespace std_copy
     {
         private:
             typedef vector<T, Alloc>                                _vector_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::iterator<_vector_type> _iterator_type;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_vector_type> _iterator_type;
 
         public:
             //typedefs
