@@ -8,7 +8,7 @@ namespace _std_copy_hidden
     namespace _std_copy_stl_containers
     {
         template <class T>
-        class iterator
+        class _iterator
         {
             public:
                 typedef typename T::value_type                  value_type;
