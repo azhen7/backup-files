@@ -3,12 +3,133 @@
 
 namespace std_copy
 {
+    //unary_function
+    template <class ArgType, class ResType>
+    struct unary_function
+    {
+        typedef ArgType     argument_type;
+        typedef ResType     result_type;
+    };
+
+    //binary_function
+    template <class FirstArgType, class SecondArgType, class ResType>
+    struct binary_function
+    {
+        typedef FirstArgType        first_argument_type;
+        typedef SecondArgType       second_argument_type;
+        typedef ResType             result_type;  
+    };
+
+    //unary_negate
+    template <class Function>
+    struct unary_negate
+    {
+        public:
+            typedef Function::argument_type argument_type;
+            typedef bool                    result_type;
+        
+        private:
+            Function _internalPred;
+        
+        public:
+            explicit constexpr unary_negate(const Function& x)
+                : _internalPred(forward<Function>(x)) {}
+
+            constexpr result_type operator()(const argument_type& x)
+            {
+                return !_internalPred(x);
+            }
+    };
+    //not1
+    template <class Function>
+    constexpr unary_negate<Function> not1(const Function& f)
+    {
+        return unary_negate<Function>(f);
+    }
+
+    //binary_negate
+    template <class Function>
+    struct binary_negate
+    {
+        public:
+            typedef Function::first_argument_type   first_argument_type;
+            typedef Function::second_argument_type  second_argument_type;
+            typedef bool                            result_type;
+        
+        private:
+            Function _internalPred;
+        
+        public:
+            explicit constexpr binary_negate(const Function& f)
+                : _internalPred(forward<Function>(f)) {}
+            
+            constexpr result_type operator()(const first_argument_type& x, const second_argument_type& y)
+            {
+                return !_internalPred(x, y);
+            }
+    };
+    //not2
+    template <class Function>
+    constexpr binary_negate<Function> not2(const Function& f)
+    {
+        return binary_negate<Function>(f);
+    }
+
+    //pointer_to_unary_function
+    template <class ArgType, class ResType>
+    struct pointer_to_unary_function : public unary_function<ArgType, ResType>
+    {
+        private:
+            typedef ResType (*_internalFunctionType)(ArgType);
+            _internalFunctionType _internalFunction;
+        
+        public:
+            pointer_to_unary_function(_internalFunctionType f)
+                : _internalFunction(forward<_internalFunctionType>(f)) {}
+            
+            constexpr ResType operator()(const ArgType& x)
+            {
+                return _internalFunction(x);
+            }
+    };
+
+    //pointer_to_binary_function
+    template <class ArgType1, class ArgType2, class ResType>
+    struct pointer_to_binary_function : public binary_function<ArgType1, ArgType2, ResType>
+    {
+        private:
+            typedef ResType (*_internalFunctionType)(ArgType1, ArgType2);
+            _internalFunctionType _internalFunction;
+        
+        public:
+            pointer_to_binary_function(_internalFunctionType f)
+                : _internalFunction(forward<_internalFunctionType>(f)) {}
+            
+            constexpr ResType operator()(const ArgType1& x, const ArgType2& y)
+            {
+                return _internalFunction(x, y);
+            }
+    };
+
+    //ptr_fun
+    template <class ArgType, class ResType>
+    pointer_to_unary_function<ArgType, ResType> ptr_fun(ResType (*f)(ArgType))
+    {
+        return pointer_to_unary_function<ArgType, ResType>(f);
+    }
+    
+    template <class ArgType1, class ArgType2, class ResType>
+    pointer_to_binary_function<ArgType1, ArgType2, ResType> ptr_fun(ResType (*f)(ArgType1, ArgType2))
+    {
+        return pointer_to_binary_function<ArgType1, ArgType2, ResType>(f);
+    }
+
     //Basic arithmetic operations
     /**
      * Struct object performing addition on two elements.
     */
     template <class T>
-    struct plus
+    struct plus : public binary_function<T, T, T>
     {
         constexpr T operator()(const T& a, const T& b)
         {
@@ -34,7 +155,7 @@ namespace std_copy
      * Struct object performing subtraction on two elements.
     */
     template <class T>
-    struct minus
+    struct minus : public binary_function<T, T, T>
     {
         constexpr T operator()(const T& a, const T& b)
         {
@@ -60,7 +181,7 @@ namespace std_copy
      * Struct object performing multiplication on two elements.
     */
     template <class T>
-    struct multiplies
+    struct multiplies : public binary_function<T, T, T>
     {
         constexpr T operator()(const T& a, const T& b)
         {
@@ -86,7 +207,7 @@ namespace std_copy
      * Struct object performing division on two elements.
     */
     template <class T>
-    struct divides
+    struct divides : public binary_function<T, T, T>
     {
         constexpr T operator()(const T& a, const T& b)
         {
@@ -112,7 +233,7 @@ namespace std_copy
      * Struct object performing mod on two elements.
     */
     template <class T>
-    struct modulus
+    struct modulus : public binary_function<T, T, T>
     {
         constexpr T operator()(const T& a, const T& b)
         {
@@ -138,7 +259,7 @@ namespace std_copy
      * Struct object negating an element.
     */
     template <class T>
-    struct negate
+    struct negate : public unary_function<T, T>
     {
         constexpr T operator()(const T& a)
         {
@@ -165,7 +286,7 @@ namespace std_copy
      * Struct object checking equality between two values.
     */
     template <class T>
-    struct equal_to
+    struct equal_to : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -190,7 +311,7 @@ namespace std_copy
      * Struct object checking inequality between two values.
     */
     template <class T>
-    struct not_equal_to
+    struct not_equal_to : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -215,7 +336,7 @@ namespace std_copy
      * Struct object checking if a < b.
     */
     template <class T>
-    struct less
+    struct less : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -240,7 +361,7 @@ namespace std_copy
      * Struct object checking if a > b.
     */
     template <class T>
-    struct greater
+    struct greater : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -265,7 +386,7 @@ namespace std_copy
      * Struct object checking if a <= b.
     */
     template <class T>
-    struct less_equal
+    struct less_equal : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -290,7 +411,7 @@ namespace std_copy
      * Struct object checking if a >= b.
     */
     template <class T>
-    struct greater_equal
+    struct greater_equal : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -316,7 +437,7 @@ namespace std_copy
      * Struct object performing logical and on two elements.
     */
     template <class T>
-    struct logical_and
+    struct logical_and : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -341,7 +462,7 @@ namespace std_copy
      * Struct object performing logical and on two elements.
     */
     template <class T>
-    struct logical_or
+    struct logical_or : public binary_function<T, T, bool>
     {
         constexpr bool operator()(const T& a, const T& b)
         {
@@ -366,7 +487,7 @@ namespace std_copy
      * Struct object performing logical and on two elements.
     */
     template <class T>
-    struct logical_not
+    struct logical_not : public unary_function<T, bool>
     {
         constexpr bool operator()(const T& a)
         {
@@ -392,9 +513,9 @@ namespace std_copy
      * Struct object performing bitwise and on two elements.
     */
     template <class T>
-    struct bit_and
+    struct bit_and : public binary_function<T, T, T>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b)
         {
             return a & b;
         }
@@ -417,9 +538,9 @@ namespace std_copy
      * Struct object performing bitwise or on two elements.
     */
     template <class T>
-    struct bit_or
+    struct bit_or : public binary_function<T, T, T>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b)
         {
             return a | b;
         }
@@ -442,9 +563,9 @@ namespace std_copy
      * Struct object performing bitwise xor on two elements.
     */
     template <class T>
-    struct bit_xor
+    struct bit_xor : public binary_function<T, T, T>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b)
         {
             return a ^ b;
         }
@@ -467,9 +588,9 @@ namespace std_copy
      * Struct object performing bitwise not on two elements.
     */
     template <class T>
-    struct bit_not
+    struct bit_not : public unary_function<T, T>
     {
-        constexpr bool operator()(const T& a)
+        constexpr T operator()(const T& a)
         {
             return ~a;
         }
@@ -490,13 +611,63 @@ namespace std_copy
 
     //identity
     template <class T>
-    struct identity
+    struct identity : public unary_function<T, T>
     {
         T operator()(const T& a)
         {
             return forward<T>(a);
         }
     };
+
+    //binder1st
+    template <class Fn>
+    struct binder1st : public unary_function<typename Fn::second_argument_type, typename Fn::result_type>
+    {
+        private:
+            Fn _internalOp;
+            typename Fn::first_argument_type val;
+        
+        public:
+            binder1st(Fn f, typename Fn::first_argument_type& s)
+                : _internalOp(forward<Fn>(f)), val(forward<Fn>(f))
+            {}
+
+            typename Fn::result_type operator()(const typename Fn::second_argument_type& x) const
+            {
+                return _internalOp(val, x);
+            }
+    };
+    //bind1st
+    template <class F, class T>
+    binder1st<F> bind1st(const F& f, const T& x)
+    {
+        return binder1st<F>(forward<F>(f), typename F::first_argument_type(x));
+    }
+
+    //binder2nd
+    template <class Fn>
+    struct binder2nd : public unary_function<typename Fn::first_argument_type, typename Fn::result_type>
+    {
+        private:
+            Fn _internalOp;
+            typename Fn::second_argument_type val;
+        
+        public:
+            binder2nd(Fn f, typename Fn::second_argument_type& s)
+                : _internalOp(forward<Fn>(f)), val(forward<Fn>(f))
+            {}
+
+            typename Fn::result_type operator()(const typename Fn::first_argument_type& x) const
+            {
+                return _internalOp(x, val);
+            }
+    };
+    //bind2nd
+    template <class F, class T>
+    binder2nd<F> bind2nd(const F& f, const T& x)
+    {
+        return binder2nd<F>(forward<F>(f), typename F::second_argument_type(x));
+    }
 }
 
 #endif /* _STD_COPY_FUNCTIONAL_COMP */
