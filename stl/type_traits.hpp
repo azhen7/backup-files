@@ -350,16 +350,16 @@ namespace std_copy
     template <class T>
     struct is_integral
         : bool_constant<
-            is_same<unsigned short, make_unsigned_t<remove_cv_t<T>>>::value     ||
-            is_same<unsigned int, make_unsigned_t<remove_cv_t<T>>>::value       ||
-            is_same<unsigned long, make_unsigned_t<remove_cv_t<T>>>::value      ||
-            is_same<unsigned long long, make_unsigned_t<remove_cv_t<T>>>::value ||
-            is_same<bool, remove_cv_t<T>>::value                                ||
-            is_same<unsigned char, make_unsigned_t<remove_cv_t<T>>>::value      ||
-            is_same<char8_t, remove_cv_t<T>>::value                             ||
-            is_same<char16_t, remove_cv_t<T>>::value                            ||
-            is_same<char32_t, remove_cv_t<T>>::value                            ||
-            is_same<wchar_t, remove_cv_t<T>>::value
+            is_same<unsigned short, make_unsigned_t<remove_cvref_t<T>>>::value     ||
+            is_same<unsigned int, make_unsigned_t<remove_cvref_t<T>>>::value       ||
+            is_same<unsigned long, make_unsigned_t<remove_cvref_t<T>>>::value      ||
+            is_same<unsigned long long, make_unsigned_t<remove_cvref_t<T>>>::value ||
+            is_same<bool, remove_cvref_t<T>>::value                                ||
+            is_same<unsigned char, make_unsigned_t<remove_cvref_t<T>>>::value      ||
+            is_same<char8_t, remove_cvref_t<T>>::value                             ||
+            is_same<char16_t, remove_cvref_t<T>>::value                            ||
+            is_same<char32_t, remove_cvref_t<T>>::value                            ||
+            is_same<wchar_t, remove_cvref_t<T>>::value
         > {};
     template <class T>
     constexpr bool is_integral_v = is_integral<T>::value;
@@ -368,9 +368,9 @@ namespace std_copy
     template <class T>
     struct is_floating_point
         : bool_constant<
-            is_same<float, remove_cv_t<T>>::value   ||
-            is_same<double, remove_cv_t<T>>::value  ||
-            is_same<long double, remove_cv_t<T>>::value> {};
+            is_same<float, remove_cvref_t<T>>::value   ||
+            is_same<double, remove_cvref_t<T>>::value  ||
+            is_same<long double, remove_cvref_t<T>>::value> {};
     template <class T>
     constexpr bool is_floating_point_v = is_floating_point<T>::value;
 
@@ -540,59 +540,54 @@ namespace _std_copy_hidden
     template <class ...>
     using _void_t = void;
 
-    template <class Default, class AlwaysVoid, template <typename...> class Template, class ...Args>
-    struct _detector
+    namespace _type_traits_detail
     {
-        using type = Default;
-    };
+        template <class Default, class AlwaysVoid, template <typename...> class Template, class ...Args>
+        struct _detector
+        {
+            using type = Default;
+        };
+        template <class Default, template <typename...> class Template, class ...Args>
+        struct _detector<Default, _void_t<Template<Args...>>, Template, Args...>
+        {
+            using type = Template<Args...>;
+        };
+    }
+
     template <class Default, template <typename...> class Template, class ...Args>
-    struct _detector<Default, _void_t<Template<Args...>>, Template, Args...>
-    {
-        using type = Template<Args...>;
-    };
-    template <class Default, template <typename...> class Template, class ...Args>
-    using _detector_t = typename _detector<Default, void, Template, Args...>::type;
+    using _detector_t = typename _type_traits_detail::_detector<Default, void, Template, Args...>::type;
 
     namespace _std_copy_type_traits
     {
-        namespace _detail_is_signed
+        template <class T, bool = std_copy::is_arithmetic_v<T>>
+        struct _is_signed_helper
+            : std_copy::is_same<std_copy::make_signed_t<std_copy::remove_cv_t<T>>, std_copy::remove_cv_t<T>>
         {
-            template <class T, bool = std_copy::is_arithmetic_v<T>>
-            struct _is_signed_helper
-                : std_copy::is_same<std_copy::make_signed_t<std_copy::remove_cv_t<T>>, std_copy::remove_cv_t<T>>
-            {
-            };
-            template <class T>
-            struct _is_signed_helper<T, false>
-                : std_copy::false_type
-            {
-            };
-        }
-        namespace _detail_is_unsigned
+        };
+        template <class T>
+        struct _is_signed_helper<T, false>
+            : std_copy::false_type
         {
-            template <class T, bool = std_copy::is_arithmetic_v<T>>
-            struct _is_unsigned_helper
-                : std_copy::is_same<std_copy::make_unsigned_t<std_copy::remove_cv_t<T>>, std_copy::remove_cv_t<T>>
-            {
-            };
-            template <class T>
-            struct _is_unsigned_helper<T, false>
-                : std_copy::false_type
-            {
-            };
-        }
-        namespace _detail_is_base_of
+        };
+        template <class T, bool = std_copy::is_arithmetic_v<T>>
+        struct _is_unsigned_helper
+            : std_copy::is_same<std_copy::make_unsigned_t<std_copy::remove_cv_t<T>>, std_copy::remove_cv_t<T>>
         {
-            template <class T>
-            std_copy::true_type test_if_ptr_convertible(const volatile T*);
-            template <class>
-            std_copy::false_type test_if_ptr_convertible(const volatile void*);
+        };
+        template <class T>
+        struct _is_unsigned_helper<T, false>
+            : std_copy::false_type
+        {
+        };
+        template <class T>
+        std_copy::true_type test_if_ptr_convertible(const volatile T*);
+        template <class>
+        std_copy::false_type test_if_ptr_convertible(const volatile void*);
 
-            template <class T, class D>
-            auto test_if_base(...) -> std_copy::true_type;
-            template <class T, class D>
-            auto test_if_base(int) -> decltype(test_if_ptr_convertible<T>(static_cast<D*>(nullptr)));
-        }
+        template <class T, class D>
+        auto test_if_base(...) -> std_copy::true_type;
+        template <class T, class D>
+        auto test_if_base(int) -> decltype(test_if_ptr_convertible<T>(static_cast<D*>(nullptr)));
     }
 }
 
@@ -601,14 +596,14 @@ namespace std_copy
     //is_signed
     template <class T>
     struct is_signed
-        : _std_copy_hidden::_std_copy_type_traits::_detail_is_signed::_is_signed_helper<T> {};
+        : _std_copy_hidden::_std_copy_type_traits::_is_signed_helper<T> {};
     template <class T>
     constexpr bool is_signed_v = is_signed<T>::value;
 
     //is_unsigned
     template <class T>
     struct is_unsigned
-        : _std_copy_hidden::_std_copy_type_traits::_detail_is_unsigned::_is_unsigned_helper<T> {};
+        : _std_copy_hidden::_std_copy_type_traits::_is_unsigned_helper<T> {};
     template <class T>
     constexpr bool is_unsigned_v = is_unsigned<T>::value;
 
@@ -617,7 +612,7 @@ namespace std_copy
     struct is_base_of
         : bool_constant<
             is_class<T>::value && is_class<U>::value &&
-            decltype(_std_copy_hidden::_std_copy_type_traits::_detail_is_base_of::test_if_base<T, U>(0))::value
+            decltype(_std_copy_hidden::_std_copy_type_traits::test_if_base<T, U>(0))::value
         >
     {};
 }
