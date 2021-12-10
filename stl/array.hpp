@@ -10,7 +10,7 @@
 namespace std_copy
 {
     /**
-     * My own implementation of the STL array container, which
+     * An implementation of the STL array container, which
      * is defined in the <array> header.
      * @param T The type of the elements in the array.
      * @param s The size of the array.
@@ -24,51 +24,51 @@ namespace std_copy
     {
         private:
             typedef array<T, s>                                     _array_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_array_type> _iterator_type;
             
         public:
             //typdefs
-            typedef T                                               value_type;
-            typedef T*                                              pointer;
-            typedef const T*                                        const_pointer;
-            typedef T&                                              reference;
-            typedef const T&                                        const_reference;
-            typedef unsigned long long                              size_type;
-            typedef long long                                       difference_type;
-            typedef _iterator_type                                  iterator;
-            typedef const _iterator_type                            const_iterator;
+            typedef T                                                                   value_type;
+            typedef T*                                                                  pointer;
+            typedef const T*                                                            const_pointer;
+            typedef T&                                                                  reference;
+            typedef const T&                                                            const_reference;
+            typedef unsigned long long                                                  size_type;
+            typedef long long                                                           difference_type;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_array_type>  iterator;
+            typedef const iterator                                                      const_iterator;
             
         private:
-            pointer _internalBuffer;
+            T _internalBuffer[s];
             size_type _numberOfElements;
             const size_type _size = s;
 
         public:
-            array()
-                : _numberOfElements(0)
-            {
-                _internalBuffer = new value_type[s];
-            }
+            array() : _numberOfElements(0) {}
 
             array(const_reference val)
-                : _numberOfElements(s)
+                : _numberOfElements(move(s))
             {
-                _internalBuffer = new value_type[s];
                 std_copy::fill_n(_internalBuffer, _size, val);
             }
 
             array(const _array_type& copy) 
-                : _numberOfElements(copy._numberOfElements)
+                : _numberOfElements(move(copy._numberOfElements))
             {
-                _internalBuffer = new value_type[_size];
                 std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
             array(_array_type&& copy)
-                : _numberOfElements(copy._numberOfElements)
+                : _numberOfElements(move(copy._numberOfElements))
             {
-                _internalBuffer = new value_type[_size];
                 std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
+            }
+
+            template <size_type Size>
+            array(T (&arr)[Size])
+                : _numberOfElements(move(Size))
+            {
+                for (size_type i = 0; i < Size; i++)
+                    _internalBuffer[i] = move(arr[i]);
             }
 
             virtual ~array() = default;
@@ -108,6 +108,14 @@ namespace std_copy
                 return _internalBuffer;
             }
             /**
+             * Returns C-style array used as underlying buffer 
+             * of the array.
+            */
+            pointer c_array() const noexcept
+            {
+                return _internalBuffer;
+            }
+            /**
              * This function returns a boolean, depending
              * on whether the array is empty or not, i.e.,
              * whether there are no elements in the array.
@@ -129,7 +137,7 @@ namespace std_copy
              * This function returns an iterator to the first element 
              * in the array container.
             */
-            iterator begin()
+            iterator begin() const noexcept
             {
                 return iterator(_internalBuffer);
             }
@@ -137,7 +145,7 @@ namespace std_copy
              * This function returns an iterator to the theoretical element 
              * after the last element in the array container.
             */
-            const_iterator end()
+            const_iterator end() const noexcept
             {
                 return iterator(_internalBuffer + _numberOfElements);
             }
@@ -145,7 +153,7 @@ namespace std_copy
              * This function returns an const iterator to the first element 
              * in the array container.
             */
-            const_iterator cbegin()
+            const_iterator cbegin() const noexcept
             {
                 return iterator(_internalBuffer);
             }
@@ -153,7 +161,7 @@ namespace std_copy
              * This function returns an const iterator to the theoretical element 
              * after the last element in the array container.
             */
-            iterator cend()
+            iterator cend() const noexcept
             {
                 return iterator(_internalBuffer + _numberOfElements);
             }
@@ -163,7 +171,7 @@ namespace std_copy
              * the vector.
              * @param index The index of the element to retrieve.
             */
-            reference at(size_type index)
+            reference at(size_type index) const
             {
                 if (index >= _numberOfElements)
                 {
@@ -179,7 +187,7 @@ namespace std_copy
              * indexing.
              * @param index The index of the element to retrieve.
             */
-            reference operator[](size_type index)
+            reference operator[](size_type index) const noexcept
             {
                 return _internalBuffer[index];
             }
@@ -188,7 +196,7 @@ namespace std_copy
              * first element in the array. If the vector
              * is empty, this function throws an exception.
             */
-            reference front()
+            reference front() const
             {
                 if (_numberOfElements == 0)
                     throw std::length_error("Cannot access element in empty array");
@@ -200,7 +208,7 @@ namespace std_copy
              * last element in the array. If the vector 
              * is empty, this function throws an exception.
             */
-            reference back()
+            reference back() const
             {
                 if (_numberOfElements == 0)
                     throw std::length_error("Cannot access element in empty array");
@@ -240,10 +248,7 @@ namespace std_copy
     template <class T, unsigned long long N>
     constexpr array<T, N> to_array(T (&arr)[N])
     {
-        array<T, N> converted;
-        for (int i = 0; i < N; i++)
-            converted[i] = arr[i];
-        return converted;
+        return array<T, N>(arr);
     }
     /**
      * Returns the Nth element of arr. N is a template parameter.
