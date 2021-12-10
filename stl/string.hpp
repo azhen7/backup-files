@@ -2,7 +2,6 @@
 #define _STD_COPY_STRING
 
 #include <stdexcept>
-#include <cmath>
 
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
@@ -10,6 +9,7 @@
 #include "char_traits.hpp"
 #include "algorithm.hpp"
 
+#if __cplusplus > 201703L
 namespace _std_copy_hidden
 {
     namespace _std_copy_string
@@ -26,25 +26,36 @@ namespace _std_copy_hidden
         };
     }
 }
+#endif
 
 namespace std_copy
 {
-    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    requires _std_copy_hidden::_std_copy_string::_is_valid_char_type<CharT>
+    /**
+     * An implementation of std::basic_string from <string> and the typedefs present: 
+     * std::string. std::wstring, std::u8string, std::u16string, and std::u32string;
+     * @param CharacterType The character of which its pointer type to encapsulate.
+     * @param Traits The traits of CharacterType.
+     * @param Alloc The allocator object used in allocating the underlying character sequence.
+    */
+    template <class CharacterType, class Traits = char_traits<CharacterType>, class Alloc = allocator<CharacterType>>
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_string::_is_valid_char_type<CharacterType>
+             && _std_copy_hidden::_std_copy_allocator::_is_valid_allocator<Alloc>
+#endif
     class basic_string
     {
         private:
-            typedef basic_string<CharT, Traits, Alloc>      _basic_string_type;
-            typedef std_copy::allocator_traits<Alloc>       _alloc_traits;
+            typedef basic_string<CharacterType, Traits, Alloc> _basic_string_type;
+            typedef std_copy::allocator_traits<Alloc>          _alloc_traits;
 
         public:
-            typedef CharT                                   value_type;
+            typedef CharacterType                           value_type;
             typedef Traits                                  traits_type;
             typedef Alloc                                   allocator_type;
             typedef _alloc_traits::size_type                size_type;
             typedef _alloc_traits::difference_type          difference_type;
-            typedef CharT&                                  reference;
-            typedef const CharT&                            const_reference;
+            typedef CharacterType&                          reference;
+            typedef const CharacterType&                    const_reference;
             typedef _alloc_traits::pointer                  pointer;
             typedef const pointer                           const_pointer;
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_basic_string_type> iterator;
@@ -56,7 +67,7 @@ namespace std_copy
             size_type _capacity;
 
             template <class _AllocateFunc>
-            void _allocateAndMoveStr(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
+            void _allocate_and_move_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -65,7 +76,7 @@ namespace std_copy
             }
 
             template <class _AllocateFunc>
-            void _allocateAndAssign(size_type i, _AllocateFunc mem_alloc, size_type count, const_reference ch)
+            void _allocate_and_assign_str(size_type i, _AllocateFunc mem_alloc, size_type count, const_reference ch)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -74,7 +85,7 @@ namespace std_copy
             }
 
             template <class _AllocateFunc, class InputIt>
-            void _allocateAndMoveRange(size_type i, _AllocateFunc mem_alloc, InputIt first, InputIt last)
+            void _allocate_and_move_range(size_type i, _AllocateFunc mem_alloc, InputIt first, InputIt last)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -100,17 +111,17 @@ namespace std_copy
                 }
                 return result;
             }
-            size_type _calculateSmallestPowerOfTwoGreaterThan(size_type x)
+            size_type _calculate_smallest_power_of_two_greater_than(size_type x)
             {
                 if (x == 0)
                     return 1;
-                return _exponent(2, (size_type) (std::log(x) / std::log(2)) + 1);
+                return _exponent(2, (size_type) (__builtin_log(x) / __builtin_log(2)) + 1);
             }
             void _realloc(size_type n, size_type copyUpTo)
             {
                 pointer temp = _internalString;
-                size_type newSize = _capacity * _calculateSmallestPowerOfTwoGreaterThan(n);
-                _allocateAndMoveStr(newSize - 1, allocator_type::allocate, temp, copyUpTo);
+                size_type newSize = _capacity * _calculate_smallest_power_of_two_greater_than(n);
+                _allocate_and_move_str(newSize - 1, allocator_type::allocate, temp, copyUpTo);
                 allocator_type::deallocate(temp, _capacity);
                 _capacity = newSize;
             }
@@ -128,28 +139,29 @@ namespace std_copy
             basic_string(pointer str)
             {
                 _length = traits_type::length(str);
-               _allocateAndMoveStr(_length, allocator_type::allocate,
+                int checkIfNullTerminated = str[_length - 1] == value_type();
+                _allocate_and_move_str(_length - 1, allocator_type::allocate,
                     str, _length);
             }
 
             basic_string(size_type count, const_reference ch)
                 : _length(count)
             {
-                _allocateAndAssign(_length, allocator_type::allocate,
+                _allocate_and_assign_str(_length, allocator_type::allocate,
                     count, ch);
             }
 
             basic_string(pointer str, size_type count)
                 : _length(count)
             {
-               _allocateAndMoveStr(_length, allocator_type::allocate,
+               _allocate_and_move_str(_length - 1, allocator_type::allocate,
                     str, count);
             }
 
             basic_string(const _basic_string_type& s, size_type count)
             {
                 _length = (count > s._length) ? s._length : count;
-               _allocateAndMoveStr(_length, allocator_type::allocate,
+               _allocate_and_move_str(_length, allocator_type::allocate,
                     s._internalString, _length);
             }
 
@@ -157,29 +169,29 @@ namespace std_copy
             {
                 size_type copyUpTo = (pos + count > s._length || count == npos) ? s._length : pos + count;
                 _length = copyUpTo - pos;
-               _allocateAndMoveStr(_length, allocator_type::allocate,
+               _allocate_and_move_str(_length, allocator_type::allocate,
                     s._internalString + pos, _length);
             }
 
             basic_string(const _basic_string_type& s)
                 : _length(s._length)
             {
-               _allocateAndMoveStr(_length, allocator_type::allocate,
+               _allocate_and_move_str(_length, allocator_type::allocate,
                     s._internalString, _length);
             }
 
             basic_string(_basic_string_type&& s)
                 : _length(s._length)
             {
-               _allocateAndMoveStr(_length, allocator_type::allocate,
+               _allocate_and_move_str(_length, allocator_type::allocate,
                     s._internalString, _length);
             }
 
             template <class InputIt>
             basic_string(InputIt start, InputIt last)
             {
-                _length = std_copy::distance(start, last);
-                _allocateAndMoveRange(_length, allocator_type::allocate,
+                _length = distance(start, last);
+                _allocate_and_move_range(_length, allocator_type::allocate,
                     start, last);
             }
 
@@ -210,29 +222,30 @@ namespace std_copy
             /**
              * Returns the allocator object associated with the string.
             */
-            constexpr allocator_type get_allocator() noexcept
+            constexpr allocator_type get_allocator() const noexcept
             {
                 return allocator_type();
             }
             /**
              * Returns the underlying buffer serving as storage.
             */
-            constexpr const_pointer data() noexcept
+            constexpr const_pointer data() const noexcept
             {
                 return _internalString;
             }
             /**
              * Returns a non-modifiable C style array version of the string. 
             */
-            constexpr const_pointer c_str() noexcept
+            constexpr const_pointer c_str() const noexcept
             {
+                _internalString[_length] = value_type();
                 return _internalString;
             }
             /**
              * Returns the element at index i.
              * @param i The index to retrieve the element from.
             */
-            constexpr reference at(size_type i)
+            constexpr reference at(size_type i) const
             {
                 if (i >= _length)
                     throw std::out_of_range("basic_string::at: index is out of bounds");
@@ -243,7 +256,7 @@ namespace std_copy
              * Returns the element at index i. Provides C-style array indexing.
              * @param i The index to retrieve the element from.
             */
-            constexpr reference operator[](size_type i)
+            constexpr reference operator[](size_type i) const noexcept
             {
                 return *(_internalString + i);
             }
@@ -251,7 +264,7 @@ namespace std_copy
              * Returns a reference to the first character in the string. Equivalent to 
              * operator[](0).
             */
-            constexpr reference front()
+            constexpr reference front() const noexcept
             {
                 return *_internalString;
             }
@@ -259,42 +272,42 @@ namespace std_copy
              * Returns a reference to the last character in the string. Equivalent to 
              * operator[](_length - 1).
             */
-            constexpr reference back()
+            constexpr reference back() const noexcept
             {
                 return *(_internalString + _length - 1);
             }
             /**
              * Returns an iterator to the start of the string.
             */
-            constexpr iterator begin()
+            constexpr iterator begin() const
             {
                 return iterator(_internalString);
             }
             /**
              * Returns an iterator to the theoretical element after the last element.
             */
-            constexpr iterator end()
+            constexpr iterator end() const
             {
                 return iterator(_internalString + _length);
             }
             /**
              * Returns a const iterator to the start of the string.
             */
-            constexpr const_iterator cbegin()
+            constexpr const_iterator cbegin() const
             {
                 return iterator(_internalString);
             }
             /**
              * Returns a const iterator to the theoretical element after the last element.
             */
-            constexpr const_iterator cend()
+            constexpr const_iterator cend() const
             {
                 return iterator(_internalString + _length);
             }
             /**
              * Returns a boolean indicating whether the string is empty.
             */
-            constexpr bool empty()
+            constexpr bool empty() const
             {
                 return _length == 0;
             }
@@ -387,7 +400,7 @@ namespace std_copy
             constexpr _basic_string_type& append(InputIt first, InputIt last)
                 requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
             {
-                const difference_type dist = std_copy::distance(first, last);
+                const difference_type dist = distance(first, last);
                 if (_length + dist > _capacity)
                     _realloc((_length + dist) / _capacity, _length);
 
@@ -529,7 +542,7 @@ namespace std_copy
                 if (count1 > _length - pos)
                     count1 = _length - pos;
                 
-                int result = traits_type::compare(_internalString + pos, p, std_copy::min(count1, count2));
+                int result = traits_type::compare(_internalString + pos, p, min(count1, count2));
                 if (result != 0 || count1 == count2)
                     return result;
                 if (count1 < count2)
@@ -556,7 +569,7 @@ namespace std_copy
                 if (count > _length - pos)
                     count = _length - pos;
 
-                int result = traits_type::compare(_internalString + pos, s._internalString, std_copy::min(count, s._length));
+                int result = traits_type::compare(_internalString + pos, s._internalString, min(count, s._length));
                 if (result != 0 || _length == s._length)
                     return result;
                 if (count < s._length)
@@ -579,7 +592,7 @@ namespace std_copy
                 if (count2 > s._length - pos2)
                     count2 = s._length - pos2;
                 
-                int result = traits_type::compare(_internalString + pos1, s._internalString + pos2, std_copy::min(count1, count2));
+                int result = traits_type::compare(_internalString + pos1, s._internalString + pos2, min(count1, count2));
                 if (result != 0 || count1 == count2)
                     return result;
                 if (count1 < count2)
@@ -633,7 +646,7 @@ namespace std_copy
             template <class InputIt>
             constexpr bool starts_with(InputIt first, InputIt last)
             {
-                const difference_type dist = std_copy::distance(first, last);
+                const difference_type dist = distance(first, last);
                 if (dist > _length)
                     return false;
                 
@@ -690,9 +703,9 @@ namespace std_copy
              * @param second An iterator to the end of the range.
             */
             template <class InputIt>
-            constexpr bool ends_with(InputIt first, InputIt last)
+            constexpr bool ends_with(InputIt first, InputIt last) const
             {
-                const difference_type dist = std_copy::distance(first, last);
+                const difference_type dist = distance(first, last);
                 if (dist > _length)
                     return false;
                 
@@ -712,7 +725,7 @@ namespace std_copy
              * @param pos The index from where to start searching. Default value is 0.
              * @param count The number of characters after pos to search in.
             */
-            constexpr size_type find(const_reference ch, size_type pos, size_type count)
+            constexpr size_type find(const_reference ch, size_type pos, size_type count) const
             {
                 return traits_type::find(_internalString + pos, count, ch) - _internalString;
             }
@@ -722,7 +735,7 @@ namespace std_copy
              * @param ch The character to search for.
              * @param pos The index from where to start searching. Default value is 0.
             */
-            constexpr size_type find(const_reference ch, size_type pos = 0)
+            constexpr size_type find(const_reference ch, size_type pos = 0) const
             {
                 return this->find(ch, pos, _length);
             }
@@ -732,7 +745,7 @@ namespace std_copy
              * @param p The substring to search for.
              * @param pos The index from which to start searching for the substring.
             */
-            constexpr size_type find(const_pointer p, size_type pos = 0)
+            constexpr size_type find(const_pointer p, size_type pos = 0) const
             {
                 return this->find(p, pos, traits_type::length(p));
             }
@@ -744,7 +757,7 @@ namespace std_copy
              * @param pos The index from which to start searching for p in *this.
              * @param count The number of characters in p to look for.
             */
-            constexpr size_type find(const_pointer p, size_type pos, size_type count)
+            constexpr size_type find(const_pointer p, size_type pos, size_type count) const
             {
                 size_type indexInSubstr = 0;
                 size_type indexSubstrStart = npos;
@@ -771,7 +784,7 @@ namespace std_copy
              * @param pos The position from where to start searching.
              * @param count The number of characters in s to search for.
             */
-            constexpr size_type find(const _basic_string_type& s, size_type pos, size_type count)
+            constexpr size_type find(const _basic_string_type& s, size_type pos, size_type count) const
             {
                 return this->find(s._internalString, pos, count);
             }
@@ -781,7 +794,7 @@ namespace std_copy
              * @param s The basic_string object to search for.
              * @param pos The position from where to start searching.
             */
-            constexpr size_type find(const _basic_string_type& s, size_type pos = 0)
+            constexpr size_type find(const _basic_string_type& s, size_type pos = 0) const
             {
                 return this->find(s._internalString, pos, s._length);
             }
@@ -793,7 +806,7 @@ namespace std_copy
              * @param pos The position in *this from where to start searching.
             */
             template <class InputIt>
-            constexpr size_type find(InputIt first, InputIt last, size_type pos = 0)
+            constexpr size_type find(InputIt first, InputIt last, size_type pos = 0) const
             {
                 size_type indexSubstrStart = npos;
                 InputIt tempFirst = first;
@@ -816,7 +829,7 @@ namespace std_copy
              * Checks if *this contains another basic_string object.
              * @param s The basic_string object to find.
             */
-            constexpr bool contains(const _basic_string_type& s)
+            constexpr bool contains(const _basic_string_type& s) const
             {
                 return this->find(s) != npos;
             }
@@ -824,7 +837,7 @@ namespace std_copy
              * Checks if *this contains a character sequence p.
              * @param p The character sequence to look for.
             */
-            constexpr bool contains(const_pointer p)
+            constexpr bool contains(const_pointer p) const
             {
                 return this->find(p) != npos;
             }
@@ -832,7 +845,7 @@ namespace std_copy
              * Checks if *this contains a character ch.
              * @param ch The character to search for.
             */
-            constexpr bool contains(const_reference ch, size_type pos = 0)
+            constexpr bool contains(const_reference ch, size_type pos = 0) const
             {
                 return this->find(ch, pos) != npos;
             }
@@ -889,7 +902,7 @@ namespace std_copy
                     traits_type::move(_internalString + pos, str._internalString, count);
                 else
                 {
-                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + str._length) / _capacity);
+                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + str._length) / _capacity);
                     pointer temp = _internalString;
                     _internalString = allocator_type::allocate(_capacity);
                     move(temp, temp + pos, _internalString);
@@ -948,7 +961,7 @@ namespace std_copy
                     traits_type::move(_internalString + pos, s, count);
                 else
                 {
-                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + len) / _capacity);
+                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
                     pointer temp = _internalString;
                     _internalString = allocator_type::allocate(_capacity);
                     move(temp, temp + pos, _internalString);
@@ -1019,12 +1032,12 @@ namespace std_copy
                 if (count > _length - pos)
                     count = _length - pos;
                     
-                const size_type len = std_copy::distance(first, last);
+                const size_type len = distance(first, last);
                 if (count == len)
                     move(first, last, _internalString + pos);
                 else
                 {
-                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + len) / _capacity);
+                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
                     pointer temp = _internalString;
                     _internalString = allocator_type::allocate(_capacity);
                     move(temp, temp + pos, _internalString);
@@ -1048,7 +1061,7 @@ namespace std_copy
                     traits_type::assign(_internalString + pos, count2, ch);
                 else
                 {
-                    _capacity *= _calculateSmallestPowerOfTwoGreaterThan((_length - count + count2) / _capacity);
+                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + count2) / _capacity);
                     pointer temp = _internalString;
                     _internalString = allocator_type::allocate(_capacity);
                     move(temp, temp + pos, _internalString);
@@ -1070,13 +1083,28 @@ namespace std_copy
             {
                 return this->replace(first - this->begin(), last - first, count, ch);
             }
+            /**
+             * Returns the substring [pos, pos + count) of *this.
+             * @param pos The index to start getting the characters from.
+             * @param count The number of characters after pos to put into the substring.
+            */
+            constexpr _basic_string_type& substr(size_type pos, size_type count = npos) const
+            {
+                if (pos > _length)
+                    throw std::out_of_range("basic_string::substr: pos > size()");
+
+                if (pos + count > _length)
+                    count = _length - pos;
+
+                return _basic_string_type(_internalString + pos, _internalString + pos + count);
+            }
     };
 
     /**
      * Gets the Nth element from str. N is a template parameter.
      * @param str The basic_string object from which to get the element.
     */
-    template <unsigned long long N, class CharT, class CharTraits = std_copy::char_traits<CharT>, class Alloc = std_copy::allocator<CharT>>
+    template <unsigned long long N, class CharT, class CharTraits = char_traits<CharT>, class Alloc = allocator<CharT>>
     CharT&& get(basic_string<CharT, CharTraits, Alloc>& str)
     {
         return move(str[N]);
@@ -1085,7 +1113,7 @@ namespace std_copy
      * Gets the Nth element from str. N is a template parameter.
      * @param str The basic_string object from which to get the element.
     */
-    template <unsigned long long N, class CharT, class CharTraits = std_copy::char_traits<CharT>, class Alloc = std_copy::allocator<CharT>>
+    template <unsigned long long N, class CharT, class CharTraits = char_traits<CharT>, class Alloc = allocator<CharT>>
     CharT& get(basic_string<CharT, CharTraits, Alloc>& str)
     {
         return str[N];
