@@ -1,6 +1,7 @@
 #ifndef _STD_COPY_CONCEPTS
 #define _STD_COPY_CONCEPTS
 
+#if __cplusplus > 201703L
 #include "type_traits.hpp"
 
 namespace std_copy
@@ -50,5 +51,6 @@ namespace std_copy
         {T()};
     };
 }
+#endif
 
 #endif /* _STD_COPY_CONCEPTS */
