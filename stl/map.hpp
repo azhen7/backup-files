@@ -2,7 +2,6 @@
 #define _STD_COPY_MAP
 
 #include <stdexcept>
-#include <functional>
 
 #include "functional_comp.hpp"
 #include "algorithm.hpp"
@@ -14,13 +13,16 @@
 namespace std_copy
 {
     /**
-     * My implementation of std::map, defined in the <map> header file.
+     * An implementation of std::map, defined in the <map> header file.
      * @param Key The type of the keys in the map.
      * @param T The type of the mapped values in the map.
      * @param Compare The comparison struct used to sort the keys.
      * @param Alloc The object used to allocate space for the map.
     */
     template <class Key, class T, class Compare = less<Key>, class Alloc = allocator<pair<Key, T>>>
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_allocator::_is_valid_allocator<Alloc>
+#endif
     class map
     {
         private:
@@ -536,9 +538,10 @@ namespace std_copy
      * @param pred The function used to erase elements.
     */
     template <class T1, class T2, class Compare, class Alloc, class Function>
-    typename map<T1, T2, Compare, Alloc>::size_type 
-        erase_if(map<T1, T2, Compare, Alloc>& c, Function func)
-        requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
+    typename map<T1, T2, Compare, Alloc>::size_type erase_if(map<T1, T2, Compare, Alloc>& c, Function func)
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
+#endif
     {
         unsigned long long oldSize = c.size();
         for (typename map<T1, T2, Compare, Alloc>::iterator it = c.begin(); it != c.end(); )
