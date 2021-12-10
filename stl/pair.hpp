@@ -4,7 +4,7 @@
 namespace std_copy
 {
     /**
-     * My implementation of std::pair.
+     * An implementation of std::pair.
      * @param T1 The type of the first member.
      * @param T2 The type of the second member.
     */
