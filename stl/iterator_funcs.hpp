@@ -18,46 +18,46 @@ namespace _std_copy_hidden
                 typedef std_copy::random_access_iterator_tag    iterator_category;
 
             private:
-                typedef iterator<T>                             iterator_type;
+                typedef _iterator<T>                            _iterator_type;
 
-                pointer internalPtr_;
+                pointer _internalPtr;
 
             public:
-                iterator(pointer ptr = nullptr)
-                    : internalPtr_(ptr) {}
+                _iterator(pointer ptr = nullptr)
+                    : _internalPtr(ptr) {}
                 
                 /**
                  * Overloaded postfix increment operator
                 */
-                iterator_type operator++()
+                _iterator_type operator++()
                 {
-                    internalPtr_++;
+                    _internalPtr++;
                     return *this;
                 }
                 /**
                  * Overloaded prefix increment operator
                 */
-                iterator_type operator++(int)
+                _iterator_type operator++(int)
                 {
-                    iterator_type ptrBeforeIncrement = *this;
-                    internalPtr_++;
+                    _iterator_type ptrBeforeIncrement = *this;
+                    _internalPtr++;
                     return ptrBeforeIncrement;
                 }
                 /**
                  * Overloaded postfix decrement operator
                 */
-                iterator_type operator--()
+                _iterator_type operator--()
                 {
-                    internalPtr_--;
+                    _internalPtr--;
                     return *this;
                 }
                 /**
                  * Overloaded prefix decrement operator
                 */
-                iterator_type operator--(int)
+                _iterator_type operator--(int)
                 {
-                    iterator_type ptrBeforeDecrement = internalPtr_;
-                    internalPtr_--;
+                    _iterator_type ptrBeforeDecrement = _internalPtr;
+                    _internalPtr--;
                     return ptrBeforeDecrement;
                 }
                 /**
@@ -65,15 +65,15 @@ namespace _std_copy_hidden
                  * another iterator.
                  * @param it The iterator to compare against.
                 */
-                bool operator==(iterator_type it)
+                bool operator==(_iterator_type it)
                 {
-                    return internalPtr_ == it.internalPtr_;
+                    return _internalPtr == it._internalPtr;
                 }
                 /**
                  * Overloaded inequality operator.
                  * @param it The iterator to compare against.
                 */
-                bool operator!=(iterator_type it)
+                bool operator!=(_iterator_type it)
                 {
                     return !(*this == it);
                 }
@@ -82,99 +82,99 @@ namespace _std_copy_hidden
                 */
                 reference operator*()
                 {
-                    return *internalPtr_;
+                    return *_internalPtr;
                 }
                 /**
                  * Overloaded arrow operator
                 */
                 pointer operator->()
                 {
-                    return internalPtr_;
+                    return _internalPtr;
                 }
                 /**
                  * Returns the iterator's internal pointer
                 */
                 pointer base()
                 {
-                    return internalPtr_;
+                    return _internalPtr;
                 }
                 /**
                  * Overloaded assignment operator -> assigns 
                  * the current iterator to a provided iterator.
                 */
-                void operator=(iterator_type it)
+                void operator=(_iterator_type it)
                 {
-                    internalPtr_ = it.internalPtr_;
+                    _internalPtr = it._internalPtr;
                 }
                 /**
                  * Overloaded += operator
                 */
                 void operator+=(difference_type n)
                 {
-                    internalPtr_ += n;
+                    _internalPtr += n;
                 }
                 /**
                  * Overloaded + operator
                 */
-                iterator_type operator+(difference_type n)
+                _iterator_type operator+(difference_type n)
                 {
-                    return iterator_type(internalPtr_ + n);
+                    return _iterator_type(_internalPtr + n);
                 }
                 /**
                  * Overloaded -= operator
                 */
                 void operator-=(difference_type n)
                 {
-                    internalPtr_ -= n;
+                    _internalPtr -= n;
                 }
                 /**
                  * Overloaded - operator; decrements the iterator by a certain amount.
                 */
-                iterator_type operator-(difference_type n)
+                _iterator_type operator-(difference_type n)
                 {
-                    return iterator_type(internalPtr_ - n);
+                    return _iterator_type(_internalPtr - n);
                 }
                 /**
                  * Overloaded - operator; finds the distance between two iterators.
                 */
-                difference_type operator-(iterator_type it)
+                difference_type operator-(_iterator_type it)
                 {
-                    return internalPtr_ - it.internalPtr_;
+                    return _internalPtr - it._internalPtr;
                 }
                 /**
                  * Overloaded < operator
                 */
-                bool operator<(iterator_type i)
+                bool operator<(_iterator_type i)
                 {
-                    return internalPtr_ < i.internalPtr_;
+                    return _internalPtr < i._internalPtr;
                 }
                 /**
                  * Overloaded > operator
                 */
-                bool operator>(iterator_type i)
+                bool operator>(_iterator_type i)
                 {
-                    return internalPtr_> i.internalPtr_;
+                    return _internalPtr> i._internalPtr;
                 }
                 /**
                  * Overloaded >= operator
                 */
-                bool operator>=(iterator_type i)
+                bool operator>=(_iterator_type i)
                 {
-                    return internalPtr_ >= i.internalPtr_;
+                    return _internalPtr >= i._internalPtr;
                 }
                 /**
                  * Overloaded <= operator
                 */
-                bool operator<=(iterator_type i)
+                bool operator<=(_iterator_type i)
                 {
-                    return internalPtr_ <= i.internalPtr_;
+                    return _internalPtr <= i._internalPtr;
                 }
                 /**
                  * Overloaded ! operator
                 */
                 bool operator!()
                 {
-                    return !internalPtr_;
+                    return !_internalPtr;
                 }
         };
     }
