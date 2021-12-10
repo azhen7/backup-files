@@ -30,7 +30,7 @@ namespace std_copy
             function(const _function_type& f)
                 : _target(f._target) {}
             function(_function_type&& f) noexcept
-                : _target(move(f._target)) {}
+                : _target(forward<F>(f._target)) {}
             
             template <class F>
             function(F&& f)
