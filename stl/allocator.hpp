@@ -3,6 +3,25 @@
 
 #include <new>
 
+#if __cplusplus > 201703L
+namespace _std_copy_hidden
+{
+    namespace _std_copy_allocator
+    {
+        template <class Allocator>
+        concept _is_valid_allocator =
+        requires(typename Allocator::value_type* randomPtr)
+        {
+            typename Allocator::size_type;
+            typename Allocator::difference_type;
+            {Allocator()};
+            {Allocator::allocate(0)};
+            {Allocator::deallocate(randomPtr, 0)};
+        };
+    }
+}
+#endif
+
 namespace std_copy
 {
     /**
