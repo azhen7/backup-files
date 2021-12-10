@@ -2,17 +2,17 @@
 #define _STD_COPY_VECTOR
 
 #include <stdexcept>
-#include <cmath>
 
 #include "algorithm.hpp"
 #include "allocator.hpp"
 #include "move.hpp"
 #include "iterator_funcs.hpp"
+#include "construct_destroy.hpp"
 
 namespace std_copy
 {
     /**
-     * My own implementation of the STL vector container, defined in
+     * An implementation of the STL vector container, defined in
      * the <vector> header. This implementation contains a few new functions, 
      * aside from the ones in the original vector implementation, like pop_front(), 
      * push_front(), and some others.
@@ -21,6 +21,9 @@ namespace std_copy
      * used for containing the values.
     */
     template <class T, class Alloc = allocator<T>>
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_allocator::_is_valid_allocator<Alloc>
+#endif
     class vector
     {
         private:
@@ -68,7 +71,7 @@ namespace std_copy
                 if (x == 0)
                     return 1;
 
-                return _exponent(2, (size_type) (std::log(x) / std::log(2)) + 1);
+                return _exponent(2, (size_type) (__builtin_log(x) / __builtin_log(2)) + 1);
             }
             constexpr void _realloc(size_type newAmount, size_type previousAmount, size_type copyUpTo)
             {
@@ -130,7 +133,9 @@ namespace std_copy
              * @param end The end of the sequence.
             */
             template <class InputIt>
-            requires _std_copy_hidden::_std_copy_algorithm::_is_input_iterator<InputIt>
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+        #endif
             vector(InputIt start, InputIt end)
                 : _numberOfElements(distance(start, end))
             {
@@ -139,7 +144,9 @@ namespace std_copy
                 move(start, end, _internalBuffer);
             }
             template <class InputIt>
-            requires _std_copy_hidden::_std_copy_algorithm::_is_input_iterator<InputIt>
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+        #endif
             vector(InputIt start, InputIt end, const allocator_type& alloc)
                 : _numberOfElements(distance(start, end))
             {
@@ -410,7 +417,9 @@ namespace std_copy
             */
             template <class InputIt>
             constexpr void assign(InputIt first, InputIt last)
-                requires _std_copy_hidden::_std_copy_algorithm::_is_input_iterator<InputIt>
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+        #endif
             {
                 allocator_type::deallocate(_internalBuffer, _capacity);
                 _numberOfElements = distance(first, last);
@@ -465,13 +474,12 @@ namespace std_copy
              * are uninitialized.
              * @param n The new size to resize the vector with.
             */
-            constexpr void resize(size_type n, const_reference val = value_type())
+            constexpr void resize(size_type n)
             {
                 pointer temp = _internalBuffer;
                 _internalBuffer = allocator_type::allocate(n);
                 size_type copyUpTo = (n > _numberOfElements) ? _numberOfElements : n;
                 move(temp, temp + copyUpTo, _internalBuffer);
-                fill(temp + copyUpTo, temp + _numberOfElements, val);
                 allocator_type::deallocate(temp, _capacity);
                 _numberOfElements = n;
                 _capacity = n;
@@ -483,9 +491,6 @@ namespace std_copy
             */
             constexpr reference front()
             {
-                if (_numberOfElements == 0)
-                    throw std::length_error("vector::front: Cannot access element in empty vector");
-                
                 return *_internalBuffer;
             }
             /**
@@ -495,9 +500,6 @@ namespace std_copy
             */
             constexpr reference back()
             {
-                if (_numberOfElements == 0)
-                    throw std::length_error("vector::back: Cannot access element in empty vector");
-
                 return *(_internalBuffer + _numberOfElements - 1);
             }
             /**
@@ -601,7 +603,9 @@ namespace std_copy
             */
             template <class InputIt>
             constexpr iterator insert(iterator pos, InputIt first, InputIt last)
-                requires _std_copy_hidden::_std_copy_algorithm::_is_input_iterator<InputIt>
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+        #endif
             {
                 const difference_type dist = distance(first, last);
                 if (dist == 0)
@@ -789,7 +793,9 @@ namespace std_copy
     */
     template <class T, class Alloc = allocator<T>, class Function>
     unsigned long long erase_if(const vector<T, Alloc>& vec, Function func)
-        requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
+#endif
     {
         auto it = remove_if(vec.begin(), vec.end(), func);
         auto dist = distance(it, vec.end());
