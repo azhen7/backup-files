@@ -2,6 +2,8 @@
 #define _STD_COPY_ITERATOR_TRAITS
 
 #include "concepts.hpp"
+#include "iterator_concepts.hpp"
+#include "type_traits.hpp"
 
 namespace std_copy
 {
@@ -19,11 +21,11 @@ namespace std_copy
             using _pointer = typename T::pointer;
 
         public:
-            typedef typename Iterator::value_type              value_type;
-            using pointer       =       _std_copy_hidden::_detector_t<void, _pointer, Iterator>;
-            typedef typename Iterator::reference               reference;
-            typedef typename Iterator::difference_type         difference_type;
-            typedef typename Iterator::iterator_category       iterator_category;
+            typedef typename Iterator::value_type                               value_type;
+            typedef _std_copy_hidden::_detector_t<void, _pointer, Iterator>     pointer;
+            typedef typename Iterator::reference                                reference;
+            typedef typename Iterator::difference_type                          difference_type;
+            typedef typename Iterator::iterator_category                        iterator_category;
     };
     /**
      * Partial specialization for pointer types
@@ -31,7 +33,7 @@ namespace std_copy
     template <class T>
     struct iterator_traits<T*>
     {
-        typedef T                                       value_type;
+        typedef remove_cv_t<T>                          value_type;
         typedef T*                                      pointer;
         typedef T&                                      reference;
         typedef long long                               difference_type;
@@ -49,14 +51,16 @@ namespace std_copy
     };
 }
 
+#if __cplusplus > 201703L
 namespace _std_copy_hidden
 {
     namespace _std_copy_iterator_traits
     {
-        template <class T>
-        using _value_type = typename std_copy::iterator_traits<T>::value_type;
         namespace _detail
         {
+            template <class T>
+            using _value_type = typename std_copy::iterator_traits<T>::value_type;
+
             template <class T, class U>
             concept _is_same = std_copy::same_as<std_copy::remove_reference_t<T>, U>;
             //Checks if Iterator is actually an iterator/pointer
@@ -81,13 +85,13 @@ namespace _std_copy_hidden
         //Checks if OutputIterator is an output iterator
         template <class OutputIterator>
         concept _is_output_iterator = _detail::_is_iterator<OutputIterator> &&
-        requires(OutputIterator it, _value_type<OutputIterator> val)
+        requires(OutputIterator it, _detail::_value_type<OutputIterator> val)
         {
             {*it = val};
         };
         //Checks if BidirectionalIterator it a bidirectional iterator
         template <class BidirectionalIterator>
-        concept _is_bidirectional_iterator = _is_input_iterator<BidirectionalIterator> && _is_output_iterator<BidirectionalIterator> &&
+        concept _is_bidirectional_iterator = _is_input_iterator<BidirectionalIterator> &&
         requires(BidirectionalIterator it)
         {
             {--it};
@@ -95,5 +99,6 @@ namespace _std_copy_hidden
         };
     }
 }
+#endif
 
 #endif
