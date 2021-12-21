@@ -12,20 +12,6 @@ namespace _std_copy_hidden
 {
     namespace _std_copy_algorithm
     {
-        //Checks if Fn is callable
-        template <class Fn>
-        concept _is_function =
-        requires(Fn f)
-        {
-            {f()};
-        };
-        //Checks if Fn returns a value of type T
-        template <class Fn, class T>
-        concept _is_function_and_returns =
-        requires(Fn f)
-        {
-            {f()} -> std_copy::same_as<T>;
-        };
         //Checks if operator< can be invoked two objects of type T 
         template <class T>
         concept _is_less_operator_invokable =
@@ -113,7 +99,7 @@ namespace std_copy
     template <class InputIt, class Function>
     InputIt find_if(InputIt first, InputIt last, Function func)
 #if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt> && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
+    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
 #endif
     {
         while (first != last && !func(*first))
@@ -130,7 +116,7 @@ namespace std_copy
     template <class InputIt, class Function>
     InputIt find_if_not(InputIt first, InputIt last, Function func)
 #if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt> && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
+    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
 #endif
     {
         while (first != last && func(*first))
@@ -150,7 +136,7 @@ namespace std_copy
 #endif
     {
         while (first != last)
-            *first++ = std_copy::move(val);
+            *first++ = move(val);
     }
     /**
      * This function assigns val to all the element at most n after first.
@@ -164,8 +150,8 @@ namespace std_copy
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt> && is_integral_v<Size>
 #endif
     {
-        for (int i = 0; i < n; i++)
-            *first++ = std_copy::move(val);
+        for (Size i = 0; i < n; i++)
+            *first++ = move(val);
     }
     /**
      * This function copies the elements in the range [first, last) to result.
@@ -200,7 +186,7 @@ namespace std_copy
     && is_integral_v<Size>
 #endif
     {
-        for (int i = 0; i < n; i++)
+        for (Size i = 0; i < n; i++)
             *result++ = *first++;
 
         return result;
@@ -220,7 +206,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         while (first != last)
@@ -263,7 +248,6 @@ namespace std_copy
     void generate(InputIt first, InputIt last, GeneratorFunc gen)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<GeneratorFunc, typename std_copy::iterator_traits<InputIt>::value_type>
 #endif
     {
         while (first != last)
@@ -280,11 +264,10 @@ namespace std_copy
     void generate_n(InputIt first, Size n, Generator gen)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Generator, typename std_copy::iterator_traits<InputIt>::value_type>
     && is_integral_v<Size>
 #endif
     {
-        for (int i = 0; i < n; i++)
+        for (Size i = 0; i < n; i++)
             *first++ = gen();
     }
     /**
@@ -298,7 +281,6 @@ namespace std_copy
     bool all_of(InputIt first, InputIt last, Function func)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         while (first != last)
@@ -321,7 +303,6 @@ namespace std_copy
     bool any_of(InputIt first, InputIt last, Function func)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         while (first != last)
@@ -344,10 +325,9 @@ namespace std_copy
     bool none_of(InputIt first, InputIt last, Function func)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
-        return !std_copy::all_of(first, last, func);
+        return !all_of(first, last, func);
     }
     /**
      * This function compares all the elements in the range [first1, last1) and the 
@@ -385,7 +365,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         while (first1 != last1)
@@ -409,7 +388,7 @@ namespace std_copy
 #endif
     {
         unsigned long long count, half;
-        count = std_copy::distance(first, last);
+        count = distance(first, last);
         InputIt curr_elem;
         while (count > 0)
         {
@@ -440,11 +419,10 @@ namespace std_copy
     InputIt lower_bound(InputIt first, InputIt last, const T& val, Compare comp)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         unsigned long long count, half;
-        count = std_copy::distance(first, last);
+        count = distance(first, last);
         InputIt curr_elem;
         while (count > 0)
         {
@@ -476,7 +454,7 @@ namespace std_copy
 #endif
     {
         unsigned long long count, half;
-        count = std_copy::distance(first, last);
+        count = distance(first, last);
         InputIt curr_elem;
         while (count > 0)
         {
@@ -507,11 +485,10 @@ namespace std_copy
     InputIt upper_bound(InputIt first, InputIt last, const T& val, Compare comp)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         unsigned long long count, half;
-        count = std_copy::distance(first, last);
+        count = distance(first, last);
         InputIt curr_elem;
         while (count > 0)
         {
@@ -554,9 +531,6 @@ namespace std_copy
     */
     template <class T, class Compare>
     const T& max(const T& a, const T& b, Compare comp)
-#if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
-#endif
     {
         if (comp(b, a))
             return a;
@@ -587,9 +561,6 @@ namespace std_copy
     */
     template <class T, class Compare>
     const T& min(const T& a, const T& b, Compare comp)
-#if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
-#endif
     {
         if (comp(a, b))
             return a;
@@ -632,7 +603,6 @@ namespace std_copy
     InputIt max_element(InputIt first, InputIt second, Compare comp)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         InputIt largest = first;
@@ -684,7 +654,6 @@ namespace std_copy
     InputIt min_element(InputIt first, InputIt second, Compare comp)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         InputIt smallest = first;
@@ -711,8 +680,8 @@ namespace std_copy
 #endif
     {
         if (a < b)
-            return std_copy::make_pair(a, b);
-        return std_copy::make_pair(b, a);
+            return make_pair(a, b);
+        return make_pair(b, a);
     }
     /**
      * This function returns a pair with first as an iterator pointing to the smallest element in 
@@ -726,9 +695,9 @@ namespace std_copy
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
 #endif
     {
-        InputIt largest = std_copy::max_element(first, second);
-        InputIt smallest = std_copy::min_element(first, second);
-        return std_copy::make_pair(smallest, largest);
+        InputIt largest = max_element(first, second);
+        InputIt smallest = min_element(first, second);
+        return make_pair(smallest, largest);
     }
     /**
      * This function compares the elements in the ranges [first1, last1) and the sequence of elements 
@@ -748,7 +717,7 @@ namespace std_copy
         while (first1 != last1 && *first1 == *first2)
             first1++;
 
-        return std_copy::make_pair(first1, first2);
+        return make_pair(first1, first2);
     }
     /**
      * This function compares the elements in the ranges [first1, last1) and the sequence of elements 
@@ -765,13 +734,145 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         while (first1 != last1 && pred(*first1, *first2))
             first1++;
 
-        return std_copy::make_pair(first1, first2);
+        return make_pair(first1, first2);
+    }
+    /**
+     * This function returns an iterator to the first element in the range [first1, last1) that matches any of 
+     * the elements in the range [first2, last2). This function invokes operator== to compare the elements. 
+     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param last2 An iterator to the final position of the second sequence of elements.
+    */
+    template <class InputIt1, class InputIt2>
+    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
+    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
+#endif
+    {
+        while (first1 != last1)
+        {
+            for (InputIt2 it = first2; it != last2; it++)
+            {
+                if (*it == *first1)
+                    return first1;
+            }
+        }
+        return last1;
+    }
+     /**
+     * This function returns an iterator to the first element in the range [first1, last1) that matches any of 
+     * the elements in the range [first2, last2). This function invokes a provided function to compare the 
+     * elements. 
+     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param last2 An iterator to the final position of the second sequence of elements.
+     * @param comp The function used to compare the elements.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
+    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
+#endif
+    {
+        while (first1 != last1)
+        {
+            for (InputIt2 it = first2; it != last2; it++)
+            {
+                if (comp(*it, *first1))
+                    return first1;
+            }
+        }
+        return last1;
+    }
+    /**
+     * Finds the sequence [first1, last1) for the last occurence of the subsequence defined by [first2, last2).
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param last2 An iterator to the final position of the second sequence of elements.
+    */
+    template <class InputIt1, class InputIt2>
+    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
+    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
+#endif
+    {
+        if (first2 == last2)
+            return last1;
+        last2--;
+        while (true)
+        {
+            last1--;
+            InputIt1 it1 = last1;
+            InputIt2 it2 = last2;
+
+            while (*it1 == *it2)
+            {
+                it1--;
+                it2--;
+                if (it2 == first2)
+                    return it1;
+                if (it1 == first1)
+                    return last1;
+            }
+
+            if (last1 == first1)
+                break;
+        }
+        return last1;
+    }
+    /**
+     * This function returns an iterator to the last element in the range [first1, last1) that matches any of 
+     * the elements in the range [first2, last2). This function invokes a provided function to compare the elements. 
+     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param last2 An iterator to the final position of the second sequence of elements.
+     * @param comp The function used to compare the elements.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+#if __cplusplus > 201703L
+    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
+    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
+#endif
+    {
+        if (first2 == last2)
+            return last1;
+        last2--;
+        while (true)
+        {
+            last1--;
+            InputIt1 it1 = last1;
+            InputIt2 it2 = last2;
+
+            while (comp(*it1,*it2))
+            {
+                it1--;
+                it2--;
+                if (it2 == first2)
+                    return it1;
+                if (it1 == first1)
+                    return last1;
+            }
+
+            if (last1 == first1)
+                break;
+        }
+        return last1;
     }
     /**
      * This function finds the first occurence of the sequence of elements in the range [first2, last2) 
@@ -824,7 +925,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         while (first1 != last1)
@@ -844,133 +944,6 @@ namespace std_copy
             first1++;
         }
         return last1;
-    }
-    /**
-     * This function returns an iterator to the first element in the range [first1, last1) that matches any of 
-     * the elements in the range [first2, last2). This function invokes operator== to compare the elements. 
-     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
-     * @param first1 An iterator to the initial position of the first sequence of elements.
-     * @param last1 An iterator to the final position of the first sequence of elements.
-     * @param first2 An iterator to the initial position of the second sequence of elements.
-     * @param last2 An iterator to the final position of the second sequence of elements.
-    */
-    template <class InputIt1, class InputIt2>
-    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
-#if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
-#endif
-    {
-        while (first1 != last1)
-        {
-            for (InputIt2 it = first2; it != last2; it++)
-            {
-                if (*it == *first1)
-                    return first1;
-            }
-        }
-        return last1;
-    }
-     /**
-     * This function returns an iterator to the first element in the range [first1, last1) that matches any of 
-     * the elements in the range [first2, last2). This function invokes a provided function to compare the 
-     * elements. 
-     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
-     * @param first1 An iterator to the initial position of the first sequence of elements.
-     * @param last1 An iterator to the final position of the first sequence of elements.
-     * @param first2 An iterator to the initial position of the second sequence of elements.
-     * @param last2 An iterator to the final position of the second sequence of elements.
-     * @param comp The function used to compare the elements.
-    */
-    template <class InputIt1, class InputIt2, class Compare>
-    InputIt1 find_first_of(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
-#if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
-#endif
-    {
-        while (first1 != last1)
-        {
-            for (InputIt2 it = first2; it != last2; it++)
-            {
-                if (comp(*it, *first1))
-                    return first1;
-            }
-        }
-        return last1;
-    }
-    /**
-     * Finds the sequence [first1, last1) for a subsequence defined by [first2, last2).
-     * @param first1 An iterator to the initial position of the first sequence of elements.
-     * @param last1 An iterator to the final position of the first sequence of elements.
-     * @param first2 An iterator to the initial position of the second sequence of elements.
-     * @param last2 An iterator to the final position of the second sequence of elements.
-    */
-    template <class InputIt1, class InputIt2>
-    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
-#if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
-#endif
-    {
-        InputIt1 ret = last1;
-        while (first1++ != last1)
-        {
-            InputIt1 it1 = first1;
-            InputIt2 it2 = first2;
-            while (*it1++ == *it2++)
-            {
-
-                if (it2 == last2)
-                {
-                    ret = first1;
-                    break;
-                }
-                
-                if (it1 == last1)
-                    return ret;
-            }
-        }
-        return ret;
-    }
-    /**
-     * This function returns an iterator to the last element in the range [first1, last1) that matches any of 
-     * the elements in the range [first2, last2). This function invokes a provided function to compare the elements. 
-     * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
-     * @param first1 An iterator to the initial position of the first sequence of elements.
-     * @param last1 An iterator to the final position of the first sequence of elements.
-     * @param first2 An iterator to the initial position of the second sequence of elements.
-     * @param last2 An iterator to the final position of the second sequence of elements.
-     * @param comp The function used to compare the elements.
-    */
-    template <class InputIt1, class InputIt2, class Compare>
-    InputIt1 find_end(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
-#if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt1>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
-#endif
-    {
-        InputIt1 ret = last1;
-        while (first1++ != last1)
-        {
-            InputIt1 it1 = first1;
-            InputIt2 it2 = first2;
-            while (comp(*it1++, *it2++))
-            {
-
-                if (it2 == last2)
-                {
-                    ret = first1;
-                    break;
-                }
-                
-                if (it1 == last1)
-                    return ret;
-            }
-        }
-        return ret;
     }
     /**
      * This function searches the elements in the range [first, last) for a sequence of count elements that all 
@@ -1020,7 +993,6 @@ namespace std_copy
     InputIt search_n(InputIt first, InputIt last, Size count, const T& val, Compare comp)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
     && is_integral_v<Size>
 #endif
     {
@@ -1051,9 +1023,9 @@ namespace std_copy
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
 #endif
     {
-        InputIt start = std_copy::lower_bound(first, last, val);
-        InputIt end = std_copy::upper_bound(first, last, val);
-        return std_copy::make_pair(start, end);
+        InputIt start = lower_bound(first, last, val);
+        InputIt end = upper_bound(first, last, val);
+        return make_pair(start, end);
     }
     /**
      * This function returns the bounds of the subrange which includes elements with values all equal to val. 
@@ -1066,12 +1038,11 @@ namespace std_copy
     pair<InputIt, InputIt> equal_range(InputIt first, InputIt last, const T& val, Compare comp)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
-        InputIt start = std_copy::lower_bound(first, last, val, comp);
-        InputIt end = std_copy::upper_bound(first, last, val, comp);
-        return std_copy::make_pair(start, end);
+        InputIt start = lower_bound(first, last, val, comp);
+        InputIt end = upper_bound(first, last, val, comp);
+        return make_pair(start, end);
     }
     /**
      * This function invokes a provided function on each element in the range [first, last).
@@ -1083,7 +1054,6 @@ namespace std_copy
     Function for_each(InputIt first, InputIt last, Function fn)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function<Function>
 #endif
     {
         while (first != last)
@@ -1091,7 +1061,7 @@ namespace std_copy
             fn(*first);
             first++;
         }
-        return std_copy::move(fn);
+        return move(fn);
     }
     /**
      * This function invokes a provided function on the first n elements in the range starting 
@@ -1104,11 +1074,10 @@ namespace std_copy
     InputIt for_each_n(InputIt first, Size n, Function fn)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function<Function>
     && is_integral_v<Size>
 #endif
     {
-        for (int i = 0; i < n; i++)
+        for (Size i = 0; i < n; i++)
         {
             fn(*first);
             first++;
@@ -1129,7 +1098,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIt>
-    &&  _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, typename std_copy::iterator_traits<InputIt>::value_type>
 #endif    
     {
         while (first != last)
@@ -1155,7 +1123,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, typename std_copy::iterator_traits<InputIt>::value_type>
 #endif
     {
         while (first1 != last1)
@@ -1181,7 +1148,7 @@ namespace std_copy
         for (InputIt it = first; it != last; it++)
         {
             if (*it != val)
-                *first++ = std_copy::move(*it);
+                *first++ = move(*it);
         }
         return first;
     }
@@ -1195,13 +1162,12 @@ namespace std_copy
     InputIt remove_if(InputIt first, InputIt last, Function pred)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         for (InputIt it = first; it != last; it++)
         {
             if (!pred(*it))
-                *first++ = std_copy::move(*it);
+                *first++ = move(*it);
         }
         return first;
     }
@@ -1242,7 +1208,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         while (first != last)
@@ -1285,7 +1250,7 @@ namespace std_copy
     */
     template <class InputIt, class Function>
     InputIt adjacent_find(InputIt first, InputIt last, Function func)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt> && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
+        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
     {
         InputIt temp = first;
         while (first != last)
@@ -1331,7 +1296,6 @@ namespace std_copy
     void replace_if(InputIt first, InputIt last, Function func, const T& new_val)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         while (first != last)
@@ -1384,7 +1348,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         while (first != last)
@@ -1410,7 +1373,7 @@ namespace std_copy
 #endif
     {
         while (first != last)
-            *result++ = std_copy::move(*first++);
+            *result++ = move(*first++);
         
         return result;
     }
@@ -1429,8 +1392,8 @@ namespace std_copy
     && is_integral_v<Size>
 #endif
     {
-        for (int i = 0; i < n; i++)
-            *result++ = std_copy::move(*first++);
+        for (Size i = 0; i < n; i++)
+            *result++ = move(*first++);
 
         return result;
     }
@@ -1450,7 +1413,7 @@ namespace std_copy
 #endif
     {
         while (first != last)
-            *(--result) = std_copy::move(*(--last));
+            *(--result) = move(*(--last));
 
         return result;
     }
@@ -1469,10 +1432,10 @@ namespace std_copy
         if (n == 0 || n > last - first)
             return first;
 
-        InputIt mid = std_copy::next(first, n);
+        InputIt mid = next(first, n);
         if (mid == last)
             return first;
-        return std_copy::move(std_copy::move(mid), std_copy::move(last), std_copy::move(first));
+        return move(move(mid), move(last), move(first));
     }
     /**
      * This function shifts the elements in the range [first, last) right by n places.
@@ -1489,10 +1452,10 @@ namespace std_copy
         if (n == 0 || n > last - first)
             return last;
 
-        InputIt mid = std_copy::next(first, n);
+        InputIt mid = next(first, n);
         if (mid == first)
             return last;
-        return std_copy::move_backward(std_copy::move(first), std_copy::move(mid), std_copy::move(last));
+        return move_backward(move(first), move(mid), move(last));
     }
     /**
      * This function copies the elements from [first, last) to a new range, for which a 
@@ -1511,7 +1474,7 @@ namespace std_copy
         while (first != last)
         {
             if (!(*result == *first))
-                *(++result) = std_copy::move(*first);
+                *(++result) = move(*first);
 
             first++;
         }
@@ -1530,14 +1493,13 @@ namespace std_copy
     InputIt unique(InputIt first, InputIt last, Compare comp)
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         InputIt result = first;
         while (first != last)
         {
             if (!comp(*result, *first))
-                *(++result) = std_copy::move(*first);
+                *(++result) = move(*first);
 
             first++;
         }
@@ -1588,7 +1550,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Compare, bool>
 #endif
     {
         if (first == last) 
@@ -1618,7 +1579,7 @@ namespace std_copy
     && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt2>
 #endif
     {
-        std_copy::swap(*a, *b);
+        swap(*a, *b);
     }
     /**
      * This function reverses the order of the values in the range 
@@ -1634,7 +1595,7 @@ namespace std_copy
     {
         while (first != last)
         {
-            std_copy::iter_swap(first, last);
+            iter_swap(first, last);
             first++;
             last--;
         }
@@ -1669,7 +1630,6 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_iterator_traits::_is_bidirectional_iterator<InputIt>
     && _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIt>
-    && _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
 #endif
     {
         last--;
@@ -1695,7 +1655,7 @@ namespace std_copy
 #endif
     {
         while (last != first)
-            *result++ = std_copy::move(*(--last));
+            *result++ = move(*(--last));
     }
 }
 
