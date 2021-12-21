@@ -93,29 +93,11 @@ namespace std_copy
                 _internalString[i] = value_type();
             }
 
-            size_type _exponent(size_type x, size_type y)
-            {
-                size_type result = 1;
-                while (y > 0)
-                {
-                    if (y % 2 == 0)
-                    {
-                        x *= x;
-                        y /= 2;
-                    }
-                    else
-                    {
-                        result *= x;
-                        y--;
-                    }
-                }
-                return result;
-            }
             size_type _calculate_smallest_power_of_two_greater_than(size_type x)
             {
                 if (x == 0)
                     return 1;
-                return _exponent(2, (size_type) (__builtin_log(x) / __builtin_log(2)) + 1);
+                return __builtin_pow(2, (size_type) (__builtin_log(x) / __builtin_log(2)) + 1);
             }
             void _realloc(size_type n, size_type copyUpTo)
             {
@@ -139,8 +121,7 @@ namespace std_copy
             basic_string(pointer str)
             {
                 _length = traits_type::length(str);
-                int checkIfNullTerminated = str[_length - 1] == value_type();
-                _allocate_and_move_str(_length - 1, allocator_type::allocate,
+                _allocate_and_move_str(_length, allocator_type::allocate,
                     str, _length);
             }
 
@@ -415,7 +396,7 @@ namespace std_copy
             }
             /**
              * Overloaded operator+=. This operator appends a character sequence pointed to by 
-             * p.
+             * p onto the end of *this.
              * @param p A pointer to the character sequence to append.
             */
             constexpr _basic_string_type& operator+=(const_pointer p)
@@ -424,7 +405,7 @@ namespace std_copy
             }
             /**
              * Overloaded operator+=. This operator appends another basic_string type onto the end 
-             * of the string.
+             * of *this.
              * @param s The basic_string object to append.
             */
             constexpr _basic_string_type& operator+=(const _basic_string_type& s)
@@ -432,7 +413,7 @@ namespace std_copy
                 return this->append(s._internalString);
             }
             /**
-             * Overloaded operator+=. This operator appends a character onto the end of this string.
+             * Overloaded operator+=. This operator appends a character onto the end of *this.
              * @param ch The character to append.
             */
             constexpr _basic_string_type& operator+=(const_reference ch)
@@ -440,7 +421,7 @@ namespace std_copy
                 return this->append(1, ch);
             }
             /**
-             * Pushes a character onto the back of the string.
+             * Pushes a character onto the back of *this.
              * @param ch The character to push.
             */
             constexpr void push_back(const_reference ch)
@@ -606,7 +587,7 @@ namespace std_copy
             */
             constexpr bool starts_with(value_type ch)
             {
-                return traits_type::eq(this->front(), ch);
+                return traits_type::eq(_internalString[0], ch);
             }
             /**
              * Checks if *this starts with the null-terminated character sequence p.
@@ -717,113 +698,6 @@ namespace std_copy
                     i++;
                 }
                 return true;
-            }
-            /**
-             * Returns a std::size_t value indicating the index at which the character 
-             * ch first occurrs in *this.
-             * @param ch The character to search for.
-             * @param pos The index from where to start searching. Default value is 0.
-             * @param count The number of characters after pos to search in.
-            */
-            constexpr size_type find(const_reference ch, size_type pos, size_type count) const
-            {
-                return traits_type::find(_internalString + pos, count, ch) - _internalString;
-            }
-            /**
-             * Returns a std::size_t value indicating the index at which the character 
-             * ch first occurrs in *this.
-             * @param ch The character to search for.
-             * @param pos The index from where to start searching. Default value is 0.
-            */
-            constexpr size_type find(const_reference ch, size_type pos = 0) const
-            {
-                return this->find(ch, pos, _length);
-            }
-            /**
-             * Returns a std::size_t value indicating the index at which the substring 
-             * p first occurs in *this.
-             * @param p The substring to search for.
-             * @param pos The index from which to start searching for the substring.
-            */
-            constexpr size_type find(const_pointer p, size_type pos = 0) const
-            {
-                return this->find(p, pos, traits_type::length(p));
-            }
-            /**
-             * Returns a std::size_t value indicating the index at which the first count 
-             * characters in the character sequence p first occurs in the substring [pos, size()) 
-             * of *this.
-             * @param p The character sequence to find.
-             * @param pos The index from which to start searching for p in *this.
-             * @param count The number of characters in p to look for.
-            */
-            constexpr size_type find(const_pointer p, size_type pos, size_type count) const
-            {
-                size_type indexInSubstr = 0;
-                size_type indexSubstrStart = npos;
-                for (size_type i = pos; i < _length && indexInSubstr != count; i++)
-                {
-                    if (!traits_type::eq(_internalString[i], p[indexInSubstr]))
-                    {
-                        indexInSubstr = 0;
-                        indexSubstrStart = npos;
-                    }
-                    if (traits_type::eq(_internalString[i], p[indexInSubstr]))
-                    {
-                        indexInSubstr++;
-                        indexSubstrStart = (indexSubstrStart == npos) ? i : indexSubstrStart;
-                    }
-                }
-                return indexSubstrStart;
-            }
-            /**
-             * Returns a std::size_t value indicating the value at which the first count 
-             * characters in the basic_string object s first occurs in the substring 
-             * [pos, size()) of *this.
-             * @param s The basic_string object to search for.
-             * @param pos The position from where to start searching.
-             * @param count The number of characters in s to search for.
-            */
-            constexpr size_type find(const _basic_string_type& s, size_type pos, size_type count) const
-            {
-                return this->find(s._internalString, pos, count);
-            }
-            /**
-             * Returns a std::size_t value indicating the value at which the basic_string 
-             * object s first occurs in the substring [pos, size()) of *this.
-             * @param s The basic_string object to search for.
-             * @param pos The position from where to start searching.
-            */
-            constexpr size_type find(const _basic_string_type& s, size_type pos = 0) const
-            {
-                return this->find(s._internalString, pos, s._length);
-            }
-            /**
-             * Returns a std::size_t value indicating the value at which the range [first, last) 
-             * first occurs in the substring [pos, size()) of *this.
-             * @param first An iterator to the start of the range.
-             * @param last An iterator to the end of the range.
-             * @param pos The position in *this from where to start searching.
-            */
-            template <class InputIt>
-            constexpr size_type find(InputIt first, InputIt last, size_type pos = 0) const
-            {
-                size_type indexSubstrStart = npos;
-                InputIt tempFirst = first;
-                for (size_type i = pos; i < _length && first != last; i++)
-                {
-                    if (!traits_type::eq(_internalString[i], *first))
-                    {
-                        indexSubstrStart = npos;
-                        first = tempFirst;
-                    }
-                    if (traits_type::eq(_internalString[i], *first))
-                    {
-                        first++;
-                        indexSubstrStart = (indexSubstrStart == npos) ? i : indexSubstrStart;
-                    }
-                }
-                return indexSubstrStart;
             }
             /**
              * Checks if *this contains another basic_string object.
@@ -1097,6 +971,198 @@ namespace std_copy
                     count = _length - pos;
 
                 return _basic_string_type(_internalString + pos, _internalString + pos + count);
+            }
+            /**
+             * Copies the substring [pos, pos + count) of *this to dest;
+             * @param dest The character sequence to copy to.
+             * @param pos The position from which to start copying.
+             * @param count The number of characters to copy.
+            */
+            size_type copy(pointer dest, size_type pos = 0, size_type count = npos)
+            {
+                if (pos > this->size())
+                    throw std::out_of_range("basic_string::copy: pos > size()");
+                if (count == npos || pos + count > _length)
+                    count = _length - pos;
+
+                traits_type::copy(dest, _internalString + pos, count);
+                return count;
+            }
+            /**
+             * Swaps the contents of two basic_string objects.
+             * @param other The basic_string object to swap contents with.
+            */
+            constexpr void swap(_basic_string_type& other)
+            {
+                std_copy::swap(_internalString, other._internalString);
+                std_copy::swap(_length, other._length);
+                std_copy::swap(_capacity, other._capacity);
+            }
+
+            /**
+             * Returns a std::size_t value indicating the index at which the character 
+             * ch first occurrs in *this.
+             * @param ch The character to search for.
+             * @param pos The index from where to start searching. Default value is 0.
+             * @param count The number of characters after pos to search in.
+            */
+            constexpr size_type find(const_reference ch, size_type pos, size_type count) const
+            {
+                return traits_type::find(_internalString + pos, count, ch) - _internalString;
+            }
+            /**
+             * Returns a std::size_t value indicating the index at which the character 
+             * ch first occurrs in *this.
+             * @param ch The character to search for.
+             * @param pos The index from where to start searching. Default value is 0.
+            */
+            constexpr size_type find(const_reference ch, size_type pos = 0) const
+            {
+                return this->find(ch, pos, _length);
+            }
+            /**
+             * Returns a std::size_t value indicating the index at which the substring 
+             * p first occurs in *this.
+             * @param p The substring to search for.
+             * @param pos The index from which to start searching for the substring.
+            */
+            constexpr size_type find(const_pointer p, size_type pos = 0) const
+            {
+                return this->find(p, pos, traits_type::length(p));
+            }
+            /**
+             * Returns a std::size_t value indicating the index at which the first count 
+             * characters in the character sequence p first occurs in the substring [pos, size()) 
+             * of *this.
+             * @param p The character sequence to find.
+             * @param pos The index from which to start searching for p in *this.
+             * @param count The number of characters in p to look for.
+            */
+            constexpr size_type find(const_pointer p, size_type pos, size_type count) const
+            {
+                char* where = search(_internalString + pos, _internalString + _length, p, p + count);
+                if (where == _internalString + _length)
+                    return npos;
+                return (where - _internalString);
+            }
+            /**
+             * Returns a std::size_t value indicating the value at which the first count 
+             * characters in the basic_string object s first occurs in the substring 
+             * [pos, size()) of *this.
+             * @param s The basic_string object to search for.
+             * @param pos The position from where to start searching.
+             * @param count The number of characters in s to search for.
+            */
+            constexpr size_type find(const _basic_string_type& s, size_type pos, size_type count) const
+            {
+                return this->find(s._internalString, pos, count);
+            }
+            /**
+             * Returns a std::size_t value indicating the value at which the basic_string 
+             * object s first occurs in the substring [pos, size()) of *this.
+             * @param s The basic_string object to search for.
+             * @param pos The position from where to start searching.
+            */
+            constexpr size_type find(const _basic_string_type& s, size_type pos = 0) const noexcept
+            {
+                return this->find(s._internalString, pos, s._length);
+            }
+            /**
+             * Returns a std::size_t value indicating the value at which the range [first, last) 
+             * first occurs in the substring [pos, size()) of *this.
+             * @param first An iterator to the start of the range.
+             * @param last An iterator to the end of the range.
+             * @param pos The position in *this from where to start searching.
+            */
+            template <class InputIt>
+            constexpr size_type find(InputIt first, InputIt last, size_type pos = 0) const noexcept
+            {
+                char* where = search(_internalString + pos, _internalString + _length, first, last);
+                if (where == _internalString + _length)
+                    return npos;
+                return (where - _internalString);
+            }
+            /**
+             * Searches for the first n characters of str from the back of *this.
+             * @param str The basic_string object to search for in *this.
+             * @param n The number of characters in str to search for.
+             * @param pos The position in *this to start searching backwards from.
+            */
+            constexpr size_type rfind(const _basic_string_type& str, size_type n, size_type pos) const noexcept
+            {
+                if (pos >= _length)
+                    pos = _length - 1;
+                
+                size_type indexSubstrEnd = npos;
+                size_type indexInSubstr = str._length - 1;
+                for (size_type i = pos, increment = 0; ; i--)
+                {
+                    if (!traits_type::eq(_internalString[i], str._internalString[indexInSubstr]))
+                    {
+                        indexInSubstr = str._length - 1;
+                        indexSubstrEnd = npos;
+                        increment = 0;
+                    }
+                    if (traits_type::eq(_internalString[i], str._internalString[indexInSubstr]))
+                    {
+                        indexInSubstr--;
+                        indexSubstrEnd = (indexSubstrEnd == npos) ? i : indexSubstrEnd;
+                        increment++;
+                        if (increment == n)
+                        {
+                            indexSubstrEnd -= str._length - 1;
+                            break;
+                        }
+                    }
+                    if (i == 0)
+                        break;
+                }
+                return indexSubstrEnd;
+            }
+            /**
+             * Searches for str from the back of *this.
+             * @param str The basic_string object to search for in *this.
+             * @param pos The position in *this to start searching backwards from.
+            */
+            constexpr size_type rfind(const _basic_string_type& str, size_type pos = npos) const noexcept
+            {
+                return this->rfind(str, str._length, pos);
+            }
+            /**
+             * Searches for the first n characters of str from the back of *this.
+             * @param str The character sequence to search for in *this.
+             * @param n The number of characters in str to search for.
+             * @param pos The position in *this to start searching backwards from.
+            */
+            constexpr size_type rfind(pointer str, size_type n, size_type pos) const noexcept
+            {
+                return this->rfind(_basic_string_type(str), n, pos);
+            }
+            /**
+             * Searches for p from the back of *this.
+             * @param p A character sequence to search for in *this.
+             * @param pos The position in *this to start searching backwards from.
+            */
+            constexpr size_type rfind(pointer p, size_type pos = npos) const noexcept
+            {
+                return this->rfind(p, traits_type::length(p), pos);
+            }
+            /**
+             * Searches for ch from the back of *this.
+             * @param ch The character to search for.
+             * @param pos The position to start searching backwards from.
+            */
+            constexpr size_type rfind(const_reference ch, size_type pos = npos) const noexcept
+            {
+                if (pos > _length)
+                    pos = _length - 1;
+
+                while (pos-- > 0)
+                {
+                    if (traits_type::eq(_internalString[pos], ch))
+                        return pos;
+                }
+                return npos;
             }
     };
 
