@@ -4,6 +4,8 @@
 #include "algorithm.hpp"
 #include "iterator.hpp"
 
+#include <cstdint>
+
 namespace _std_copy_hidden
 {
     namespace _std_copy_char_traits
@@ -30,7 +32,7 @@ namespace _std_copy_hidden
                  * @param count The number of characters to assign to.
                  * @param a The character assigned.
                 */
-                static constexpr char_type* assign(char_type* p, unsigned long long count, const char_type& a) noexcept
+                static constexpr char_type* assign(char_type* p, int_type count, const char_type& a) noexcept
                 {
                     std_copy::fill_n(p, count, a);
                     return p;
@@ -68,11 +70,15 @@ namespace _std_copy_hidden
                  * @param src The location from where to get the characters to move to dest.
                  * @param count The number of characters to move.
                 */
-                static constexpr char_type* move(char_type* dest, char_type* src, unsigned long long count) noexcept
+                static constexpr char_type* move(char_type* dest, char_type* src, int_type count) noexcept
                 {
-                    char_type* ptrToStart = src;
-                    std_copy::advance(src, count);
-                    std_copy::move(ptrToStart, src, dest);
+                    //std_copy::move(src, std_copy::next(src, count), dest);
+                    while (count-- > 0)
+                    {
+                        *dest = std_copy::move(*src);
+                        src++;
+                        dest++;
+                    }
                     return dest;
                 }
                 /**
@@ -81,7 +87,7 @@ namespace _std_copy_hidden
                  * @param src The location from where to get the characters to move to dest.
                  * @param count The number of characters to copy.
                 */
-                static constexpr char_type* copy(char_type* dest, char_type* src, unsigned long long count) noexcept
+                static constexpr char_type* copy(char_type* dest, char_type* src, int_type count) noexcept
                 {
                     for (unsigned int i = 0; i < count; i++)
                         assign(dest[i], src[i]);
@@ -94,9 +100,9 @@ namespace _std_copy_hidden
                  * @param count The number of characters to search in.
                  * @param ch The character to search for.
                 */
-                static constexpr char_type* find(char_type* p, unsigned long long count, const char_type& ch) noexcept
+                static constexpr char_type* find(char_type* p, int_type count, const char_type& ch) noexcept
                 {
-                    for (unsigned long long i = 0; i < count; i++)
+                    for (int_type i = 0; i < count; i++)
                     {
                         if (eq(p[i], ch))
                             return &p[i];
@@ -138,9 +144,9 @@ namespace _std_copy_hidden
                  * Finds the length of the character sequence pointed to by s.
                  * @param s A pointer to the start of the character sequence.
                 */
-                static constexpr unsigned long long length(char_type* s) noexcept
+                static constexpr int_type length(char_type* s) noexcept
                 {
-                    unsigned long long len = 0;
+                    int_type len = 0;
                     while (!eq(s[len], char_type()))
                         len++;
                     return len;
@@ -151,9 +157,9 @@ namespace _std_copy_hidden
                  * @param s2 The second character sequence.
                  * @param count The number of characters to compare.
                 */
-                static constexpr int compare(char_type* s1, char_type* s2, unsigned long long count)
+                static constexpr int compare(char_type* s1, char_type* s2, int_type count)
                 {
-                    for (unsigned long long i = 0; i < count; i++)
+                    for (int_type i = 0; i < count; i++)
                     {
                         if (lt(s1[i], s2[i]))
                             return -1;
@@ -170,7 +176,7 @@ namespace std_copy
 {
     template <class CharT>
     class char_traits
-        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<CharT, unsigned long long>
+        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<CharT, std::size_t>
     {
     };
     //Partial specialization for char
@@ -182,19 +188,19 @@ namespace std_copy
     //Partial specialization for wchar_t
     template <>
     class char_traits<wchar_t>
-        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<wchar_t, unsigned short>
+        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<wchar_t, std::wint_t>
     {
     };
     //Partial specialization for char16_t
     template <>
     class char_traits<char16_t>
-        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<char16_t, unsigned short>
+        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<char16_t, std::uint_least16_t>
     {
     };
     //Partial specialization for char32_t
     template <>
     class char_traits<char32_t>
-        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<char32_t, unsigned int>
+        : public _std_copy_hidden::_std_copy_char_traits::_char_traits<char32_t, std::uint_least32_t>
     {
     };
     //Partial specialization for char8_t
