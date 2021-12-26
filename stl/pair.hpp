@@ -11,7 +11,7 @@ namespace std_copy
     template <class T1, class T2>
     class pair
     {
-        private:
+        protected:
             typedef pair<T1, T2>    pair_type;
 
         public:
