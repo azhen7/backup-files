@@ -3,6 +3,7 @@
 
 #include "move.hpp"
 #include "pair.hpp"
+#include <cstdint>
 
 namespace std_copy {
     /**
@@ -23,10 +24,10 @@ namespace std_copy {
      * @param a The first array.
      * @param b The second array.
     */
-    template <class T, unsigned long long N>
+    template <class T, std::size_t N>
     constexpr void swap(T (&a)[N], T (&b)[N])
     {
-        for (unsigned long long i = 0; i < N; i++)
+        for (std::size_t i = 0; i < N; i++)
         {
             T temp = std_copy::move(a[i]);
             a[i] = std_copy::move(b[i]);
@@ -43,7 +44,7 @@ namespace std_copy {
     T exchange(T& obj, U&& new_value)
     {
         T old_val = std_copy::move(obj);
-        old_val = std_copy::move(new_value);
+        obj = std_copy::move(new_value);
         return old_val;
     }
     /**
