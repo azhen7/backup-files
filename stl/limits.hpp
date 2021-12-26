@@ -5,13 +5,7 @@
 #include <climits>
 #include <cstdint>
 
-namespace _std_copy_hidden
-{
-    namespace _std_copy_limits
-    {
-        constexpr double _log2_10 = 643L / 2136.0; //Approximates log10(2) to 7 decimal places
-    }
-}
+#define _limits_log2_10     ((643L) / (2136.0))
 
 namespace std_copy
 {
@@ -76,6 +70,8 @@ namespace std_copy
         static constexpr T round_error() noexcept { return T(); }
 
         static constexpr T infinity() noexcept { return T(); }
+
+        static constexpr T quite_NaN() noexcept { return T(); }
     };
     template <>
     struct numeric_limits<bool>
@@ -114,6 +110,8 @@ namespace std_copy
         static constexpr bool round_error() noexcept { return false; }
 
         static constexpr bool infinity() noexcept { return false; }
+
+        static constexpr bool quiet_NaN() noexcept { return false; }
     };
     template <>
     struct numeric_limits<char>
@@ -131,7 +129,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -152,6 +150,8 @@ namespace std_copy
         static constexpr char round_error() noexcept { return 0; }
 
         static constexpr char infinity() noexcept { return 0; }
+
+        static constexpr char quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<signed char>
@@ -169,7 +169,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -188,6 +188,8 @@ namespace std_copy
         static constexpr signed char epsilon() noexcept { return 0; }
 
         static constexpr signed char round_error() noexcept { return 0; }
+
+        static constexpr signed char quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<unsigned char>
@@ -205,7 +207,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -226,6 +228,8 @@ namespace std_copy
         static constexpr unsigned char round_error() noexcept { return 0; }
 
         static constexpr unsigned char infinity() noexcept { return 0; }
+
+        static constexpr unsigned char quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<wchar_t>
@@ -243,7 +247,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(wchar_t) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -264,6 +268,8 @@ namespace std_copy
         static constexpr wchar_t round_error() noexcept { return 0; }
 
         static constexpr wchar_t infinity() noexcept { return 0; }
+
+        static constexpr wchar_t quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<char8_t>
@@ -281,7 +287,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(char8_t) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -302,6 +308,8 @@ namespace std_copy
         static constexpr char8_t round_error() noexcept { return 0; }
 
         static constexpr char8_t infinity() noexcept { return 0; }
+
+        static constexpr char8_t quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<char16_t>
@@ -319,7 +327,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(char16_t) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -340,6 +348,8 @@ namespace std_copy
         static constexpr char16_t round_error() noexcept { return 0; }
 
         static constexpr char16_t infinity() noexcept { return 0; }
+
+        static constexpr char16_t quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<char32_t>
@@ -357,7 +367,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(char32_t) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -378,6 +388,8 @@ namespace std_copy
         static constexpr char32_t round_error() noexcept { return 0; }
 
         static constexpr char32_t infinity() noexcept { return 0; }
+
+        static constexpr char32_t quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<short>
@@ -395,7 +407,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(short) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -416,6 +428,8 @@ namespace std_copy
         static constexpr short round_error() noexcept { return 0; }
 
         static constexpr short infinity() noexcept { return 0; }
+
+        static constexpr short quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<unsigned short>
@@ -433,7 +447,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(short);
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -454,6 +468,8 @@ namespace std_copy
         static constexpr unsigned short round_error() noexcept { return 0; }
 
         static constexpr unsigned short infinity() noexcept { return 0; }
+
+        static constexpr unsigned short quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<int>
@@ -471,7 +487,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(int) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -492,6 +508,8 @@ namespace std_copy
         static constexpr int round_error() noexcept { return 0; }
 
         static constexpr int infinity() noexcept { return 0; }
+
+        static constexpr int quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<unsigned int>
@@ -509,7 +527,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(int);
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -530,6 +548,8 @@ namespace std_copy
         static constexpr unsigned int round_error() noexcept { return 0; }
 
         static constexpr unsigned int infinity() noexcept { return 0; }
+
+        static constexpr unsigned int quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<long>
@@ -547,7 +567,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -568,6 +588,8 @@ namespace std_copy
         static constexpr long round_error() noexcept { return 0; }
 
         static constexpr long infinity() noexcept { return 0; }
+
+        static constexpr long quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<unsigned long>
@@ -585,7 +607,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long);
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -606,6 +628,8 @@ namespace std_copy
         static constexpr unsigned long round_error() noexcept { return 0; }
 
         static constexpr unsigned long infinity() noexcept { return 0; }
+
+        static constexpr unsigned long quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<long long>
@@ -623,7 +647,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long long) - 1;
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -644,6 +668,8 @@ namespace std_copy
         static constexpr long long round_error() noexcept { return 0; }
 
         static constexpr long long infinity() noexcept { return 0; }
+
+        static constexpr long long quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<unsigned long long>
@@ -661,7 +687,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long long);
-        static constexpr int digits10           = digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int digits10           = digits * _limits_log2_10;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -682,6 +708,8 @@ namespace std_copy
         static constexpr unsigned long long round_error() noexcept { return 0; }
 
         static constexpr unsigned long long infinity() noexcept { return 0; }
+
+        static constexpr unsigned long long quiet_NaN() noexcept { return 0; }
     };
     template <>
     struct numeric_limits<float>
@@ -704,7 +732,7 @@ namespace std_copy
         static constexpr int max_exponent       = FLT_MAX_EXP;
         static constexpr int min_exponent10     = FLT_MIN_10_EXP;
         static constexpr int max_exponent10     = FLT_MAX_10_EXP;
-        static constexpr int max_digits10       = (int) 2 + digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int max_digits10       = (int) 2 + digits * _limits_log2_10;
         static constexpr bool traps             = false;
         static constexpr bool is_modulo         = false;
         static constexpr bool radix             = FLT_RADIX;
@@ -720,6 +748,8 @@ namespace std_copy
         static constexpr float round_error() noexcept { return 0.5F; }
 
         static constexpr float infinity() noexcept { return __builtin_huge_valf(); }
+
+        static constexpr float quiet_NaN() noexcept { return __builtin_nanf(""); }
     };
     template <>
     struct numeric_limits<double>
@@ -732,7 +762,7 @@ namespace std_copy
         static constexpr bool has_infinity      = true;
         static constexpr bool has_quiet_NAN     = true;
         static constexpr bool has_signaling_NAN = true;
-        static constexpr float_denorm_style has_denorm = denorm_present;
+        static constexpr float_denorm_style has_denorm  = denorm_present;
         static constexpr bool has_denorm_loss   = false;
         static constexpr float_round_style round_style = round_to_nearest;
         static constexpr bool is_bounded        = true;
@@ -742,7 +772,7 @@ namespace std_copy
         static constexpr int max_exponent       = DBL_MAX_EXP;
         static constexpr int min_exponent10     = DBL_MIN_10_EXP;
         static constexpr int max_exponent10     = DBL_MAX_10_EXP;
-        static constexpr int max_digits10       = (int) 2 + digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int max_digits10       = (int) 2 + digits * _limits_log2_10;
         static constexpr bool traps             = false;
         static constexpr bool is_modulo         = false;
         static constexpr bool radix             = FLT_RADIX;
@@ -758,6 +788,8 @@ namespace std_copy
         static constexpr double round_error() noexcept { return 0.5; }
 
         static constexpr double infinity() noexcept { return __builtin_huge_val(); }
+
+        static constexpr double quiet_NaN() noexcept { return __builtin_nan(""); }
     };
     template <>
     struct numeric_limits<long double>
@@ -780,7 +812,7 @@ namespace std_copy
         static constexpr int max_exponent       = LDBL_MAX_EXP;
         static constexpr int min_exponent10     = LDBL_MIN_10_EXP;
         static constexpr int max_exponent10     = LDBL_MAX_10_EXP;
-        static constexpr int max_digits10       = (int) 2 + digits * _std_copy_hidden::_std_copy_limits::_log2_10;
+        static constexpr int max_digits10       = (int) 2 + digits * _limits_log2_10;
         static constexpr bool traps             = false;
         static constexpr bool is_modulo         = false;
         static constexpr bool radix             = FLT_RADIX;
@@ -796,6 +828,8 @@ namespace std_copy
         static constexpr long double round_error() noexcept { return 0.5L; }
 
         static constexpr long double infinity() noexcept { return __builtin_huge_vall(); }
+
+        static constexpr long double quiet_NaN() noexcept { return __builtin_nanl(""); }
     };
 }
 
