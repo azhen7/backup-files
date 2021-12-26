@@ -27,7 +27,7 @@ namespace std_copy
 #endif
     class vector
     {
-        private:
+        protected:
             typedef vector<T, Alloc>                                _vector_type;
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_vector_type> _iterator_type;
 
@@ -44,7 +44,7 @@ namespace std_copy
             typedef _iterator_type                                  iterator;
             typedef const iterator                                  const_iterator;
 
-        private:
+        protected:
             pointer _internalBuffer;
             size_type _numberOfElements;
             size_type _capacity;
@@ -69,14 +69,20 @@ namespace std_copy
                 allocator_type::deallocate(temp, previousAmount);
             }
 
-            constexpr difference_type _realloc_insert(difference_type addToGetPos, difference_type a, difference_type copyFrom, size_type copyUpTo, size_type c)
+            constexpr difference_type _realloc_create_insert_space(
+                difference_type addToGetPos,
+                difference_type secondCopy,
+                difference_type copyFrom,
+                size_type copyUpTo,
+                size_type c
+            )
             {
                 pointer temp = _internalBuffer;
                 _capacity = c;
                 _internalBuffer = allocator_type::allocate(_capacity);
 
                 move(temp, temp + addToGetPos, _internalBuffer);
-                move(temp + a, temp + copyUpTo, _internalBuffer + copyFrom);
+                move(temp + secondCopy, temp + copyUpTo, _internalBuffer + copyFrom);
 
                 return addToGetPos;
             }
@@ -132,28 +138,30 @@ namespace std_copy
              * @param start The start of the sequence.
              * @param end The end of the sequence.
             */
-            template <class InputIt>
+            template <class InputIterator>
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
         #endif
-            vector(InputIt start, InputIt end)
-                : _numberOfElements(distance(start, end))
+            vector(InputIterator start, InputIterator end)
+                : _numberOfElements(std_copy::distance(start, end))
             {
                 _capacity = _numberOfElements;
                 _internalBuffer = allocator_type::allocate(_numberOfElements);
                 move(start, end, _internalBuffer);
             }
-            template <class InputIt>
+            template <class InputIterator>
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
         #endif
-            vector(InputIt start, InputIt end, const allocator_type& alloc)
-                : _numberOfElements(distance(start, end))
+            vector(InputIterator start, InputIterator end, const allocator_type& alloc)
+                : _numberOfElements(std_copy::distance(start, end))
             {
                 _capacity = _numberOfElements;
                 _internalBuffer = alloc.allocate(_numberOfElements);
                 move(start, end, _internalBuffer);
             }
+
+        #if __cplusplus > 201103L
             /**
              * This constructor constructs the vector to contain all 
              * the arguments passed in.
@@ -177,6 +185,8 @@ namespace std_copy
                 size_type i = 0;
                 (void(_internalBuffer[i++] = args), ...);
             }
+        #endif
+
             /**
              * This function initializes the vector with the contents 
              * of copy.
@@ -215,42 +225,30 @@ namespace std_copy
             //Destructor
             virtual ~vector()
             {
-                this->clear();
+                allocator_type::deallocate(_internalBuffer, _capacity);
             }
             
             /**
              * This function returns the size of the vector, 
              * i.e., how many elements are in the vector.
             */
-            constexpr size_type size() noexcept
-            {
-                return _numberOfElements;
-            }
+            constexpr size_type size() noexcept { return _numberOfElements; }
             /**
              * Returns a bool corresponding to whether the vector 
              * is empty.
             */
-            constexpr bool empty() noexcept
-            {
-                return _numberOfElements == 0;
-            }
+            constexpr bool empty() noexcept { return _numberOfElements == 0; }
             /**
              * This function returns the capacity of the
              * vector, i.e., how many elements the vector
              * has space allocated for.
             */
-            constexpr size_type capacity() noexcept
-            {
-                return _capacity;
-            }
+            constexpr size_type capacity() noexcept { return _capacity; }
             /**
              * This function returns the underlying
              * internal buffer of the array.
             */
-            constexpr pointer data() noexcept
-            {
-                return _internalBuffer;
-            }
+            constexpr pointer data() noexcept { return _internalBuffer; }
             /**
              * This function returns the maximum capacity
              * of the vector.
@@ -309,27 +307,17 @@ namespace std_copy
             }
             /**
              * This function removes the last element in the vector.
-             * If the vector is empty, the function does nothing, whereas in the original,
-             * undefined behavior happens.
             */
             constexpr void pop_back()
             {
-                if (_numberOfElements == 0)
-                    throw std::length_error("vector::pop_back: Cannot delete element in empty vector");
-
                 _numberOfElements--;
                 (_internalBuffer + _numberOfElements)->~value_type();
             }
             /**
              * This function removes the element at the beginning of the vector.
-             * If the vector is empty, a call to this function does nothing.
-             * This function is new.
             */
             constexpr void pop_front()
             {
-                if (_numberOfElements == 0)
-                    throw std::length_error("vector::pop_front: Cannot delete element in empty vector");
-                
                 move(_internalBuffer + 1, _internalBuffer + _numberOfElements, _internalBuffer);
                 this->pop_back();
             }
@@ -338,18 +326,26 @@ namespace std_copy
              * @param pos The position to construct the element.
              * @param args The arguments to forward to the element's constructor.
             */
+        #if __cplusplus > 201103L
             template <class ...Args>
             constexpr iterator emplace(iterator pos, Args&& ...args)
+        #else
+            constexpr iterator emplace(iterator pos, const_reference elem)
+        #endif
             {
                 const difference_type addToGetPos = pos - this->begin();
                 if (_numberOfElements + 1 > _capacity)
-                    _realloc_insert(addToGetPos, addToGetPos, addToGetPos + 1, _numberOfElements, _get_new_capacity());
+                    _realloc_create_insert_space(addToGetPos, addToGetPos, addToGetPos + 1, _numberOfElements, _get_new_capacity());
                 else
                     move_backward(_internalBuffer + addToGetPos, _internalBuffer + _numberOfElements, _internalBuffer + _numberOfElements + 1);
 
                 _numberOfElements++;
-                    
+            
+            #if __cplusplus > 201103L
                 construct_at(_internalBuffer + addToGetPos, forward<Args>(args)...);
+            #else
+                construct_at(_internalBuffer + addToGetPos, elem);
+            #endif
 
                 return iterator(_internalBuffer + addToGetPos);
             }
@@ -408,14 +404,14 @@ namespace std_copy
              * @param first An iterator to the start of the range.
              * @param last An iterator to the end of the range.
             */
-            template <class InputIt>
-            constexpr void assign(InputIt first, InputIt last)
+            template <class InputIterator>
+            constexpr void assign(InputIterator first, InputIterator last)
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
         #endif
             {
                 allocator_type::deallocate(_internalBuffer, _capacity);
-                _numberOfElements = distance(first, last);
+                _numberOfElements = std_copy::distance(first, last);
                 _capacity = _numberOfElements;
                 _internalBuffer = allocator_type::allocate(_numberOfElements);
                 move(first, last, _internalBuffer);
@@ -482,19 +478,13 @@ namespace std_copy
              * first element in the array. If the vector
              * is empty, this function throws an exception.
             */
-            constexpr reference front()
-            {
-                return *_internalBuffer;
-            }
+            constexpr reference front() { return *_internalBuffer; }
             /**
              * This function returns a reference to the
              * last element in the array. If the vector 
              * is empty, this function throws an exception.
             */
-            constexpr reference back()
-            {
-                return *(_internalBuffer + _numberOfElements - 1);
-            }
+            constexpr reference back() { return *(_internalBuffer + _numberOfElements - 1); }
             /**
              * This function shrinks the vector's capacity
              * to fit its size.
@@ -511,24 +501,15 @@ namespace std_copy
              * This function returns a copy of the _allocator
              * object associated with the vector.
             */
-            constexpr allocator_type get_allocator() noexcept
-            {
-                return allocator_type();
-            }
+            constexpr allocator_type get_allocator() noexcept { return allocator_type(); }
             /**
              * This function returns an iterator to the front of the vector.
             */
-            constexpr iterator begin()
-            {
-                return iterator(_internalBuffer);
-            }
+            constexpr iterator begin() { return iterator(_internalBuffer); }
             /**
              * This function returns an iterator to the theoretical element after the last element in the vector.
             */
-            constexpr iterator end()
-            {
-                return iterator(_internalBuffer + _numberOfElements);
-            }
+            constexpr iterator end() { return iterator(_internalBuffer + _numberOfElements); }
             /**
              * This function returns a const iterator to the 
              * first element in the vector.
@@ -569,7 +550,7 @@ namespace std_copy
             {
                 difference_type t = pos - this->begin();
                 if (_numberOfElements + 1 > _capacity)
-                    _realloc_insert(t, t, t + 1, _numberOfElements, _get_new_capacity());
+                    _realloc_create_insert_space(t, t, t + 1, _numberOfElements, _get_new_capacity());
                 else
                     move_backward(pos.base(), _internalBuffer + _numberOfElements, _internalBuffer + _numberOfElements + 1);
 
@@ -585,20 +566,20 @@ namespace std_copy
              * @param start The start of the sequence of elements to insert.
              * @param end The end of the sequence of elements to insert.
             */
-            template <class InputIt>
-            constexpr iterator insert(iterator pos, InputIt first, InputIt last)
+            template <class InputIterator>
+            constexpr iterator insert(iterator pos, InputIterator first, InputIterator last)
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
         #endif
             {
-                const difference_type dist = distance(first, last);
+                const difference_type dist = std_copy::distance(first, last);
                 if (dist == 0)
                     return pos;
                 _numberOfElements += dist;
                 difference_type addToGetPos = pos - this->begin();
                 
                 if (_numberOfElements > _capacity)
-                    _realloc_insert(addToGetPos, addToGetPos, addToGetPos + dist, _numberOfElements - dist, _calculate_smallest_power_of_two_greater_than(_numberOfElements));
+                    _realloc_create_insert_space(addToGetPos, addToGetPos, addToGetPos + dist, _numberOfElements - dist, _calculate_smallest_power_of_two_greater_than(_numberOfElements));
                 else
                     move_backward(_internalBuffer + addToGetPos, _internalBuffer + _numberOfElements - dist, _internalBuffer + _numberOfElements);
 
@@ -646,7 +627,7 @@ namespace std_copy
             {
                 move(last.base(), _internalBuffer + _numberOfElements, first.base());
                 destroy(_internalBuffer + _numberOfElements - (last - first), this->end().base());
-                _numberOfElements -= distance(first, last);
+                _numberOfElements -= std_copy::distance(first, last);
                 return *this;
             }
             /**
@@ -731,7 +712,7 @@ namespace std_copy
     unsigned long long erase(const vector<T, Alloc>& vec, const T& val)
     {
         auto it = remove(vec.begin(), vec.end(), val);
-        auto dist = distance(it, vec.end());
+        auto dist = std_copy::distance(it, vec.end());
         vec.erase(it, vec.end());
         return dist;
     }
@@ -745,7 +726,7 @@ namespace std_copy
     unsigned long long erase_if(const vector<T, Alloc>& vec, Function func)
     {
         auto it = remove_if(vec.begin(), vec.end(), func);
-        auto dist = distance(it, vec.end());
+        auto dist = std_copy::distance(it, vec.end());
         vec.erase(it, vec.end());
         return dist;
     }
@@ -766,6 +747,26 @@ namespace std_copy
     T& get(vector<T, Alloc>& vec)
     {
         return vec[N];
+    }
+    /**
+     * Returns an iterator to the beginning of a std_copy::vector. Equivalent 
+     * to vec.begin().
+     * @param vec The vector.
+    */
+    template <class T, class Alloc>
+    auto begin(const vector<T, Alloc>& vec) -> decltype(vec.begin())
+    {
+        return vec.begin();
+    }
+    /**
+     * Returns an iterator to the end of a std_copy::vector. Equivalent 
+     * to vec.end().
+     * @param vec The vector.
+    */
+    template <class T, class Alloc>
+    auto end(const vector<T, Alloc>& vec) -> decltype(vec.end())
+    {
+        return vec.end();
     }
 }
 
