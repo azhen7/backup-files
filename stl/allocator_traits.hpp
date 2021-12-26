@@ -1,6 +1,8 @@
 #ifndef _STD_COPY_ALLOCATOR_TRAITS
 #define _STD_COPY_ALLOCATOR_TRAITS
 
+#include <cstdint>
+
 #include "allocator.hpp"
 #include "pointer_traits.hpp"
 #include "construct_destroy.hpp"
@@ -15,12 +17,12 @@ namespace std_copy
     template <class Alloc>
     class allocator_traits
     {
-        private:
+        protected:
             //Check if allocator object has construct function
             template <class T>
             class _has_construct
             {
-                private:
+                protected:
                     typedef int yes;
                     typedef char no;
 
@@ -38,7 +40,7 @@ namespace std_copy
             template <class C>
             class _has_destroy
             {
-                private:
+                protected:
                     typedef int yes;
                     typedef char no;
 
@@ -56,7 +58,7 @@ namespace std_copy
             template <class C>
             class _has_select_on_container_copy_construction
             {
-                private:
+                protected:
                     typedef int yes;
                     typedef char no;
 
@@ -94,8 +96,8 @@ namespace std_copy
             using const_pointer        =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, const value_type*>, _const_pointer, Alloc>;
             using void_pointer         =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, void>, _void_pointer, Alloc>;
             using const_void_pointer   =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, const void>, _const_void_pointer, Alloc>;
-            using difference_type      =    _std_copy_hidden::_detector_t<long long, _diff_type, Alloc>;
-            using size_type            =    _std_copy_hidden::_detector_t<unsigned long long, _size_type, Alloc>;
+            using difference_type      =    _std_copy_hidden::_detector_t<std::ptrdiff_t, _diff_type, Alloc>;
+            using size_type            =    _std_copy_hidden::_detector_t<std::size_t, _size_type, Alloc>;
 
             /**
              * This function allocates n elements and returns a 
@@ -169,8 +171,8 @@ namespace std_copy
             typedef const T*                const_pointer;
             typedef void*                   void_pointer;
             typedef const void*             const_void_pointer;
-            typedef unsigned long long      size_type;
-            typedef long long               difference_type;
+            typedef std::size_t             size_type;
+            typedef std::size_t             difference_type;
 
             /**
              * This function allocates n elements and returns a 
