@@ -2,6 +2,8 @@
 #define _STD_COPY_ALLOCATOR
 
 #include <new>
+#include <cstdint>
+#include "type_traits.hpp"
 
 #if __cplusplus > 201703L
 namespace _std_copy_hidden
@@ -33,8 +35,9 @@ namespace std_copy
     {
         public:
             typedef T                   value_type;
-            typedef unsigned long long  size_type;
-            typedef long long           difference_type;
+            typedef std::size_t         size_type;
+            typedef std::ptrdiff_t      difference_type;
+            typedef true_type           propagate_on_container_move_assignment;
 
             /**
              * This function allocates n elements and returns a 
