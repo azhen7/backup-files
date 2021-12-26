@@ -29,5 +29,7 @@
 #define std_copy_iterator_traits_iterator       202111L
 #define std_copy_uninitialized_algo             202111L
 #define std_copy_system_error                   202111L
+#define std_copy_random                         202112L
+#define std_copy_equation                       202112L
 
 #endif /* _STD_COPY_VERSION */
