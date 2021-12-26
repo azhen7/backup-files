@@ -28,7 +28,7 @@ namespace std_copy
             typedef Function::argument_type argument_type;
             typedef bool                    result_type;
         
-        private:
+        protected:
             Function _internalPred;
         
         public:
@@ -56,7 +56,7 @@ namespace std_copy
             typedef Function::second_argument_type  second_argument_type;
             typedef bool                            result_type;
         
-        private:
+        protected:
             Function _internalPred;
         
         public:
@@ -79,7 +79,7 @@ namespace std_copy
     template <class ArgType, class ResType>
     struct pointer_to_unary_function : public unary_function<ArgType, ResType>
     {
-        private:
+        protected:
             typedef ResType (*_internalFunctionType)(ArgType);
             _internalFunctionType _internalFunction;
         
@@ -97,7 +97,7 @@ namespace std_copy
     template <class ArgType1, class ArgType2, class ResType>
     struct pointer_to_binary_function : public binary_function<ArgType1, ArgType2, ResType>
     {
-        private:
+        protected:
             typedef ResType (*_internalFunctionType)(ArgType1, ArgType2);
             _internalFunctionType _internalFunction;
         
@@ -623,7 +623,7 @@ namespace std_copy
     template <class Fn>
     struct binder1st : public unary_function<typename Fn::second_argument_type, typename Fn::result_type>
     {
-        private:
+        protected:
             Fn _internalOp;
             typename Fn::first_argument_type val;
         
@@ -648,7 +648,7 @@ namespace std_copy
     template <class Fn>
     struct binder2nd : public unary_function<typename Fn::first_argument_type, typename Fn::result_type>
     {
-        private:
+        protected:
             Fn _internalOp;
             typename Fn::second_argument_type val;
         
