@@ -7,19 +7,19 @@
 namespace std_copy
 {
     /**
-     * My implementation of std::function from the header <functional>.
-     * @param ResType The return type of the internal function object.
-     * @param Args The types of the arguments that the internal function 
+     * An implementation of std::function from the header <functional>.
+     * @param ReturnType The return type of the internal function object.
+     * @param ArgumentTypes The types of the arguments that the internal function 
      * object accepts.
     */
-    template <class ResType, class ...Args>
+    template <class ReturnType, class ...ArgumentTypes>
     class function;
-    template <class ResType, class ...Args>
-    class function<ResType(Args...)>
+    template <class ReturnType, class ...ArgumentTypes>
+    class function<ReturnType(ArgumentTypes...)>
     {
-        private:
-            typedef function<ResType(Args...)>    _function_type;
-            typedef ResType (*_internalFunctionType)(Args...);
+        protected:
+            typedef function<ReturnType(ArgumentTypes...)>    _function_type;
+            typedef ReturnType (*_internalFunctionType)(ArgumentTypes...);
 
             _internalFunctionType _target;
 
@@ -74,12 +74,12 @@ namespace std_copy
                 return _target != nullptr;
             }
 
-            ResType operator()(Args... args)
+            ReturnType operator()(ArgumentTypes... Arguments)
             {
                 if (!_target)
                     throw std::bad_function_call();
 
-                return _target(forward<Args>(args)...);
+                return _target(forward<ArgumentTypes>(Arguments)...);
             }
     };
 }
