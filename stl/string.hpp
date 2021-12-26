@@ -8,6 +8,7 @@
 #include "iterator_funcs.hpp"
 #include "char_traits.hpp"
 #include "algorithm.hpp"
+#include "uninitialized_algo.hpp"
 
 #if __cplusplus > 201703L
 namespace _std_copy_hidden
@@ -33,8 +34,8 @@ namespace std_copy
     /**
      * An implementation of std::basic_string from <string> and the typedefs present: 
      * std::string. std::wstring, std::u8string, std::u16string, and std::u32string;
-     * @param CharacterType The character of which its pointer type to encapsulate.
-     * @param Traits The traits of CharacterType.
+     * @param CharacterType The character of which its pointer type is used as the underlying buffer.
+     * @param Traits The traits of CharacterType, which manipulates sequences of CharacterType.
      * @param Alloc The allocator object used in allocating the underlying character sequence.
     */
     template <class CharacterType, class Traits = char_traits<CharacterType>, class Alloc = allocator<CharacterType>>
@@ -44,7 +45,7 @@ namespace std_copy
 #endif
     class basic_string
     {
-        private:
+        protected:
             typedef basic_string<CharacterType, Traits, Alloc> _basic_string_type;
             typedef std_copy::allocator_traits<Alloc>          _alloc_traits;
 
@@ -61,13 +62,13 @@ namespace std_copy
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_basic_string_type> iterator;
             typedef const iterator                          const_iterator;
 
-        private:
+        protected:
             pointer _internalString;
             size_type _length;
             size_type _capacity;
 
             template <class _AllocateFunc>
-            void _allocate_and_move_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
+            constexpr void _allocate_and_move_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -76,7 +77,7 @@ namespace std_copy
             }
 
             template <class _AllocateFunc>
-            void _allocate_and_assign_str(size_type i, _AllocateFunc mem_alloc, size_type count, const_reference ch)
+            constexpr void _allocate_and_assign_str(size_type i, _AllocateFunc mem_alloc, size_type count, const_reference ch)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -84,22 +85,24 @@ namespace std_copy
                 _internalString[i] = value_type();
             }
 
-            template <class _AllocateFunc, class InputIt>
-            void _allocate_and_move_range(size_type i, _AllocateFunc mem_alloc, InputIt first, InputIt last)
+            template <class _AllocateFunc, class InputIterator>
+            constexpr void _allocate_and_move_range(size_type i, _AllocateFunc mem_alloc, InputIterator first, InputIterator last)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
-                move(first, last, _internalString);
+                std_copy::move(first, last, _internalString);
                 _internalString[i] = value_type();
             }
 
-            size_type _calculate_smallest_power_of_two_greater_than(size_type x)
+            constexpr size_type _calculate_smallest_power_of_two_greater_than(size_type x)
             {
                 if (x == 0)
                     return 1;
                 return __builtin_pow(2, (size_type) (__builtin_log(x) / __builtin_log(2)) + 1);
             }
-            void _realloc(size_type n, size_type copyUpTo)
+
+            //Reallocates the internal buffer.
+            constexpr void _realloc(size_type n, size_type copyUpTo)
             {
                 pointer temp = _internalString;
                 size_type newSize = _capacity * _calculate_smallest_power_of_two_greater_than(n);
@@ -107,6 +110,48 @@ namespace std_copy
                 allocator_type::deallocate(temp, _capacity);
                 _capacity = newSize;
             }
+
+            //Null terminates the internal buffer and updates _length
+            constexpr void _terminate_and_update_length(size_type newLen = npos, size_type whereToTerminate = npos)
+            {
+                if (newLen == npos)
+                    newLen = _length;
+                _length = move(newLen);
+
+                if (whereToTerminate == npos)
+                    whereToTerminate = _length;
+                _internalString[whereToTerminate] = value_type();
+            }
+
+            template <class ExceptionType = std::out_of_range>
+            constexpr void _check_exception(size_type a, difference_type checkAgainst, const char* str)
+            {
+                if (a >= checkAgainst)
+                    throw ExceptionType(str);
+            }
+
+            constexpr void _move_string(pointer dest, pointer src, size_type n)
+            {
+                if (n == 1)
+                    traits_type::assign(*dest, *src);
+                else
+                    traits_type::move(dest, src, n);
+                
+                _terminate_and_update_length(_length - n);
+            }
+
+            //Contains other helper one-use functions
+            struct _helper
+            {
+                static void _to_upper(reference c)
+                {
+                    c -= 32 * (c >= 'a' && c <= 'z');
+                }
+                static void _to_lower(reference c)
+                {
+                    c += 32 * (c >= 'A' && c <= 'Z');
+                }
+            };
 
         public:
             const static size_type npos = -1;
@@ -118,7 +163,7 @@ namespace std_copy
                 _internalString = allocator_type::allocate(15);
             }
 
-            basic_string(pointer str)
+            basic_string(const_pointer str)
             {
                 _length = traits_type::length(str);
                 _allocate_and_move_str(_length, allocator_type::allocate,
@@ -168,10 +213,10 @@ namespace std_copy
                     s._internalString, _length);
             }
 
-            template <class InputIt>
-            basic_string(InputIt start, InputIt last)
+            template <class InputIterator>
+            basic_string(InputIterator start, InputIterator last)
             {
-                _length = distance(start, last);
+                _length = std_copy::distance(start, last);
                 _allocate_and_move_range(_length, allocator_type::allocate,
                     start, last);
             }
@@ -181,37 +226,26 @@ namespace std_copy
             /**
              * Returns the length of the string.
             */
-            constexpr size_type length() const noexcept
-            {
-                return _length;
-            }
+            constexpr size_type length() const noexcept { return _length; }
             /**
              * Returns the size of the string (i.e. the number of characters).
             */
-            constexpr size_type size() const noexcept
-            {
-                return _length;
-            }
+            constexpr size_type size() const noexcept { return _length; }
             /**
              * Returns the capacity of the string, i.e. the number of elements the 
              * string has storage for.
             */
-            constexpr size_type capacity() const noexcept
-            {
-                return _capacity;
-            }
+            constexpr size_type capacity() const noexcept { return _capacity; }
             /**
              * Returns the allocator object associated with the string.
             */
-            constexpr allocator_type get_allocator() const noexcept
-            {
-                return allocator_type();
-            }
+            constexpr allocator_type get_allocator() const noexcept { return allocator_type(); }
             /**
              * Returns the underlying buffer serving as storage.
             */
             constexpr const_pointer data() const noexcept
             {
+                _internalString[_length] = value_type();
                 return _internalString;
             }
             /**
@@ -228,70 +262,44 @@ namespace std_copy
             */
             constexpr reference at(size_type i) const
             {
-                if (i >= _length)
-                    throw std::out_of_range("basic_string::at: index is out of bounds");
-
+                _check_exception(i, _length, "basic_string::at: i out of bounds");
                 return *(_internalString + i);
             }
             /**
              * Returns the element at index i. Provides C-style array indexing.
              * @param i The index to retrieve the element from.
             */
-            constexpr reference operator[](size_type i) const noexcept
-            {
-                return *(_internalString + i);
-            }
+            constexpr reference operator[](size_type i) const noexcept { return *(_internalString + i); }
             /**
              * Returns a reference to the first character in the string. Equivalent to 
-             * operator[](0).
+             * (*this)[0].
             */
-            constexpr reference front() const noexcept
-            {
-                return *_internalString;
-            }
+            constexpr reference front() const noexcept { return *_internalString; }
             /**
              * Returns a reference to the last character in the string. Equivalent to 
-             * operator[](_length - 1).
+             * (*this)[_length - 1].
             */
-            constexpr reference back() const noexcept
-            {
-                return *(_internalString + _length - 1);
-            }
+            constexpr reference back() const noexcept { return *(_internalString + _length - 1); }
             /**
              * Returns an iterator to the start of the string.
             */
-            constexpr iterator begin() const
-            {
-                return iterator(_internalString);
-            }
+            constexpr iterator begin() const { return iterator(_internalString); }
             /**
              * Returns an iterator to the theoretical element after the last element.
             */
-            constexpr iterator end() const
-            {
-                return iterator(_internalString + _length);
-            }
+            constexpr iterator end() const { return iterator(_internalString + _length); }
             /**
              * Returns a const iterator to the start of the string.
             */
-            constexpr const_iterator cbegin() const
-            {
-                return iterator(_internalString);
-            }
+            constexpr const_iterator cbegin() const { return iterator(_internalString); }
             /**
              * Returns a const iterator to the theoretical element after the last element.
             */
-            constexpr const_iterator cend() const
-            {
-                return iterator(_internalString + _length);
-            }
+            constexpr const_iterator cend() const { return iterator(_internalString + _length); }
             /**
              * Returns a boolean indicating whether the string is empty.
             */
-            constexpr bool empty() const
-            {
-                return _length == 0;
-            }
+            constexpr bool empty() const { return _length == 0; }
             /**
              * Reserves additional memory in the string.
             */
@@ -305,6 +313,7 @@ namespace std_copy
                 traits_type::move(_internalString, temp, _length);
                 allocator_type::deallocate(temp, _capacity);
                 _capacity = newCap;
+                _terminate_and_update_length();
             }
             /**
              * Shrinks the amount of storage in the string to the number of elements 
@@ -314,8 +323,9 @@ namespace std_copy
             {
                 pointer temp = _internalString;
                 _internalString = allocator_type::allocate(_length);
-                move(temp, temp + _length, _internalString);
+                traits_type::move(_internalString, temp, _length);
                 allocator_type::deallocate(temp, _capacity);
+                _terminate_and_update_length();
             }
             /**
              * Appends the first count elements from the sequence of characters pointed to by p onto the end of 
@@ -329,8 +339,7 @@ namespace std_copy
                     _realloc((_length + count) / _capacity, _length);
 
                 traits_type::move(_internalString + _length, str, count);
-                _length += count;
-                _internalString[_length] = value_type();
+                _terminate_and_update_length(_length + count);
                 return *this;
             }
             /**
@@ -352,8 +361,7 @@ namespace std_copy
                     _realloc((_length + count) / _capacity, _length);
 
                 traits_type::assign(_internalString + _length, count, ch);
-                _length += count;
-                _internalString[_length] = value_type();
+                _terminate_and_update_length(_length + count);
                 return *this;
             }
             /**
@@ -365,8 +373,7 @@ namespace std_copy
             */
             constexpr _basic_string_type& append(const _basic_string_type& s, size_type pos, size_type count = npos)
             {
-                if (pos > s._length)
-                    throw std::out_of_range("basic_string::append: pos is greater than the length of s");
+                _check_exception(pos, s._length, "basic_string::append: pos is greater than the length of s");
                 if (pos + count > s._length || count == npos)
                     count = s._length - pos;
                 
@@ -377,26 +384,24 @@ namespace std_copy
              * @param first An iterator to the start of the sequence.
              * @param last An iterator to the end of the sequence.
             */
-            template <class InputIt>
-            constexpr _basic_string_type& append(InputIt first, InputIt last)
-                requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            template <class InputIterator>
+            constexpr _basic_string_type& append(InputIterator first, InputIterator last)
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+        #endif
             {
-                const difference_type dist = distance(first, last);
+                const difference_type dist = std_copy::distance(first, last);
                 if (_length + dist > _capacity)
                     _realloc((_length + dist) / _capacity, _length);
 
-                size_type i = _length;
-                while (first != last)
-                    _internalString[i++] = move(*first++);
-                
-                _internalString[i] = value_type();
-                _length += dist;
+                std_copy::move(first, last, _internalString + _length);
+                _terminate_and_update_length(_length + dist);
 
                 return *this;
             }
             /**
              * Overloaded operator+=. This operator appends a character sequence pointed to by 
-             * p onto the end of *this.
+             * p onto the end of the current basic_string object.
              * @param p A pointer to the character sequence to append.
             */
             constexpr _basic_string_type& operator+=(const_pointer p)
@@ -405,7 +410,7 @@ namespace std_copy
             }
             /**
              * Overloaded operator+=. This operator appends another basic_string type onto the end 
-             * of *this.
+             * of the current basic_string object.
              * @param s The basic_string object to append.
             */
             constexpr _basic_string_type& operator+=(const _basic_string_type& s)
@@ -413,7 +418,7 @@ namespace std_copy
                 return this->append(s._internalString);
             }
             /**
-             * Overloaded operator+=. This operator appends a character onto the end of *this.
+             * Overloaded operator+=. This operator appends a character onto the end of the current basic_string object.
              * @param ch The character to append.
             */
             constexpr _basic_string_type& operator+=(const_reference ch)
@@ -421,7 +426,7 @@ namespace std_copy
                 return this->append(1, ch);
             }
             /**
-             * Pushes a character onto the back of *this.
+             * Pushes a character onto the back of the current basic_string object.
              * @param ch The character to push.
             */
             constexpr void push_back(const_reference ch)
@@ -433,23 +438,25 @@ namespace std_copy
             */
             constexpr void pop_back()
             {
-                this->erase(this->end() - 1);
+                _terminate_and_update_length(_length - 1);
             }
             /**
-             * Erases the character at pos.
+             * Erases the character pointed to by pos.
              * @param pos An iterator pointing to the element to be erased.
             */
             constexpr iterator erase(iterator pos)
             {
-                const difference_type dist = pos - begin();
-                pointer temp = _internalString;
-                _internalString = allocator_type::allocate(_capacity);
-                move(temp, temp + dist, _internalString);
-                move(temp + dist + 1, temp + _length, _internalString + dist);
-                _length--;
-                _internalString[_length] = value_type();
-                allocator_type::deallocate(temp, _capacity);
-                return pos;
+                const difference_type dist = pos - this->begin();
+
+                _check_exception(0, dist, "basic_string::erase: pos is out of bounds");
+                _check_exception(dist, _length, "basic_string::erase: pos is out of bounds");
+                
+                if (pos == this->end() - 1)
+                    _terminate_and_update_length(_length - 1);
+                else
+                    _move_string(pos.base(), pos.base() + 1, _length - dist - 1);
+
+                return iterator(_internalString + dist);
             }
             /**
              * Erases the characters in the range [first, last).
@@ -458,16 +465,23 @@ namespace std_copy
             */
             constexpr iterator erase(iterator first, iterator last)
             {
-                const difference_type dist_first = first - begin();
-                const difference_type dist_last = last - begin();
-                pointer temp = _internalString;
-                _internalString = allocator_type::allocate(_capacity);
-                move(temp, temp + dist_first, _internalString);
-                move(temp + dist_last, temp + _length, _internalString + dist_first);
-                _length -= dist_last - dist_first;
-                _internalString[_length] = value_type();
-                allocator_type::deallocate(temp, _capacity);
-                return last;
+                const difference_type len = last - first;
+                const difference_type dist_from_last_to_begin = last - this->begin();
+                const difference_type dist_from_first_to_begin = first - this->begin();
+
+                _check_exception(0, dist_from_first_to_begin, "basic_string::erase: first is out of bounds");
+                _check_exception(0, dist_from_last_to_begin, "basic_string::erase: last is out of bounds");
+                _check_exception(size_type(dist_from_first_to_begin), _length, "basic_string::erase: first is out of bounds");
+                _check_exception(size_type(dist_from_last_to_begin), _length + 1, "basic_string::erase: last is out of bounds");
+
+                if (len)
+                {
+                    if (last == this->end())
+                        _terminate_and_update_length(size_type(dist_from_first_to_begin));
+                    else
+                        _move_string(first.base(), last.base(), _length - dist_from_first_to_begin - len);
+                }
+                return iterator(_internalString + dist_from_first_to_begin);
             }
             /**
              * Erases the first count characters starting from index pos.
@@ -476,19 +490,15 @@ namespace std_copy
             */
             constexpr _basic_string_type& erase(size_type pos = 0, size_type count = npos)
             {
-                if (pos > _length)
-                    throw std::out_of_range("basic_string::erase: pos is greater than _length");
-                
-                if (pos + count > _length || count == npos)
-                    count = _length - pos;
+                _check_exception(pos, _length, "basic_string::erase: pos is out of bounds");
 
-                pointer temp = _internalString;
-                _internalString = allocator_type::allocate(_capacity);
-                move(temp, temp + pos, _internalString);
-                move(temp + pos + count, temp + _length, _internalString + pos);
-                _length -= count;
-                _internalString[_length] = value_type();
-                allocator_type::deallocate(temp, _capacity);
+                if (count)
+                {
+                    if (pos + count >= _length || count == npos)
+                        _terminate_and_update_length(pos);
+                    else
+                        _move_string(_internalString + pos, _internalString + pos + count, _length - pos - count);
+                }
                 return *this;
             }
             /**
@@ -500,9 +510,9 @@ namespace std_copy
                 return this->compare(0, _length, p);
             }
             /**
-             * Compares the substring [pos, pos + count) of *this with the 
+             * Compares the substring [pos, pos + count) of the current basic_string object with the 
              * character sequence pointed to by p.
-             * @param pos The starting index of the substring of *this.
+             * @param pos The starting index of the substring of the current basic_string object.
              * @param count The number of characters after pos to compare.
              * @param p A pointer to the character sequence to compare against.
             */
@@ -511,9 +521,9 @@ namespace std_copy
                 return this->compare(pos, count, p, traits_type::length(p));
             }
             /**
-             * Compares the substring [pos, pos + count1) of *this with the 
+             * Compares the substring [pos, pos + count1) of the current basic_string object with the 
              * first count2 elements in the character sequence pointed to by p.
-             * @param pos The starting index of the substring of *this.
+             * @param pos The starting index of the substring of the current basic_string object.
              * @param count1 The number of characters after pos to compare.
              * @param p A pointer to the character sequence to compare against.
              * @param count2 The number of characters in p to compare.
@@ -523,7 +533,7 @@ namespace std_copy
                 if (count1 > _length - pos)
                     count1 = _length - pos;
                 
-                int result = traits_type::compare(_internalString + pos, p, min(count1, count2));
+                int result = traits_type::compare(_internalString + pos, p, std_copy::min(count1, count2));
                 if (result != 0 || count1 == count2)
                     return result;
                 if (count1 < count2)
@@ -539,28 +549,20 @@ namespace std_copy
                 return this->compare(0, _length, s);
             }
             /**
-             * Compares the substring [pos, pos + count) of *this with 
+             * Compares the substring [pos, pos + count) of the current basic_string object with 
              * another basic_string object.
-             * @param pos The starting index of the substring of *this.
+             * @param pos The starting index of the substring of the current basic_string object.
              * @param count The number of characters after pos to compare.
              * @param s The basic_string object to compare against.
             */
             constexpr int compare(size_type pos, size_type count, const _basic_string_type& s)
             {
-                if (count > _length - pos)
-                    count = _length - pos;
-
-                int result = traits_type::compare(_internalString + pos, s._internalString, min(count, s._length));
-                if (result != 0 || _length == s._length)
-                    return result;
-                if (count < s._length)
-                    return -1;
-                return 1;
+                return this->compare(pos, count, s, 0, s._length);
             }
             /**
-             * Compares the substring [pos1, pos1 + count1) of *this with 
+             * Compares the substring [pos1, pos1 + count1) of the current basic_string object with 
              * the substring [pos2, count2) of another basic_string object.
-             * @param pos1 The starting index of the substring of *this.
+             * @param pos1 The starting index of the substring of the current basic_string object.
              * @param count1 The number of characters after pos1 to compare.
              * @param s The basic_string object to compare against.
              * @param pos2 The starting index of the substring of s.
@@ -573,7 +575,7 @@ namespace std_copy
                 if (count2 > s._length - pos2)
                     count2 = s._length - pos2;
                 
-                int result = traits_type::compare(_internalString + pos1, s._internalString + pos2, min(count1, count2));
+                int result = traits_type::compare(_internalString + pos1, s._internalString + pos2, std_copy::min(count1, count2));
                 if (result != 0 || count1 == count2)
                     return result;
                 if (count1 < count2)
@@ -583,7 +585,7 @@ namespace std_copy
             /**
              * Checks if *this starts with a character ch. The behavior is undefined 
              * if *this is empty.
-             * @param ch The character to check for at the beginning of *this.
+             * @param ch The character to check for at the beginning of the current basic_string object.
             */
             constexpr bool starts_with(value_type ch)
             {
@@ -591,7 +593,7 @@ namespace std_copy
             }
             /**
              * Checks if *this starts with the null-terminated character sequence p.
-             * @param p The character sequence to check for at the beginning of *this.
+             * @param p The character sequence to check for at the beginning of the current basic_string object.
             */
             constexpr bool starts_with(const_pointer p)
             {
@@ -606,7 +608,7 @@ namespace std_copy
             }
             /**
              * Checks if *this starts with the basic_string object s.
-             * @param s The basic_string object to check for at the beginning of *this.
+             * @param s The basic_string object to check for at the beginning of the current basic_string object.
             */
             constexpr bool starts_with(const _basic_string_type& s)
             {
@@ -624,10 +626,10 @@ namespace std_copy
              * @param first An iterator to the start of the sequence.
              * @param last An iterator to the end of the sequence.
             */
-            template <class InputIt>
-            constexpr bool starts_with(InputIt first, InputIt last)
+            template <class InputIterator>
+            constexpr bool starts_with(InputIterator first, InputIterator last)
             {
-                const difference_type dist = distance(first, last);
+                const difference_type dist = std_copy::distance(first, last);
                 if (dist > _length)
                     return false;
                 
@@ -643,7 +645,7 @@ namespace std_copy
             }
             /**
              * Check if *this ends with ch.
-             * @param ch The character to check for at the end of *this.
+             * @param ch The character to check for at the end of the current basic_string object.
             */
             constexpr bool ends_with(const_reference ch)
             {
@@ -651,22 +653,16 @@ namespace std_copy
             }
             /**
              * Check if *this ends with p.
-             * @param p A null-terminated character sequence to check for at the end of *this.
+             * @param p A null-terminated character sequence to check for at the end of the current basic_string object.
             */
-            constexpr bool ends_with(const_pointer p)
+            constexpr bool ends_with(pointer p)
             {
                 const size_type len = traits_type::length(p);
-                if (len > _length)
-                    return false;
-                
-                for (size_type i = 1; i <= len; i++)
-                    if (!traits_type::eq(_internalString[_length - i], p[len - i]))
-                        return false;
-                return true;
+                return (_length > len) && (this->compare(_length - len, len, p) == 0);
             }
             /**
              * Checks if *this ends with s.
-             * @param s A basic_string object to check for at the end of *this.
+             * @param s A basic_string object to check for at the end of the current basic_string object.
             */
             constexpr bool ends_with(const _basic_string_type& s)
             {
@@ -683,10 +679,10 @@ namespace std_copy
              * @param first An iterator to the start of the range.
              * @param second An iterator to the end of the range.
             */
-            template <class InputIt>
-            constexpr bool ends_with(InputIt first, InputIt last) const
+            template <class InputIterator>
+            constexpr bool ends_with(InputIterator first, InputIterator last) const
             {
-                const difference_type dist = distance(first, last);
+                const difference_type dist = std_copy::distance(first, last);
                 if (dist > _length)
                     return false;
                 
@@ -738,8 +734,7 @@ namespace std_copy
                     _realloc(count / _capacity, _length);
                     traits_type::assign(_internalString + _length, count - _length, ch);
                 }
-                _internalString[count] = value_type();
-                _length = count;
+                _terminate_and_update_length(count);
             }
             /**
              * Resizes a string to contain count elements.
@@ -750,7 +745,7 @@ namespace std_copy
                 return this->resize(count, value_type());
             }
             /**
-             * Replaces the range [first, last) of *this with str.
+             * Replaces the range [first, last) of the current basic_string object with str.
              * @param first An iterator pointing to the start of the range to erase.
              * @param last An iterator pointing to the end of the range to erase.
              * @param str The basic_string object to replace the range.
@@ -760,35 +755,51 @@ namespace std_copy
                 return this->replace(first - this->begin(), last - first, str);
             }
             /**
-             * Replaces the substring [pos, pos + count) of *this with str.
+             * Replaces the substring [pos, pos + count) of the current basic_string object with str.
              * @param pos The index from which to start replacing.
              * @param count The number of characters after pos to replace.
              * @param str The basic_string object to replace the substring with.
             */
             constexpr _basic_string_type& replace(size_type pos, size_type count, const _basic_string_type& str)
             {
-                if (pos > _length)
-                    throw std::out_of_range("basic_string::replace: pos > size()");
+                _check_exception(pos, _length, "basic_string::replace: pos is out of range");
+
                 if (count > _length - pos)
                     count = _length - pos;
+
+                if (count == 0)
+                    return this->erase(pos, count);
                 
                 if (count == str._length)
                     traits_type::move(_internalString + pos, str._internalString, count);
+                else if (str._length < count)
+                {
+                    traits_type::move(_internalString + pos, str._internalString, str._length);
+                    traits_type::move(_internalString + pos + str._length, _internalString + pos + count, _length - pos - count);
+                    _terminate_and_update_length(_length - count + str._length);
+                }
                 else
                 {
-                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + str._length) / _capacity);
-                    pointer temp = _internalString;
-                    _internalString = allocator_type::allocate(_capacity);
-                    move(temp, temp + pos, _internalString);
-                    move(str._internalString, str._internalString + str._length, _internalString + pos);
-                    move(temp + pos + count, temp + _length, _internalString + pos + str._length);
-                    _length -= count - str._length;
-                    _internalString[_length] = value_type();
+                    if (_length - count + str._length > _capacity)
+                    {
+                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + str._length) / _capacity);
+                        pointer temp = _internalString;
+                        _internalString = allocator_type::allocate(_capacity);
+                        traits_type::move(_internalString, temp, pos);
+                        traits_type::move(_internalString + pos, str._internalString, str._length);
+                        traits_type::move(_internalString + pos + str._length, temp + pos + count, _length - pos - count);
+                    }
+                    else
+                    {
+                        std_copy::move_backward(_internalString + pos + count, _internalString + _length, _internalString + _length - count + str._length);
+                        traits_type::move(_internalString + pos, str._internalString, str._length);
+                    }
+                    _terminate_and_update_length(_length - count + str._length);
                 }
                 return *this;
             }
             /**
-             * Replaces the substring [pos1, pos1 + count1) of *this with the substring [pos2, pos2 + count2) 
+             * Replaces the substring [pos1, pos1 + count1) of the current basic_string object with the substring [pos2, pos2 + count2) 
              * of str.
              * @param pos1 The index from which to start replacing.
              * @param count1 The number of characters after pos to replace.
@@ -798,17 +809,16 @@ namespace std_copy
             */
             constexpr _basic_string_type& replace(size_type pos1, size_type count1, const _basic_string_type& str, size_type pos2, size_type count2)
             {
-                if (pos1 > _length)
-                    throw std::out_of_range("basic_string::replace: pos1 > size()");
-                if (pos2 > str._length)
-                    throw std::out_of_range("basic_string::replace: pos2 > str.size()");
+                _check_exception(pos1, str._length, "basic_string::replace: pos1 > str.size()");
+                _check_exception(pos2, str._length, "basic_string::replace: pos2 > str.size()");
+
                 count1 = (count1 > _length - pos1) ? _length - pos1 : count1;
                 count2 = (count2 > str._length - pos2) ? str._length - pos2 : count2;
 
                 return this->replace(pos1, count1, str._internalString + pos2, str._internalString + pos2 + count2);
             }
             /**
-             * Replaces the range [first, last) of *this with s.
+             * Replaces the range [first, last) of the current basic_string object with s.
              * @param first An iterator pointing to the start of the range to erase.
              * @param last An iterator pointing to the end of the range to erase.
              * @param s The character sequence to replace the range.
@@ -818,36 +828,52 @@ namespace std_copy
                 return this->replace(first - this->begin(), last - first, s);
             }
             /**
-             * Replaces the substring [pos, pos + count) of *this with s.
+             * Replaces the substring [pos, pos + count) of the current basic_string object with s.
              * @param pos The index from which to start replacing.
              * @param count The number of characters after pos to replace.
              * @param s The character sequence to replace the range.
             */
             constexpr _basic_string_type& replace(size_type pos, size_type count, pointer s)
             {
-                if (pos > _length)
-                    throw std::out_of_range("basic_string::replace: pos > size()");
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+                
+                const size_type len = traits_type::length(s);
                 if (count > _length - pos)
                     count = _length - pos;
 
-                const size_type len = traits_type::length(s);
+                if (count == 0)
+                    return this->erase(pos, count);
+                
                 if (count == len)
                     traits_type::move(_internalString + pos, s, count);
+                else if (len < count)
+                {
+                    traits_type::move(_internalString + pos, s, len);
+                    traits_type::move(_internalString + pos + len, _internalString + pos + count, _length - pos - count);
+                    _terminate_and_update_length(_length - count + len);
+                }
                 else
                 {
-                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
-                    pointer temp = _internalString;
-                    _internalString = allocator_type::allocate(_capacity);
-                    move(temp, temp + pos, _internalString);
-                    move(s, s + len, _internalString + pos);
-                    move(temp + pos + count, temp + _length, _internalString + pos + len);
-                    _length -= count - len;
-                    _internalString[_length] = value_type();
+                    if (_length - count + len > _capacity)
+                    {
+                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
+                        pointer temp = _internalString;
+                        _internalString = allocator_type::allocate(_capacity);
+                        traits_type::move(_internalString, temp, pos);
+                        traits_type::move(_internalString + pos, s, len);
+                        traits_type::move(_internalString + pos + len, temp + pos + count, _length - pos - count);
+                    }
+                    else
+                    {
+                        std_copy::move_backward(_internalString + pos + count, _internalString + _length, _internalString + _length - count + len);
+                        traits_type::move(_internalString + pos, s, len);
+                    }
+                    _terminate_and_update_length(_length - count + len);
                 }
                 return *this;
             }
             /**
-             * Replaces the substring [pos, pos + count1) of *this with the first count2 
+             * Replaces the substring [pos, pos + count1) of the current basic_string object with the first count2 
              * characters of s.
              * @param pos The index from which to start replacing.
              * @param count1 The number of characters after pos to replace.
@@ -856,9 +882,9 @@ namespace std_copy
             */
             constexpr _basic_string_type& replace(size_type pos, size_type count1, pointer s, size_type count2)
             {
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+
                 const size_type len = traits_type::length(s);
-                if (pos > _length)
-                    throw std::out_of_range("basic_string::replace: pos > size()");
                 if (count1 > _length - pos)
                     count1 = _length - pos;
                 count2 = (count2 > len) ? len : count2;
@@ -866,7 +892,7 @@ namespace std_copy
                 return this->replace(this->begin() + pos, this->begin() + pos + count1, s, s + count2);
             }
             /**
-             * Replaces the range [first, last) of *this with the first count2 
+             * Replaces the range [first, last) of the current basic_string object with the first count2 
              * characters of s.
              * @param first An iterator to the start of the range to replace.
              * @param last An iterator to the end of the range to replace.
@@ -878,47 +904,67 @@ namespace std_copy
                 return this->replace(first, last, s, s + count2);
             }
             /**
-             * Replaces the range [first, last) of *this with the range [first2, last2).
+             * Replaces the range [first, last) of the current basic_string object with the range [first2, last2).
              * @param first An iterator pointing to the start of the range to erase.
              * @param last An iterator pointing to the end of the range to erase.
              * @param first2 An iterator to the start of the range to replace [first, last).
              * @param last2 An iterator to the end of the range to replace [first, last).
             */
-            template <class InputIt>
-            constexpr _basic_string_type& replace(iterator first, iterator last, InputIt first2, InputIt last2)
-                requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            template <class InputIterator>
+            constexpr _basic_string_type& replace(iterator first, iterator last, InputIterator first2, InputIterator last2)
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+        #endif
             {
                 return this->replace(first - this->begin(), last - first, first2, last2);
             }
             /**
-             * Replaces the substring [pos, pos + count) of *this with the range [first2, last2).
+             * Replaces the substring [pos, pos + count) of the current basic_string object with the range [first2, last2).
              * @param pos The index from which to start replacing.
              * @param count The number of characters after pos to replace.
              * @param first An iterator to the start of the range to replace [first, last).
              * @param last An iterator to the end of the range to replace [first, last).
             */
-            template <class InputIt>
-            constexpr _basic_string_type& replace(size_type pos, size_type count, InputIt first, InputIt last)
-                requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+            template <class InputIterator>
+            constexpr _basic_string_type& replace(size_type pos, size_type count, InputIterator first, InputIterator last)
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+        #endif
             {
-                if (pos > _length)
-                    throw std::out_of_range("basic_string::replace: pos > size()");
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+
+                const size_type len = std_copy::distance(first, last);
                 if (count > _length - pos)
                     count = _length - pos;
-                    
-                const size_type len = distance(first, last);
+
+                if (count == 0)
+                    return this->erase(pos, count);
+                
                 if (count == len)
-                    move(first, last, _internalString + pos);
+                    traits_type::move(_internalString + pos, first, count);
+                else if (len < count)
+                {
+                    traits_type::move(_internalString + pos, first, len);
+                    traits_type::move(_internalString + pos + len, _internalString + pos + count, _length - pos - count);
+                    _terminate_and_update_length(_length - count + len);
+                }
                 else
                 {
-                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
-                    pointer temp = _internalString;
-                    _internalString = allocator_type::allocate(_capacity);
-                    move(temp, temp + pos, _internalString);
-                    move(first, last, _internalString + pos);
-                    move(temp + pos + count, temp + _length, _internalString + pos + len);
-                    _length -= count - len;
-                    _internalString[_length] = value_type();
+                    if (_length - count + len > _capacity)
+                    {
+                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
+                        pointer temp = _internalString;
+                        _internalString = allocator_type::allocate(_capacity);
+                        traits_type::move(_internalString, temp, pos);
+                        traits_type::move(_internalString + pos, first, len);
+                        traits_type::move(_internalString + pos + len, temp + pos + count, _length - pos - count);
+                    }
+                    else
+                    {
+                        std_copy::move_backward(_internalString + pos + count, _internalString + _length, _internalString + _length - count + len);
+                        traits_type::move(_internalString + pos, first, len);
+                    }
+                    _terminate_and_update_length(_length - count + len);
                 }
                 return *this;
             }
@@ -931,18 +977,27 @@ namespace std_copy
             */
             constexpr _basic_string_type& replace(size_type pos, size_type count, size_type count2, const_reference ch)
             {
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+                if (count > _length - pos)
+                    count = _length - pos;
+    
                 if (count == count2)
                     traits_type::assign(_internalString + pos, count2, ch);
+                else if (count2 < count)
+                {
+                    traits_type::assign(_internalString + pos, count2, ch);
+                    traits_type::move(_internalString + pos + count2, _internalString + pos + count, _length - pos - count);
+                    _terminate_and_update_length(_length - count + count2);
+                }
                 else
                 {
                     _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + count2) / _capacity);
                     pointer temp = _internalString;
                     _internalString = allocator_type::allocate(_capacity);
-                    move(temp, temp + pos, _internalString);
+                    traits_type::move(_internalString, temp, pos);
                     traits_type::assign(_internalString + pos, count2, ch);
-                    move(temp + pos + count, temp + _length, _internalString + pos + count2);
-                    _length -= count - count2;
-                    _internalString[_length] = value_type();
+                    traits_type::move(_internalString + pos + count2, temp + pos + count, _length - pos - count);
+                    _terminate_and_update_length(_length - count + count2);
                 }
                 return *this;
             }
@@ -958,30 +1013,29 @@ namespace std_copy
                 return this->replace(first - this->begin(), last - first, count, ch);
             }
             /**
-             * Returns the substring [pos, pos + count) of *this.
+             * Returns the substring [pos, pos + count) of the current basic_string object.
              * @param pos The index to start getting the characters from.
              * @param count The number of characters after pos to put into the substring.
             */
-            constexpr _basic_string_type& substr(size_type pos, size_type count = npos) const
+            _basic_string_type substr(size_type pos, size_type count = npos) const
             {
-                if (pos > _length)
-                    throw std::out_of_range("basic_string::substr: pos > size()");
+                _check_exception(pos, _length, "basic_string::substr: pos > size()");
 
                 if (pos + count > _length)
                     count = _length - pos;
 
-                return _basic_string_type(_internalString + pos, _internalString + pos + count);
+                return _basic_string_type(*this, pos, count);
             }
             /**
-             * Copies the substring [pos, pos + count) of *this to dest;
+             * Copies the substring [pos, pos + count) of the current basic_string object to dest;
              * @param dest The character sequence to copy to.
              * @param pos The position from which to start copying.
              * @param count The number of characters to copy.
             */
             size_type copy(pointer dest, size_type pos = 0, size_type count = npos)
             {
-                if (pos > this->size())
-                    throw std::out_of_range("basic_string::copy: pos > size()");
+                _check_exception(pos, _length, "basic_string::copy: pos > size()");
+
                 if (count == npos || pos + count > _length)
                     count = _length - pos;
 
@@ -1008,7 +1062,7 @@ namespace std_copy
             */
             constexpr size_type find(const_reference ch, size_type pos, size_type count) const
             {
-                return traits_type::find(_internalString + pos, count, ch) - _internalString;
+                return (traits_type::find(_internalString + pos, count, ch) - _internalString);
             }
             /**
              * Returns a std::size_t value indicating the index at which the character 
@@ -1033,14 +1087,14 @@ namespace std_copy
             /**
              * Returns a std::size_t value indicating the index at which the first count 
              * characters in the character sequence p first occurs in the substring [pos, size()) 
-             * of *this.
+             * of the current basic_string object.
              * @param p The character sequence to find.
              * @param pos The index from which to start searching for p in *this.
              * @param count The number of characters in p to look for.
             */
             constexpr size_type find(const_pointer p, size_type pos, size_type count) const
             {
-                char* where = search(_internalString + pos, _internalString + _length, p, p + count);
+                pointer where = search(_internalString + pos, _internalString + _length, p, p + count);
                 if (where == _internalString + _length)
                     return npos;
                 return (where - _internalString);
@@ -1048,7 +1102,7 @@ namespace std_copy
             /**
              * Returns a std::size_t value indicating the value at which the first count 
              * characters in the basic_string object s first occurs in the substring 
-             * [pos, size()) of *this.
+             * [pos, size()) of the current basic_string object.
              * @param s The basic_string object to search for.
              * @param pos The position from where to start searching.
              * @param count The number of characters in s to search for.
@@ -1059,7 +1113,7 @@ namespace std_copy
             }
             /**
              * Returns a std::size_t value indicating the value at which the basic_string 
-             * object s first occurs in the substring [pos, size()) of *this.
+             * object s first occurs in the substring [pos, size()) of the current basic_string object.
              * @param s The basic_string object to search for.
              * @param pos The position from where to start searching.
             */
@@ -1069,21 +1123,24 @@ namespace std_copy
             }
             /**
              * Returns a std::size_t value indicating the value at which the range [first, last) 
-             * first occurs in the substring [pos, size()) of *this.
+             * first occurs in the substring [pos, size()) of the current basic_string object.
              * @param first An iterator to the start of the range.
              * @param last An iterator to the end of the range.
              * @param pos The position in *this from where to start searching.
             */
-            template <class InputIt>
-            constexpr size_type find(InputIt first, InputIt last, size_type pos = 0) const noexcept
+            template <class InputIterator>
+            constexpr size_type find(InputIterator first, InputIterator last, size_type pos = 0) const noexcept
+        #if __cplusplus > 201703L
+            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+        #endif
             {
-                char* where = search(_internalString + pos, _internalString + _length, first, last);
+                pointer where = std_copy::search(_internalString + pos, _internalString + _length, first, last);
                 if (where == _internalString + _length)
                     return npos;
                 return (where - _internalString);
             }
             /**
-             * Searches for the first n characters of str from the back of *this.
+             * Searches for the first n characters of str from the back of the current basic_string object.
              * @param str The basic_string object to search for in *this.
              * @param n The number of characters in str to search for.
              * @param pos The position in *this to start searching backwards from.
@@ -1120,7 +1177,7 @@ namespace std_copy
                 return indexSubstrEnd;
             }
             /**
-             * Searches for str from the back of *this.
+             * Searches for str from the back of the current basic_string object.
              * @param str The basic_string object to search for in *this.
              * @param pos The position in *this to start searching backwards from.
             */
@@ -1129,7 +1186,7 @@ namespace std_copy
                 return this->rfind(str, str._length, pos);
             }
             /**
-             * Searches for the first n characters of str from the back of *this.
+             * Searches for the first n characters of str from the back of the current basic_string object.
              * @param str The character sequence to search for in *this.
              * @param n The number of characters in str to search for.
              * @param pos The position in *this to start searching backwards from.
@@ -1139,7 +1196,7 @@ namespace std_copy
                 return this->rfind(_basic_string_type(str), n, pos);
             }
             /**
-             * Searches for p from the back of *this.
+             * Searches for p from the back of the current basic_string object.
              * @param p A character sequence to search for in *this.
              * @param pos The position in *this to start searching backwards from.
             */
@@ -1148,7 +1205,7 @@ namespace std_copy
                 return this->rfind(p, traits_type::length(p), pos);
             }
             /**
-             * Searches for ch from the back of *this.
+             * Searches for ch from the back of the current basic_string object.
              * @param ch The character to search for.
              * @param pos The position to start searching backwards from.
             */
@@ -1164,13 +1221,292 @@ namespace std_copy
                 }
                 return npos;
             }
+            /**
+             * Searches for the first occurrence of any of the characters in the character 
+             * sequence p in *this.
+             * @param p The character sequence.
+             * @param pos The position from which to start searching.
+            */
+            constexpr size_type find_first_of(const_pointer p, size_type pos = 0)
+            {
+                return this->find_first_of(p, pos, traits_type::length(p));
+            }
+            /**
+             * Searches for the first occurrence of any of the characters in the first count  
+             * characters from the character sequence p in *this.
+             * @param p The character sequence.
+             * @param pos The position from which to start searching.
+             * @param count The number of charcters in p that count as "valid".
+            */
+            constexpr size_type find_first_of(const_pointer p, size_type pos, size_type count)
+            {
+                _check_exception(pos, _length, "basic_string::find_first_of: pos > size()");
+                
+                pointer where = std_copy::find_first_of(_internalString + pos, _internalString + _length, p, p + count);
+                if (where == _internalString + _length)
+                    return npos;
+                return where - _internalString;
+            }
+            /**
+             * Searches for the first occurrence of any of the characters in the 
+             * basic_string object p in *this.
+             * @param p The basic_string object.
+             * @param pos The position from which to start searching.
+            */
+            constexpr size_type find_first_of(const _basic_string_type& p, size_type pos = 0)
+            {
+                return this->find_first_of(p._internalString, pos, p._length);
+            }
+            /**
+             * Searches for the first occurrence of ch in *this.
+             * @param ch The character to search for.
+             * @param pos The position to start searching from.
+            */
+            constexpr size_type find_first_of(const_reference ch, size_type pos = 0)
+            {
+                _check_exception(pos, _length, "basic_string::find_first_of: pos > size()");
+                
+                pointer where = std_copy::find(_internalString + pos, this->end().base(), ch);
+                if (where == _internalString + _length)
+                    return npos;
+                return where - _internalString;
+            }
+            /**
+             * Searches for the first occurrence of any character not in the 
+             * character sequence p in *this.
+             * @param p The character sequence.
+             * @param pos The position from which to start searching.
+            */
+            constexpr size_type find_first_not_of(const_pointer p, size_type pos = 0)
+            {
+                return this->find_first_not_of(p, pos, traits_type::length(p));
+            }
+            /**
+             * Searches for the first occurrence of any character not in the first count characters 
+             * from character sequence p in *this.
+             * @param p The character sequence.
+             * @param pos The position from which to start searching.
+             * @param count The number of characters from p considered "invalid".
+            */
+            constexpr size_type find_first_not_of(const_pointer p, size_type pos, size_type count)
+            {
+                _check_exception(pos, _length, "basic_string::find_first_not_of: pos > size()");
+                
+                for (size_type i = pos; i < _length; i++)
+                {
+                    pointer where = std_copy::find(p, p + count, _internalString[i]);
+                    if (where == p + count)
+                        return i;
+                }
+                return npos;
+            }
+            /**
+             * Searches for the first occurrence of any character not in the 
+             * basic_string object p in *this.
+             * @param p The basic_string object.
+             * @param pos The position from which to start searching.
+            */
+            constexpr size_type find_first_not_of(const _basic_string_type& p, size_type pos = 0)
+            {
+                return this->find_first_not_of(p._internalString, pos, p._length);
+            }
+            /**
+             * Searches for first occurrence of any character that is not ch in 
+             * *this.
+             * @param ch The character.
+             * @param pos The position to start searching from.
+            */
+            constexpr size_type find_first_not_of(const_reference ch, size_type pos = 0)
+            {
+                _check_exception(pos, _length, "basic_string::find_first_not_of: pos > size()");
+                
+                for (size_type i = pos; i < _length; i++)
+                {
+                    if (!traits_type::eq(_internalString[i], ch))
+                        return i;
+                }
+                return npos;
+            }
+            /**
+             * Searches for the last occurrence of any of the characters from the first count 
+             * characters from the character sequence p.
+             * @param p The character sequence.
+             * @param pos The position to start searching backwards from.
+             * @param count The number of characters from count considered "valid".
+            */
+            constexpr size_type find_last_of(const_pointer p, size_type pos, size_type count)
+            {
+                _check_exception(pos, _length, "basic_string::find_last_of: pos > size()");
+
+                for (size_type i = pos; i < _length; i++)
+                {
+                    if (std_copy::find(p, p + count, _internalString[i]) != p + count)
+                        return i;
+                }
+                return npos;
+            }
+            /**
+             * Searches for the last occurrence of any of the characters from the character 
+             * sequence p.
+             * @param p The character sequence.
+             * @param pos The position to start searching backwards from.
+            */
+            constexpr size_type find_last_of(const_pointer p, size_type pos = npos)
+            {
+                if (pos >= _length)
+                    pos = _length - 1;
+
+                return this->find_last_of(p, pos, traits_type::length(p));
+            }
+            /**
+             * Searches for the last occurrence of any of the characters from the 
+             * basic_string object p.
+             * @param p The character sequence.
+             * @param pos The position to start searching backwards from.
+            */
+            constexpr size_type find_last_of(const _basic_string_type& p, size_type pos = npos)
+            {
+                if (pos >= _length)
+                    pos = _length - 1;
+
+                return this->find_last_of(p._internalString, pos, p._length);
+            }
+            /**
+             * Searches for the last occurrence of ch in *this.
+             * @param ch The character to search for.
+             * @param pos The position to start searching from.
+            */
+            constexpr size_type find_last_of(const_reference ch, size_type pos = npos)
+            {
+                if (pos >= _length)
+                    pos = _length - 1;
+                
+                while (pos-- > 0)
+                {
+                    if (traits_type::eq(_internalString[pos], ch))
+                        return pos;
+                }
+                return npos;
+            }
+            /**
+             * Searches for the last occurrence of any character not from the first count 
+             * characters from the character sequence p.
+             * @param p The character sequence.
+             * @param pos The position to start searching backwards from.
+             * @param count The number of characters from count considered "valid".
+            */
+            constexpr size_type find_last_not_of(const_pointer p, size_type pos, size_type count)
+            {
+                _check_exception(pos, _length, "basic_string::find_last_not_of: pos > size()");
+
+                for (size_type i = pos; i < _length; i++)
+                {
+                    if (std_copy::find(p, p + count, _internalString[i]) == p + count)
+                        return i;
+                }
+                return npos;
+            }
+            /**
+             * Searches for the last occurrence of any character not from the character 
+             * sequence p.
+             * @param p The character sequence.
+             * @param pos The position to start searching backwards from.
+            */
+            constexpr size_type find_last_not_of(const_pointer p, size_type pos = npos)
+            {
+                if (pos >= _length)
+                    pos = _length - 1;
+
+                return this->find_last_not_of(p, pos, traits_type::length(p));
+            }
+            /**
+             * Searches for the last occurrence of any character not from the 
+             * basic_string object p.
+             * @param p The character sequence.
+             * @param pos The position to start searching backwards from.
+            */
+            constexpr size_type find_last_not_of(const _basic_string_type& p, size_type pos = npos)
+            {
+                if (pos >= _length)
+                    pos = _length - 1;
+
+                return this->find_last_not_of(p._internalString, pos, p._length);
+            }
+            /**
+             * Searches for the last occurrence of ch in *this.
+             * @param ch The character to search for.
+             * @param pos The position to start searching from.
+             * @returns The index of the last occurrence of ch.
+            */
+            constexpr size_type find_last_not_of(const_reference ch, size_type pos = npos)
+            {
+                if (pos >= _length)
+                    pos = _length - 1;
+                
+                while (pos-- > 0)
+                {
+                    if (!traits_type::eq(_internalString[pos], ch))
+                        return pos;
+                }
+                return npos;
+            }
+            /**
+             * Converts all the alphabetic characters to uppercase if they are lowercase.
+            */
+            constexpr _basic_string_type& to_upper()
+            {
+                std_copy::for_each(_internalString, _internalString + _length, _helper::_to_upper);
+                return *this;
+            }
+            /**
+             * Converts all the alphabetic characters to lowercase if they are uppercase.
+            */
+            constexpr _basic_string_type& to_lower()
+            {
+                std_copy::for_each(_internalString, _internalString + _length, _helper::_to_lower);
+                return *this;
+            }
+            /**
+             * Removes all the occurrences of a character ch.
+             * @param ch The character to remove.
+             * @returns The number of occurrences of ch.
+            */
+            constexpr size_type remove(const_reference ch)
+            {
+                size_type numberOfOccurrences = 0;
+                #if __cplusplus >= 201103L
+
+                    pointer upTo = remove_if(_internalString, _internalString + _length, [&](const_reference c) {
+                        numberOfOccurrences += (traits_type::eq(c, ch)) ? 1 : 0;
+                        return traits_type::eq(c, ch);
+                    });
+                    _terminate_and_update_length(_length - (this->end() - upTo));
+
+                #else
+
+                    for (size_type i = 0, where = 0; i < _length; i++)
+                    {
+                        if (!traits_type::eq(_internalString[i], ch))
+                        {
+                            traits_type::assign(_internalString[where], _internalString[i]);
+                            where++;
+                        }
+                        else
+                            numberOfOccurrences++;
+                    }
+                    _terminate_and_update_length(_length - numberOfOccurrences);
+
+                #endif
+
+                return numberOfOccurrences;
+            }
     };
 
     /**
      * Gets the Nth element from str. N is a template parameter.
      * @param str The basic_string object from which to get the element.
     */
-    template <unsigned long long N, class CharT, class CharTraits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    template <std::size_t N, class CharT, class CharTraits = char_traits<CharT>, class Alloc = allocator<CharT>>
     CharT&& get(basic_string<CharT, CharTraits, Alloc>& str)
     {
         return move(str[N]);
@@ -1179,10 +1515,30 @@ namespace std_copy
      * Gets the Nth element from str. N is a template parameter.
      * @param str The basic_string object from which to get the element.
     */
-    template <unsigned long long N, class CharT, class CharTraits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    template <std::size_t N, class CharT, class CharTraits = char_traits<CharT>, class Alloc = allocator<CharT>>
     CharT& get(basic_string<CharT, CharTraits, Alloc>& str)
     {
         return str[N];
+    }
+    /**
+     * Returns an iterator to the beginning of a basic_string object. Equivalent to 
+     * str.begin().
+     * @param str The string.
+    */
+    template <class CharT, class CharTraits, class Alloc>
+    auto begin(const basic_string<CharT, CharTraits, Alloc>& str) -> decltype(str.begin())
+    {
+        return str.begin();
+    }
+    /**
+     * Returns an iterator to the end of a basic_string object. Equivalent to 
+     * str.end().
+     * @param str The string.
+    */
+    template <class CharT, class CharTraits, class Alloc>
+    auto end(const basic_string<CharT, CharTraits, Alloc>& str) -> decltype(str.end())
+    {
+        return str.end();
     }
 
     typedef basic_string<char>      string;
