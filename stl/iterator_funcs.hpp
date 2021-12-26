@@ -2,6 +2,7 @@
 #define _STD_COPY_ITERATOR_FUNCS
 
 #include "iterator_traits.hpp"
+#include <cstdint>
 
 namespace _std_copy_hidden
 {
@@ -17,13 +18,14 @@ namespace _std_copy_hidden
                 typedef typename T::difference_type             difference_type;
                 typedef std_copy::random_access_iterator_tag    iterator_category;
 
-            private:
+            protected:
                 typedef _iterator<T>                            _iterator_type;
 
                 pointer _internalPtr;
 
             public:
-                _iterator(pointer ptr = nullptr)
+                _iterator() {}
+                _iterator(pointer ptr)
                     : _internalPtr(ptr) {}
                 
                 /**
@@ -135,7 +137,7 @@ namespace _std_copy_hidden
                     return _iterator_type(_internalPtr - n);
                 }
                 /**
-                 * Overloaded - operator; finds the distance between two iterators.
+                 * Overloaded - operator; finds the std_copy::distance between two iterators.
                 */
                 difference_type operator-(_iterator_type it)
                 {
@@ -153,7 +155,7 @@ namespace _std_copy_hidden
                 */
                 bool operator>(_iterator_type i)
                 {
-                    return _internalPtr> i._internalPtr;
+                    return _internalPtr > i._internalPtr;
                 }
                 /**
                  * Overloaded >= operator
@@ -188,32 +190,32 @@ namespace std_copy
      * @param it The iterator to advance.
      * @param n The number to advance the iterator by.
     */
-    template <class InputIt>
-    void advance(InputIt& it, unsigned long long n = 1)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+    template <class InputIterator>
+    void advance(InputIterator& it, std::size_t n = 1)
+        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
     {
-        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
         
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             it += n;
         else
         {
-            for (unsigned long long i = 0; i < n; i++)
+            for (std::size_t i = 0; i < n; i++)
                 it++;
         }
     }
     /**
-     * This function returns the distance between 
+     * This function returns the std_copy::distance between 
      * two iterators.
      * @param first The first iterator.
      * @param second The second iterator.
     */
-    template <class InputIt>
-    long long distance(InputIt start, InputIt last)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+    template <class InputIterator>
+    long long distance(InputIterator start, InputIterator last)
+        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
     {
-        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
@@ -230,11 +232,11 @@ namespace std_copy
      * @param it The starting iterator position.
      * @param n The amount to add to the iterator.
     */
-    template <class InputIt>
-    InputIt next(InputIt it, unsigned long long n)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIt>
+    template <class InputIterator>
+    InputIterator next(InputIterator it, std::size_t n)
+        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
     {
-        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
@@ -250,11 +252,11 @@ namespace std_copy
      * @param it The starting iterator position.
      * @param n The amount to subtract from the iterator.
     */
-    template <class InputIt>
-    InputIt prev(InputIt it, unsigned long long n)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_bidirectional_iterator<InputIt>
+    template <class InputIterator>
+    InputIterator prev(InputIterator it, std::size_t n)
+        requires _std_copy_hidden::_std_copy_iterator_traits::_is_bidirectional_iterator<InputIterator>
     {
-        using _iter_category = std_copy::iterator_traits<InputIt>::iterator_category;
+        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
