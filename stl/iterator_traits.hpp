@@ -5,6 +5,8 @@
 #include "iterator_concepts.hpp"
 #include "type_traits.hpp"
 
+#include <cstdint>
+
 namespace std_copy
 {
     struct input_iterator_tag {};
@@ -16,7 +18,7 @@ namespace std_copy
     template <class Iterator>
     struct iterator_traits
     {
-        private:
+        protected:
             template <class T>
             using _pointer = typename T::pointer;
 
@@ -36,11 +38,11 @@ namespace std_copy
         typedef remove_cv_t<T>                          value_type;
         typedef T*                                      pointer;
         typedef T&                                      reference;
-        typedef long long                               difference_type;
+        typedef std::ptrdiff_t                          difference_type;
         typedef std_copy::random_access_iterator_tag    iterator_category;
     };
 
-    template <class Category, class T, class Distance = long long, class Pointer = T*, class Reference = T&>
+    template <class Category, class T, class Distance = std::ptrdiff_t, class Pointer = T*, class Reference = T&>
     struct iterator
     {
         typedef Category            iterator_category;
@@ -62,7 +64,7 @@ namespace _std_copy_hidden
             using _value_type = typename std_copy::iterator_traits<T>::value_type;
 
             template <class T, class U>
-            concept _is_same = std_copy::same_as<std_copy::remove_reference_t<T>, U>;
+            concept _is_same = std_copy::same_as<std_copy::remove_reference_t<T>, std_copy::remove_reference_t<U>>;
             //Checks if Iterator is actually an iterator/pointer
             template <class Iterator>
             concept _is_iterator =
