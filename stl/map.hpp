@@ -2,13 +2,14 @@
 #define _STD_COPY_MAP
 
 #include <stdexcept>
+#include <cstdint>
 
 #include "functional_comp.hpp"
 #include "algorithm.hpp"
 #include "iterator_funcs.hpp"
-#include "pair.hpp"
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
+#include "utility.hpp"
 
 namespace std_copy
 {
@@ -19,13 +20,13 @@ namespace std_copy
      * @param Compare The comparison struct used to sort the keys.
      * @param Alloc The object used to allocate space for the map.
     */
-    template <class Key, class T, class Compare = less<Key>, class Alloc = allocator<pair<Key, T>>>
+    template <class Key, class T, class Compare = less<Key>, class Alloc = std_copy::allocator<std_copy::pair<Key, T>>>
 #if __cplusplus > 201703L
     requires _std_copy_hidden::_std_copy_allocator::_is_valid_allocator<Alloc>
 #endif
     class map
     {
-        private:
+        protected:
             typedef map<Key, T, Compare, Alloc>                 _map_type;
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_map_type> _iterator_type;
             
@@ -39,23 +40,24 @@ namespace std_copy
             typedef value_type&                                 reference;
             typedef const value_type&                           const_reference;
             typedef Alloc                                       allocator_type;
-            typedef unsigned long long                          size_type;
-            typedef long long                                   difference_type;
+            typedef std::size_t                                 size_type;
+            typedef std::ptrdiff_t                              difference_type;
             typedef _iterator_type                              iterator;
             typedef const _iterator_type                        const_iterator;
         
-        private:
+        protected:
             typedef pair<iterator, bool>                        _iterator_and_bool;
 
             pointer _internalBuffer;
             size_type _numberOfElements;
             size_type _capacity;
-            key_compare _key_compare;
 
             class value_compare
                 : binary_function<value_type, value_type, bool>
             {
-                private:
+                friend class map;
+                
+                protected:
                     key_compare comp;
                     value_compare(key_compare c) : comp(c) {}
 
@@ -70,7 +72,7 @@ namespace std_copy
             {
                 for (int i = 0; i < _numberOfElements; i++)
                 {
-                    if (!_key_compare(copyFrom[i].first, key))
+                    if (!key_compare{}(copyFrom[i].first, key))
                     {
                         move_backward(copyFrom + i, copyFrom + _numberOfElements, _internalBuffer + _numberOfElements);
                         pos = i;
@@ -94,7 +96,7 @@ namespace std_copy
                     pointer temp = _internalBuffer;
                     _internalBuffer = allocator_type::allocate(_capacity);
                     _copyAndFindInsertPos(temp, elemToConstruct.first, whereToInsert);
-                    allocator_type::deallocate(temp, (int) _capacity / 2);
+                    allocator_type::deallocate(temp, (size_type) _capacity / 2);
                 }
                 construct_at(_internalBuffer + whereToInsert, move(elemToConstruct));
                 _numberOfElements++;
@@ -158,21 +160,21 @@ namespace std_copy
              * This function returns the number of elements 
              * in the map.
             */
-            size_type size() const noexcept
+            constexpr size_type size() const noexcept
             {
                 return _numberOfElements;
             }
             /**
              * This function checks whether the map is empty (i.e. has no elements).
             */
-            bool empty() const noexcept
+            constexpr bool empty() const noexcept
             {
                 return _numberOfElements == 0;
             }
             /**
              * This function clears the map.
             */
-            void clear()
+            constexpr void clear()
             {
                 allocator_type::deallocate(_internalBuffer, _capacity);
                 _numberOfElements = 0;
@@ -181,7 +183,7 @@ namespace std_copy
             /**
              * This function returns an iterator to the first element in the container
             */
-            iterator begin()
+            constexpr iterator begin()
             {
                 return iterator(_internalBuffer);
             }
@@ -189,14 +191,14 @@ namespace std_copy
              * This function returns an iterator to the theoretical element after the last 
              * element in the container;
             */
-            iterator end()
+            constexpr iterator end()
             {
                 return iterator(_internalBuffer + _numberOfElements);
             }
             /**
              * This function returns a const iterator to the first element in the container
             */
-            const_iterator cbegin()
+            constexpr const_iterator cbegin()
             {
                 return (const_iterator) iterator(_internalBuffer);
             }
@@ -204,7 +206,7 @@ namespace std_copy
              * This function returns a const iterator to the theoretical element after the last 
              * element in the container;
             */
-            const_iterator cend()
+            constexpr const_iterator cend()
             {
                 return (const_iterator) iterator(_internalBuffer + _numberOfElements);
             }
@@ -212,7 +214,7 @@ namespace std_copy
              * This function erases the element pointed to by the provided iterator.
              * @param pos The iterator which points to the element to erase.
             */
-            iterator erase(iterator pos)
+            constexpr iterator erase(iterator pos)
             {
                 if (_numberOfElements == 0)
                     throw std::length_error("No elements to erase");
@@ -232,7 +234,7 @@ namespace std_copy
              * @param first The start of the sequence to erase.
              * @param last The end of the sequence to erase.
             */
-            iterator erase(const_iterator first, const_iterator last)
+            constexpr iterator erase(const_iterator first, const_iterator last)
             {
                 if (_numberOfElements == 0)
                     throw std::length_error("No elements to erase");
@@ -298,7 +300,7 @@ namespace std_copy
              * insert an element when an element with the specified key already exists.
              * @param pairToInsert The element to insert into the map.
             */
-            _iterator_and_bool insert(const_reference pairToInsert)
+            constexpr _iterator_and_bool insert(const_reference pairToInsert)
             {
                 iterator pos = this->find(pairToInsert.first);
                 if (pos != this->end())
@@ -328,7 +330,7 @@ namespace std_copy
              * key already exists, that element gets assigned to the new mapped value instead.
              * @param pairToInsert The element to insert into the map.
             */
-            _iterator_and_bool insert_or_assign(const_reference pairToInsert)
+            constexpr _iterator_and_bool insert_or_assign(const_reference pairToInsert)
             {
                 _iterator_and_bool p = this->insert(pairToInsert);
                 if (!p.second)
@@ -340,7 +342,7 @@ namespace std_copy
              * the container.
              * @param elemToConstruct The element to construct in place.
             */
-            _iterator_and_bool emplace(const_reference elemToConstruct)
+            constexpr _iterator_and_bool emplace(const_reference elemToConstruct)
             {
                 return _emplace(elemToConstruct);
             }
@@ -350,7 +352,7 @@ namespace std_copy
              * @param args The arguments forwarded to the constructor.
             */
             template <class ...Args>
-            _iterator_and_bool emplace(Args&&... args)
+            constexpr _iterator_and_bool emplace(Args&&... args)
             {
                 return _emplace(value_type(forward<Args>(args)...));
             }
@@ -360,7 +362,7 @@ namespace std_copy
              * @param args The arguments forwarded to the constructed element's second parameter.
             */
             template <class ...Args>
-            _iterator_and_bool try_emplace(const key_type& key, Args&&... args)
+            constexpr _iterator_and_bool try_emplace(const key_type& key, Args&&... args)
             {
                 return _emplace(value_type(move(key), mapped_type(forward<Args>(args)...)));
             }
@@ -368,7 +370,7 @@ namespace std_copy
              * This function copies one map to another.
              * @param s The map to copy to this.
             */
-            void operator=(const _map_type& s)
+            constexpr void operator=(const _map_type& s)
             {
                 allocator_type::deallocate(_internalBuffer, _capacity);
                 _numberOfElements = s._numberOfElements;
@@ -379,7 +381,7 @@ namespace std_copy
             /**
              * This function returns an object of the provided _allocator type.
             */
-            allocator_type get_allocator() const noexcept
+            constexpr allocator_type get_allocator() const noexcept
             {
                 return allocator_type();
             }
@@ -388,7 +390,7 @@ namespace std_copy
              * same key as key.
              * @param key The key of the element to search for.
             */
-            iterator find(const key_type& key)
+            constexpr iterator find(const key_type& key)
             {
                 if (_numberOfElements == 0)
                     return this->end();
@@ -421,7 +423,7 @@ namespace std_copy
              * The equality operator has to be provided by the user.
              * @param key The key to find.
             */
-            bool contains(const key_type& key)
+            constexpr bool contains(const key_type& key)
             {
                 return this->find(key) != this->end();
             }
@@ -429,19 +431,11 @@ namespace std_copy
              * This function swaps the contents of *this with s.
              * @param s The map to swap with.
             */
-            void swap(const _map_type& s)
+            constexpr void swap(_map_type& s)
             {
-                pointer temp = s._internalBuffer;
-                s._internalBuffer = _internalBuffer;
-                _internalBuffer = temp;
-
-                size_type tempCapacity = s._capacity;
-                s._capacity = _capacity;
-                _capacity = tempCapacity;
-
-                size_type tempNumberOfElems = s._numberOfElements;
-                s._numberOfElements = _numberOfElements;
-                _numberOfElements = tempNumberOfElems;
+                std_copy::swap(_internalBuffer, s._internalBuffer);
+                std_copy::swap(_numberOfElements, s._numberOfElements);
+                std_copy::swap(_capacity, s._capacity);
             }
             /**
              * This function returns an iterator to the first element with 
@@ -449,7 +443,7 @@ namespace std_copy
              * @param key The key used to compare against the keys of the 
              * other elements.
             */
-            iterator lower_bound(const key_type& key)
+            constexpr iterator lower_bound(const key_type& key)
             {
                 if (!_numberOfElements)
                     return this->end();
@@ -477,7 +471,7 @@ namespace std_copy
              * @param key The key used to compare against the keys of the 
              * other elements.
             */
-            iterator upper_bound(const key_type& key)
+            constexpr iterator upper_bound(const key_type& key)
             {
                 if (!_numberOfElements)
                     return this->end();
@@ -503,23 +497,23 @@ namespace std_copy
              * Returns a range containing all elements with the given key in the container.
              * @param key The key to search for.
             */
-            pair<iterator, iterator> equal_range(const key_type& key)
+            constexpr pair<iterator, iterator> equal_range(const key_type& key)
             {
                 return std_copy::make_pair(this->lower_bound(), this->upper_bound());
             }
             /**
              * Returns the object used to compare the keys.
             */
-            key_compare key_comp() const noexcept
+            constexpr key_compare key_comp() const noexcept
             {
-                return _key_compare;
+                return key_compare{};
             }
             /**
              * Returns the object used to compare the mapped values.
             */
-            value_compare value_comp() const noexcept
+            constexpr value_compare value_comp() const noexcept
             {
-                return value_compare(_key_compare);
+                return value_compare(key_compare{});
             }
     };
     /**
@@ -539,11 +533,8 @@ namespace std_copy
     */
     template <class T1, class T2, class Compare, class Alloc, class Function>
     typename map<T1, T2, Compare, Alloc>::size_type erase_if(map<T1, T2, Compare, Alloc>& c, Function func)
-#if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_algorithm::_is_function_and_returns<Function, bool>
-#endif
     {
-        unsigned long long oldSize = c.size();
+        typename map<T1, T2, Compare, Alloc>::size_type oldSize = c.size();
         for (typename map<T1, T2, Compare, Alloc>::iterator it = c.begin(); it != c.end(); )
         {
             if (func(*it))
@@ -552,6 +543,26 @@ namespace std_copy
                 it++;
         }
         return oldSize - c.size();
+    }
+    /**
+     * Returns an iterator to the beginning of a map. Equivalent 
+     * to m.begin().
+     * @param m The map.
+    */
+    template <class T1, class T2, class Compare, class Alloc>
+    typename map<T1, T2, Compare, Alloc>::iterator begin(const map<T1, T2, Compare, Alloc>& m)
+    {
+        return m.begin();
+    }
+    /**
+     * Returns an iterator to the end of a map. Equivalent 
+     * to m.end();
+     * @param m The map.
+    */
+    template <class T1, class T2, class Compare, class Alloc>
+    typename map<T1, T2, Compare, Alloc>::iterator end(const map<T1, T2, Compare, Alloc>& m)
+    {
+        return m.end();
     }
 }
 
