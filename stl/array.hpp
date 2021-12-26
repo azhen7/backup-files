@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <cstdint>
 
 #include "iterator_funcs.hpp"
 #include "algorithm.hpp"
@@ -19,10 +20,10 @@ namespace std_copy
      * to another, and you can return them from functions. They also
      * come with a lot of helpful functions.
     */
-    template <class T, unsigned long long s>
+    template <class T, std::size_t s>
     class array
     {
-        private:
+        protected:
             typedef array<T, s>                                     _array_type;
             
         public:
@@ -32,12 +33,12 @@ namespace std_copy
             typedef const T*                                                            const_pointer;
             typedef T&                                                                  reference;
             typedef const T&                                                            const_reference;
-            typedef unsigned long long                                                  size_type;
-            typedef long long                                                           difference_type;
+            typedef std::size_t                                                         size_type;
+            typedef std::ptrdiff_t                                                      difference_type;
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_array_type>  iterator;
             typedef const iterator                                                      const_iterator;
             
-        private:
+        protected:
             T _internalBuffer[s];
             size_type _numberOfElements;
             const size_type _size = s;
@@ -63,7 +64,7 @@ namespace std_copy
                 std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
-            template <size_type Size>
+            template <std::size_t Size>
             array(T (&arr)[Size])
                 : _numberOfElements(move(Size))
             {
@@ -221,13 +222,8 @@ namespace std_copy
             */
             void swap(const _array_type& toSwap)
             {
-                pointer temp = _internalBuffer;
-                _internalBuffer = toSwap._internalBuffer;
-                toSwap._internalBuffer = temp;
-
-                size_type tempNumberOfElems = _numberOfElements;
-                _numberOfElements = toSwap._numberOfElements;
-                toSwap._numberOfElements = tempNumberOfElems;
+                std_copy::swap(_internalBuffer, s._internalBuffer);
+                std_copy::swap(_numberOfElements, s._numberOfElements);
             }
     };
 
@@ -236,7 +232,7 @@ namespace std_copy
      * @param lhs The first array.
      * @param rhs The second array.
     */
-    template <class T, unsigned long long N>
+    template <class T, std::size_t N>
     void swap(const array<T, N>& lhs, const array<T, N>& rhs)
     {
         lhs.swap(rhs);
@@ -245,7 +241,7 @@ namespace std_copy
      * This function converts a builtin array to a std::array.
      * @param arr The array to convert.
     */
-    template <class T, unsigned long long N>
+    template <class T, std::size_t N>
     constexpr array<T, N> to_array(T (&arr)[N])
     {
         return array<T, N>(arr);
@@ -254,7 +250,7 @@ namespace std_copy
      * Returns the Nth element of arr. N is a template parameter.
      * @param arr The array from which to get the Nth element.
     */
-    template <unsigned long long I, class T, unsigned long long N>
+    template <std::size_t I, class T, std::size_t N>
     T&& get(array<T, N>& arr)
     {
         return move(arr[I]);
@@ -263,10 +259,30 @@ namespace std_copy
      * Returns the Nth element of arr. N is a template parameter.
      * @param arr The array from which to get the Nth element.
     */
-    template <unsigned long long I, class T, unsigned long long N>
+    template <std::size_t I, class T, std::size_t N>
     T& get(array<T, N>& arr)
     {
         return arr[I];
+    }
+    /**
+     * Returns an iterator to the beginning of an std_copy::array. Equivalent 
+     * to arr.begin().
+     * @param arr The array.
+    */
+    template <class T, std::size_t N>
+    typename array<T, N>::iterator begin(const array<T, N>& arr)
+    {
+        return arr.begin();
+    }
+    /**
+     * Returns an iterator to the end of an std_copy::array. Equivalent 
+     * to arr.end().
+     * @param arr The array.
+    */
+    template <class T, std::size_t N>
+    typename array<T, N>::iterator end(const array<T, N>& arr)
+    {
+        return arr.end();
     }
 }
 
