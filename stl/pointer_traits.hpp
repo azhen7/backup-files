@@ -12,7 +12,7 @@ namespace std_copy
     template <class Ptr>
     class pointer_traits
     {
-        private:
+        protected:
             /**
              * _undefined: Replicates the behaviour of the value from other languages 
              * with "undefined" property such as "None" from Python and "undefined" from JS.
