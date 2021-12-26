@@ -4,6 +4,16 @@
 namespace std_copy
 {
     /**
+     * This function returns the actual address of an object referenced 
+     * by val, even in the presence of an overloaded operator&.
+     * @param f The object to return the actual address of.
+    */
+    template <class T>
+    T* addressof(T& f)
+    {
+        return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(f)));
+    }
+    /**
      * Constructs an object at a particular location in memory.
      * @param location The location to construct the object.
      * @param args The arguments forwarded to the object's constructor.
@@ -33,8 +43,8 @@ namespace std_copy
      * @param first An iterator to the start of the range to destroy.
      * @param last An iterator to the end of the range to destroy.
     */
-    template <class InputIt>
-    constexpr void destroy(InputIt first, InputIt last)
+    template <class InputIterator>
+    constexpr void destroy(InputIterator first, InputIterator last)
     {
         while (first != last)
         {
@@ -47,8 +57,8 @@ namespace std_copy
      * @param first An iterator to the start of the range to destroy.
      * @param n The number of elements after first to destroy.
     */
-    template <class InputIt, class Size>
-    constexpr void destroy_n(InputIt first, Size n)
+    template <class InputIterator, class Size>
+    constexpr void destroy_n(InputIterator first, Size n)
     {
         while (n > 0)
         {
@@ -56,16 +66,6 @@ namespace std_copy
             first++;
             n--;
         }
-    }
-    /**
-     * This function returns the actual address of an object referenced 
-     * by val, even in the presence of an overloaded operator&.
-     * @param f The object to return the actual address of.
-    */
-    template <class T>
-    T* addressof(T& f)
-    {
-        return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(f)));
     }
 }
 
