@@ -6,6 +6,7 @@
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
 #include "iterator_funcs.hpp"
+#include "iterator_adaptors.hpp"
 #include "char_traits.hpp"
 #include "algorithm.hpp"
 #include "uninitialized_algo.hpp"
@@ -61,6 +62,8 @@ namespace std_copy
             typedef const pointer                           const_pointer;
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_basic_string_type> iterator;
             typedef const iterator                          const_iterator;
+            typedef reverse_iterator<pointer>               reverse_iterator;
+            typedef const reverse_iterator                  const_reverse_iterator;
 
         protected:
             pointer _internalString;
@@ -177,17 +180,17 @@ namespace std_copy
                     count, ch);
             }
 
-            basic_string(pointer str, size_type count)
+            basic_string(const_pointer str, size_type count)
                 : _length(count)
             {
-               _allocate_and_move_str(_length - 1, allocator_type::allocate,
+                _allocate_and_move_str(_length - 1, allocator_type::allocate,
                     str, count);
             }
 
             basic_string(const _basic_string_type& s, size_type count)
             {
                 _length = (count > s._length) ? s._length : count;
-               _allocate_and_move_str(_length, allocator_type::allocate,
+                _allocate_and_move_str(_length, allocator_type::allocate,
                     s._internalString, _length);
             }
 
@@ -195,22 +198,21 @@ namespace std_copy
             {
                 size_type copyUpTo = (pos + count > s._length || count == npos) ? s._length : pos + count;
                 _length = copyUpTo - pos;
-               _allocate_and_move_str(_length, allocator_type::allocate,
+                _allocate_and_move_str(_length, allocator_type::allocate,
                     s._internalString + pos, _length);
             }
 
             basic_string(const _basic_string_type& s)
                 : _length(s._length)
             {
-               _allocate_and_move_str(_length, allocator_type::allocate,
+                _allocate_and_move_str(_length, allocator_type::allocate,
                     s._internalString, _length);
             }
 
             basic_string(_basic_string_type&& s)
-                : _length(s._length)
+                : _length(move(s._length)),
+                _internalString(move(s._internalString))
             {
-               _allocate_and_move_str(_length, allocator_type::allocate,
-                    s._internalString, _length);
             }
 
             template <class InputIterator>
@@ -222,6 +224,11 @@ namespace std_copy
             }
 
             basic_string(decltype(nullptr)) = delete;
+
+            ~basic_string()
+            {
+                allocator_type::deallocate(_internalString, _capacity);
+            }
 
             /**
              * Returns the length of the string.
@@ -297,6 +304,22 @@ namespace std_copy
             */
             constexpr const_iterator cend() const { return iterator(_internalString + _length); }
             /**
+             * Returns a reverse iterator to the reverse beginning of the string.
+            */
+            constexpr reverse_iterator rbegin() const { return reverse_iterator(_internalString + _length); }
+            /**
+             * Returns a reverse iterator to the reverse end of the string.
+            */
+            constexpr reverse_iterator rend() const { return reverse_iterator(_internalString); }
+            /**
+             * Returns a const reverse iterator to the reverse beginning of the string.
+            */
+            constexpr const_reverse_iterator crbegin() const { return reverse_iterator(_internalString + _length); }
+            /**
+             * Returns a const reverse iterator to the reverse end of the string.
+            */
+            constexpr const_reverse_iterator crend() const { return reverse_iterator(_internalString); }
+            /**
              * Returns a boolean indicating whether the string is empty.
             */
             constexpr bool empty() const { return _length == 0; }
@@ -369,15 +392,105 @@ namespace std_copy
              * first count characters starting from pos.
              * @param s The string object that gets appended.
              * @param pos The starting position from where to append.
-             * @param count How many places after the start position to end.
+             * @param count The number of characters after pos to append.
             */
-            constexpr _basic_string_type& append(const _basic_string_type& s, size_type pos, size_type count = npos)
+            constexpr _basic_string_type& append(const _basic_string_type& s, size_type pos = 0, size_type count = npos)
             {
                 _check_exception(pos, s._length, "basic_string::append: pos is greater than the length of s");
                 if (pos + count > s._length || count == npos)
                     count = s._length - pos;
                 
                 return this->append(s._internalString + pos, count);
+            }
+            /**
+             * Appends a rvalue reference'd basic_string object onto *this.
+             * @param s The object that gets appended.
+             * @param pos The starting position in obj from where to append.
+             * @param count The number of characters after pos to append.
+            */
+            constexpr _basic_string_type& append(_basic_string_type&& s, size_type pos = 0, size_type count = npos)
+            {
+                _check_exception(pos, s._length, "basic_string::append: pos is greater than the length of s");
+                if (pos + count > s._length || count == npos)
+                    count = s._length - pos;
+                
+                return this->append(move(s._internalString + pos), count);
+            }
+            /**
+             * Copies the contents of str to *this.
+             * @param str The basic_string object to copy from.
+            */
+            constexpr _basic_string_type& assign(const _basic_string_type& str)
+            {
+                this->assign(str, str._length);
+            }
+            /**
+             * Copies the first n characters of str to *this.
+             * @param str The basic_string object to copy from.
+             * @param count The number of characters to copy.
+            */
+            constexpr _basic_string_type& assign(const _basic_string_type& str, size_type count)
+            {
+                if (_length > count)
+                {
+                    traits_type::move(_internalString, str._internalString, count);
+                    _terminate_and_update_length(count);
+                    return *this;
+                }
+                else
+                {
+                    _length = count;
+                    _allocate_and_move_str(_length, allocator_type::allocate,
+                        str._internalString, _length);
+                }
+                return *this;
+            }
+            /**
+             * Copies the first n characters of str after pos.
+             * @param str The basic_string object to copy from.
+             * @param pos The number of characters to copy.
+             * @param count The number of characters after pos to copy.
+            */
+            constexpr _basic_string_type& assign(const _basic_string_type& str, size_type pos, size_type count)
+            {
+                return this->assign(str, 0, count);
+            }
+            /**
+             * Copies the first n characters of s.
+             * @param s The character sequence to copy from.
+             * @param count The number of characters to copy.
+            */
+            constexpr _basic_string_type assign(const_pointer s, size_type count)
+            {
+                if (_length > count)
+                {
+                    traits_type::move(_internalString, s, count);
+                    _terminate_and_update_length(count);
+                }
+                else
+                {
+                    _length = count;
+                    _allocate_and_move_str(_length, allocator_type::allocate,
+                        s, _length);
+                }
+                return *this;
+            }
+            /**
+             * Copies the character sequence s.
+             * @param s The character sequence to copy from.
+            */
+            constexpr _basic_string_type assign(const_pointer s)
+            {
+                return this->assign(s, traits_type::length(s));
+            }
+            /**
+             * Assigns *this count occurences of ch.
+            */
+            constexpr _basic_string_type assign(size_type count, const_reference ch)
+            {
+                _length = count;
+                _allocate_and_assign_str(_length, allocator_type::allocate,
+                    count, ch);
             }
             /**
              * Appends all the characters in the range [first, last) onto the end of the string.
@@ -387,7 +500,7 @@ namespace std_copy
             template <class InputIterator>
             constexpr _basic_string_type& append(InputIterator first, InputIterator last)
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+            requires input_iterator<InputIterator>
         #endif
             {
                 const difference_type dist = std_copy::distance(first, last);
@@ -913,7 +1026,7 @@ namespace std_copy
             template <class InputIterator>
             constexpr _basic_string_type& replace(iterator first, iterator last, InputIterator first2, InputIterator last2)
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+            requires input_iterator<InputIterator>
         #endif
             {
                 return this->replace(first - this->begin(), last - first, first2, last2);
@@ -928,7 +1041,7 @@ namespace std_copy
             template <class InputIterator>
             constexpr _basic_string_type& replace(size_type pos, size_type count, InputIterator first, InputIterator last)
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+            requires input_iterator<InputIterator>
         #endif
             {
                 _check_exception(pos, _length, "basic_string::replace: pos > size()");
@@ -1048,7 +1161,9 @@ namespace std_copy
             */
             constexpr void swap(_basic_string_type& other)
             {
-                std_copy::swap(_internalString, other._internalString);
+                _basic_string_type temp(*this);
+                
+
                 std_copy::swap(_length, other._length);
                 std_copy::swap(_capacity, other._capacity);
             }
@@ -1131,7 +1246,7 @@ namespace std_copy
             template <class InputIterator>
             constexpr size_type find(InputIterator first, InputIterator last, size_type pos = 0) const noexcept
         #if __cplusplus > 201703L
-            requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+            requires input_iterator<InputIterator>
         #endif
             {
                 pointer where = std_copy::search(_internalString + pos, _internalString + _length, first, last);
@@ -1469,18 +1584,15 @@ namespace std_copy
             /**
              * Removes all the occurrences of a character ch.
              * @param ch The character to remove.
-             * @returns The number of occurrences of ch.
             */
             constexpr size_type remove(const_reference ch)
             {
                 size_type numberOfOccurrences = 0;
                 #if __cplusplus >= 201103L
 
-                    pointer upTo = remove_if(_internalString, _internalString + _length, [&](const_reference c) {
-                        numberOfOccurrences += (traits_type::eq(c, ch)) ? 1 : 0;
-                        return traits_type::eq(c, ch);
-                    });
-                    _terminate_and_update_length(_length - (this->end() - upTo));
+                    pointer upTo = std_copy::remove(_internalString, _internalString + _length, ch);
+                    numberOfOccurrences = this->end() - upTo;
+                    _terminate_and_update_length(_length - numberOfOccurrences);
 
                 #else
 
@@ -1500,7 +1612,188 @@ namespace std_copy
 
                 return numberOfOccurrences;
             }
+            /**
+             * Removes all the occurrences of characters for which fn returns true.
+             * @param fn The character to remove.
+            */
+            template <class Function>
+            constexpr size_type remove_if(Function fn)
+            {
+                size_type numberOfOccurrences = 0;
+                #if __cplusplus >= 201103L
+
+                    pointer upTo = std_copy::remove_if(_internalString, _internalString + _length, fn);
+                    numberOfOccurrences = size_type(this->end() - upTo);
+                    _terminate_and_update_length(_length - numberOfOccurrences);
+
+                #else
+
+                    for (size_type i = 0, where = 0; i < _length; i++)
+                    {
+                        if (!fn(_internalString[i]))
+                        {
+                            traits_type::assign(_internalString[where], _internalString[i]);
+                            where++;
+                        }
+                        else
+                            numberOfOccurrences++;
+                    }
+                    _terminate_and_update_length(_length - numberOfOccurrences);
+
+                #endif
+
+                return numberOfOccurrences;
+            }
     };
+    /**
+     * Appends two basic_string objects.
+     * @param first The first basic_string object.
+     * @param second The second basic_string object.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+                                                 const basic_string<CharT, Traits, Alloc>& second)
+    {
+        basic_string<CharT, Traits, Alloc> ret(first);
+        ret += second;
+        return ret;
+    }
+    /**
+     * Appends a character sequence onto a basic_string object.
+     * @param first The basic_string object.
+     * @param second The character sequence to append.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+                                                 const CharT* second)
+    {
+        basic_string<CharT, Traits, Alloc> ret(first);
+        ret += second;
+        return ret;
+    }
+    /**
+     * Appends a character onto a basic_string object.
+     * @param first The basic_string object.
+     * @param ch The character to append.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+                                                           CharT ch)
+    {
+        basic_string<CharT, Traits, Alloc> ret(first);
+        ret += ch;
+        return ret;
+    }
+    /**
+     * Appends a basic_string object onto a character sequence.
+     * @param first The character sequence.
+     * @param second The basic_string object to append.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(const CharT* first,
+                                                           const basic_string<CharT, Traits, Alloc>& second)
+    {
+        basic_string<CharT, Traits, Alloc> ret(first);
+        ret += second;
+        return ret;
+    }
+    /**
+     * Appends a basic_string object onto a basic_string object.
+     * @param first The character.
+     * @param second The basic_string object.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(CharT first,
+                                                           const basic_string<CharT, Traits, Alloc>& second)
+    {
+        basic_string<CharT, Traits, Alloc> ret(1, first);
+        ret += second;
+        return ret;
+    }
+    /**
+     * Appends a rvalue reference'd basic_string object onto another rvalue-reference'd 
+     * basic_string object.
+     * @param first The first rvalue reference'd basic_string object.
+     * @param second The second rvalue reference'd basic_string object.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+                                                           basic_string<CharT, Traits, Alloc>&& second)
+    {
+        return first.append(second);
+    }
+    /**
+     * Appends a character sequence onto a rvalue-reference'd basic_string object.
+     * @param first The rvalue-reference'd basic_string object.
+     * @param second The character sequence to append.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+                                                           const CharT* second)
+    {
+        return first.append(second);
+    }
+    /**
+     * Appends a character onto a rvalue-reference'd basic_string object.
+     * @param first The rvalue-reference'd basic_string object.
+     * @param ch The character to append.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+                                                           CharT ch)
+    {
+        return first.append(1, ch);
+    }
+    /**
+     * Appends a rvalue reference'd basic_string object onto a basic_string object.
+     * @param first The basic_string object.
+     * @param second The rvalue reference'd basic_string object.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+                                                           basic_string<CharT, Traits, Alloc>&& second)
+    {
+        basic_string<CharT, Traits, Alloc> ret(first);
+        ret.append(move(second));
+        return ret;
+    }
+    /**
+     * Appends a basic_string object onto a rvalue reference'd basic_string object.
+     * @param first The rvalue reference'd basic_string object.
+     * @param second The basic_string object.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+                                                           const basic_string<CharT, Traits, Alloc>& second)
+    {
+        return first.append(second);
+    }
+    /**
+     * Appends a rvalue-reference'd basic_string object onto a character sequence.
+     * @param first The character sequence.
+     * @param second The rvalue-reference'd basic_string object;
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(const CharT* first,
+                                                           basic_string<CharT, Traits, Alloc>&& second)
+    {
+        basic_string<CharT, Traits, Alloc> ret(first);
+        ret.append(move(second));
+        return ret;
+    }
+    /**
+     * Appends a rvalue-reference'd basic_string object onto a character.
+     * @param first The character.
+     * @param second The rvalue-reference'd basic_string object.
+    */
+    template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
+    constexpr basic_string<CharT, Traits, Alloc> operator+(CharT first,
+                                                           basic_string<CharT, Traits, Alloc>&& second)
+    {
+        basic_string<CharT, Traits, Alloc> ret(1, first);
+        ret.append(move(second));
+        return ret;
+    }
 
     /**
      * Gets the Nth element from str. N is a template parameter.
@@ -1539,6 +1832,42 @@ namespace std_copy
     auto end(const basic_string<CharT, CharTraits, Alloc>& str) -> decltype(str.end())
     {
         return str.end();
+    }
+    /**
+     * Swaps two basic_string objects.
+     * @param s1 The first basic_string object.
+     * @param s2 The second basic_string object.
+    */
+    template <class CharT, class CharTraits, class Alloc>
+    constexpr void swap(basic_string<CharT, CharTraits, Alloc>& s1, basic_string<CharT, CharTraits, Alloc>& s2)
+    {
+        s1.swap(s2);
+    }
+    /**
+     * Removes all characters equal to ch in str.
+     * @param str The basic_string object.
+     * @param ch The element of which all occurrences in str will be erased.
+    */
+    template <class CharT, class CharTraits, class Alloc, class U>
+    constexpr std::size_t erase(basic_string<CharT, CharTraits, Alloc>& str, const U& ch)
+    {
+        auto it = std_copy::remove(str.begin(), str.end(), ch);
+        std::size_t numberErased = std::distance(it, str.end());
+        str.erase(it, str.end());
+        return numberErased;
+    }
+    /**
+     * Removes all characters for which fn equals true in str.
+     * @param str The basic_string object.
+     * @param fn The function used to determine which elements to erase.
+    */
+    template <class CharT, class CharTraits, class Alloc, class Function>
+    constexpr std::size_t erase_if(basic_string<CharT, CharTraits, Alloc>& str, Function fn)
+    {
+        auto it = std_copy::remove_if(str.begin(), str.end(), fn);
+        std::size_t numberErased = std::distance(it, str.end());
+        str.erase(it, str.end());
+        return numberErased;
     }
 
     typedef basic_string<char>      string;

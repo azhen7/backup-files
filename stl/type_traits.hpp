@@ -377,6 +377,22 @@ namespace std_copy
     //is_null_pointer
     template <class T>
     struct is_null_pointer : is_same<decltype(nullptr), remove_cv_t<T>> {};
+    template <class T>
+    constexpr bool is_null_pointer_v = is_null_pointer<T>::value;
+
+    //is_pointer
+    template <class T>
+    struct is_pointer : false_type {};
+    template <class T>
+    struct is_pointer<T*> : true_type {};
+    template <class T>
+    struct is_pointer<const T> : is_pointer<T> {};
+    template <class T>
+    struct is_pointer<volatile T> : is_pointer<T> {};
+    template <class T>
+    struct is_pointer<const volatile T> : is_pointer<T> {};
+    template <class T>
+    constexpr bool is_pointer_v = is_pointer<T>::value;
 
     //is_arithmetic
     template <class T>

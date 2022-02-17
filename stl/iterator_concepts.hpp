@@ -1,8 +1,11 @@
 #ifndef _STD_COPY_ITERATOR_CONCEPTS
 #define _STD_COPY_ITERATOR_CONCEPTS
 
+#if __cplusplus > 201703L
+
 #include "concepts.hpp"
 #include "type_traits.hpp"
+#include "iterator_traits.hpp"
 
 namespace std_copy
 {
@@ -60,6 +63,17 @@ namespace std_copy
     {
         using value_type = remove_cv_t<typename T::value_type>;
     };
+
+    //weakly_incrementable
+    template <class Iterator>
+    concept weakly_incrementable =
+    requires(Iterator i)
+    {
+        typename Iterator::difference_type;
+        {++i} -> std_copy::same_as<Iterator&>;
+        i++;
+    };
 }
+#endif
 
 #endif /* _STD_COPY_ITERATOR_CONCEPTS */

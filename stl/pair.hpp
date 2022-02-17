@@ -1,6 +1,8 @@
 #ifndef _STD_COPY_PAIR
 #define _STD_COPY_PAIR
 
+#include "move.hpp"
+
 namespace std_copy
 {
     /**
@@ -12,7 +14,7 @@ namespace std_copy
     class pair
     {
         protected:
-            typedef pair<T1, T2>    pair_type;
+            typedef pair<T1, T2>    _pair_type;
 
         public:
             typedef T1  first_type;
@@ -36,7 +38,7 @@ namespace std_copy
              * This function constructs a pair from the given pair.
              * @param p The pair used to construct the current pair object.
             */
-            pair(const pair_type& p)
+            pair(const _pair_type& p)
                 : first(p.first),
                 second(p.second)
             {
@@ -46,23 +48,23 @@ namespace std_copy
              * reference pair.
              * @param p The pair used to construct the current pair object.
             */
-            pair(pair_type&& p)
+            pair(_pair_type&& p)
                 : first(p.first),
                 second(p.second)
             {
             }
 
-            void swap(const pair_type& p)
+            void swap(const _pair_type& p)
             {
-                first_type temp = first;
-                first = p.first;
-                p.first = temp;
+                first_type temp = std_copy::move(first);
+                first = std_copy::move(p.first);
+                p.first = std_copy::move(temp);
 
-                second_type temp2 = second;
-                second = p.second;
-                p.second = temp2;
+                second_type temp2 = std_copy::move(second);
+                second = std_copy::move(p.second);
+                p.second = std_copy::move(temp2);
             }
-            const pair_type& operator=(const pair_type& toAssign)
+            const _pair_type& operator=(const _pair_type& toAssign)
             {
                 first = std_copy::move(toAssign.first);
                 second = std_copy::move(toAssign.second);

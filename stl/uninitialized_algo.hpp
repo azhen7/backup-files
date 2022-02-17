@@ -20,8 +20,8 @@ namespace std_copy
     template <class InputIterator, class ForwardIterator>
     ForwardIterator uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result_first)
 #if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<ForwardIterator>
+    requires input_iterator<InputIterator>
+    && input_iterator<ForwardIterator>
 #endif
     {
         using T = typename iterator_traits<ForwardIterator>::value_type;
@@ -52,8 +52,8 @@ namespace std_copy
     ForwardIterator uninitialized_copy_n(InputIterator first, Size n, ForwardIterator result_first)
 #if __cplusplus > 201703L
     requires integral<Size>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<ForwardIterator>
+    && input_iterator<InputIterator>
+    && input_iterator<ForwardIterator>
 #endif
     {
         using T = typename iterator_traits<ForwardIterator>::value_type;
@@ -83,7 +83,7 @@ namespace std_copy
     template <class InputIterator, class T>
     void uninitialized_fill(InputIterator first, InputIterator last, const T& val)
 #if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    requires input_iterator<InputIterator>
 #endif
     {
         using Type = typename iterator_traits<InputIterator>::value_type;
@@ -112,7 +112,7 @@ namespace std_copy
     void uninitiialized_fill_n(InputIterator first, Size n, const T& val)
 #if __cplusplus > 201703L
     requires integral<Size>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    && input_iterator<InputIterator>
 #endif
     {
         using Type = typename iterator_traits<InputIterator>::value_type;
@@ -141,8 +141,8 @@ namespace std_copy
     template <class InputIterator, class ForwardIterator>
     ForwardIterator uninitialized_move(InputIterator first, InputIterator last, ForwardIterator result_first)
 #if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<ForwardIterator>
+    requires input_iterator<InputIterator>
+    && input_iterator<ForwardIterator>
 #endif
     {
         using T = typename iterator_traits<ForwardIterator>::value_type;
@@ -164,6 +164,33 @@ namespace std_copy
         return result_first;
     }
     /**
+     * Moves the range [first, last) to the uninitialized range ending at result_last in reverse order.
+     * @param first An iterator to the start of the range to move.
+     * @param last An iterator to the end of the range to move.
+     * @param result_last An iterator to the start of the range to move to.
+    */
+    template <class InputIt, class ForwardIt>
+    constexpr ForwardIt uninitialized_move_backward(InputIt first, InputIt last, ForwardIt result_last)
+    {
+        using T = typename iterator_traits<ForwardIt>::value_type;
+        ForwardIt temp = result_last;
+        try
+        {
+            while (first != last)
+            {
+                result_last--;
+                last--;
+                _uninitialized_algo_construct_obj(T, *result_last, move(*last));
+            }
+        }
+        catch(...)
+        {
+            destroy(result_last, temp);
+            throw;
+        }
+        return result_last;
+    }
+    /**
      * Moves the first n elements starting from first to the uninitialized range starting at result_first.
      * @param first An iterator to the start of the range to move.
      * @param n The number of elements after first to move.
@@ -172,8 +199,8 @@ namespace std_copy
     template <class InputIterator, class Size, class ForwardIterator>
     ForwardIterator uninitialized_move_n(InputIterator first, Size n, ForwardIterator result_first)
 #if __cplusplus > 201703L
-    requires integral<Size> && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<ForwardIterator>
+    requires integral<Size> && input_iterator<InputIterator>
+    && input_iterator<ForwardIterator>
 #endif
     {
         using T = typename iterator_traits<ForwardIterator>::value_type;
@@ -202,7 +229,7 @@ namespace std_copy
     template <class InputIterator>
     void uninitialized_default_constructed(InputIterator first, InputIterator last)
 #if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    requires input_iterator<InputIterator>
 #endif
     {
         using T = typename iterator_traits<InputIterator>::value_type;
@@ -229,7 +256,7 @@ namespace std_copy
     template <class InputIterator, class Size>
     void uninitialized_default_constructed_n(InputIterator first, Size n)
 #if __cplusplus > 201703L
-    requires integral<Size> && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    requires integral<Size> && input_iterator<InputIterator>
 #endif
     {
         using T = typename iterator_traits<InputIterator>::value_type;
@@ -257,7 +284,7 @@ namespace std_copy
     template <class InputIterator, class T>
     void uninitialized_value_construct(InputIterator first, InputIterator last)
 #if __cplusplus > 201703L
-    requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    requires input_iterator<InputIterator>
 #endif
     {
         using Type = typename iterator_traits<InputIterator>::value_type;
@@ -285,7 +312,7 @@ namespace std_copy
     void uninitialized_value_construct_n(InputIterator first, Size n)
 #if __cplusplus > 201703L
     requires integral<Size>
-    && _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    && input_iterator<InputIterator>
 #endif
     {
         using T = typename iterator_traits<InputIterator>::value_type;

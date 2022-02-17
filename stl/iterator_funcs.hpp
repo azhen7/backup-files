@@ -3,6 +3,7 @@
 
 #include "iterator_traits.hpp"
 #include <cstdint>
+#include <stdexcept>
 
 namespace _std_copy_hidden
 {
@@ -179,6 +180,13 @@ namespace _std_copy_hidden
                     return !_internalPtr;
                 }
         };
+        template <class Size>
+        Size _abs(Size n)
+        {
+            if (n < 0)
+                return -1 * n;
+            return n;
+        }
     }
 }
 
@@ -191,18 +199,25 @@ namespace std_copy
      * @param n The number to advance the iterator by.
     */
     template <class InputIterator>
-    void advance(InputIterator& it, std::size_t n = 1)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    constexpr void advance(InputIterator& it, std::ptrdiff_t n = 1)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIterator>
+#endif
     {
-        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
+        using _iter_category = typename std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
         
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             it += n;
         else
         {
-            for (std::size_t i = 0; i < n; i++)
+            if (n == 1)
                 it++;
+            else
+            {
+                for (std::size_t i = 0; i < _std_copy_hidden::_std_copy_stl_containers::_abs(n); i++)
+                    it += 1 - 2 * (n < 0);
+            }
         }
     }
     /**
@@ -212,17 +227,25 @@ namespace std_copy
      * @param second The second iterator.
     */
     template <class InputIterator>
-    long long distance(InputIterator start, InputIterator last)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    constexpr std::size_t distance(InputIterator start, InputIterator last)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIterator>
+#endif
     {
         using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             return last - start;
-        long long n = 0;
-        while (start++ != last)
+        
+        std::size_t n = 0;
+        while (start != last)
+        {
+            if (n == std::size_t(-1))
+                throw std::length_error("Range is too long");
             n++;
+            start++;
+        }
         return n;
         
     }
@@ -233,8 +256,10 @@ namespace std_copy
      * @param n The amount to add to the iterator.
     */
     template <class InputIterator>
-    InputIterator next(InputIterator it, std::size_t n)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>
+    constexpr InputIterator next(InputIterator it, std::ptrdiff_t n)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIterator>
+#endif
     {
         using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
@@ -242,8 +267,8 @@ namespace std_copy
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             return it + n;
         
-        for (unsigned int i = 0; i < n; i++)
-            it++;
+        for (std::size_t i = 0; i < _std_copy_hidden::_std_copy_stl_containers::_abs(n); i++)
+            it += 1 - 2 * (n < 0);
         return it;
     }
     /**
@@ -253,8 +278,10 @@ namespace std_copy
      * @param n The amount to subtract from the iterator.
     */
     template <class InputIterator>
-    InputIterator prev(InputIterator it, std::size_t n)
-        requires _std_copy_hidden::_std_copy_iterator_traits::_is_bidirectional_iterator<InputIterator>
+    constexpr InputIterator prev(InputIterator it, std::ptrdiff_t n = 1)
+#if __cplusplus > 201703L
+    requires bidirectional_iterator<InputIterator>
+#endif
     {
         using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
@@ -262,8 +289,8 @@ namespace std_copy
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             return it - n;
         
-        for (unsigned int i = 0; i < n; i++)
-            it--;
+        for (std::size_t i = 0; i < _std_copy_hidden::_std_copy_stl_containers::_abs(n); i++)
+            it += 1 - 2 * (n > 0);
         return it;
     }
 }

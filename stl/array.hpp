@@ -59,9 +59,9 @@ namespace std_copy
             }
 
             array(_array_type&& copy)
-                : _numberOfElements(move(copy._numberOfElements))
+                : _numberOfElements(move(copy._numberOfElements)),
+                _internalBuffer(move(copy._internalBuffer))
             {
-                std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
             template <std::size_t Size>
@@ -78,7 +78,7 @@ namespace std_copy
              * Assigns one array to another.
              * @param assign The array to get assigned.
             */
-            void operator=(const _array_type& assign)
+            constexpr void operator=(const _array_type& assign)
             {
                 for (int i = 0; i < _size; i++)
                     _internalBuffer[i] = assign._internalBuffer[i];
@@ -88,7 +88,7 @@ namespace std_copy
              * designated value.
              * @param val The value used to fill the array.
             */
-            void fill(const_reference val)
+            constexpr void fill(const_reference val)
             {
                 std_copy::fill_n(_internalBuffer, _size, val);
             }
@@ -96,7 +96,7 @@ namespace std_copy
              * This function returns the number of elements
              * in the array. This function is new.
             */
-            size_type quantity() const noexcept
+            constexpr size_type quantity() const noexcept
             {
                 return _numberOfElements;
             }
@@ -104,15 +104,15 @@ namespace std_copy
              * This function returns the underlying
              * internal buffer of the array.
             */
-            pointer data() const noexcept
+            constexpr pointer data() const noexcept
             {
                 return _internalBuffer;
             }
             /**
              * Returns C-style array used as underlying buffer 
-             * of the array.
+             * of the object.
             */
-            pointer c_array() const noexcept
+            constexpr pointer c_array() const noexcept
             {
                 return _internalBuffer;
             }
@@ -122,7 +122,7 @@ namespace std_copy
              * whether there are no elements in the array.
              * This function is new.
             */
-            bool empty() const noexcept
+            constexpr bool empty() const noexcept
             {
                 return _numberOfElements == 0;
             }
@@ -130,7 +130,7 @@ namespace std_copy
              * This function returns the size of the
              * array.
             */
-            size_type size() const noexcept
+            constexpr size_type size() const noexcept
             {
                 return _size;
             }
@@ -138,7 +138,7 @@ namespace std_copy
              * This function returns an iterator to the first element 
              * in the array container.
             */
-            iterator begin() const noexcept
+            constexpr iterator begin() const noexcept
             {
                 return iterator(_internalBuffer);
             }
@@ -146,7 +146,7 @@ namespace std_copy
              * This function returns an iterator to the theoretical element 
              * after the last element in the array container.
             */
-            const_iterator end() const noexcept
+            constexpr iterator end() const noexcept
             {
                 return iterator(_internalBuffer + _numberOfElements);
             }
@@ -154,7 +154,7 @@ namespace std_copy
              * This function returns an const iterator to the first element 
              * in the array container.
             */
-            const_iterator cbegin() const noexcept
+            constexpr const_iterator cbegin() const noexcept
             {
                 return iterator(_internalBuffer);
             }
@@ -162,7 +162,7 @@ namespace std_copy
              * This function returns an const iterator to the theoretical element 
              * after the last element in the array container.
             */
-            iterator cend() const noexcept
+            constexpr const_iterator cend() const noexcept
             {
                 return iterator(_internalBuffer + _numberOfElements);
             }
@@ -172,7 +172,7 @@ namespace std_copy
              * the vector.
              * @param index The index of the element to retrieve.
             */
-            reference at(size_type index) const
+            constexpr reference at(size_type index) const
             {
                 if (index >= _numberOfElements)
                 {
@@ -181,49 +181,40 @@ namespace std_copy
 
                     throw std::out_of_range(err);
                 }
-                return *(_internalBuffer + index);
+                return const_cast<reference>(_internalBuffer[index]);
             }
             /**
              * operator[] is overloaded to provide C-style array
              * indexing.
              * @param index The index of the element to retrieve.
             */
-            reference operator[](size_type index) const noexcept
+            constexpr reference operator[](size_type index) const noexcept
             {
-                return _internalBuffer[index];
+                return const_cast<reference>(_internalBuffer[index]);
             }
             /**
              * This function returns a reference to the
-             * first element in the array. If the vector
-             * is empty, this function throws an exception.
+             * first element in the array.
             */
-            reference front() const
+            constexpr reference front() const
             {
-                if (_numberOfElements == 0)
-                    throw std::length_error("Cannot access element in empty array");
-
                 return _internalBuffer[0];
             }
             /**
              * This function returns a reference to the
-             * last element in the array. If the vector 
-             * is empty, this function throws an exception.
+             * last element in the array.
             */
-            reference back() const
+            constexpr reference back() const
             {
-                if (_numberOfElements == 0)
-                    throw std::length_error("Cannot access element in empty array");
-
                 return _internalBuffer[_numberOfElements - 1];
             }
             /**
              * This function swaps the contents of *this and toSwap.
              * @param toSwap The array to swap the contents with.
             */
-            void swap(const _array_type& toSwap)
+            constexpr void swap(const _array_type& toSwap)
             {
-                std_copy::swap(_internalBuffer, s._internalBuffer);
-                std_copy::swap(_numberOfElements, s._numberOfElements);
+                std_copy::swap_ranges(this->begin().data(), this->end().data(), toSwap._internalBuffer);
             }
     };
 
@@ -233,7 +224,7 @@ namespace std_copy
      * @param rhs The second array.
     */
     template <class T, std::size_t N>
-    void swap(const array<T, N>& lhs, const array<T, N>& rhs)
+    constexpr void swap(array<T, N>& lhs, array<T, N>& rhs)
     {
         lhs.swap(rhs);
     }

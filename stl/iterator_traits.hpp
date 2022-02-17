@@ -101,6 +101,37 @@ namespace _std_copy_hidden
         };
     }
 }
+
+namespace std_copy
+{
+    template <class InputOrOutpuIterator>
+    concept input_or_output_iterator = std_copy::weakly_incrementable<InputOrOutpuIterator> &&
+    requires(InputOrOutpuIterator i)
+    {
+        {*i};
+    };
+
+    template <class InputIterator>
+    concept input_iterator = _std_copy_hidden::_std_copy_iterator_traits::_is_input_iterator<InputIterator>;
+
+    template <class OutputIterator>
+    concept output_iterator = _std_copy_hidden::_std_copy_iterator_traits::_is_output_iterator<OutputIterator>;
+
+    template <class BidirectionalIterator>
+    concept bidirectional_iterator = _std_copy_hidden::_std_copy_iterator_traits::_is_bidirectional_iterator<BidirectionalIterator>;
+
+    template <class RandomAccessIterator>
+    concept random_access_iterator = bidirectional_iterator<RandomAccessIterator> &&
+    requires(RandomAccessIterator it, const RandomAccessIterator constIt, typename iterator_traits<RandomAccessIterator>::difference_type n)
+    {
+        {it += n} -> std_copy::same_as<RandomAccessIterator&>;
+        {constIt + n} -> std_copy::same_as<RandomAccessIterator>;
+        {n + constIt} -> std_copy::same_as<RandomAccessIterator>;
+        {it -= n} -> std_copy::same_as<RandomAccessIterator&>;
+        {constIt - n} -> std_copy::same_as<RandomAccessIterator>;
+        {constIt[n]} -> std_copy::same_as<typename iterator_traits<RandomAccessIterator>::reference>;
+    };
+}
 #endif
 
 #endif
