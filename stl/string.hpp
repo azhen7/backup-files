@@ -59,7 +59,7 @@ namespace std_copy
             typedef CharacterType&                          reference;
             typedef const CharacterType&                    const_reference;
             typedef _alloc_traits::pointer                  pointer;
-            typedef const pointer                           const_pointer;
+            typedef const _alloc_traits::pointer            const_pointer;
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_basic_string_type> iterator;
             typedef const iterator                          const_iterator;
             typedef reverse_iterator<pointer>               reverse_iterator;
@@ -1082,7 +1082,7 @@ namespace std_copy
                 return *this;
             }
             /**
-             * Replaces the substring [pos, pos + count) with count elements of value ch.
+             * Replaces the substring [pos, pos + count) with count2 elements of value ch.
              * @param pos The index to start replacing from.
              * @param count The number of characters after pos to replace.
              * @param count2 The number of elements to replace the range with.

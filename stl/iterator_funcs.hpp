@@ -4,6 +4,7 @@
 #include "iterator_traits.hpp"
 #include <cstdint>
 #include <stdexcept>
+#include <cmath>
 
 namespace _std_copy_hidden
 {
@@ -180,13 +181,6 @@ namespace _std_copy_hidden
                     return !_internalPtr;
                 }
         };
-        template <class Size>
-        Size _abs(Size n)
-        {
-            if (n < 0)
-                return -1 * n;
-            return n;
-        }
     }
 }
 
@@ -215,8 +209,13 @@ namespace std_copy
                 it++;
             else
             {
-                for (std::size_t i = 0; i < _std_copy_hidden::_std_copy_stl_containers::_abs(n); i++)
-                    it += 1 - 2 * (n < 0);
+                for (std::size_t i = 0; i < std::abs(n); i++)
+                {
+                    if (n < 0)
+                        it--;
+                    else if (n > 0)
+                        it++;
+                }
             }
         }
     }
@@ -267,8 +266,13 @@ namespace std_copy
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             return it + n;
         
-        for (std::size_t i = 0; i < _std_copy_hidden::_std_copy_stl_containers::_abs(n); i++)
-            it += 1 - 2 * (n < 0);
+        for (std::size_t i = 0; i < std::abs(n); i++)
+        {
+            if (n < 0)
+                it--;
+            else if (n > 0)
+                it++;
+        }
         return it;
     }
     /**
@@ -288,10 +292,32 @@ namespace std_copy
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             return it - n;
-        
-        for (std::size_t i = 0; i < _std_copy_hidden::_std_copy_stl_containers::_abs(n); i++)
-            it += 1 - 2 * (n > 0);
+        for (std::size_t i = 0; i < std::abs(n); i++)
+        {
+            if (n < 0)
+                it--;
+            else if (n > 0)
+                it++;
+        }
         return it;
+    }
+    /**
+     * Returns a pointer to the beginning of a C-style array.
+     * @param arr The array.
+    */
+    template <class T, std::size_t N>
+    T* begin(T (&arr)[N])
+    {
+        return arr;
+    }
+    /**
+     * Returns a pointer to the end of a C-style array.
+     * @param arr The array.
+    */
+    template <class T, std::size_t N>
+    T* end(T (&arr)[N])
+    {
+        return arr + N;
     }
 }
 

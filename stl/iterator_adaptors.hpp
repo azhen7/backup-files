@@ -366,7 +366,9 @@ namespace std_copy
             //Set new container
             constexpr _self_type& set_container(container_type& c)
             {
+                difference_type dist = std_copy::distance(std_copy::begin(c), _pos);
                 _current = std_copy::addressof(c);
+                _pos = std_copy::next(std::begin(c), dist);
                 return *this;
             }
 

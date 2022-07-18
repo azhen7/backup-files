@@ -348,9 +348,10 @@ namespace std_copy
              * @param args The elements to construct in place.
             */
             template <class ...Args>
-            constexpr iterator emplace_back(Args&&... args)
+            constexpr reference emplace_back(Args&&... args)
             {
-                return this->emplace(this->end(), forward<Args>(args)...);
+                this->emplace(this->end(), forward<Args>(args)...);
+                return this->back();
             }
             /**
              * This function returns a reference to 

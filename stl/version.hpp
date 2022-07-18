@@ -32,5 +32,6 @@
 #define std_copy_random                         202112L
 #define std_copy_equation                       202112L
 #define std_copy_iterator_adaptors              202201L
+#define std_copy_list                           202201L
 
 #endif /* _STD_COPY_VERSION */

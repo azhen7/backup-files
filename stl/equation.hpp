@@ -73,37 +73,6 @@ namespace std_copy
                 return ret;
             }
 
-            std::string get_equation(std::string beginning = "f(x) = ")
-            {
-                std::string ret(beginning);
-                bool has_elem_printed = false;
-
-                for (_long_long_type i = 0; i < DegreeOfEquation + 1; i++)
-                {
-                    if (_coefficients[i] == 0)
-                        continue;
-                    else if (i > 0 && has_elem_printed)
-                    {
-                        if (_coefficients[i] > 0)
-                            ret += "+ ";
-                        else
-                            ret += "- ";
-                    }
-                    has_elem_printed = true;
-                    
-                    if (_coefficients[i] != 1)
-                        ret += std::to_string(_coefficients[i]);
-                    if (DegreeOfEquation > i)
-                    {
-                        ret += "x";
-                        if (DegreeOfEquation - i > 1)
-                            ret.append(std::string("^") + std::to_string(DegreeOfEquation - i));
-                        ret += " ";
-                    }
-                }
-                return ret;
-            }
-
             _equation_type change_coefficient(_long_long_type term, _long_long_type newCoef)
             {
                 _coefficients[term - 1] = newCoef;
@@ -164,6 +133,12 @@ namespace std_copy
                 return equation<DegreeOfEquation - 1>(newCoefs);
             }
     };
+
+    template <unsigned long long N>
+    std::string to_string(equation<N> e)
+    {
+        //tbd
+    }
 }
 
 #endif /* _STD_COPY_EQUATION */
