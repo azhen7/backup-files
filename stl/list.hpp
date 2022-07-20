@@ -8,12 +8,185 @@
 #include "iterator_adaptors.hpp"
 #include "move.hpp"
 #include <cstdint>
+#include <stdexcept>
 
 #define _DEBUG 1
 
 #if _DEBUG
-#   include <iostream>
+#include <iostream>
+#include <list>
 #endif
+
+namespace _std_copy_hidden
+{
+    namespace _std_copy_list
+    {
+        template <class _Type>
+        struct _node
+        {
+            private:
+                typedef _node<_Type> _self_type;
+
+            public:
+                _self_type *_next;
+                _self_type *_prev;
+
+                _Type _value;
+
+                void _init(_self_type *p, _self_type *n, const _Type &val)
+                {
+                    _prev = p;
+                    _next = n;
+                    _value = val;
+                }
+        };
+
+
+        template <class _T>
+        struct _node_iterator
+        {
+            private:
+                typedef _node<_T> _node_type;
+                typedef _node_iterator<_T> _self_type;
+                _node_type* _curr;
+                _node_type* _prev{nullptr};
+
+            public:
+                typedef std::ptrdiff_t difference_type;
+                typedef std_copy::bidirectional_iterator_tag iterator_category;
+                typedef _T value_type;
+                typedef _T& reference;
+                typedef _T* pointer;
+
+                _node_iterator(_node_type* e, _node_type* _prev_if_needed = nullptr)
+                    : _curr(e)
+                {
+                    if (_prev_if_needed && e == nullptr)
+                    {
+                        _prev = _prev_if_needed;
+                    }
+                }
+
+                _self_type operator++()
+                {
+                    if (!_curr) return *this;
+
+                    _curr = _curr->_next;
+                    return *this;
+                }
+                _self_type operator++(int)
+                {
+                    if (!_curr) return *this;
+
+                    _self_type temp = *this;
+                    _curr = _curr->_next;
+                    return temp;
+                }
+                _self_type operator--()
+                {
+                    if (!_curr) return _prev;
+
+                    _curr = _curr->_prev;
+                    return *this;
+                }
+                _self_type operator--(int)
+                {
+                    if (!_curr) return _prev;
+
+                    _self_type temp = *this;
+                    _curr = _curr->_prev;
+                    return temp;
+                }
+                _T& operator*()
+                {
+                    if (!_curr) throw std::bad_alloc();
+
+                    return _curr->_value;
+                }
+                _node_type* base()
+                {
+                    return _curr;
+                }
+                void operator=(const _self_type& l)
+                {
+                    _curr = l._curr;
+                }
+                bool operator==(const _self_type& l)
+                {
+                    return _curr == l._curr;
+                }
+                bool operator!=(const _self_type& l)
+                {
+                    return !(*this == l);
+                }
+        };
+
+
+        template <class _Type>
+        struct _const_node_iterator
+        {
+            private:
+                typedef const _node<_Type> _node_type;
+                typedef _const_node_iterator<_Type> _self_type;
+                const _node_type* _curr;
+
+            public:
+                typedef std::ptrdiff_t difference_type;
+                typedef std_copy::bidirectional_iterator_tag iterator_category;
+                typedef _Type value_type;
+                typedef const _Type &reference;
+                typedef const _Type *pointer;
+
+                _const_node_iterator(_node_type *e)
+                    : _curr(e)
+                {
+                }
+
+                _self_type operator++()
+                {
+                    _curr = _curr->_next;
+                    return *this;
+                }
+                _self_type operator++(int)
+                {
+                    _self_type temp = *this;
+                    _curr = _curr->_next;
+                    return temp;
+                }
+                _self_type operator--()
+                {
+                    _curr = _curr->_prev;
+                    return *this;
+                }
+                _self_type operator--(int)
+                {
+                    _self_type temp = *this;
+                    _curr = _curr->_prev;
+                    return temp;
+                }
+                _Type& operator*()
+                {
+                    return _curr->_value;
+                }
+                _node_type* base()
+                {
+                    return _curr;
+                }
+                void operator=(const _node_iterator<_Type> &l)
+                {
+                    _curr = l._curr;
+                }
+                bool operator==(const _node_iterator<_Type> &l)
+                {
+                    return _curr == l._curr;
+                }
+                bool operator!=(const _node_iterator<_Type> &l)
+                {
+                    return !(*this == l);
+                }
+        };
+    }
+};
 
 namespace std_copy
 {
@@ -21,176 +194,30 @@ namespace std_copy
     class list
     {
         private:
-            template <class _Type>
-            struct _node
-            {
-                private:
-                    typedef _node<_Type>        _self_type;
-
-                public:
-                    _self_type* _next;
-                    _self_type* _prev;
-
-                    _Type _value;
-
-                    void _init(_self_type* p, _self_type* n, const _Type& val)
-                    {
-                        _prev = p;
-                        _next = n;
-                        _value = val;
-                    }
-            };
-
-            template <class _T>
-            struct _node_iterator
-            {
-                private:
-                    typedef _node<_T>    _node_type;
-                    typedef _node_iterator<_T> _self_type;
-                    _node_type* _curr;
-
-                public:
-                    typedef std::ptrdiff_t              difference_type;
-                    typedef bidirectional_iterator_tag  iterator_category;
-                    typedef _T                          value_type;
-                    typedef _T&                         reference;
-                    typedef _T*                         pointer;
-
-                    _node_iterator(_node_type* e)
-                        : _curr(e)
-                    {}
-
-                    _self_type operator++()
-                    {
-                        _curr = _curr->_next;
-                        return *this;
-                    }
-                    _self_type operator++(int)
-                    {
-                        _self_type temp = *this;
-                        _curr = _curr->_next;
-                        return temp;
-                    }
-                    _self_type operator--()
-                    {
-                        _curr = _curr->_prev;
-                        return *this;
-                    }
-                    _self_type operator--(int)
-                    {
-                        _self_type temp = *this;
-                        _curr = _curr->_prev;
-                        return temp;
-                    }
-                    _T& operator*()
-                    {
-                        return _curr->_value;
-                    }
-                    _node_type* base()
-                    {
-                        return _curr;
-                    }
-                    void operator=(const _self_type& l)
-                    {
-                        _curr = l._curr;
-                    }
-                    bool operator==(const _self_type& l)
-                    {
-                        return _curr == l._curr;
-                    }
-                    bool operator!=(const _self_type& l)
-                    {
-                        return !(*this == l);
-                    }
-            };
-
-            template <class _Type>
-            struct _const_node_iterator
-            {
-                private:
-                    typedef const _node<_Type>    _node_type;
-                    typedef _const_node_iterator<_Type> _self_type;
-                    const _node_type* _curr;
-
-                public:
-                    typedef std::ptrdiff_t              difference_type;
-                    typedef bidirectional_iterator_tag  iterator_category;
-                    typedef _Type                       value_type;
-                    typedef const _Type&                reference;
-                    typedef const _Type*                pointer;
-
-                    _const_node_iterator(_node_type* e)
-                        : _curr(e)
-                    {}
-
-                    _self_type operator++()
-                    {
-                        _curr = _curr->_next;
-                        return *this;
-                    }
-                    _self_type operator++(int)
-                    {
-                        _self_type temp = *this;
-                        _curr = _curr->_next;
-                        return temp;
-                    }
-                    _self_type operator--()
-                    {
-                        _curr = _curr->_prev;
-                        return *this;
-                    }
-                    _self_type operator--(int)
-                    {
-                        _self_type temp = *this;
-                        _curr = _curr->_prev;
-                        return temp;
-                    }
-                    _Type& operator*()
-                    {
-                        return _curr->_value;
-                    }
-                    _node_type* base()
-                    {
-                        return _curr;
-                    }
-                    void operator=(const _node_iterator<_Type>& l)
-                    {
-                        _curr = l._curr;
-                    }
-                    bool operator==(const _node_iterator<_Type>& l)
-                    {
-                        return _curr == l._curr;
-                    }
-                    bool operator!=(const _node_iterator<_Type>& l)
-                    {
-                        return !(*this == l);
-                    }
-            };
-
-            typedef list<T, Alloc>                              _list_type;
-            typedef _node<T>                                    _node_type;
-            typedef allocator<_node_type>                       _node_allocator_type;
+            typedef list<T, Alloc> _list_type;
+            typedef _std_copy_hidden::_std_copy_list::_node<T> _node_type;
+            typedef allocator<_node_type> _node_allocator_type;
 
         public:
-            typedef T                                           value_type;
-            typedef T&                                          reference;
-            typedef const T&                                    const_reference;
-            typedef allocator_traits<Alloc>::pointer            pointer;
-            typedef allocator_traits<Alloc>::const_pointer      const_pointer;
-            typedef Alloc                                       allocator_type;
-            typedef _node_iterator<T>                           iterator;
-            typedef _const_node_iterator<T>                     const_iterator;
-            typedef std_copy::reverse_iterator<iterator>        reverse_iterator;
-            typedef std_copy::reverse_iterator<const_iterator>  const_reverse_iterator;
-            typedef std::size_t                                 size_type;
-            typedef std::ptrdiff_t                              difference_type;
+            typedef T value_type;
+            typedef T &reference;
+            typedef const T &const_reference;
+            typedef allocator_traits<Alloc>::pointer pointer;
+            typedef allocator_traits<Alloc>::const_pointer const_pointer;
+            typedef Alloc allocator_type;
+            typedef _std_copy_hidden::_std_copy_list::_node_iterator<T> iterator;
+            typedef _std_copy_hidden::_std_copy_list::_const_node_iterator<T> const_iterator;
+            typedef std_copy::reverse_iterator<iterator> reverse_iterator;
+            typedef std_copy::reverse_iterator<const_iterator> const_reverse_iterator;
+            typedef std::size_t size_type;
+            typedef std::ptrdiff_t difference_type;
 
         private:
-            _node_type* _head{nullptr};
-            _node_type* _tail{nullptr};
+            _node_type *_head{nullptr};
+            _node_type *_tail{nullptr};
             size_type _size;
 
-            void _copy_list(_node_type* dest, _node_type* src)
+            void _copy_list(_node_type *dest, _node_type *src)
             {
                 while (src)
                 {
@@ -204,9 +231,10 @@ namespace std_copy
             {
                 if (!_head)
                     _head = _node_allocator_type::allocate(1);
+                
                 _size = distance(first, last);
                 _head->_init(nullptr, nullptr, *first);
-                _node_type* tempHead = _head;
+                _node_type *tempHead = _head;
                 _size = 1;
 
                 _tail = tempHead;
@@ -215,7 +243,7 @@ namespace std_copy
                 {
                     if (_size == size_type(-1))
                         throw std::length_error("Range is too long");
-                    _node_type* attach = _node_allocator_type::allocate(1);
+                    _node_type *attach = _node_allocator_type::allocate(1);
                     attach->_init(tempHead, nullptr, *first);
                     tempHead->_next = attach;
                     tempHead = tempHead->_next;
@@ -224,6 +252,7 @@ namespace std_copy
                     ++first;
                     _tail = tempHead;
                 }
+                
             }
             void _value_init_list(size_type count, const_reference val)
             {
@@ -231,11 +260,11 @@ namespace std_copy
                     _head = _node_allocator_type::allocate(1);
                 _head->_init(nullptr, nullptr, val);
 
-                _node_type* tempHead = _head;
+                _node_type *tempHead = _head;
                 _tail = tempHead;
                 while (count > 1)
                 {
-                    _node_type* attach = _node_allocator_type::allocate(1);
+                    _node_type *attach = _node_allocator_type::allocate(1);
                     attach->_init(tempHead, nullptr, val);
                     tempHead->_next = attach;
                     tempHead = tempHead->_next;
@@ -246,7 +275,7 @@ namespace std_copy
             }
             void _destroy_list()
             {
-                _node_type* previous = _head->_prev;
+                _node_type *previous = _head->_prev;
                 while (_head)
                 {
                     if (previous)
@@ -261,7 +290,7 @@ namespace std_copy
                 _size = 0;
             }
 
-            //Funtions used when appending elements (e.g. push_front, push_back, insert, etc.)
+            // Funtions used when appending elements (e.g. push_front, push_back, insert, etc.)
             bool _check_if_empty(const_reference e)
             {
                 if (!_head)
@@ -273,6 +302,10 @@ namespace std_copy
                     return true;
                 }
                 return false;
+            }
+            _node_type* __end_check_if_nullptr()
+            {
+                return _tail ? _tail->_next : nullptr;
             }
 
         public:
@@ -295,19 +328,20 @@ namespace std_copy
 
             template <class InputIt>
             list(InputIt first, InputIt last)
-        #if __cplusplus > 201703L
-            requires input_iterator<InputIt>
-        #endif
+    #if __cplusplus > 201703L
+                requires input_iterator<InputIt>
+    #endif
             {
                 _range_init_list(first, last);
             }
 
-            list(_list_type&& other)
+            list(_list_type &&other)
                 : _size(move(other._size)),
                 _head(move(other._head))
-            {}
+            {
+            }
 
-            list(const _list_type& other)
+            list(const _list_type &other)
                 : _size(other._size)
             {
                 _copy_list(_head, other._head);
@@ -320,7 +354,7 @@ namespace std_copy
 
             /**
              * Clears the contents of the list.
-            */
+             */
             void clear() noexcept
             {
                 _destroy_list();
@@ -329,7 +363,7 @@ namespace std_copy
             }
             /**
              * Returns the number of elements in the list.
-            */
+             */
             size_type size() noexcept
             {
                 return _size;
@@ -337,10 +371,11 @@ namespace std_copy
             /**
              * Appends an element onto the end of the list.
              * @param elem The element to append.
-            */
+             */
             void push_back(const_reference elem)
             {
-                if (_check_if_empty(elem)) {
+                if (_check_if_empty(elem))
+                {
                     return;
                 }
                 _tail->_next = _node_allocator_type::allocate(1);
@@ -351,10 +386,11 @@ namespace std_copy
             /**
              * Pushes an element to the beginning of the list.
              * @param elem The element to push to the beginning.
-            */
+             */
             void push_front(const_reference elem)
             {
-                if (_check_if_empty(elem)) {
+                if (_check_if_empty(elem))
+                {
                     return;
                 }
                 _head->_prev = _node_allocator_type::allocate(1);
@@ -364,7 +400,7 @@ namespace std_copy
             }
             /**
              * Removes the first element.
-            */
+             */
             void pop_front()
             {
                 _head = _head->_next;
@@ -374,50 +410,51 @@ namespace std_copy
             }
             /**
              * Removes the last element.
-            */
+             */
             void pop_back()
             {
                 _tail = _tail->_prev;
                 _node_allocator_type::deallocate(_tail->_next, 1);
+                _tail->_next = nullptr;
                 _size--;
             }
             /**
              * Returns iterator to beginning of list.
-            */
-            iterator begin()  { return iterator(_head); }
+             */
+            iterator begin() { return iterator(_head); }
             /**
              * Returns const iterator to beginning of list.
-            */
+             */
             const_iterator cbegin() { return const_iterator(_head); }
             /**
              * Returns iterator to end of list.
-            */
-            iterator end() { return iterator(_tail->_next); }
+             */
+            iterator end() { return iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns const iterator to end of list.
-            */
-            const_iterator cend() { return const_iterator(_tail->_next); }
+             */
+            const_iterator cend() { return const_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns reverse iterator to beginning of list.
-            */
-            reverse_iterator rbegin() { return reverse_iterator(_tail->_next); }
+             */
+            reverse_iterator rbegin() { return reverse_iterator(_head); }
             /**
              * Returns reverse iterator to beginning of list.
-            */
-            reverse_iterator rend() { return reverse_iterator(_tail->_next); }
+             */
+            reverse_iterator rend() { return reverse_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns constant reverse iterator to beginning of list.
-            */
-            const_reverse_iterator crbegin() { return const_reverse_iterator(_tail->_next); }
+             */
+            const_reverse_iterator crbegin() { return const_reverse_iterator(_head); }
             /**
              * Returns constant reverse iterator to end of list.
-            */
-            const_reverse_iterator crend() { return const_reverse_iterator(_head); }
+             */
+            const_reverse_iterator crend() { return const_reverse_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Inserts an element at pos.
              * @param pos The position to insert the element at.
              * @param elem The element to insert.
-            */
+             */
             iterator insert(iterator pos, const_reference elem)
             {
                 _size++;
@@ -431,7 +468,7 @@ namespace std_copy
                     this->push_front(elem);
                     return pos;
                 }
-                
+
                 _node_type* newElem = _node_allocator_type::allocate(1);
                 newElem->_init(pos.base()->_prev, pos.base(), elem);
                 _node_type* rawIt = pos.base();
@@ -442,54 +479,39 @@ namespace std_copy
              * Inserts an element at pos.
              * @param pos The position to insert the element at.
              * @param args The arguments that are forwarded to the element's type's constructor.
-            */
-            template <class ...Args>
-            iterator emplace(iterator pos, Args&& ...args)
+             */
+            template <class... Args>
+            iterator emplace(iterator pos, Args &&...args)
             {
                 return this->insert(pos, value_type(args...));
             }
             /**
              * Inserts an element at the end of the list.
              * @param args The arguments that are forwarded to the element's type's constructor.
-            */
-            template <class ...Args>
-            reference emplace_back(Args&&... args)
+             */
+            template <class... Args>
+            reference emplace_back(Args &&...args)
             {
-                value_type e(args...);
-                if (_check_if_empty(e))
-                {
-                    return _head->_value;
-                }
-                iterator pos = this->end();
-                this->insert(pos, e);
-                return *pos;
+                this->push_back(value_type(args...));
+                return _tail->_value;
             }
             /**
              * Inserts an element at the beginning of the list.
              * @param args The arguments that are forwarded to the element's type's constructor.
-            */
-            template <class ...Args>
-            reference emplace_front(Args&&... args)
+             */
+            template <class... Args>
+            reference emplace_front(Args &&...args)
             {
-                value_type e(args...);
-                if (_check_if_empty(e))
-                {
-                    return _head->_value;
-                }
-                iterator pos = this->begin();
-                this->insert(pos, e);
-                return *pos;
+                this->push_front(value_type(args...));
+                return _head->_value;
             }
             /**
              * Erases the element at pos.
              * @param pos The position of the element to erase.
-            */
+             */
             iterator erase(iterator pos)
             {
                 iterator nextIt(nullptr);
-                #if _DEBUG
-                    std::cout << *pos << '\n';
-                #endif
                 if (pos.base() == _tail)
                 {
                     nextIt = this->end();
@@ -502,7 +524,7 @@ namespace std_copy
                 }
                 else
                 {
-                    _node_type* rawIt = pos.base();
+                    _node_type *rawIt = pos.base();
                     (rawIt->_prev)->_next = rawIt->_next;
                     nextIt = rawIt->_next;
                     _node_allocator_type::deallocate(rawIt, 1);
@@ -511,11 +533,11 @@ namespace std_copy
                 return nextIt;
             }
 
-        #if _DEBUG
+    #if _DEBUG
 
             void _debug_print()
             {
-                _node_type* temp = _head;
+                _node_type *temp = _head;
                 while (temp)
                 {
                     std::cout << temp->_value << ' ';
@@ -524,7 +546,7 @@ namespace std_copy
                 std::cout << '\n';
             }
 
-        #endif
+    #endif
     };
 }
 
