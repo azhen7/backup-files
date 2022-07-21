@@ -129,6 +129,7 @@ namespace _std_copy_hidden
                 typedef const _node<_Type> _node_type;
                 typedef _const_node_iterator<_Type> _self_type;
                 const _node_type* _curr;
+                const _node_type* _prev;
 
             public:
                 typedef std::ptrdiff_t difference_type;
@@ -137,35 +138,46 @@ namespace _std_copy_hidden
                 typedef const _Type &reference;
                 typedef const _Type *pointer;
 
-                _const_node_iterator(_node_type *e)
+                _const_node_iterator(_node_type *e, _node_type* p)
                     : _curr(e)
                 {
+                    if (p && !e) _prev = p;
                 }
 
                 _self_type operator++()
                 {
+                    if (!_curr) return *this;
+
                     _curr = _curr->_next;
                     return *this;
                 }
                 _self_type operator++(int)
                 {
+                    if (!_curr) return *this;
+
                     _self_type temp = *this;
                     _curr = _curr->_next;
                     return temp;
                 }
                 _self_type operator--()
                 {
+                    if (!_curr) return _prev;
+
                     _curr = _curr->_prev;
                     return *this;
                 }
                 _self_type operator--(int)
                 {
+                    if (!_curr) return _prev;
+
                     _self_type temp = *this;
                     _curr = _curr->_prev;
                     return temp;
                 }
                 _Type& operator*()
                 {
+                    if (!_curr) throw std::bad_alloc();
+
                     return _curr->_value;
                 }
                 _node_type* base()
@@ -200,8 +212,8 @@ namespace std_copy
 
         public:
             typedef T value_type;
-            typedef T &reference;
-            typedef const T &const_reference;
+            typedef T& reference;
+            typedef const T& const_reference;
             typedef allocator_traits<Alloc>::pointer pointer;
             typedef allocator_traits<Alloc>::const_pointer const_pointer;
             typedef Alloc allocator_type;
@@ -355,7 +367,7 @@ namespace std_copy
             /**
              * Clears the contents of the list.
              */
-            void clear() noexcept
+            constexpr void clear() noexcept
             {
                 _destroy_list();
                 _size = 0;
@@ -364,7 +376,7 @@ namespace std_copy
             /**
              * Returns the number of elements in the list.
              */
-            size_type size() noexcept
+            constexpr size_type size() const noexcept
             {
                 return _size;
             }
@@ -421,35 +433,35 @@ namespace std_copy
             /**
              * Returns iterator to beginning of list.
              */
-            iterator begin() { return iterator(_head); }
+            constexpr iterator begin() const noexcept { return iterator(_head); }
             /**
              * Returns const iterator to beginning of list.
              */
-            const_iterator cbegin() { return const_iterator(_head); }
+            constexpr const_iterator cbegin() const noexcept { return const_iterator(_head); }
             /**
              * Returns iterator to end of list.
              */
-            iterator end() { return iterator(__end_check_if_nullptr(), _tail); }
+            constexpr iterator end() const noexcept { return iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns const iterator to end of list.
              */
-            const_iterator cend() { return const_iterator(__end_check_if_nullptr(), _tail); }
+            constexpr const_iterator cend() const noexcept { return const_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns reverse iterator to beginning of list.
              */
-            reverse_iterator rbegin() { return reverse_iterator(_head); }
+            constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator(_head); }
             /**
              * Returns reverse iterator to beginning of list.
              */
-            reverse_iterator rend() { return reverse_iterator(__end_check_if_nullptr(), _tail); }
+            constexpr reverse_iterator rend() const noexcept { return reverse_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns constant reverse iterator to beginning of list.
              */
-            const_reverse_iterator crbegin() { return const_reverse_iterator(_head); }
+            constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(_head); }
             /**
              * Returns constant reverse iterator to end of list.
              */
-            const_reverse_iterator crend() { return const_reverse_iterator(__end_check_if_nullptr(), _tail); }
+            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Inserts an element at pos.
              * @param pos The position to insert the element at.
@@ -457,7 +469,6 @@ namespace std_copy
              */
             iterator insert(iterator pos, const_reference elem)
             {
-                _size++;
                 if (pos == this->end())
                 {
                     this->push_back(elem);
@@ -469,10 +480,12 @@ namespace std_copy
                     return pos;
                 }
 
+                _size++;
+
                 _node_type* newElem = _node_allocator_type::allocate(1);
                 newElem->_init(pos.base()->_prev, pos.base(), elem);
-                _node_type* rawIt = pos.base();
-                rawIt->_prev = newElem;
+                pos.base()->_prev = newElem;
+                pos.base()->_prev->_prev->_next = newElem;
                 return pos;
             }
             /**
@@ -511,25 +524,24 @@ namespace std_copy
              */
             iterator erase(iterator pos)
             {
-                iterator nextIt(nullptr);
                 if (pos.base() == _tail)
                 {
-                    nextIt = this->end();
                     this->pop_back();
+                    return this->end();
                 }
                 else if (pos.base() == _head)
                 {
                     this->pop_front();
                     return this->begin();
                 }
-                else
-                {
-                    _node_type *rawIt = pos.base();
-                    (rawIt->_prev)->_next = rawIt->_next;
-                    nextIt = rawIt->_next;
-                    _node_allocator_type::deallocate(rawIt, 1);
-                    _size--;
-                }
+                iterator nextIt(nullptr);
+
+                _node_type *rawIt = pos.base();
+                (rawIt->_prev)->_next = rawIt->_next;
+                nextIt = rawIt->_next;
+                _node_allocator_type::deallocate(rawIt, 1);
+                _size--;
+
                 return nextIt;
             }
 

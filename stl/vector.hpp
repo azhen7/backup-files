@@ -233,28 +233,28 @@ namespace std_copy
              * This function returns the size of the vector, 
              * i.e., how many elements are in the vector.
             */
-            constexpr size_type size() noexcept { return _numberOfElements; }
+            constexpr size_type size() const noexcept { return _numberOfElements; }
             /**
              * Returns a bool corresponding to whether the vector 
              * is empty.
             */
-            constexpr bool empty() noexcept { return _numberOfElements == 0; }
+            constexpr bool empty() const noexcept { return _numberOfElements == 0; }
             /**
              * This function returns the capacity of the
              * vector, i.e., how many elements the vector
              * has space allocated for.
             */
-            constexpr size_type capacity() noexcept { return _capacity; }
+            constexpr size_type capacity() const noexcept { return _capacity; }
             /**
              * This function returns the underlying
              * internal buffer of the array.
             */
-            constexpr pointer data() noexcept { return _internalBuffer; }
+            constexpr pointer data() const noexcept { return _internalBuffer; }
             /**
              * This function returns the maximum capacity
              * of the vector.
             */
-            constexpr size_type max_size() noexcept
+            constexpr size_type max_size() const noexcept
             {
                 size_type first = __builtin_powl(2, (size_type) (8 * sizeof(size_type) / sizeof(value_type)));
                 size_type second = __builtin_powl(2, (8 * sizeof(difference_type)));
@@ -359,7 +359,7 @@ namespace std_copy
              * the vector.
              * @param index The index of the element to retrieve.
             */
-            constexpr reference at(size_type index)
+            constexpr reference at(size_type index) const
             {
                 if (index >= _numberOfElements)
                 {
@@ -375,7 +375,7 @@ namespace std_copy
              * indexing.
              * @param index The index of the element to retrieve.
             */
-            constexpr reference operator[](size_type index) noexcept
+            constexpr reference operator[](size_type index) const
             {
                 return *(_internalBuffer + index);
             }
@@ -481,6 +481,12 @@ namespace std_copy
                 size_type copyUpTo = (n > _numberOfElements) ? _numberOfElements : n;
                 uninitialized_move(temp, temp + copyUpTo, _internalBuffer);
                 allocator_type::deallocate(temp, _capacity);
+
+                if (n > _numberOfElements)
+                {
+                    fill(_internalBuffer + _numberOfElements, _internalBuffer + n, value_type());
+                }
+
                 _numberOfElements = n;
                 _capacity = n;
             }
@@ -488,12 +494,12 @@ namespace std_copy
              * This function returns a reference to the
              * first element in the array.
             */
-            constexpr reference front() { return *_internalBuffer; }
+            constexpr reference front() const noexcept { return *_internalBuffer; }
             /**
              * This function returns a reference to the
              * last element in the array.
             */
-            constexpr reference back() { return *(_internalBuffer + _numberOfElements - 1); }
+            constexpr reference back() const noexcept { return *(_internalBuffer + _numberOfElements - 1); }
             /**
              * This function shrinks the vector's capacity
              * to fit its size.
@@ -510,48 +516,42 @@ namespace std_copy
              * This function returns a copy of the _allocator
              * object associated with the vector.
             */
-            constexpr allocator_type get_allocator() noexcept { return allocator_type(); }
+            constexpr allocator_type get_allocator() const noexcept { return allocator_type(); }
             /**
              * This function returns an iterator to the front of the vector.
             */
-            constexpr iterator begin() { return iterator(_internalBuffer); }
+            constexpr iterator begin() const noexcept { return iterator(_internalBuffer); }
             /**
              * This function returns an iterator to the theoretical element after the last element in the vector.
             */
-            constexpr iterator end() { return iterator(_internalBuffer + _numberOfElements); }
+            constexpr iterator end() const noexcept { return iterator(_internalBuffer + _numberOfElements); }
             /**
              * Returns a reverse iterator to the reverse beginning of the vector.
             */
-            constexpr reverse_iterator rbegin() const { return reverse_iterator(_internalBuffer + _numberOfElements); }
+            constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator(_internalBuffer + _numberOfElements); }
             /**
              * Returns a reverse iterator to the reverse end of the vector.
             */
-            constexpr reverse_iterator rend() const { return reverse_iterator(_internalBuffer); }
+            constexpr reverse_iterator rend() const noexcept { return reverse_iterator(_internalBuffer); }
             /**
              * Returns a const reverse iterator to the reverse beginning of the vector.
             */
-            constexpr const_reverse_iterator crbegin() const { return reverse_iterator(_internalBuffer + _numberOfElements); }
+            constexpr const_reverse_iterator crbegin() const noexcept { return reverse_iterator(_internalBuffer + _numberOfElements); }
             /**
              * Returns a const reverse iterator to the reverse end of the vector.
             */
-            constexpr const_reverse_iterator crend() const { return reverse_iterator(_internalBuffer); }
+            constexpr const_reverse_iterator crend() const noexcept { return reverse_iterator(_internalBuffer); }
             /**
              * This function returns a const iterator to the 
              * first element in the vector.
             */
-            constexpr const_iterator cbegin()
-            {
-                return this->begin();
-            }
+            constexpr const_iterator cbegin() const noexcept { return const_iterator(this->begin()); }
             /**
              * This function returns a const iterator to 
              * the theoretical element after the last element 
              * in the vector.
             */
-            constexpr const_iterator cend()
-            {
-                return this->end();
-            }
+            constexpr const_iterator cend() const noexcept { return const_iterator(this->end()); }
             /**
              * Overloaded assignment operator.
             */
@@ -670,7 +670,7 @@ namespace std_copy
              * element. This function is new.
              * @param elem The element to check for.
             */
-            constexpr bool contains(const_reference elem)
+            constexpr bool contains(const_reference elem) const
             {
                 return this->count(elem) != 0;
             }
@@ -680,7 +680,7 @@ namespace std_copy
              * returns end().
              * @param elem The element to find.
             */
-            constexpr iterator find(const_reference elem)
+            constexpr iterator find(const_reference elem) const
             {
                 return find(_internalBuffer, _internalBuffer + _numberOfElements, elem);
             }
@@ -689,7 +689,7 @@ namespace std_copy
              * inside the vector.
              * @param elem The element of which to count the number of occurrences.
             */
-            constexpr size_type count(const_reference elem)
+            constexpr size_type count(const_reference elem) const
             {
                 return count(_internalBuffer, _internalBuffer + _numberOfElements, elem);
             }

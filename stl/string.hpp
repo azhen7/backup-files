@@ -267,7 +267,7 @@ namespace std_copy
              * Returns the element at index i.
              * @param i The index to retrieve the element from.
             */
-            constexpr reference at(size_type i) const
+            constexpr reference at(size_type i) const noexcept
             {
                 _check_exception(i, _length, "basic_string::at: i out of bounds");
                 return *(_internalString + i);
@@ -290,39 +290,39 @@ namespace std_copy
             /**
              * Returns an iterator to the start of the string.
             */
-            constexpr iterator begin() const { return iterator(_internalString); }
+            constexpr iterator begin() const noexcept { return iterator(_internalString); }
             /**
              * Returns an iterator to the theoretical element after the last element.
             */
-            constexpr iterator end() const { return iterator(_internalString + _length); }
+            constexpr iterator end() const noexcept { return iterator(_internalString + _length); }
             /**
              * Returns a const iterator to the start of the string.
             */
-            constexpr const_iterator cbegin() const { return iterator(_internalString); }
+            constexpr const_iterator cbegin() const noexcept { return iterator(_internalString); }
             /**
              * Returns a const iterator to the theoretical element after the last element.
             */
-            constexpr const_iterator cend() const { return iterator(_internalString + _length); }
+            constexpr const_iterator cend() const noexcept { return iterator(_internalString + _length); }
             /**
              * Returns a reverse iterator to the reverse beginning of the string.
             */
-            constexpr reverse_iterator rbegin() const { return reverse_iterator(_internalString + _length); }
+            constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator(_internalString + _length); }
             /**
              * Returns a reverse iterator to the reverse end of the string.
             */
-            constexpr reverse_iterator rend() const { return reverse_iterator(_internalString); }
+            constexpr reverse_iterator rend() const noexcept { return reverse_iterator(_internalString); }
             /**
              * Returns a const reverse iterator to the reverse beginning of the string.
             */
-            constexpr const_reverse_iterator crbegin() const { return reverse_iterator(_internalString + _length); }
+            constexpr const_reverse_iterator crbegin() const noexcept { return reverse_iterator(_internalString + _length); }
             /**
              * Returns a const reverse iterator to the reverse end of the string.
             */
-            constexpr const_reverse_iterator crend() const { return reverse_iterator(_internalString); }
+            constexpr const_reverse_iterator crend() const noexcept { return reverse_iterator(_internalString); }
             /**
              * Returns a boolean indicating whether the string is empty.
             */
-            constexpr bool empty() const { return _length == 0; }
+            constexpr bool empty() const noexcept { return _length == 0; }
             /**
              * Reserves additional memory in the string.
             */
@@ -618,7 +618,7 @@ namespace std_copy
              * Compares this basic_string with the character sequence pointed to by p.
              * @param p A pointer to the character sequence to compare against.
             */
-            constexpr int compare(const_pointer p)
+            constexpr int compare(const_pointer p) const noexcept
             {
                 return this->compare(0, _length, p);
             }
@@ -629,7 +629,7 @@ namespace std_copy
              * @param count The number of characters after pos to compare.
              * @param p A pointer to the character sequence to compare against.
             */
-            constexpr int compare(size_type pos, size_type count, const_pointer p)
+            constexpr int compare(size_type pos, size_type count, const_pointer p) const noexcept
             {
                 return this->compare(pos, count, p, traits_type::length(p));
             }
@@ -641,7 +641,7 @@ namespace std_copy
              * @param p A pointer to the character sequence to compare against.
              * @param count2 The number of characters in p to compare.
             */
-            constexpr int compare(size_type pos, size_type count1, const_pointer p, size_type count2)
+            constexpr int compare(size_type pos, size_type count1, const_pointer p, size_type count2) const noexcept
             {
                 if (count1 > _length - pos)
                     count1 = _length - pos;
@@ -657,7 +657,7 @@ namespace std_copy
              * Compares two basic_string types.
              * @param s The basic_string object getting compared to *this.
             */
-            constexpr int compare(const _basic_string_type& s)
+            constexpr int compare(const _basic_string_type& s) const noexcept
             {
                 return this->compare(0, _length, s);
             }
@@ -700,7 +700,7 @@ namespace std_copy
              * if *this is empty.
              * @param ch The character to check for at the beginning of the current basic_string object.
             */
-            constexpr bool starts_with(value_type ch)
+            constexpr bool starts_with(value_type ch) const noexcept
             {
                 return traits_type::eq(_internalString[0], ch);
             }
@@ -708,7 +708,7 @@ namespace std_copy
              * Checks if *this starts with the null-terminated character sequence p.
              * @param p The character sequence to check for at the beginning of the current basic_string object.
             */
-            constexpr bool starts_with(const_pointer p)
+            constexpr bool starts_with(const_pointer p) const noexcept
             {
                 const size_type len = traits_type::length(p);
                 if (len > _length)
@@ -723,7 +723,7 @@ namespace std_copy
              * Checks if *this starts with the basic_string object s.
              * @param s The basic_string object to check for at the beginning of the current basic_string object.
             */
-            constexpr bool starts_with(const _basic_string_type& s)
+            constexpr bool starts_with(const _basic_string_type& s) const noexcept
             {
                 if (s._length > _length)
                     return false;
@@ -740,7 +740,7 @@ namespace std_copy
              * @param last An iterator to the end of the sequence.
             */
             template <class InputIterator>
-            constexpr bool starts_with(InputIterator first, InputIterator last)
+            constexpr bool starts_with(InputIterator first, InputIterator last) const noexcept
             {
                 const difference_type dist = std_copy::distance(first, last);
                 if (dist > _length)
@@ -760,7 +760,7 @@ namespace std_copy
              * Check if *this ends with ch.
              * @param ch The character to check for at the end of the current basic_string object.
             */
-            constexpr bool ends_with(const_reference ch)
+            constexpr bool ends_with(const_reference ch) const noexcept
             {
                 return traits_type::eq(this->back(), ch);
             }
@@ -768,7 +768,7 @@ namespace std_copy
              * Check if *this ends with p.
              * @param p A null-terminated character sequence to check for at the end of the current basic_string object.
             */
-            constexpr bool ends_with(pointer p)
+            constexpr bool ends_with(pointer p) const noexcept
             {
                 const size_type len = traits_type::length(p);
                 return (_length > len) && (this->compare(_length - len, len, p) == 0);
@@ -777,7 +777,7 @@ namespace std_copy
              * Checks if *this ends with s.
              * @param s A basic_string object to check for at the end of the current basic_string object.
             */
-            constexpr bool ends_with(const _basic_string_type& s)
+            constexpr bool ends_with(const _basic_string_type& s) const noexcept
             {
                 if (s._length > _length)
                     return false;
@@ -793,7 +793,7 @@ namespace std_copy
              * @param second An iterator to the end of the range.
             */
             template <class InputIterator>
-            constexpr bool ends_with(InputIterator first, InputIterator last) const
+            constexpr bool ends_with(InputIterator first, InputIterator last) const noexcept
             {
                 const difference_type dist = std_copy::distance(first, last);
                 if (dist > _length)
@@ -812,7 +812,7 @@ namespace std_copy
              * Checks if *this contains another basic_string object.
              * @param s The basic_string object to find.
             */
-            constexpr bool contains(const _basic_string_type& s) const
+            constexpr bool contains(const _basic_string_type& s) const noexcept
             {
                 return this->find(s) != npos;
             }
@@ -820,7 +820,7 @@ namespace std_copy
              * Checks if *this contains a character sequence p.
              * @param p The character sequence to look for.
             */
-            constexpr bool contains(const_pointer p) const
+            constexpr bool contains(const_pointer p) const noexcept
             {
                 return this->find(p) != npos;
             }
@@ -828,7 +828,7 @@ namespace std_copy
              * Checks if *this contains a character ch.
              * @param ch The character to search for.
             */
-            constexpr bool contains(const_reference ch, size_type pos = 0) const
+            constexpr bool contains(const_reference ch, size_type pos = 0) const noexcept
             {
                 return this->find(ch, pos) != npos;
             }
