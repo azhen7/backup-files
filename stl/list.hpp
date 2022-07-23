@@ -37,7 +37,7 @@ namespace _std_copy_hidden
                 {
                     _prev = p;
                     _next = n;
-                    _value = val;
+                    _value = std_copy::move(val);
                 }
         };
 
@@ -135,8 +135,8 @@ namespace _std_copy_hidden
                 typedef std::ptrdiff_t difference_type;
                 typedef std_copy::bidirectional_iterator_tag iterator_category;
                 typedef _Type value_type;
-                typedef const _Type &reference;
-                typedef const _Type *pointer;
+                typedef const _Type& reference;
+                typedef const _Type* pointer;
 
                 _const_node_iterator(_node_type *e, _node_type* p)
                     : _curr(e)
@@ -202,6 +202,11 @@ namespace _std_copy_hidden
 
 namespace std_copy
 {
+    /**
+     * An implementation of std::list from the header <list>.
+     * @param T The type of the elements.
+     * @param Alloc The allocator used to allocate new elements.
+     */
     template <class T, class Alloc = std_copy::allocator<T>>
     class list
     {
@@ -315,9 +320,34 @@ namespace std_copy
                 }
                 return false;
             }
-            _node_type* __end_check_if_nullptr()
+            _node_type* __end_check_if_nullptr() const noexcept
             {
                 return _tail ? _tail->_next : nullptr;
+            }
+            
+            void __resize(size_type count, const_reference val)
+            {
+                if (count > _size)
+                {
+                    size_type left = count - _size;
+                    while (left-- > 0)
+                    {
+                        _node_type* it = _node_allocator_type::allocate(1);
+                        it->_init(_tail, nullptr, val);
+                        _tail->_next = it;
+                        _tail = _tail->_next;
+                    }
+                }
+                else
+                {
+                    size_type left = _size - count;
+                    while (left-- > 0)
+                    {
+                        _tail = _tail->_prev;
+                        _node_allocator_type::deallocate(_tail->_next, 1);
+                        _tail->_next = nullptr;
+                    }
+                }
             }
 
         public:
@@ -367,7 +397,7 @@ namespace std_copy
             /**
              * Clears the contents of the list.
              */
-            constexpr void clear() noexcept
+            void clear() noexcept
             {
                 _destroy_list();
                 _size = 0;
@@ -376,7 +406,7 @@ namespace std_copy
             /**
              * Returns the number of elements in the list.
              */
-            constexpr size_type size() const noexcept
+            size_type size() const noexcept
             {
                 return _size;
             }
@@ -433,35 +463,35 @@ namespace std_copy
             /**
              * Returns iterator to beginning of list.
              */
-            constexpr iterator begin() const noexcept { return iterator(_head); }
+            iterator begin() const noexcept { return iterator(_head); }
             /**
              * Returns const iterator to beginning of list.
              */
-            constexpr const_iterator cbegin() const noexcept { return const_iterator(_head); }
+            const_iterator cbegin() const noexcept { return const_iterator(_head); }
             /**
              * Returns iterator to end of list.
              */
-            constexpr iterator end() const noexcept { return iterator(__end_check_if_nullptr(), _tail); }
+            iterator end() const noexcept { return iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns const iterator to end of list.
              */
-            constexpr const_iterator cend() const noexcept { return const_iterator(__end_check_if_nullptr(), _tail); }
+            const_iterator cend() const noexcept { return const_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns reverse iterator to beginning of list.
              */
-            constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator(_head); }
+            reverse_iterator rbegin() const noexcept { return reverse_iterator(_head); }
             /**
              * Returns reverse iterator to beginning of list.
              */
-            constexpr reverse_iterator rend() const noexcept { return reverse_iterator(__end_check_if_nullptr(), _tail); }
+            reverse_iterator rend() const noexcept { return reverse_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Returns constant reverse iterator to beginning of list.
              */
-            constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(_head); }
+            const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(_head); }
             /**
              * Returns constant reverse iterator to end of list.
              */
-            constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator(__end_check_if_nullptr(), _tail); }
+            const_reverse_iterator crend() const noexcept { return const_reverse_iterator(__end_check_if_nullptr(), _tail); }
             /**
              * Inserts an element at pos.
              * @param pos The position to insert the element at.
@@ -534,15 +564,95 @@ namespace std_copy
                     this->pop_front();
                     return this->begin();
                 }
-                iterator nextIt(nullptr);
+                _node_type* nextIt;
 
-                _node_type *rawIt = pos.base();
+                _node_type* rawIt = pos.base();
                 (rawIt->_prev)->_next = rawIt->_next;
                 nextIt = rawIt->_next;
                 _node_allocator_type::deallocate(rawIt, 1);
                 _size--;
 
                 return nextIt;
+            }
+            /**
+             * Resizes the list to contain count elements. If count is greater than the
+             * current size of the list, additional default-inserted elements are appended.
+             * @param count The new size to resize the list to.
+             */
+            void resize(size_type count)
+            {
+                __resize(count, value_type());
+            }
+            /**
+             * Resizes the list to contain count elements. If count is greater than the
+             * current size of the list, additional copies of val are appended.
+             * @param count The new size to resize the list to.
+             * @param val The value that gets appended.
+             */
+            void resize(size_type count, const_reference val)
+            {
+                __resize(count, val);
+            }
+            /**
+             * Removes all elements equal to val.
+             * @param val The value to remove.
+             */
+            size_type remove(const_reference val)
+            {
+                size_type numberOfRemoved = 0;
+                _node_type* temp = _head;
+                while (temp)
+                {
+                    if (temp->_value == val)
+                    {
+                        temp = temp->_prev;
+                        _node_type* nextNext = temp->_next->_next;
+                        _node_allocator_type::deallocate(temp->_next, 1);
+                        temp->_next = nextNext;
+
+                        if (nextNext)
+                        {
+                            nextNext->_prev = temp;
+                        }
+
+                        _size--;
+                        numberOfRemoved++;
+                    }
+                    _tail = temp;
+                    temp = temp->_next;
+                }
+                return numberOfRemoved;
+            }
+            /**
+             * Removes all elements for which func returns true.
+             * @param func The function determing which elements to remove.
+             */
+            template <class Function>
+            size_type remove_if(Function func)
+            {
+                size_type numberOfRemoved = 0;
+                _node_type* temp = _head;
+                while (temp)
+                {
+                    if (func(temp->_value))
+                    {
+                        temp = temp->_prev;
+                        _node_type* nextNext = temp->_next->_next;
+                        _node_allocator_type::deallocate(temp->_next, 1);
+                        temp->_next = nextNext;
+
+                        if (nextNext)
+                        {
+                            nextNext->_prev = temp;
+                        }
+
+                        _size--;
+                        numberOfRemoved++;
+                    }
+                    _tail = temp;
+                    temp = temp->_next;
+                }
+                return numberOfRemoved;
             }
 
     #if _DEBUG
