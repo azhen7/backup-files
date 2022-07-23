@@ -78,7 +78,7 @@ namespace std_copy
              * Assigns one array to another.
              * @param assign The array to get assigned.
             */
-            constexpr void operator=(const _array_type& assign)
+            void operator=(const _array_type& assign)
             {
                 for (int i = 0; i < _size; i++)
                     _internalBuffer[i] = assign._internalBuffer[i];
@@ -88,7 +88,7 @@ namespace std_copy
              * designated value.
              * @param val The value used to fill the array.
             */
-            constexpr void fill(const_reference val)
+            void fill(const_reference val)
             {
                 std_copy::fill_n(_internalBuffer, _size, val);
             }
@@ -96,7 +96,7 @@ namespace std_copy
              * This function returns the number of elements
              * in the array. This function is new.
             */
-            constexpr size_type quantity() const noexcept
+            size_type quantity() const noexcept
             {
                 return _numberOfElements;
             }
@@ -104,7 +104,7 @@ namespace std_copy
              * This function returns the underlying
              * internal buffer of the array.
             */
-            constexpr pointer data() const noexcept
+            pointer data() const noexcept
             {
                 return _internalBuffer;
             }
@@ -112,7 +112,7 @@ namespace std_copy
              * Returns C-style array used as underlying buffer 
              * of the object.
             */
-            constexpr pointer c_array() const noexcept
+            pointer c_array() const noexcept
             {
                 return _internalBuffer;
             }
@@ -122,7 +122,7 @@ namespace std_copy
              * whether there are no elements in the array.
              * This function is new.
             */
-            constexpr bool empty() const noexcept
+            bool empty() const noexcept
             {
                 return _numberOfElements == 0;
             }
@@ -130,7 +130,7 @@ namespace std_copy
              * This function returns the size of the
              * array.
             */
-            constexpr size_type size() const noexcept
+            size_type size() const noexcept
             {
                 return _size;
             }
@@ -138,7 +138,7 @@ namespace std_copy
              * This function returns an iterator to the first element 
              * in the array container.
             */
-            constexpr iterator begin() const noexcept
+            iterator begin() const noexcept
             {
                 return iterator(_internalBuffer);
             }
@@ -146,7 +146,7 @@ namespace std_copy
              * This function returns an iterator to the theoretical element 
              * after the last element in the array container.
             */
-            constexpr iterator end() const noexcept
+            iterator end() const noexcept
             {
                 return iterator(_internalBuffer + _numberOfElements);
             }
@@ -154,7 +154,7 @@ namespace std_copy
              * This function returns an const iterator to the first element 
              * in the array container.
             */
-            constexpr const_iterator cbegin() const noexcept
+            const_iterator cbegin() const noexcept
             {
                 return iterator(_internalBuffer);
             }
@@ -162,7 +162,7 @@ namespace std_copy
              * This function returns an const iterator to the theoretical element 
              * after the last element in the array container.
             */
-            constexpr const_iterator cend() const noexcept
+            const_iterator cend() const noexcept
             {
                 return iterator(_internalBuffer + _numberOfElements);
             }
@@ -172,7 +172,7 @@ namespace std_copy
              * the vector.
              * @param index The index of the element to retrieve.
             */
-            constexpr reference at(size_type index) const
+            reference at(size_type index) const noexcept
             {
                 if (index >= _numberOfElements)
                 {
@@ -188,7 +188,7 @@ namespace std_copy
              * indexing.
              * @param index The index of the element to retrieve.
             */
-            constexpr reference operator[](size_type index) const noexcept
+            reference operator[](size_type index) const noexcept
             {
                 return const_cast<reference>(_internalBuffer[index]);
             }
@@ -196,7 +196,7 @@ namespace std_copy
              * This function returns a reference to the
              * first element in the array.
             */
-            constexpr reference front() const
+            reference front() const noexcept
             {
                 return _internalBuffer[0];
             }
@@ -204,7 +204,7 @@ namespace std_copy
              * This function returns a reference to the
              * last element in the array.
             */
-            constexpr reference back() const
+            reference back() const noexcept
             {
                 return _internalBuffer[_numberOfElements - 1];
             }
@@ -212,7 +212,7 @@ namespace std_copy
              * This function swaps the contents of *this and toSwap.
              * @param toSwap The array to swap the contents with.
             */
-            constexpr void swap(const _array_type& toSwap)
+            void swap(const _array_type& toSwap)
             {
                 std_copy::swap_ranges(this->begin().data(), this->end().data(), toSwap._internalBuffer);
             }
@@ -224,7 +224,7 @@ namespace std_copy
      * @param rhs The second array.
     */
     template <class T, std::size_t N>
-    constexpr void swap(array<T, N>& lhs, array<T, N>& rhs)
+    void swap(array<T, N>& lhs, array<T, N>& rhs)
     {
         lhs.swap(rhs);
     }
@@ -233,7 +233,7 @@ namespace std_copy
      * @param arr The array to convert.
     */
     template <class T, std::size_t N>
-    constexpr array<T, N> to_array(T (&arr)[N])
+    array<T, N> to_array(T (&arr)[N])
     {
         return array<T, N>(arr);
     }

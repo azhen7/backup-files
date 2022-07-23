@@ -71,7 +71,7 @@ namespace std_copy
             size_type _capacity;
 
             template <class _AllocateFunc>
-            constexpr void _allocate_and_move_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
+            void _allocate_and_move_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -80,7 +80,7 @@ namespace std_copy
             }
 
             template <class _AllocateFunc>
-            constexpr void _allocate_and_assign_str(size_type i, _AllocateFunc mem_alloc, size_type count, const_reference ch)
+            void _allocate_and_assign_str(size_type i, _AllocateFunc mem_alloc, size_type count, const_reference ch)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -89,7 +89,7 @@ namespace std_copy
             }
 
             template <class _AllocateFunc, class InputIterator>
-            constexpr void _allocate_and_move_range(size_type i, _AllocateFunc mem_alloc, InputIterator first, InputIterator last)
+            void _allocate_and_move_range(size_type i, _AllocateFunc mem_alloc, InputIterator first, InputIterator last)
             {
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
@@ -97,7 +97,7 @@ namespace std_copy
                 _internalString[i] = value_type();
             }
 
-            constexpr size_type _calculate_smallest_power_of_two_greater_than(size_type x)
+            size_type _calculate_smallest_power_of_two_greater_than(size_type x)
             {
                 if (x == 0)
                     return 1;
@@ -105,7 +105,7 @@ namespace std_copy
             }
 
             //Reallocates the internal buffer.
-            constexpr void _realloc(size_type n, size_type copyUpTo)
+            void _realloc(size_type n, size_type copyUpTo)
             {
                 pointer temp = _internalString;
                 size_type newSize = _capacity * _calculate_smallest_power_of_two_greater_than(n);
@@ -115,7 +115,7 @@ namespace std_copy
             }
 
             //Null terminates the internal buffer and updates _length
-            constexpr void _terminate_and_update_length(size_type newLen = npos, size_type whereToTerminate = npos)
+            void _terminate_and_update_length(size_type newLen = npos, size_type whereToTerminate = npos)
             {
                 if (newLen == npos)
                     newLen = _length;
@@ -127,13 +127,13 @@ namespace std_copy
             }
 
             template <class ExceptionType = std::out_of_range>
-            constexpr void _check_exception(size_type a, difference_type checkAgainst, const char* str)
+            void _check_exception(size_type a, difference_type checkAgainst, const char* str)
             {
                 if (a >= checkAgainst)
                     throw ExceptionType(str);
             }
 
-            constexpr void _move_string(pointer dest, pointer src, size_type n)
+            void _move_string(pointer dest, pointer src, size_type n)
             {
                 if (n == 1)
                     traits_type::assign(*dest, *src);
@@ -233,24 +233,24 @@ namespace std_copy
             /**
              * Returns the length of the string.
             */
-            constexpr size_type length() const noexcept { return _length; }
+            size_type length() const noexcept { return _length; }
             /**
              * Returns the size of the string (i.e. the number of characters).
             */
-            constexpr size_type size() const noexcept { return _length; }
+            size_type size() const noexcept { return _length; }
             /**
              * Returns the capacity of the string, i.e. the number of elements the 
              * string has storage for.
             */
-            constexpr size_type capacity() const noexcept { return _capacity; }
+            size_type capacity() const noexcept { return _capacity; }
             /**
              * Returns the allocator object associated with the string.
             */
-            constexpr allocator_type get_allocator() const noexcept { return allocator_type(); }
+            allocator_type get_allocator() const noexcept { return allocator_type(); }
             /**
              * Returns the underlying buffer serving as storage.
             */
-            constexpr const_pointer data() const noexcept
+            const_pointer data() const noexcept
             {
                 _internalString[_length] = value_type();
                 return _internalString;
@@ -258,7 +258,7 @@ namespace std_copy
             /**
              * Returns a non-modifiable C style array version of the string. 
             */
-            constexpr const_pointer c_str() const noexcept
+            const_pointer c_str() const noexcept
             {
                 _internalString[_length] = value_type();
                 return _internalString;
@@ -267,7 +267,7 @@ namespace std_copy
              * Returns the element at index i.
              * @param i The index to retrieve the element from.
             */
-            constexpr reference at(size_type i) const noexcept
+            reference at(size_type i) const noexcept
             {
                 _check_exception(i, _length, "basic_string::at: i out of bounds");
                 return *(_internalString + i);
@@ -276,57 +276,57 @@ namespace std_copy
              * Returns the element at index i. Provides C-style array indexing.
              * @param i The index to retrieve the element from.
             */
-            constexpr reference operator[](size_type i) const noexcept { return *(_internalString + i); }
+            reference operator[](size_type i) const noexcept { return *(_internalString + i); }
             /**
              * Returns a reference to the first character in the string. Equivalent to 
              * (*this)[0].
             */
-            constexpr reference front() const noexcept { return *_internalString; }
+            reference front() const noexcept { return *_internalString; }
             /**
              * Returns a reference to the last character in the string. Equivalent to 
              * (*this)[_length - 1].
             */
-            constexpr reference back() const noexcept { return *(_internalString + _length - 1); }
+            reference back() const noexcept { return *(_internalString + _length - 1); }
             /**
              * Returns an iterator to the start of the string.
             */
-            constexpr iterator begin() const noexcept { return iterator(_internalString); }
+            iterator begin() const noexcept { return iterator(_internalString); }
             /**
              * Returns an iterator to the theoretical element after the last element.
             */
-            constexpr iterator end() const noexcept { return iterator(_internalString + _length); }
+            iterator end() const noexcept { return iterator(_internalString + _length); }
             /**
              * Returns a const iterator to the start of the string.
             */
-            constexpr const_iterator cbegin() const noexcept { return iterator(_internalString); }
+            const_iterator cbegin() const noexcept { return iterator(_internalString); }
             /**
              * Returns a const iterator to the theoretical element after the last element.
             */
-            constexpr const_iterator cend() const noexcept { return iterator(_internalString + _length); }
+            const_iterator cend() const noexcept { return iterator(_internalString + _length); }
             /**
              * Returns a reverse iterator to the reverse beginning of the string.
             */
-            constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator(_internalString + _length); }
+            reverse_iterator rbegin() const noexcept { return reverse_iterator(_internalString + _length); }
             /**
              * Returns a reverse iterator to the reverse end of the string.
             */
-            constexpr reverse_iterator rend() const noexcept { return reverse_iterator(_internalString); }
+            reverse_iterator rend() const noexcept { return reverse_iterator(_internalString); }
             /**
              * Returns a const reverse iterator to the reverse beginning of the string.
             */
-            constexpr const_reverse_iterator crbegin() const noexcept { return reverse_iterator(_internalString + _length); }
+            const_reverse_iterator crbegin() const noexcept { return reverse_iterator(_internalString + _length); }
             /**
              * Returns a const reverse iterator to the reverse end of the string.
             */
-            constexpr const_reverse_iterator crend() const noexcept { return reverse_iterator(_internalString); }
+            const_reverse_iterator crend() const noexcept { return reverse_iterator(_internalString); }
             /**
              * Returns a boolean indicating whether the string is empty.
             */
-            constexpr bool empty() const noexcept { return _length == 0; }
+            bool empty() const noexcept { return _length == 0; }
             /**
              * Reserves additional memory in the string.
             */
-            constexpr void reserve(size_type newCap)
+            void reserve(size_type newCap)
             {
                 if (newCap <= _capacity)
                     return;
@@ -342,7 +342,7 @@ namespace std_copy
              * Shrinks the amount of storage in the string to the number of elements 
              * in the string.
             */
-            constexpr void shrink_to_fit()
+            void shrink_to_fit()
             {
                 pointer temp = _internalString;
                 _internalString = allocator_type::allocate(_length);
@@ -356,7 +356,7 @@ namespace std_copy
              * @param p The pointer to the start of the sequence of characters.
              * @param count The number of elements to append.
             */
-            constexpr _basic_string_type& append(const_pointer str, size_type count)
+            _basic_string_type& append(const_pointer str, size_type count)
             {
                 if (_length + count > _capacity)
                     _realloc((_length + count) / _capacity, _length);
@@ -369,7 +369,7 @@ namespace std_copy
              * Appends the entire sequence of characters pointed to by p onto the end of the string.
              * @param p The pointer to the start of the sequence of characters.
             */
-            constexpr _basic_string_type& append(const_pointer str)
+            _basic_string_type& append(const_pointer str)
             {
                 return this->append(str, traits_type::length(str));
             }
@@ -378,7 +378,7 @@ namespace std_copy
              * @param count The number of characters to append.
              * @param ch The character to append.
             */
-            constexpr _basic_string_type& append(size_type count, const_reference ch)
+            _basic_string_type& append(size_type count, const_reference ch)
             {
                 if (_length + count > _capacity)
                     _realloc((_length + count) / _capacity, _length);
@@ -394,7 +394,7 @@ namespace std_copy
              * @param pos The starting position from where to append.
              * @param count The number of characters after pos to append.
             */
-            constexpr _basic_string_type& append(const _basic_string_type& s, size_type pos = 0, size_type count = npos)
+            _basic_string_type& append(const _basic_string_type& s, size_type pos = 0, size_type count = npos)
             {
                 _check_exception(pos, s._length, "basic_string::append: pos is greater than the length of s");
                 if (pos + count > s._length || count == npos)
@@ -408,7 +408,7 @@ namespace std_copy
              * @param pos The starting position in obj from where to append.
              * @param count The number of characters after pos to append.
             */
-            constexpr _basic_string_type& append(_basic_string_type&& s, size_type pos = 0, size_type count = npos)
+            _basic_string_type& append(_basic_string_type&& s, size_type pos = 0, size_type count = npos)
             {
                 _check_exception(pos, s._length, "basic_string::append: pos is greater than the length of s");
                 if (pos + count > s._length || count == npos)
@@ -420,7 +420,7 @@ namespace std_copy
              * Copies the contents of str to *this.
              * @param str The basic_string object to copy from.
             */
-            constexpr _basic_string_type& assign(const _basic_string_type& str)
+            _basic_string_type& assign(const _basic_string_type& str)
             {
                 this->assign(str, str._length);
             }
@@ -429,7 +429,7 @@ namespace std_copy
              * @param str The basic_string object to copy from.
              * @param count The number of characters to copy.
             */
-            constexpr _basic_string_type& assign(const _basic_string_type& str, size_type count)
+            _basic_string_type& assign(const _basic_string_type& str, size_type count)
             {
                 if (_length > count)
                 {
@@ -451,7 +451,7 @@ namespace std_copy
              * @param pos The number of characters to copy.
              * @param count The number of characters after pos to copy.
             */
-            constexpr _basic_string_type& assign(const _basic_string_type& str, size_type pos, size_type count)
+            _basic_string_type& assign(const _basic_string_type& str, size_type pos, size_type count)
             {
                 return this->assign(str, 0, count);
             }
@@ -460,7 +460,7 @@ namespace std_copy
              * @param s The character sequence to copy from.
              * @param count The number of characters to copy.
             */
-            constexpr _basic_string_type assign(const_pointer s, size_type count)
+            _basic_string_type assign(const_pointer s, size_type count)
             {
                 if (_length > count)
                 {
@@ -479,14 +479,14 @@ namespace std_copy
              * Copies the character sequence s.
              * @param s The character sequence to copy from.
             */
-            constexpr _basic_string_type assign(const_pointer s)
+            _basic_string_type assign(const_pointer s)
             {
                 return this->assign(s, traits_type::length(s));
             }
             /**
              * Assigns *this count occurences of ch.
             */
-            constexpr _basic_string_type assign(size_type count, const_reference ch)
+            _basic_string_type assign(size_type count, const_reference ch)
             {
                 _length = count;
                 _allocate_and_assign_str(_length, allocator_type::allocate,
@@ -498,7 +498,7 @@ namespace std_copy
              * @param last An iterator to the end of the sequence.
             */
             template <class InputIterator>
-            constexpr _basic_string_type& append(InputIterator first, InputIterator last)
+            _basic_string_type& append(InputIterator first, InputIterator last)
         #if __cplusplus > 201703L
             requires input_iterator<InputIterator>
         #endif
@@ -517,7 +517,7 @@ namespace std_copy
              * p onto the end of the current basic_string object.
              * @param p A pointer to the character sequence to append.
             */
-            constexpr _basic_string_type& operator+=(const_pointer p)
+            _basic_string_type& operator+=(const_pointer p)
             {
                 return this->append(p);
             }
@@ -526,7 +526,7 @@ namespace std_copy
              * of the current basic_string object.
              * @param s The basic_string object to append.
             */
-            constexpr _basic_string_type& operator+=(const _basic_string_type& s)
+            _basic_string_type& operator+=(const _basic_string_type& s)
             {
                 return this->append(s._internalString);
             }
@@ -534,7 +534,7 @@ namespace std_copy
              * Overloaded operator+=. This operator appends a character onto the end of the current basic_string object.
              * @param ch The character to append.
             */
-            constexpr _basic_string_type& operator+=(const_reference ch)
+            _basic_string_type& operator+=(const_reference ch)
             {
                 return this->append(1, ch);
             }
@@ -542,14 +542,14 @@ namespace std_copy
              * Pushes a character onto the back of the current basic_string object.
              * @param ch The character to push.
             */
-            constexpr void push_back(const_reference ch)
+            void push_back(const_reference ch)
             {
                 return this->append(1, ch);
             }
             /**
              * Erases the last element off the string.
             */
-            constexpr void pop_back()
+            void pop_back()
             {
                 _terminate_and_update_length(_length - 1);
             }
@@ -557,7 +557,7 @@ namespace std_copy
              * Erases the character pointed to by pos.
              * @param pos An iterator pointing to the element to be erased.
             */
-            constexpr iterator erase(iterator pos)
+            iterator erase(iterator pos)
             {
                 const difference_type dist = pos - this->begin();
 
@@ -576,7 +576,7 @@ namespace std_copy
              * @param first An iterator to the start of the sequence to erase.
              * @param last An iterator to the end of the sequence to erase.
             */
-            constexpr iterator erase(iterator first, iterator last)
+            iterator erase(iterator first, iterator last)
             {
                 const difference_type len = last - first;
                 const difference_type dist_from_last_to_begin = last - this->begin();
@@ -601,7 +601,7 @@ namespace std_copy
              * @param pos The index from where to start erasing.
              * @param count The number of characters to erase.
             */
-            constexpr _basic_string_type& erase(size_type pos = 0, size_type count = npos)
+            _basic_string_type& erase(size_type pos = 0, size_type count = npos)
             {
                 _check_exception(pos, _length, "basic_string::erase: pos is out of bounds");
 
@@ -618,7 +618,7 @@ namespace std_copy
              * Compares this basic_string with the character sequence pointed to by p.
              * @param p A pointer to the character sequence to compare against.
             */
-            constexpr int compare(const_pointer p) const noexcept
+            int compare(const_pointer p) const noexcept
             {
                 return this->compare(0, _length, p);
             }
@@ -629,7 +629,7 @@ namespace std_copy
              * @param count The number of characters after pos to compare.
              * @param p A pointer to the character sequence to compare against.
             */
-            constexpr int compare(size_type pos, size_type count, const_pointer p) const noexcept
+            int compare(size_type pos, size_type count, const_pointer p) const noexcept
             {
                 return this->compare(pos, count, p, traits_type::length(p));
             }
@@ -641,7 +641,7 @@ namespace std_copy
              * @param p A pointer to the character sequence to compare against.
              * @param count2 The number of characters in p to compare.
             */
-            constexpr int compare(size_type pos, size_type count1, const_pointer p, size_type count2) const noexcept
+            int compare(size_type pos, size_type count1, const_pointer p, size_type count2) const noexcept
             {
                 if (count1 > _length - pos)
                     count1 = _length - pos;
@@ -657,7 +657,7 @@ namespace std_copy
              * Compares two basic_string types.
              * @param s The basic_string object getting compared to *this.
             */
-            constexpr int compare(const _basic_string_type& s) const noexcept
+            int compare(const _basic_string_type& s) const noexcept
             {
                 return this->compare(0, _length, s);
             }
@@ -668,7 +668,7 @@ namespace std_copy
              * @param count The number of characters after pos to compare.
              * @param s The basic_string object to compare against.
             */
-            constexpr int compare(size_type pos, size_type count, const _basic_string_type& s)
+            int compare(size_type pos, size_type count, const _basic_string_type& s)
             {
                 return this->compare(pos, count, s, 0, s._length);
             }
@@ -681,7 +681,7 @@ namespace std_copy
              * @param pos2 The starting index of the substring of s.
              * @param count2 The number of characters after pos2 in s to compare.
             */
-            constexpr int compare(size_type pos1, size_type count1, const _basic_string_type& s, size_type pos2, size_type count2)
+            int compare(size_type pos1, size_type count1, const _basic_string_type& s, size_type pos2, size_type count2)
             {
                 if (count1 > _length - pos1)
                     count1 = _length - pos1;
@@ -700,7 +700,7 @@ namespace std_copy
              * if *this is empty.
              * @param ch The character to check for at the beginning of the current basic_string object.
             */
-            constexpr bool starts_with(value_type ch) const noexcept
+            bool starts_with(value_type ch) const noexcept
             {
                 return traits_type::eq(_internalString[0], ch);
             }
@@ -708,7 +708,7 @@ namespace std_copy
              * Checks if *this starts with the null-terminated character sequence p.
              * @param p The character sequence to check for at the beginning of the current basic_string object.
             */
-            constexpr bool starts_with(const_pointer p) const noexcept
+            bool starts_with(const_pointer p) const noexcept
             {
                 const size_type len = traits_type::length(p);
                 if (len > _length)
@@ -723,7 +723,7 @@ namespace std_copy
              * Checks if *this starts with the basic_string object s.
              * @param s The basic_string object to check for at the beginning of the current basic_string object.
             */
-            constexpr bool starts_with(const _basic_string_type& s) const noexcept
+            bool starts_with(const _basic_string_type& s) const noexcept
             {
                 if (s._length > _length)
                     return false;
@@ -740,7 +740,7 @@ namespace std_copy
              * @param last An iterator to the end of the sequence.
             */
             template <class InputIterator>
-            constexpr bool starts_with(InputIterator first, InputIterator last) const noexcept
+            bool starts_with(InputIterator first, InputIterator last) const noexcept
             {
                 const difference_type dist = std_copy::distance(first, last);
                 if (dist > _length)
@@ -760,7 +760,7 @@ namespace std_copy
              * Check if *this ends with ch.
              * @param ch The character to check for at the end of the current basic_string object.
             */
-            constexpr bool ends_with(const_reference ch) const noexcept
+            bool ends_with(const_reference ch) const noexcept
             {
                 return traits_type::eq(this->back(), ch);
             }
@@ -768,7 +768,7 @@ namespace std_copy
              * Check if *this ends with p.
              * @param p A null-terminated character sequence to check for at the end of the current basic_string object.
             */
-            constexpr bool ends_with(pointer p) const noexcept
+            bool ends_with(pointer p) const noexcept
             {
                 const size_type len = traits_type::length(p);
                 return (_length > len) && (this->compare(_length - len, len, p) == 0);
@@ -777,7 +777,7 @@ namespace std_copy
              * Checks if *this ends with s.
              * @param s A basic_string object to check for at the end of the current basic_string object.
             */
-            constexpr bool ends_with(const _basic_string_type& s) const noexcept
+            bool ends_with(const _basic_string_type& s) const noexcept
             {
                 if (s._length > _length)
                     return false;
@@ -793,7 +793,7 @@ namespace std_copy
              * @param second An iterator to the end of the range.
             */
             template <class InputIterator>
-            constexpr bool ends_with(InputIterator first, InputIterator last) const noexcept
+            bool ends_with(InputIterator first, InputIterator last) const noexcept
             {
                 const difference_type dist = std_copy::distance(first, last);
                 if (dist > _length)
@@ -812,7 +812,7 @@ namespace std_copy
              * Checks if *this contains another basic_string object.
              * @param s The basic_string object to find.
             */
-            constexpr bool contains(const _basic_string_type& s) const noexcept
+            bool contains(const _basic_string_type& s) const noexcept
             {
                 return this->find(s) != npos;
             }
@@ -820,7 +820,7 @@ namespace std_copy
              * Checks if *this contains a character sequence p.
              * @param p The character sequence to look for.
             */
-            constexpr bool contains(const_pointer p) const noexcept
+            bool contains(const_pointer p) const noexcept
             {
                 return this->find(p) != npos;
             }
@@ -828,7 +828,7 @@ namespace std_copy
              * Checks if *this contains a character ch.
              * @param ch The character to search for.
             */
-            constexpr bool contains(const_reference ch, size_type pos = 0) const noexcept
+            bool contains(const_reference ch, size_type pos = 0) const noexcept
             {
                 return this->find(ch, pos) != npos;
             }
@@ -838,7 +838,7 @@ namespace std_copy
              * @param count The number of elements to resize *this to.
              * @param ch The character assigned to any additional elements.
             */
-            constexpr void resize(size_type count, const_reference ch)
+            void resize(size_type count, const_reference ch)
             {
                 if (count < _length)
                     _realloc(0, count);
@@ -853,7 +853,7 @@ namespace std_copy
              * Resizes a string to contain count elements.
              * @param count The number of elements to resize *this to.
             */
-            constexpr void resize(size_type count)
+            void resize(size_type count)
             {
                 return this->resize(count, value_type());
             }
@@ -863,7 +863,7 @@ namespace std_copy
              * @param last An iterator pointing to the end of the range to erase.
              * @param str The basic_string object to replace the range.
             */
-            constexpr _basic_string_type& replace(iterator first, iterator last, const _basic_string_type& str)
+            _basic_string_type& replace(iterator first, iterator last, const _basic_string_type& str)
             {
                 return this->replace(first - this->begin(), last - first, str);
             }
@@ -873,7 +873,7 @@ namespace std_copy
              * @param count The number of characters after pos to replace.
              * @param str The basic_string object to replace the substring with.
             */
-            constexpr _basic_string_type& replace(size_type pos, size_type count, const _basic_string_type& str)
+            _basic_string_type& replace(size_type pos, size_type count, const _basic_string_type& str)
             {
                 _check_exception(pos, _length, "basic_string::replace: pos is out of range");
 
@@ -920,7 +920,7 @@ namespace std_copy
              * @param pos2 The index of str to start replacing the substring [pos, pos + count) in *this.
              * @param count2 The number of characters after pos2 to start replacing the substring [pos, pos + count) in *this.
             */
-            constexpr _basic_string_type& replace(size_type pos1, size_type count1, const _basic_string_type& str, size_type pos2, size_type count2)
+            _basic_string_type& replace(size_type pos1, size_type count1, const _basic_string_type& str, size_type pos2, size_type count2)
             {
                 _check_exception(pos1, str._length, "basic_string::replace: pos1 > str.size()");
                 _check_exception(pos2, str._length, "basic_string::replace: pos2 > str.size()");
@@ -936,7 +936,7 @@ namespace std_copy
              * @param last An iterator pointing to the end of the range to erase.
              * @param s The character sequence to replace the range.
             */
-            constexpr _basic_string_type& replace(iterator first, iterator last, pointer s)
+            _basic_string_type& replace(iterator first, iterator last, pointer s)
             {
                 return this->replace(first - this->begin(), last - first, s);
             }
@@ -946,7 +946,7 @@ namespace std_copy
              * @param count The number of characters after pos to replace.
              * @param s The character sequence to replace the range.
             */
-            constexpr _basic_string_type& replace(size_type pos, size_type count, pointer s)
+            _basic_string_type& replace(size_type pos, size_type count, pointer s)
             {
                 _check_exception(pos, _length, "basic_string::replace: pos > size()");
                 
@@ -993,7 +993,7 @@ namespace std_copy
              * @param s The character sequence to replace the range.
              * @param count2 The number of characters in s to replace with.
             */
-            constexpr _basic_string_type& replace(size_type pos, size_type count1, pointer s, size_type count2)
+            _basic_string_type& replace(size_type pos, size_type count1, pointer s, size_type count2)
             {
                 _check_exception(pos, _length, "basic_string::replace: pos > size()");
 
@@ -1012,7 +1012,7 @@ namespace std_copy
              * @param s The character sequence to replace the range.
              * @param count2 The number of characters in s to replace with.
             */
-            constexpr _basic_string_type& replace(iterator first, iterator last, pointer s, size_type count2)
+            _basic_string_type& replace(iterator first, iterator last, pointer s, size_type count2)
             {
                 return this->replace(first, last, s, s + count2);
             }
@@ -1024,7 +1024,7 @@ namespace std_copy
              * @param last2 An iterator to the end of the range to replace [first, last).
             */
             template <class InputIterator>
-            constexpr _basic_string_type& replace(iterator first, iterator last, InputIterator first2, InputIterator last2)
+            _basic_string_type& replace(iterator first, iterator last, InputIterator first2, InputIterator last2)
         #if __cplusplus > 201703L
             requires input_iterator<InputIterator>
         #endif
@@ -1039,7 +1039,7 @@ namespace std_copy
              * @param last An iterator to the end of the range to replace [first, last).
             */
             template <class InputIterator>
-            constexpr _basic_string_type& replace(size_type pos, size_type count, InputIterator first, InputIterator last)
+            _basic_string_type& replace(size_type pos, size_type count, InputIterator first, InputIterator last)
         #if __cplusplus > 201703L
             requires input_iterator<InputIterator>
         #endif
@@ -1088,7 +1088,7 @@ namespace std_copy
              * @param count2 The number of elements to replace the range with.
              * @param ch The value of each element.
             */
-            constexpr _basic_string_type& replace(size_type pos, size_type count, size_type count2, const_reference ch)
+            _basic_string_type& replace(size_type pos, size_type count, size_type count2, const_reference ch)
             {
                 _check_exception(pos, _length, "basic_string::replace: pos > size()");
                 if (count > _length - pos)
@@ -1121,7 +1121,7 @@ namespace std_copy
              * @param count The number of elements to replace the range with.
              * @param ch The value of each element.
             */
-            constexpr _basic_string_type& replace(iterator first, iterator last, size_type count, const_reference ch)
+            _basic_string_type& replace(iterator first, iterator last, size_type count, const_reference ch)
             {
                 return this->replace(first - this->begin(), last - first, count, ch);
             }
@@ -1159,7 +1159,7 @@ namespace std_copy
              * Swaps the contents of two basic_string objects.
              * @param other The basic_string object to swap contents with.
             */
-            constexpr void swap(_basic_string_type& other)
+            void swap(_basic_string_type& other)
             {
                 _basic_string_type temp(*this);
                 
@@ -1175,7 +1175,7 @@ namespace std_copy
              * @param pos The index from where to start searching. Default value is 0.
              * @param count The number of characters after pos to search in.
             */
-            constexpr size_type find(const_reference ch, size_type pos, size_type count) const
+            size_type find(const_reference ch, size_type pos, size_type count) const noexcept
             {
                 return (traits_type::find(_internalString + pos, count, ch) - _internalString);
             }
@@ -1185,7 +1185,7 @@ namespace std_copy
              * @param ch The character to search for.
              * @param pos The index from where to start searching. Default value is 0.
             */
-            constexpr size_type find(const_reference ch, size_type pos = 0) const
+            size_type find(const_reference ch, size_type pos = 0) const noexcept
             {
                 return this->find(ch, pos, _length);
             }
@@ -1195,7 +1195,7 @@ namespace std_copy
              * @param p The substring to search for.
              * @param pos The index from which to start searching for the substring.
             */
-            constexpr size_type find(const_pointer p, size_type pos = 0) const
+            size_type find(const_pointer p, size_type pos = 0) const noexcept
             {
                 return this->find(p, pos, traits_type::length(p));
             }
@@ -1207,7 +1207,7 @@ namespace std_copy
              * @param pos The index from which to start searching for p in *this.
              * @param count The number of characters in p to look for.
             */
-            constexpr size_type find(const_pointer p, size_type pos, size_type count) const
+            size_type find(const_pointer p, size_type pos, size_type count) const noexcept
             {
                 pointer where = search(_internalString + pos, _internalString + _length, p, p + count);
                 if (where == _internalString + _length)
@@ -1222,7 +1222,7 @@ namespace std_copy
              * @param pos The position from where to start searching.
              * @param count The number of characters in s to search for.
             */
-            constexpr size_type find(const _basic_string_type& s, size_type pos, size_type count) const
+            size_type find(const _basic_string_type& s, size_type pos, size_type count) const noexcept
             {
                 return this->find(s._internalString, pos, count);
             }
@@ -1232,7 +1232,7 @@ namespace std_copy
              * @param s The basic_string object to search for.
              * @param pos The position from where to start searching.
             */
-            constexpr size_type find(const _basic_string_type& s, size_type pos = 0) const noexcept
+            size_type find(const _basic_string_type& s, size_type pos = 0) const noexcept
             {
                 return this->find(s._internalString, pos, s._length);
             }
@@ -1244,7 +1244,7 @@ namespace std_copy
              * @param pos The position in *this from where to start searching.
             */
             template <class InputIterator>
-            constexpr size_type find(InputIterator first, InputIterator last, size_type pos = 0) const noexcept
+            size_type find(InputIterator first, InputIterator last, size_type pos = 0) const noexcept
         #if __cplusplus > 201703L
             requires input_iterator<InputIterator>
         #endif
@@ -1260,7 +1260,7 @@ namespace std_copy
              * @param n The number of characters in str to search for.
              * @param pos The position in *this to start searching backwards from.
             */
-            constexpr size_type rfind(const _basic_string_type& str, size_type n, size_type pos) const noexcept
+            size_type rfind(const _basic_string_type& str, size_type n, size_type pos) const noexcept
             {
                 if (pos >= _length)
                     pos = _length - 1;
@@ -1296,7 +1296,7 @@ namespace std_copy
              * @param str The basic_string object to search for in *this.
              * @param pos The position in *this to start searching backwards from.
             */
-            constexpr size_type rfind(const _basic_string_type& str, size_type pos = npos) const noexcept
+            size_type rfind(const _basic_string_type& str, size_type pos = npos) const noexcept
             {
                 return this->rfind(str, str._length, pos);
             }
@@ -1306,7 +1306,7 @@ namespace std_copy
              * @param n The number of characters in str to search for.
              * @param pos The position in *this to start searching backwards from.
             */
-            constexpr size_type rfind(pointer str, size_type n, size_type pos) const noexcept
+            size_type rfind(pointer str, size_type n, size_type pos) const noexcept
             {
                 return this->rfind(_basic_string_type(str), n, pos);
             }
@@ -1315,7 +1315,7 @@ namespace std_copy
              * @param p A character sequence to search for in *this.
              * @param pos The position in *this to start searching backwards from.
             */
-            constexpr size_type rfind(pointer p, size_type pos = npos) const noexcept
+            size_type rfind(pointer p, size_type pos = npos) const noexcept
             {
                 return this->rfind(p, traits_type::length(p), pos);
             }
@@ -1324,7 +1324,7 @@ namespace std_copy
              * @param ch The character to search for.
              * @param pos The position to start searching backwards from.
             */
-            constexpr size_type rfind(const_reference ch, size_type pos = npos) const noexcept
+            size_type rfind(const_reference ch, size_type pos = npos) const noexcept
             {
                 if (pos > _length)
                     pos = _length - 1;
@@ -1342,7 +1342,7 @@ namespace std_copy
              * @param p The character sequence.
              * @param pos The position from which to start searching.
             */
-            constexpr size_type find_first_of(const_pointer p, size_type pos = 0)
+            size_type find_first_of(const_pointer p, size_type pos = 0) const noexcept
             {
                 return this->find_first_of(p, pos, traits_type::length(p));
             }
@@ -1353,7 +1353,7 @@ namespace std_copy
              * @param pos The position from which to start searching.
              * @param count The number of charcters in p that count as "valid".
             */
-            constexpr size_type find_first_of(const_pointer p, size_type pos, size_type count)
+            size_type find_first_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
                 _check_exception(pos, _length, "basic_string::find_first_of: pos > size()");
                 
@@ -1368,7 +1368,7 @@ namespace std_copy
              * @param p The basic_string object.
              * @param pos The position from which to start searching.
             */
-            constexpr size_type find_first_of(const _basic_string_type& p, size_type pos = 0)
+            size_type find_first_of(const _basic_string_type& p, size_type pos = 0) const noexcept
             {
                 return this->find_first_of(p._internalString, pos, p._length);
             }
@@ -1377,7 +1377,7 @@ namespace std_copy
              * @param ch The character to search for.
              * @param pos The position to start searching from.
             */
-            constexpr size_type find_first_of(const_reference ch, size_type pos = 0)
+            size_type find_first_of(const_reference ch, size_type pos = 0) const noexcept
             {
                 _check_exception(pos, _length, "basic_string::find_first_of: pos > size()");
                 
@@ -1392,7 +1392,7 @@ namespace std_copy
              * @param p The character sequence.
              * @param pos The position from which to start searching.
             */
-            constexpr size_type find_first_not_of(const_pointer p, size_type pos = 0)
+            size_type find_first_not_of(const_pointer p, size_type pos = 0) const noexcept
             {
                 return this->find_first_not_of(p, pos, traits_type::length(p));
             }
@@ -1403,7 +1403,7 @@ namespace std_copy
              * @param pos The position from which to start searching.
              * @param count The number of characters from p considered "invalid".
             */
-            constexpr size_type find_first_not_of(const_pointer p, size_type pos, size_type count)
+            size_type find_first_not_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
                 _check_exception(pos, _length, "basic_string::find_first_not_of: pos > size()");
                 
@@ -1421,7 +1421,7 @@ namespace std_copy
              * @param p The basic_string object.
              * @param pos The position from which to start searching.
             */
-            constexpr size_type find_first_not_of(const _basic_string_type& p, size_type pos = 0)
+            size_type find_first_not_of(const _basic_string_type& p, size_type pos = 0) const noexcept
             {
                 return this->find_first_not_of(p._internalString, pos, p._length);
             }
@@ -1431,7 +1431,7 @@ namespace std_copy
              * @param ch The character.
              * @param pos The position to start searching from.
             */
-            constexpr size_type find_first_not_of(const_reference ch, size_type pos = 0)
+            size_type find_first_not_of(const_reference ch, size_type pos = 0) const noexcept
             {
                 _check_exception(pos, _length, "basic_string::find_first_not_of: pos > size()");
                 
@@ -1449,7 +1449,7 @@ namespace std_copy
              * @param pos The position to start searching backwards from.
              * @param count The number of characters from count considered "valid".
             */
-            constexpr size_type find_last_of(const_pointer p, size_type pos, size_type count)
+            size_type find_last_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
                 _check_exception(pos, _length, "basic_string::find_last_of: pos > size()");
 
@@ -1466,7 +1466,7 @@ namespace std_copy
              * @param p The character sequence.
              * @param pos The position to start searching backwards from.
             */
-            constexpr size_type find_last_of(const_pointer p, size_type pos = npos)
+            size_type find_last_of(const_pointer p, size_type pos = npos)
             {
                 if (pos >= _length)
                     pos = _length - 1;
@@ -1479,7 +1479,7 @@ namespace std_copy
              * @param p The character sequence.
              * @param pos The position to start searching backwards from.
             */
-            constexpr size_type find_last_of(const _basic_string_type& p, size_type pos = npos)
+            size_type find_last_of(const _basic_string_type& p, size_type pos = npos) const noexcept
             {
                 if (pos >= _length)
                     pos = _length - 1;
@@ -1491,7 +1491,7 @@ namespace std_copy
              * @param ch The character to search for.
              * @param pos The position to start searching from.
             */
-            constexpr size_type find_last_of(const_reference ch, size_type pos = npos)
+            size_type find_last_of(const_reference ch, size_type pos = npos) const noexcept
             {
                 if (pos >= _length)
                     pos = _length - 1;
@@ -1510,7 +1510,7 @@ namespace std_copy
              * @param pos The position to start searching backwards from.
              * @param count The number of characters from count considered "valid".
             */
-            constexpr size_type find_last_not_of(const_pointer p, size_type pos, size_type count)
+            size_type find_last_not_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
                 _check_exception(pos, _length, "basic_string::find_last_not_of: pos > size()");
 
@@ -1527,7 +1527,7 @@ namespace std_copy
              * @param p The character sequence.
              * @param pos The position to start searching backwards from.
             */
-            constexpr size_type find_last_not_of(const_pointer p, size_type pos = npos)
+            size_type find_last_not_of(const_pointer p, size_type pos = npos) const noexcept
             {
                 if (pos >= _length)
                     pos = _length - 1;
@@ -1540,7 +1540,7 @@ namespace std_copy
              * @param p The character sequence.
              * @param pos The position to start searching backwards from.
             */
-            constexpr size_type find_last_not_of(const _basic_string_type& p, size_type pos = npos)
+            size_type find_last_not_of(const _basic_string_type& p, size_type pos = npos) const noexcept
             {
                 if (pos >= _length)
                     pos = _length - 1;
@@ -1553,7 +1553,7 @@ namespace std_copy
              * @param pos The position to start searching from.
              * @returns The index of the last occurrence of ch.
             */
-            constexpr size_type find_last_not_of(const_reference ch, size_type pos = npos)
+            size_type find_last_not_of(const_reference ch, size_type pos = npos) const noexcept
             {
                 if (pos >= _length)
                     pos = _length - 1;
@@ -1568,7 +1568,7 @@ namespace std_copy
             /**
              * Converts all the alphabetic characters to uppercase if they are lowercase.
             */
-            constexpr _basic_string_type& to_upper()
+            _basic_string_type& to_upper()
             {
                 std_copy::for_each(_internalString, _internalString + _length, _helper::_to_upper);
                 return *this;
@@ -1576,7 +1576,7 @@ namespace std_copy
             /**
              * Converts all the alphabetic characters to lowercase if they are uppercase.
             */
-            constexpr _basic_string_type& to_lower()
+            _basic_string_type& to_lower()
             {
                 std_copy::for_each(_internalString, _internalString + _length, _helper::_to_lower);
                 return *this;
@@ -1585,7 +1585,7 @@ namespace std_copy
              * Removes all the occurrences of a character ch.
              * @param ch The character to remove.
             */
-            constexpr size_type remove(const_reference ch)
+            size_type remove(const_reference ch)
             {
                 size_type numberOfOccurrences = 0;
                 #if __cplusplus >= 201103L
@@ -1617,7 +1617,7 @@ namespace std_copy
              * @param fn The character to remove.
             */
             template <class Function>
-            constexpr size_type remove_if(Function fn)
+            size_type remove_if(Function fn)
             {
                 size_type numberOfOccurrences = 0;
                 #if __cplusplus >= 201103L
@@ -1651,7 +1651,7 @@ namespace std_copy
      * @param second The second basic_string object.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+    basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
                                                  const basic_string<CharT, Traits, Alloc>& second)
     {
         basic_string<CharT, Traits, Alloc> ret(first);
@@ -1664,7 +1664,7 @@ namespace std_copy
      * @param second The character sequence to append.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+    basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
                                                  const CharT* second)
     {
         basic_string<CharT, Traits, Alloc> ret(first);
@@ -1677,7 +1677,7 @@ namespace std_copy
      * @param ch The character to append.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+    basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
                                                            CharT ch)
     {
         basic_string<CharT, Traits, Alloc> ret(first);
@@ -1690,7 +1690,7 @@ namespace std_copy
      * @param second The basic_string object to append.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(const CharT* first,
+    basic_string<CharT, Traits, Alloc> operator+(const CharT* first,
                                                            const basic_string<CharT, Traits, Alloc>& second)
     {
         basic_string<CharT, Traits, Alloc> ret(first);
@@ -1703,7 +1703,7 @@ namespace std_copy
      * @param second The basic_string object.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(CharT first,
+    basic_string<CharT, Traits, Alloc> operator+(CharT first,
                                                            const basic_string<CharT, Traits, Alloc>& second)
     {
         basic_string<CharT, Traits, Alloc> ret(1, first);
@@ -1717,7 +1717,7 @@ namespace std_copy
      * @param second The second rvalue reference'd basic_string object.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+    basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
                                                            basic_string<CharT, Traits, Alloc>&& second)
     {
         return first.append(second);
@@ -1728,7 +1728,7 @@ namespace std_copy
      * @param second The character sequence to append.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+    basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
                                                            const CharT* second)
     {
         return first.append(second);
@@ -1739,7 +1739,7 @@ namespace std_copy
      * @param ch The character to append.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+    basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
                                                            CharT ch)
     {
         return first.append(1, ch);
@@ -1750,7 +1750,7 @@ namespace std_copy
      * @param second The rvalue reference'd basic_string object.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
+    basic_string<CharT, Traits, Alloc> operator+(const basic_string<CharT, Traits, Alloc>& first,
                                                            basic_string<CharT, Traits, Alloc>&& second)
     {
         basic_string<CharT, Traits, Alloc> ret(first);
@@ -1763,7 +1763,7 @@ namespace std_copy
      * @param second The basic_string object.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
+    basic_string<CharT, Traits, Alloc> operator+(basic_string<CharT, Traits, Alloc>&& first,
                                                            const basic_string<CharT, Traits, Alloc>& second)
     {
         return first.append(second);
@@ -1774,7 +1774,7 @@ namespace std_copy
      * @param second The rvalue-reference'd basic_string object;
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(const CharT* first,
+    basic_string<CharT, Traits, Alloc> operator+(const CharT* first,
                                                            basic_string<CharT, Traits, Alloc>&& second)
     {
         basic_string<CharT, Traits, Alloc> ret(first);
@@ -1787,7 +1787,7 @@ namespace std_copy
      * @param second The rvalue-reference'd basic_string object.
     */
     template <class CharT, class Traits = char_traits<CharT>, class Alloc = allocator<CharT>>
-    constexpr basic_string<CharT, Traits, Alloc> operator+(CharT first,
+    basic_string<CharT, Traits, Alloc> operator+(CharT first,
                                                            basic_string<CharT, Traits, Alloc>&& second)
     {
         basic_string<CharT, Traits, Alloc> ret(1, first);
@@ -1839,7 +1839,7 @@ namespace std_copy
      * @param s2 The second basic_string object.
     */
     template <class CharT, class CharTraits, class Alloc>
-    constexpr void swap(basic_string<CharT, CharTraits, Alloc>& s1, basic_string<CharT, CharTraits, Alloc>& s2)
+    void swap(basic_string<CharT, CharTraits, Alloc>& s1, basic_string<CharT, CharTraits, Alloc>& s2)
     {
         s1.swap(s2);
     }
@@ -1849,7 +1849,7 @@ namespace std_copy
      * @param ch The element of which all occurrences in str will be erased.
     */
     template <class CharT, class CharTraits, class Alloc, class U>
-    constexpr std::size_t erase(basic_string<CharT, CharTraits, Alloc>& str, const U& ch)
+    std::size_t erase(basic_string<CharT, CharTraits, Alloc>& str, const U& ch)
     {
         auto it = std_copy::remove(str.begin(), str.end(), ch);
         std::size_t numberErased = std::distance(it, str.end());
@@ -1862,7 +1862,7 @@ namespace std_copy
      * @param fn The function used to determine which elements to erase.
     */
     template <class CharT, class CharTraits, class Alloc, class Function>
-    constexpr std::size_t erase_if(basic_string<CharT, CharTraits, Alloc>& str, Function fn)
+    std::size_t erase_if(basic_string<CharT, CharTraits, Alloc>& str, Function fn)
     {
         auto it = std_copy::remove_if(str.begin(), str.end(), fn);
         std::size_t numberErased = std::distance(it, str.end());
