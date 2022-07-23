@@ -158,8 +158,11 @@ namespace std_copy
              * Copies the contents from m to *this.
              * @param m The map to copy from.
             */
-            constexpr void assign(const _map_type& m)
+            void assign(const _map_type& m)
             {
+                if (std_copy::addressof(*this) == std_copy::addressof(m))
+                    return;
+                
                 _numberOfElements = m._numberOfElements;
                 _capacity = m._capacity;
 
@@ -171,11 +174,14 @@ namespace std_copy
              * Copies the contents from m to *this.
              * @param m The rvalue-reference'd map to copy from.
             */
-            constexpr void assign(_map_type&& m)
+            void assign(_map_type&& m)
             {
-                _numberOfElements = move(m._numberOfElements);
-                _capacity = move(m._capacity);
+                if (std_copy::addressof(*this) == std_copy::addressof(m))
+                    return;
                 
+                _numberOfElements = m._numberOfElements;
+                _capacity = m._capacity;
+
                 _internalBuffer = allocator_type::allocate(_capacity);
                 for (size_type i = 0; i < _numberOfElements; i++)
                     _internalBuffer[i] = move(m._internalBuffer[i]);
@@ -184,21 +190,21 @@ namespace std_copy
              * This function returns the number of elements 
              * in the map.
             */
-            constexpr size_type size() const noexcept
+            size_type size() const noexcept
             {
                 return _numberOfElements;
             }
             /**
              * This function checks whether the map is empty (i.e. has no elements).
             */
-            constexpr bool empty() const noexcept
+            bool empty() const noexcept
             {
                 return _numberOfElements == 0;
             }
             /**
              * This function clears the map.
             */
-            constexpr void clear()
+            void clear()
             {
                 allocator_type::deallocate(_internalBuffer, _capacity);
                 _numberOfElements = 0;
@@ -207,42 +213,42 @@ namespace std_copy
             /**
              * This function returns an iterator to the first element in the container
             */
-            constexpr iterator begin() { return iterator(_internalBuffer); }
+            iterator begin() { return iterator(_internalBuffer); }
             /**
              * This function returns an iterator to the theoretical element after the last 
              * element in the container;
             */
-            constexpr iterator end() { return iterator(_internalBuffer + _numberOfElements); }
+            iterator end() { return iterator(_internalBuffer + _numberOfElements); }
             /**
              * This function returns a const iterator to the first element in the container
             */
-            constexpr const_iterator cbegin() { return iterator(_internalBuffer); }
+            const_iterator cbegin() { return iterator(_internalBuffer); }
             /**
              * This function returns a const iterator to the theoretical element after the last 
              * element in the container;
             */
-            constexpr const_iterator cend() { return iterator(_internalBuffer + _numberOfElements); }
+            const_iterator cend() { return iterator(_internalBuffer + _numberOfElements); }
             /**
              * Returns a reverse iterator to the reverse beginning of the vector.
             */
-            constexpr reverse_iterator rbegin() const { return reverse_iterator(_internalBuffer + _numberOfElements); }
+            reverse_iterator rbegin() const { return reverse_iterator(_internalBuffer + _numberOfElements); }
             /**
              * Returns a reverse iterator to the reverse end of the vector.
             */
-            constexpr reverse_iterator rend() const { return reverse_iterator(_internalBuffer); }
+            reverse_iterator rend() const { return reverse_iterator(_internalBuffer); }
             /**
              * Returns a const reverse iterator to the reverse beginning of the vector.
             */
-            constexpr const_reverse_iterator crbegin() const { return reverse_iterator(_internalBuffer + _numberOfElements); }
+            const_reverse_iterator crbegin() const { return reverse_iterator(_internalBuffer + _numberOfElements); }
             /**
              * Returns a const reverse iterator to the reverse end of the vector.
             */
-            constexpr const_reverse_iterator crend() const { return reverse_iterator(_internalBuffer); }
+            const_reverse_iterator crend() const { return reverse_iterator(_internalBuffer); }
             /**
              * This function erases the element pointed to by the provided iterator.
              * @param pos The iterator which points to the element to erase.
             */
-            constexpr iterator erase(iterator pos)
+            iterator erase(iterator pos)
             {
                 size_type index = 0;
                 for (iterator it = this->begin(); it != this->end(); it++)
@@ -259,7 +265,7 @@ namespace std_copy
              * @param first The start of the sequence to erase.
              * @param last The end of the sequence to erase.
             */
-            constexpr iterator erase(iterator first, iterator last)
+            iterator erase(iterator first, iterator last)
             {
                 size_type index = 0;
                 for (iterator it = this->begin(); it != this->end(); it++)
@@ -331,7 +337,7 @@ namespace std_copy
              * insert an element when an element with the specified key already exists.
              * @param pairToInsert The element to insert into the map.
             */
-            constexpr _iterator_and_bool insert(const_reference pairToInsert)
+            _iterator_and_bool insert(const_reference pairToInsert)
             {
                 iterator pos = this->find(pairToInsert.first);
                 if (pos != this->end())
@@ -368,7 +374,7 @@ namespace std_copy
              * key already exists, that element gets assigned to the new mapped value instead.
              * @param pairToInsert The element to insert into the map.
             */
-            constexpr _iterator_and_bool insert_or_assign(const_reference pairToInsert)
+            _iterator_and_bool insert_or_assign(const_reference pairToInsert)
             {
                 _iterator_and_bool p = this->insert(pairToInsert);
                 if (!p.second)
@@ -380,7 +386,7 @@ namespace std_copy
              * the container.
              * @param elemToConstruct The element to construct in place.
             */
-            constexpr _iterator_and_bool emplace(const_reference elemToConstruct)
+            _iterator_and_bool emplace(const_reference elemToConstruct)
             {
                 return _emplace(elemToConstruct);
             }
@@ -390,7 +396,7 @@ namespace std_copy
              * @param args The arguments forwarded to the constructor.
             */
             template <class ...Args>
-            constexpr _iterator_and_bool emplace(Args&&... args)
+            _iterator_and_bool emplace(Args&&... args)
             {
                 return _emplace(value_type(forward<Args>(args)...));
             }
@@ -400,7 +406,7 @@ namespace std_copy
              * @param args The arguments forwarded to the constructed element's second parameter.
             */
             template <class ...Args>
-            constexpr _iterator_and_bool try_emplace(const key_type& key, Args&&... args)
+            _iterator_and_bool try_emplace(const key_type& key, Args&&... args)
             {
                 return _emplace(value_type(move(key), mapped_type(forward<Args>(args)...)));
             }
@@ -408,8 +414,11 @@ namespace std_copy
              * This function copies one map to another.
              * @param s The map to copy to this.
             */
-            constexpr void operator=(const _map_type& s)
+            void operator=(const _map_type& s)
             {
+                if (std_copy::addressof(*this) == std_copy::addressof(s))
+                    return;
+                
                 allocator_type::deallocate(_internalBuffer, _capacity);
                 _numberOfElements = s._numberOfElements;
                 _capacity = s._capacity;
@@ -419,7 +428,7 @@ namespace std_copy
             /**
              * This function returns an object of the provided _allocator type.
             */
-            constexpr allocator_type get_allocator() const noexcept
+            allocator_type get_allocator() const noexcept
             {
                 return allocator_type();
             }
@@ -428,7 +437,7 @@ namespace std_copy
              * same key as key.
              * @param key The key of the element to search for.
             */
-            constexpr iterator find(const key_type& key)
+            iterator find(const key_type& key)
             {
                 if (_numberOfElements == 0)
                     return this->end();
@@ -461,7 +470,7 @@ namespace std_copy
              * The equality operator has to be provided by the user.
              * @param key The key to find.
             */
-            constexpr bool contains(const key_type& key)
+            bool contains(const key_type& key)
             {
                 return this->find(key) != this->end();
             }
@@ -469,8 +478,11 @@ namespace std_copy
              * This function swaps the contents of *this with s.
              * @param s The map to swap with.
             */
-            constexpr void swap(_map_type& s)
+            void swap(_map_type& s)
             {
+                if (std_copy::addressof(*this) == std_copy::addressof(s))
+                    return;
+                
                 _map_type temp(move(*this));
                 this->assign(s);
                 s.assign(temp);
@@ -484,7 +496,7 @@ namespace std_copy
              * @param key The key used to compare against the keys of the 
              * other elements.
             */
-            constexpr iterator lower_bound(const key_type& key)
+            iterator lower_bound(const key_type& key)
             {
                 if (!_numberOfElements)
                     return this->end();
@@ -512,7 +524,7 @@ namespace std_copy
              * @param key The key used to compare against the keys of the 
              * other elements.
             */
-            constexpr iterator upper_bound(const key_type& key)
+            iterator upper_bound(const key_type& key)
             {
                 if (!_numberOfElements)
                     return this->end();
@@ -538,21 +550,21 @@ namespace std_copy
              * Returns a range containing all elements with the given key in the container.
              * @param key The key to search for.
             */
-            constexpr pair<iterator, iterator> equal_range(const key_type& key)
+            pair<iterator, iterator> equal_range(const key_type& key)
             {
                 return std_copy::make_pair(this->lower_bound(), this->upper_bound());
             }
             /**
              * Returns the object used to compare the keys.
             */
-            constexpr key_compare key_comp() const noexcept
+            key_compare key_comp() const noexcept
             {
                 return key_compare{};
             }
             /**
              * Returns the object used to compare the mapped values.
             */
-            constexpr value_compare value_comp() const noexcept
+            value_compare value_comp() const noexcept
             {
                 return value_compare(key_compare{});
             }
