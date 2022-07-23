@@ -17,8 +17,6 @@ namespace _std_copy_hidden
             typename Allocator::size_type;
             typename Allocator::difference_type;
             {Allocator()};
-            {Allocator::allocate(0)};
-            {Allocator::deallocate(randomPtr, 0)};
         };
     }
 }
@@ -52,7 +50,7 @@ namespace std_copy
                 if (n > size_type(-1) / sizeof(T))
                     throw std::bad_array_new_length();
 
-                return new value_type[n];
+                return static_cast<value_type*>(::operator new(n * sizeof(value_type)));
             }
             /**
              * This function deallocates n elements starting from ptr.
