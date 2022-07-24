@@ -3,6 +3,7 @@
 
 #include "move.hpp"
 #include <string>
+#include <cstdint>
 
 namespace std_copy
 {
@@ -42,7 +43,7 @@ namespace std_copy
             }
     };
 
-    template <unsigned long long DegreeOfEquation>
+    template <std::size_t DegreeOfEquation>
     class equation
     {
         protected:
@@ -134,7 +135,7 @@ namespace std_copy
             }
     };
 
-    template <unsigned long long N>
+    template <std::size_t N>
     std::string to_string(equation<N> e)
     {
         //tbd

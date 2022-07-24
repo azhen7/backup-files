@@ -155,7 +155,7 @@ namespace std_copy
             }
 
             /**
-             * Copies the contents from m to *this.
+             * Copies the contents from @p m to @p *this.
              * @param m The map to copy from.
             */
             void assign(const _map_type& m)
@@ -426,7 +426,7 @@ namespace std_copy
                 std_copy::copy(s._internalBuffer, s._internalBuffer + _numberOfElements, _internalBuffer);
             }
             /**
-             * This function returns an object of the provided _allocator type.
+             * This function returns an object of the provided @p allocator type.
             */
             allocator_type get_allocator() const noexcept
             {
@@ -434,7 +434,7 @@ namespace std_copy
             }
             /**
              * This function returns an iterator to the element with the 
-             * same key as key.
+             * same key as @p key.
              * @param key The key of the element to search for.
             */
             iterator find(const key_type& key)
@@ -475,7 +475,7 @@ namespace std_copy
                 return this->find(key) != this->end();
             }
             /**
-             * This function swaps the contents of *this with s.
+             * This function swaps the contents of @p *this with @p s.
              * @param s The map to swap with.
             */
             void swap(_map_type& s)
@@ -492,7 +492,7 @@ namespace std_copy
             }
             /**
              * This function returns an iterator to the first element with 
-             * a key that does not compare less than key.
+             * a key that does not compare less than @p key.
              * @param key The key used to compare against the keys of the 
              * other elements.
             */
@@ -580,7 +580,7 @@ namespace std_copy
         lhs.swap(rhs);
     }
     /**
-     * This function erases all elements from a map that meet a certain criteria.
+     * This function erases all elements from a map for which @p pred returns true.
      * @param c The map to erase elements from.
      * @param pred The function used to erase elements.
     */

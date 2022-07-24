@@ -307,7 +307,7 @@ namespace std_copy
                 _size = 0;
             }
 
-            // Funtions used when appending elements (e.g. push_front, push_back, insert, etc.)
+            // Funtions used for appending elements (e.g. push_front, push_back, insert, etc.)
             bool _check_if_empty(const_reference e)
             {
                 if (!_head)
@@ -493,7 +493,7 @@ namespace std_copy
              */
             const_reverse_iterator crend() const noexcept { return const_reverse_iterator(__end_check_if_nullptr(), _tail); }
             /**
-             * Inserts an element at pos.
+             * Inserts an element at @p pos.
              * @param pos The position to insert the element at.
              * @param elem The element to insert.
              */
@@ -519,7 +519,7 @@ namespace std_copy
                 return pos;
             }
             /**
-             * Inserts an element at pos.
+             * Inserts an element at @p pos.
              * @param pos The position to insert the element at.
              * @param args The arguments that are forwarded to the element's type's constructor.
              */
@@ -549,7 +549,7 @@ namespace std_copy
                 return _head->_value;
             }
             /**
-             * Erases the element at pos.
+             * Erases the element at @p pos.
              * @param pos The position of the element to erase.
              */
             iterator erase(iterator pos)
@@ -575,7 +575,7 @@ namespace std_copy
                 return nextIt;
             }
             /**
-             * Resizes the list to contain count elements. If count is greater than the
+             * Resizes the list to contain @p count elements. If @p count is greater than the
              * current size of the list, additional default-inserted elements are appended.
              * @param count The new size to resize the list to.
              */
@@ -584,8 +584,8 @@ namespace std_copy
                 __resize(count, value_type());
             }
             /**
-             * Resizes the list to contain count elements. If count is greater than the
-             * current size of the list, additional copies of val are appended.
+             * Resizes the list to contain @p count elements. If @p count is greater than the
+             * current size of the list, additional copies of @p val are appended.
              * @param count The new size to resize the list to.
              * @param val The value that gets appended.
              */
@@ -594,7 +594,7 @@ namespace std_copy
                 __resize(count, val);
             }
             /**
-             * Removes all elements equal to val.
+             * Removes all elements equal to @p val.
              * @param val The value to remove.
              */
             size_type remove(const_reference val)
@@ -624,7 +624,7 @@ namespace std_copy
                 return numberOfRemoved;
             }
             /**
-             * Removes all elements for which func returns true.
+             * Removes all elements for which @p func returns true.
              * @param func The function determing which elements to remove.
              */
             template <class Function>
