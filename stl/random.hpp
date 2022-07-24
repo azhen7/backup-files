@@ -2,7 +2,7 @@
 #define _STD_COPY_RANDOM
 
 #include <cstdint>
-#include <random>
+#include "type_traits.hpp"
 
 namespace std_copy
 {
@@ -15,14 +15,14 @@ namespace std_copy
     class linear_congruential_engine
     {
         protected:
-            UIntType _seed;
+            typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type _seed;
 
             typedef linear_congruential_engine<
                 UIntType,
                 multiplierVal,
                 incrementVal,
                 modulusVal
-            > _linear_congruential_engine_type;
+            > _self_type;
         
         public:
             typedef UIntType    result_type;
@@ -38,7 +38,7 @@ namespace std_copy
             explicit linear_congruential_engine(result_type val)
                 : _seed(val) {}
 
-            linear_congruential_engine(const _linear_congruential_engine_type& l)
+            linear_congruential_engine(const _self_type& l)
                 : _seed(l._seed) {}
 
             /**
@@ -75,25 +75,26 @@ namespace std_copy
              * Advances the internal state of the engine by z positions.
              * @param z The number of positions to advance the internal state by.
             */
-            void discard(unsigned long long z)
+            void discard(std::size_t z)
             {
                 while (z-- > 0)
                     (*this)();
             }
 
             template <class UInt, UInt a, UInt c, UInt m>
-            friend bool operator==(const _linear_congruential_engine_type& lhs,
-                                   const _linear_congruential_engine_type& rhs);
+            friend bool operator==(const _self_type& lhs,
+                                   const _self_type& rhs);
             template <class UInt, UInt a, UInt c, UInt m>
-            friend bool operator!=(const _linear_congruential_engine_type& lhs,
-                                   const _linear_congruential_engine_type& rhs);
+            friend bool operator!=(const _self_type& lhs,
+                                   const _self_type& rhs);
     };
     
     template <class UIntType, UIntType a, UIntType c, UIntType m>
     bool operator==(const linear_congruential_engine<UIntType, a, c, m>& lhs,
                     const linear_congruential_engine<UIntType, a, c, m>& rhs)
     {
-        return lhs._seed == rhs._seed;
+        return (lhs._seed == rhs._seed) && (lhs.multiplier == rhs.multiplier)
+               && (lhs.increment == rhs.increment) && (lhs.default_seed == rhs.default_seed);
     }
 
     template <class UIntType, UIntType a, UIntType c, UIntType m>

@@ -48,47 +48,6 @@ _CHARCONV_START_HIDDEN_SCOPE
         return '\0';
     }
 
-    namespace _detail
-    {
-        template <class T, bool B, class... Args>
-        struct _select;
-
-        template <class T, class IntT, class... Args>
-        struct _select<T, true, IntT, Args...>
-        {
-            typedef IntT type;
-        };
-        template <class T, class IntT, class NextIntT, class... Args>
-        struct _select<T, false, IntT, NextIntT, Args...>
-            : _select<T, sizeof(T) <= sizeof(NextIntT), NextIntT, Args...>
-        {
-        };
-        template <class T, class IntT>
-        struct _select<T, false, IntT>
-        {
-            typedef T type;
-        };
-    }
-
-    template <class T>
-    struct _find_uleast
-    {
-        using type = typename _detail::_select<T, sizeof(T) <= sizeof(unsigned int),
-                                            unsigned int,
-                                            unsigned long,
-                                            unsigned long long,
-                                            __uint128_t>::type;
-    };
-
-    template <class T>
-    struct _find_least_floating_point
-    {
-        using type = typename _detail::_select<T, sizeof(T) <= sizeof(float),
-                                            float,
-                                            double,
-                                            long double>::type;
-    };
-
     bool _is_alpha_char(char c)
     {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -145,7 +104,7 @@ _CHARCONV_START_HIDDEN_SCOPE
             requires std_copy::is_integral_v<IntType>
     #endif
         {
-            using uleast_type = typename _find_uleast<IntType>::type;
+            using uleast_type = typename _std_copy_type_traits::_find_uleast<IntType>::type;
             uleast_type value = static_cast<uleast_type>(val);
             val = 0;
 
@@ -236,7 +195,7 @@ _CHARCONV_START_HIDDEN_SCOPE
             requires std_copy::is_floating_point_v<FloatingPointType>
     #endif
         {
-            using floating_point_least_greater = typename _find_least_floating_point<FloatingPointType>::type;
+            using floating_point_least_greater = typename _std_copy_type_traits::_find_least_floating_point<FloatingPointType>::type;
             floating_point_least_greater value = 0.0;
 
             std_copy::from_chars_result ret;

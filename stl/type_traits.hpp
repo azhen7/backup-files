@@ -604,6 +604,47 @@ namespace _std_copy_hidden
         auto test_if_base(...) -> std_copy::true_type;
         template <class T, class D>
         auto test_if_base(int) -> decltype(test_if_ptr_convertible<T>(static_cast<D*>(nullptr)));
+
+        namespace _detail
+        {
+            template <class T, bool B, class... Args>
+            struct _select;
+
+            template <class T, class IntT, class... Args>
+            struct _select<T, true, IntT, Args...>
+            {
+                typedef IntT type;
+            };
+            template <class T, class IntT, class NextIntT, class... Args>
+            struct _select<T, false, IntT, NextIntT, Args...>
+                : _select<T, sizeof(T) < sizeof(NextIntT), NextIntT, Args...>
+            {
+            };
+            template <class T, class IntT>
+            struct _select<T, false, IntT>
+            {
+                typedef T type;
+            };
+        }
+
+        template <class T>
+        struct _find_uleast
+        {
+            using type = typename _detail::_select<T, sizeof(T) < sizeof(unsigned int),
+                                                unsigned int,
+                                                unsigned long,
+                                                unsigned long long,
+                                                __uint128_t>::type;
+        };
+
+        template <class T>
+        struct _find_least_floating_point
+        {
+            using type = typename _detail::_select<T, sizeof(T) < sizeof(float),
+                                                float,
+                                                double,
+                                                long double>::type;
+        };
     }
 }
 
