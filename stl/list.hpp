@@ -4,9 +4,9 @@
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
 #include "iterator.hpp"
-#include "iterator_traits.hpp"
-#include "iterator_adaptors.hpp"
 #include "move.hpp"
+#include "algorithm.hpp"
+#include "functional_comp.hpp"
 #include <cstdint>
 #include <stdexcept>
 
@@ -33,7 +33,7 @@ namespace _std_copy_hidden
 
                 _Type _value;
 
-                void _init(_self_type *p, _self_type *n, const _Type &val)
+                void _init(_self_type* p, _self_type* n, const _Type& val)
                 {
                     _prev = p;
                     _next = n;
@@ -84,25 +84,42 @@ namespace _std_copy_hidden
                 }
                 _self_type operator--()
                 {
-                    if (!_curr) return _prev;
+                    if (!_curr)
+                    {
+                        _curr = _prev;
+                        return *this;
+                    }
 
                     _curr = _curr->_prev;
                     return *this;
                 }
                 _self_type operator--(int)
                 {
-                    if (!_curr) return _prev;
-
                     _self_type temp = *this;
+                    if (!_curr)
+                    {
+                        _curr = _prev;
+                        return temp;
+                    }
+
                     _curr = _curr->_prev;
                     return temp;
                 }
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wreturn-local-addr"
                 _T& operator*()
                 {
-                    if (!_curr) throw std::bad_alloc();
+                    if (!_curr)
+                    {
+                        _T* t = new _T;
+                        _T val = *t;
+                        delete t;
+                        return val;
+                    }
 
                     return _curr->_value;
                 }
+        #pragma GCC diagnostic pop
                 _node_type* base()
                 {
                     return _curr;
@@ -161,25 +178,42 @@ namespace _std_copy_hidden
                 }
                 _self_type operator--()
                 {
-                    if (!_curr) return _prev;
+                    if (!_curr)
+                    {
+                        _curr = _prev;
+                        return *this;
+                    }
 
                     _curr = _curr->_prev;
                     return *this;
                 }
                 _self_type operator--(int)
                 {
-                    if (!_curr) return _prev;
-
                     _self_type temp = *this;
+                    if (!_curr)
+                    {
+                        _curr = _prev;
+                        return temp;
+                    }
+
                     _curr = _curr->_prev;
                     return temp;
                 }
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wreturn-local-addr"
                 _Type& operator*()
                 {
-                    if (!_curr) throw std::bad_alloc();
+                    if (!_curr)
+                    {
+                        _Type* t = new _Type;
+                        _Type val = *t;
+                        delete t;
+                        return val;
+                    }
 
                     return _curr->_value;
                 }
+        #pragma GCC diagnostic pop
                 _node_type* base()
                 {
                     return _curr;
@@ -211,23 +245,23 @@ namespace std_copy
     class list
     {
         private:
-            typedef list<T, Alloc> _list_type;
-            typedef _std_copy_hidden::_std_copy_list::_node<T> _node_type;
-            typedef allocator<_node_type> _node_allocator_type;
+            typedef list<T, Alloc>                                              _list_type;
+            typedef _std_copy_hidden::_std_copy_list::_node<T>                  _node_type;
+            typedef allocator<_node_type>                                       _node_allocator_type;
 
         public:
-            typedef T value_type;
-            typedef T& reference;
-            typedef const T& const_reference;
-            typedef allocator_traits<Alloc>::pointer pointer;
-            typedef allocator_traits<Alloc>::const_pointer const_pointer;
-            typedef Alloc allocator_type;
-            typedef _std_copy_hidden::_std_copy_list::_node_iterator<T> iterator;
-            typedef _std_copy_hidden::_std_copy_list::_const_node_iterator<T> const_iterator;
-            typedef std_copy::reverse_iterator<iterator> reverse_iterator;
-            typedef std_copy::reverse_iterator<const_iterator> const_reverse_iterator;
-            typedef std::size_t size_type;
-            typedef std::ptrdiff_t difference_type;
+            typedef T                                                           value_type;
+            typedef T&                                                          reference;
+            typedef const T&                                                    const_reference;
+            typedef allocator_traits<Alloc>::pointer                            pointer;
+            typedef allocator_traits<Alloc>::const_pointer                      const_pointer;
+            typedef Alloc                                                       allocator_type;
+            typedef _std_copy_hidden::_std_copy_list::_node_iterator<T>         iterator;
+            typedef _std_copy_hidden::_std_copy_list::_const_node_iterator<T>   const_iterator;
+            typedef std_copy::reverse_iterator<iterator>                        reverse_iterator;
+            typedef std_copy::reverse_iterator<const_iterator>                  const_reverse_iterator;
+            typedef std::size_t                                                 size_type;
+            typedef std::ptrdiff_t                                              difference_type;
 
         private:
             _node_type *_head{nullptr};
@@ -348,6 +382,34 @@ namespace std_copy
                         _tail->_next = nullptr;
                     }
                 }
+            }
+
+            template <class Function>
+            size_type __remove(Function compare)
+            {
+                size_type numberOfRemoved = 0;
+                _node_type* temp = _head;
+                while (temp)
+                {
+                    if (compare(temp->_value))
+                    {
+                        temp = temp->_prev;
+                        _node_type* nextNext = temp->_next->_next;
+                        _node_allocator_type::deallocate(temp->_next, 1);
+                        temp->_next = nextNext;
+
+                        if (nextNext)
+                        {
+                            nextNext->_prev = temp;
+                        }
+
+                        _size--;
+                        numberOfRemoved++;
+                    }
+                    _tail = temp;
+                    temp = temp->_next;
+                }
+                return numberOfRemoved;
             }
 
         public:
@@ -515,7 +577,10 @@ namespace std_copy
                 _node_type* newElem = _node_allocator_type::allocate(1);
                 newElem->_init(pos.base()->_prev, pos.base(), elem);
                 pos.base()->_prev = newElem;
-                pos.base()->_prev->_prev->_next = newElem;
+                if (pos.base()->_prev->_prev)
+                {
+                    pos.base()->_prev->_prev->_next = newElem;
+                }
                 return pos;
             }
             /**
@@ -579,7 +644,7 @@ namespace std_copy
              * current size of the list, additional default-inserted elements are appended.
              * @param count The new size to resize the list to.
              */
-            void resize(size_type count)
+            void resize(size_type count) noexcept
             {
                 __resize(count, value_type());
             }
@@ -589,7 +654,7 @@ namespace std_copy
              * @param count The new size to resize the list to.
              * @param val The value that gets appended.
              */
-            void resize(size_type count, const_reference val)
+            void resize(size_type count, const_reference val) noexcept
             {
                 __resize(count, val);
             }
@@ -599,29 +664,7 @@ namespace std_copy
              */
             size_type remove(const_reference val)
             {
-                size_type numberOfRemoved = 0;
-                _node_type* temp = _head;
-                while (temp)
-                {
-                    if (temp->_value == val)
-                    {
-                        temp = temp->_prev;
-                        _node_type* nextNext = temp->_next->_next;
-                        _node_allocator_type::deallocate(temp->_next, 1);
-                        temp->_next = nextNext;
-
-                        if (nextNext)
-                        {
-                            nextNext->_prev = temp;
-                        }
-
-                        _size--;
-                        numberOfRemoved++;
-                    }
-                    _tail = temp;
-                    temp = temp->_next;
-                }
-                return numberOfRemoved;
+                return __remove(bind1st(equal_to<value_type>(), val));
             }
             /**
              * Removes all elements for which @p func returns true.
@@ -630,29 +673,14 @@ namespace std_copy
             template <class Function>
             size_type remove_if(Function func)
             {
-                size_type numberOfRemoved = 0;
-                _node_type* temp = _head;
-                while (temp)
-                {
-                    if (func(temp->_value))
-                    {
-                        temp = temp->_prev;
-                        _node_type* nextNext = temp->_next->_next;
-                        _node_allocator_type::deallocate(temp->_next, 1);
-                        temp->_next = nextNext;
-
-                        if (nextNext)
-                        {
-                            nextNext->_prev = temp;
-                        }
-
-                        _size--;
-                        numberOfRemoved++;
-                    }
-                    _tail = temp;
-                    temp = temp->_next;
-                }
-                return numberOfRemoved;
+                return __remove(func);
+            }
+            /**
+             * Sorts the current list.
+             */
+            void reverse() noexcept
+            {
+                std_copy::reverse(this->begin(), this->end());
             }
 
     #if _DEBUG

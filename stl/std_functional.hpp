@@ -2,7 +2,6 @@
 #define _STD_COPY_STD_FUNCTIONAL
 
 #include "move.hpp"
-#include <functional>
 
 namespace std_copy
 {

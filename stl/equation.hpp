@@ -134,12 +134,6 @@ namespace std_copy
                 return equation<DegreeOfEquation - 1>(newCoefs);
             }
     };
-
-    template <std::size_t N>
-    std::string to_string(equation<N> e)
-    {
-        //tbd
-    }
 }
 
 #endif /* _STD_COPY_EQUATION */

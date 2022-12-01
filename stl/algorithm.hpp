@@ -1561,11 +1561,10 @@ namespace std_copy
     requires bidirectional_iterator<InputIterator>
 #endif
     {
-        while (first != last)
+        if (first == last) return;
+        while (first != last && first != --last)
         {
-            iter_swap(first, last);
-            first++;
-            last--;
+            iter_swap(first++, last);
         }
     }
     /**

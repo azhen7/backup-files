@@ -35,7 +35,7 @@ namespace std_copy
             explicit constexpr unary_negate(const Function& x)
                 : _internalPred(forward<Function>(x)) {}
 
-            constexpr result_type operator()(const argument_type& x)
+            constexpr result_type operator()(const argument_type& x) const
             {
                 return !_internalPred(x);
             }
@@ -63,7 +63,7 @@ namespace std_copy
             explicit constexpr binary_negate(const Function& f)
                 : _internalPred(forward<Function>(f)) {}
             
-            constexpr result_type operator()(const first_argument_type& x, const second_argument_type& y)
+            constexpr result_type operator()(const first_argument_type& x, const second_argument_type& y) const
             {
                 return !_internalPred(x, y);
             }
@@ -87,7 +87,7 @@ namespace std_copy
             pointer_to_unary_function(_internalFunctionType f)
                 : _internalFunction(forward<_internalFunctionType>(f)) {}
             
-            constexpr ResType operator()(const ArgType& x)
+            constexpr ResType operator()(const ArgType& x) const
             {
                 return _internalFunction(x);
             }
@@ -105,7 +105,7 @@ namespace std_copy
             pointer_to_binary_function(_internalFunctionType f)
                 : _internalFunction(forward<_internalFunctionType>(f)) {}
             
-            constexpr ResType operator()(const ArgType1& x, const ArgType2& y)
+            constexpr ResType operator()(const ArgType1& x, const ArgType2& y) const
             {
                 return _internalFunction(x, y);
             }
@@ -131,7 +131,7 @@ namespace std_copy
     template <class T>
     struct plus : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a + b;
         }
@@ -144,7 +144,7 @@ namespace std_copy
     struct plus<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) + forward<U>(b))
         {
             return a + b;
@@ -157,7 +157,7 @@ namespace std_copy
     template <class T>
     struct minus : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a - b;
         }
@@ -170,7 +170,7 @@ namespace std_copy
     struct minus<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) - forward<U>(b))
         {
             return a - b;
@@ -183,7 +183,7 @@ namespace std_copy
     template <class T>
     struct multiplies : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a * b;
         }
@@ -196,7 +196,7 @@ namespace std_copy
     struct multiplies<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) * forward<U>(b))
         {
             return a * b;
@@ -209,7 +209,7 @@ namespace std_copy
     template <class T>
     struct divides : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a / b;
         }
@@ -222,7 +222,7 @@ namespace std_copy
     struct divides<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) / forward<U>(b))
         {
             return a / b;
@@ -235,7 +235,7 @@ namespace std_copy
     template <class T>
     struct modulus : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a % b;
         }
@@ -248,7 +248,7 @@ namespace std_copy
     struct modulus<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) % forward<U>(b))
         {
             return a % b;
@@ -288,7 +288,7 @@ namespace std_copy
     template <class T>
     struct equal_to : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a == b;
         }
@@ -300,7 +300,7 @@ namespace std_copy
     struct equal_to<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) == forward<U>(b))
         {
             return a == b;
@@ -313,7 +313,7 @@ namespace std_copy
     template <class T>
     struct not_equal_to : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a != b;
         }
@@ -325,7 +325,7 @@ namespace std_copy
     struct not_equal_to<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) != forward<U>(b))
         {
             return a != b;
@@ -338,7 +338,7 @@ namespace std_copy
     template <class T>
     struct less : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a < b;
         }
@@ -350,7 +350,7 @@ namespace std_copy
     struct less<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) < forward<U>(b))
         {
             return a < b;
@@ -363,7 +363,7 @@ namespace std_copy
     template <class T>
     struct greater : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a > b;
         }
@@ -375,7 +375,7 @@ namespace std_copy
     struct greater<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) > forward<U>(b))
         {
             return a > b;
@@ -388,7 +388,7 @@ namespace std_copy
     template <class T>
     struct less_equal : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a <= b;
         }
@@ -400,7 +400,7 @@ namespace std_copy
     struct less_equal<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) <= forward<U>(b))
         {
             return a <= b;
@@ -413,7 +413,7 @@ namespace std_copy
     template <class T>
     struct greater_equal : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a >= b;
         }
@@ -425,7 +425,7 @@ namespace std_copy
     struct greater_equal<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) >= forward<U>(b))
         {
             return a >= b;
@@ -439,7 +439,7 @@ namespace std_copy
     template <class T>
     struct logical_and : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a && b;
         }
@@ -451,7 +451,7 @@ namespace std_copy
     struct logical_and<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) && forward<U>(b))
         {
             return a && b;
@@ -464,7 +464,7 @@ namespace std_copy
     template <class T>
     struct logical_or : public binary_function<T, T, bool>
     {
-        constexpr bool operator()(const T& a, const T& b)
+        constexpr bool operator()(const T& a, const T& b) const
         {
             return a || b;
         }
@@ -476,7 +476,7 @@ namespace std_copy
     struct logical_or<void>
     {
         template <class T, class U>
-        auto operator()(T&& a, U&& b)
+        auto operator()(T&& a, U&& b) const
             -> decltype(forward<T>(a) || forward<U>(b))
         {
             return a || b;
@@ -515,7 +515,7 @@ namespace std_copy
     template <class T>
     struct bit_and : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a & b;
         }
@@ -540,7 +540,7 @@ namespace std_copy
     template <class T>
     struct bit_or : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a | b;
         }
@@ -565,7 +565,7 @@ namespace std_copy
     template <class T>
     struct bit_xor : public binary_function<T, T, T>
     {
-        constexpr T operator()(const T& a, const T& b)
+        constexpr T operator()(const T& a, const T& b) const
         {
             return a ^ b;
         }
@@ -628,8 +628,8 @@ namespace std_copy
             typename Fn::first_argument_type val;
         
         public:
-            binder1st(Fn f, typename Fn::first_argument_type& s)
-                : _internalOp(forward<Fn>(f)), val(forward<Fn>(f))
+            binder1st(const Fn& f, const typename Fn::first_argument_type& s)
+                : _internalOp(f), val(s)
             {}
 
             typename Fn::result_type operator()(const typename Fn::second_argument_type& x) const
@@ -641,7 +641,8 @@ namespace std_copy
     template <class F, class T>
     binder1st<F> bind1st(const F& f, const T& x)
     {
-        return binder1st<F>(forward<F>(f), typename F::first_argument_type(x));
+        typedef typename F::first_argument_type _arg_type;
+        return binder1st<F>(f, _arg_type(x));
     }
 
     //binder2nd
@@ -653,7 +654,7 @@ namespace std_copy
             typename Fn::second_argument_type val;
         
         public:
-            binder2nd(Fn f, typename Fn::second_argument_type& s)
+            binder2nd(const Fn& f, const typename Fn::second_argument_type& s)
                 : _internalOp(forward<Fn>(f)), val(forward<Fn>(f))
             {}
 
@@ -666,7 +667,7 @@ namespace std_copy
     template <class F, class T>
     binder2nd<F> bind2nd(const F& f, const T& x)
     {
-        return binder2nd<F>(forward<F>(f), typename F::second_argument_type(x));
+        return binder2nd<F>(f, typename F::second_argument_type(x));
     }
 }
 

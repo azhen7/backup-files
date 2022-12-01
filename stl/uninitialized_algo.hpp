@@ -5,6 +5,7 @@
 #include "move.hpp"
 #include "concepts.hpp"
 #include "construct_destroy.hpp"
+#include <new>
 
 #define _uninitialized_algo_construct_obj(type, where, val) \
     (::new (const_cast<void*>(static_cast<const volatile void*>(addressof(where)))) type(val))
