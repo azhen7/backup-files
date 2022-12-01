@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Bootstrap -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous"
+        />
+
+        <!-- MathJax -->
+        <script
+            id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+        ></script>
+
+        <!-- JQuery -->
+        <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"
+        ></script>
+    </head>
+    <body>
+        {{#if response}}
+        <p>
+          {{response}}
+        </p>
+        {{else}}
+        <div class="container">
+            <div class="bg-primary py-3 mb-3 container-fluid text-white rounded font-weight-bold">
+                Trigonometry Identities 
+            </div>
+            <p>Test your trig identity knowledge here!</p>
+            <br />
+            <form method="get" action="/trig">
+                <div class="form-check">
+                    <span><b>1.</b> $$\frac{sin(x)}{cos(x)}$$</span>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                          <input type="checkbox" class="form-check-input" name="1" value="tan">
+                          \(tan(x)\)
+                        </label>
+                      </div>
+                      <br />
+                      <div class="form-check">
+                        <label class="form-check-label">
+                          <input type="checkbox" class="form-check-input" name="1" value="sec">
+                          \(sec(x)\)
+                        </label>
+                      </div>
+                      <br />
+                      <div class="form-check">
+                        <label class="form-check-label">
+                          <input type="checkbox" class="form-check-input" name="1" value="csc">
+                          \(csc(x)\)
+                        </label>
+                      </div>
+                      <br />
+                      <div class="form-check">
+                        <label class="form-check-label">
+                          <input type="checkbox" class="form-check-input" name="1" value="cot">
+                          \(cot(x)\)
+                        </label>
+                      </div>
+                      <br />
+                      <div class="form-check">
+                        <label class="form-check-label">
+                          <input type="checkbox" class="form-check-input" name="1" value="sinc">
+                          \(sinc(x)\)
+                        </label>
+                      </div>
+                </div>
+                <br />
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        {{/if}}
+
+        <script type="text/javascript">
+            $('input[type="checkbox"]').on('change', function() {
+                $('input[name="' + this.name + '"]').not(this).prop('checked', false);
+            });
+        </script>
+    </body>
+</html>
