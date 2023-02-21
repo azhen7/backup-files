@@ -17,6 +17,9 @@
 #include <list>
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-local-addr"
+
 namespace _std_copy_hidden
 {
     namespace _std_copy_list
@@ -41,6 +44,13 @@ namespace _std_copy_hidden
                 }
         };
 
+        template <class T>
+        T& _generate_garbage_val() {
+            T* t = new T;
+            T& val = *t;
+            delete t;
+            return val;
+        }
 
         template <class _T>
         struct _node_iterator
@@ -105,21 +115,11 @@ namespace _std_copy_hidden
                     _curr = _curr->_prev;
                     return temp;
                 }
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wreturn-local-addr"
                 _T& operator*()
                 {
-                    if (!_curr)
-                    {
-                        _T* t = new _T;
-                        _T val = *t;
-                        delete t;
-                        return val;
-                    }
-
+                    if (!_curr) { return _generate_garbage_val<_T>(); }
                     return _curr->_value;
                 }
-        #pragma GCC diagnostic pop
                 _node_type* base()
                 {
                     return _curr;
@@ -139,21 +139,21 @@ namespace _std_copy_hidden
         };
 
 
-        template <class _Type>
+        template <class _T>
         struct _const_node_iterator
         {
             private:
-                typedef const _node<_Type> _node_type;
-                typedef _const_node_iterator<_Type> _self_type;
+                typedef const _node<_T> _node_type;
+                typedef _const_node_iterator<_T> _self_type;
                 const _node_type* _curr;
                 const _node_type* _prev;
 
             public:
                 typedef std::ptrdiff_t difference_type;
                 typedef std_copy::bidirectional_iterator_tag iterator_category;
-                typedef _Type value_type;
-                typedef const _Type& reference;
-                typedef const _Type* pointer;
+                typedef _T value_type;
+                typedef const _T& reference;
+                typedef const _T* pointer;
 
                 _const_node_iterator(_node_type *e, _node_type* p)
                     : _curr(e)
@@ -199,40 +199,33 @@ namespace _std_copy_hidden
                     _curr = _curr->_prev;
                     return temp;
                 }
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wreturn-local-addr"
-                _Type& operator*()
+        
+                _T& operator*()
                 {
-                    if (!_curr)
-                    {
-                        _Type* t = new _Type;
-                        _Type val = *t;
-                        delete t;
-                        return val;
-                    }
-
+                    if (!_curr) { return _generate_garbage_val<_T>(); }
                     return _curr->_value;
                 }
-        #pragma GCC diagnostic pop
                 _node_type* base()
                 {
                     return _curr;
                 }
-                void operator=(const _node_iterator<_Type> &l)
+                void operator=(const _node_iterator<_T> &l)
                 {
                     _curr = l._curr;
                 }
-                bool operator==(const _node_iterator<_Type> &l)
+                bool operator==(const _node_iterator<_T> &l)
                 {
                     return _curr == l._curr;
                 }
-                bool operator!=(const _node_iterator<_Type> &l)
+                bool operator!=(const _node_iterator<_T> &l)
                 {
                     return !(*this == l);
                 }
         };
     }
 };
+
+#pragma GCC diagnostic pop
 
 namespace std_copy
 {
@@ -676,7 +669,7 @@ namespace std_copy
                 return __remove(func);
             }
             /**
-             * Sorts the current list.
+             * Reverses the current list.
              */
             void reverse() noexcept
             {
