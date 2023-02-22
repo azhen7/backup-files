@@ -59,7 +59,6 @@ namespace _std_copy_hidden
                 typedef _node<_T> _node_type;
                 typedef _node_iterator<_T> _self_type;
                 _node_type* _curr;
-                _node_type* _prev{nullptr};
 
             public:
                 typedef std::ptrdiff_t difference_type;
@@ -68,56 +67,35 @@ namespace _std_copy_hidden
                 typedef _T& reference;
                 typedef _T* pointer;
 
-                _node_iterator(_node_type* e, _node_type* _prev_if_needed = nullptr)
+                _node_iterator(_node_type* e)
                     : _curr(e)
                 {
-                    if (_prev_if_needed && e == nullptr)
-                    {
-                        _prev = _prev_if_needed;
-                    }
                 }
 
                 _self_type operator++()
                 {
-                    if (!_curr) return *this;
-
                     _curr = _curr->_next;
                     return *this;
                 }
                 _self_type operator++(int)
                 {
-                    if (!_curr) return *this;
-
                     _self_type temp = *this;
                     _curr = _curr->_next;
                     return temp;
                 }
                 _self_type operator--()
                 {
-                    if (!_curr)
-                    {
-                        _curr = _prev;
-                        return *this;
-                    }
-
                     _curr = _curr->_prev;
                     return *this;
                 }
                 _self_type operator--(int)
                 {
                     _self_type temp = *this;
-                    if (!_curr)
-                    {
-                        _curr = _prev;
-                        return temp;
-                    }
-
                     _curr = _curr->_prev;
                     return temp;
                 }
                 _T& operator*()
                 {
-                    if (!_curr) { return _generate_garbage_val<_T>(); }
                     return _curr->_value;
                 }
                 _node_type* base()
@@ -163,46 +141,29 @@ namespace _std_copy_hidden
 
                 _self_type operator++()
                 {
-                    if (!_curr) return *this;
-
                     _curr = _curr->_next;
                     return *this;
                 }
                 _self_type operator++(int)
                 {
-                    if (!_curr) return *this;
-
                     _self_type temp = *this;
                     _curr = _curr->_next;
                     return temp;
                 }
                 _self_type operator--()
                 {
-                    if (!_curr)
-                    {
-                        _curr = _prev;
-                        return *this;
-                    }
-
                     _curr = _curr->_prev;
                     return *this;
                 }
                 _self_type operator--(int)
                 {
                     _self_type temp = *this;
-                    if (!_curr)
-                    {
-                        _curr = _prev;
-                        return temp;
-                    }
-
                     _curr = _curr->_prev;
                     return temp;
                 }
         
                 _T& operator*()
                 {
-                    if (!_curr) { return _generate_garbage_val<_T>(); }
                     return _curr->_value;
                 }
                 _node_type* base()
@@ -277,7 +238,9 @@ namespace std_copy
                     _head = _node_allocator_type::allocate(1);
                 
                 _size = distance(first, last);
-                _head->_init(nullptr, nullptr, *first);
+
+                _head->_value = *first;
+
                 _node_type *tempHead = _head;
                 _size = 1;
 
@@ -288,7 +251,10 @@ namespace std_copy
                     if (_size == size_type(-1))
                         throw std::length_error("Range is too long");
                     _node_type *attach = _node_allocator_type::allocate(1);
-                    attach->_init(tempHead, nullptr, *first);
+
+                    attach->_prev = tempHead;
+                    attach->_value = *first;
+
                     tempHead->_next = attach;
                     tempHead = tempHead->_next;
 
@@ -296,20 +262,23 @@ namespace std_copy
                     ++first;
                     _tail = tempHead;
                 }
-                
             }
             void _value_init_list(size_type count, const_reference val)
             {
                 if (!_head)
                     _head = _node_allocator_type::allocate(1);
-                _head->_init(nullptr, nullptr, val);
+
+                _head->_value = val;
 
                 _node_type *tempHead = _head;
                 _tail = tempHead;
                 while (count > 1)
                 {
                     _node_type *attach = _node_allocator_type::allocate(1);
-                    attach->_init(tempHead, nullptr, val);
+
+                    attach->_prev = tempHead;
+                    attach->_value = val;
+
                     tempHead->_next = attach;
                     tempHead = tempHead->_next;
 
@@ -319,38 +288,47 @@ namespace std_copy
             }
             void _destroy_list()
             {
-                _node_type *previous = _head->_prev;
-                while (_head)
-                {
-                    if (previous)
-                        _node_allocator_type::deallocate(previous, 1);
+                // _node_type *previous = _head->_prev;
+                // while (_head)
+                // {
+                //     if (previous)
+                //         _node_allocator_type::deallocate(previous, 1);
 
-                    _head->_value.~value_type();
-                    previous = _head;
+                //     _head->_value.~value_type();
+                //     previous = _head;
+                //     _head = _head->_next;
+                // }
+                // _node_allocator_type::deallocate(previous, 1);
+                // _head = nullptr;
+                // _size = 0;
+                _node_type* temp = _head;
+                while (_size > 0)
+                {
                     _head = _head->_next;
+                    _node_allocator_type::deallocate(temp, 1);
+                    temp = _head;
+                    _size--;
                 }
-                _node_allocator_type::deallocate(previous, 1);
                 _head = nullptr;
-                _size = 0;
             }
 
             // Funtions used for appending elements (e.g. push_front, push_back, insert, etc.)
-            bool _check_if_empty(const_reference e)
+            bool _check_if_empty(const_reference val)
             {
                 if (!_head)
                 {
                     _head = _node_allocator_type::allocate(1);
-                    _head->_init(nullptr, nullptr, e);
+                    _head->_value = val;
                     _tail = _head;
                     _size = 1;
                     return true;
                 }
                 return false;
             }
-            _node_type* __end_check_if_nullptr() const noexcept
-            {
-                return _tail ? _tail->_next : nullptr;
-            }
+            // _node_type* __end_check_if_nullptr() const noexcept
+            // {
+            //     return _tail ? _tail->_next : nullptr;
+            // }
             
             void __resize(size_type count, const_reference val)
             {
@@ -360,7 +338,10 @@ namespace std_copy
                     while (left-- > 0)
                     {
                         _node_type* it = _node_allocator_type::allocate(1);
-                        it->_init(_tail, nullptr, val);
+
+                        it->_prev = _tail;
+                        it->_value = val;
+
                         _tail->_next = it;
                         _tail = _tail->_next;
                     }
@@ -372,7 +353,6 @@ namespace std_copy
                     {
                         _tail = _tail->_prev;
                         _node_allocator_type::deallocate(_tail->_next, 1);
-                        _tail->_next = nullptr;
                     }
                 }
             }
@@ -526,11 +506,11 @@ namespace std_copy
             /**
              * Returns iterator to end of list.
              */
-            iterator end() const noexcept { return iterator(__end_check_if_nullptr(), _tail); }
+            iterator end() const noexcept { return iterator(_tail); }
             /**
              * Returns const iterator to end of list.
              */
-            const_iterator cend() const noexcept { return const_iterator(__end_check_if_nullptr(), _tail); }
+            const_iterator cend() const noexcept { return const_iterator(_tail); }
             /**
              * Returns reverse iterator to beginning of list.
              */
@@ -538,7 +518,7 @@ namespace std_copy
             /**
              * Returns reverse iterator to beginning of list.
              */
-            reverse_iterator rend() const noexcept { return reverse_iterator(__end_check_if_nullptr(), _tail); }
+            reverse_iterator rend() const noexcept { return reverse_iterator(_tail); }
             /**
              * Returns constant reverse iterator to beginning of list.
              */
@@ -546,7 +526,7 @@ namespace std_copy
             /**
              * Returns constant reverse iterator to end of list.
              */
-            const_reverse_iterator crend() const noexcept { return const_reverse_iterator(__end_check_if_nullptr(), _tail); }
+            const_reverse_iterator crend() const noexcept { return const_reverse_iterator(_tail); }
             /**
              * Inserts an element at @p pos.
              * @param pos The position to insert the element at.
