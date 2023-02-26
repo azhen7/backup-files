@@ -1426,9 +1426,8 @@ namespace std_copy
         return move_backward(move(first), move(mid), move(last));
     }
     /**
-     * This function copies the elements from [first, last) to a new range, for which a 
-     * past-the-end iterator gets returned. This function invokes operator== to compare the 
-     * elements.
+     * This function removes consecutive duplicate elements. operator== is invoked
+     * to compare the elements.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
     */
@@ -1450,9 +1449,8 @@ namespace std_copy
         return result;
     }
     /**
-     * This function copies the elements from [first, last) to a new range, for which a 
-     * past-the-end iterator gets returned. This function invokes a provided function to 
-     * compare the elements.
+     * This function removes consecutive duplicate elements. A user-provided comparator
+     * function @p comp is invoked to compare the elements.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
      * @param comp The function used to compare the elements.
