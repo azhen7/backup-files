@@ -17,9 +17,6 @@
 #include <list>
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreturn-local-addr"
-
 namespace _std_copy_hidden
 {
     namespace _std_copy_list
@@ -43,14 +40,6 @@ namespace _std_copy_hidden
                     _value = std_copy::move(val);
                 }
         };
-
-        template <class T>
-        T& _generate_garbage_val() {
-            T* t = new T;
-            T& val = *t;
-            delete t;
-            return val;
-        }
 
         template <class _T>
         struct _node_iterator
@@ -124,7 +113,6 @@ namespace _std_copy_hidden
                 typedef const _node<_T> _node_type;
                 typedef _const_node_iterator<_T> _self_type;
                 const _node_type* _curr;
-                const _node_type* _prev;
 
             public:
                 typedef std::ptrdiff_t difference_type;
@@ -133,10 +121,9 @@ namespace _std_copy_hidden
                 typedef const _T& reference;
                 typedef const _T* pointer;
 
-                _const_node_iterator(_node_type *e, _node_type* p)
+                _const_node_iterator(_node_type *e)
                     : _curr(e)
                 {
-                    if (p && !e) _prev = p;
                 }
 
                 _self_type operator++()
@@ -186,8 +173,6 @@ namespace _std_copy_hidden
     }
 };
 
-#pragma GCC diagnostic pop
-
 namespace std_copy
 {
     /**
@@ -198,7 +183,7 @@ namespace std_copy
     template <class T, class Alloc = std_copy::allocator<T>>
     class list
     {
-        private:
+        protected:
             typedef list<T, Alloc>                                              _list_type;
             typedef _std_copy_hidden::_std_copy_list::_node<T>                  _node_type;
             typedef allocator<_node_type>                                       _node_allocator_type;
@@ -249,7 +234,7 @@ namespace std_copy
                 while (first != last)
                 {
                     if (_size == size_type(-1))
-                        throw std::length_error("Range is too long");
+                        throw std::length_error("Range is too large");
                     _node_type *attach = _node_allocator_type::allocate(1);
 
                     attach->_prev = tempHead;
@@ -288,28 +273,17 @@ namespace std_copy
             }
             void _destroy_list()
             {
-                // _node_type *previous = _head->_prev;
-                // while (_head)
-                // {
-                //     if (previous)
-                //         _node_allocator_type::deallocate(previous, 1);
-
-                //     _head->_value.~value_type();
-                //     previous = _head;
-                //     _head = _head->_next;
-                // }
-                // _node_allocator_type::deallocate(previous, 1);
-                // _head = nullptr;
-                // _size = 0;
                 _node_type* temp = _head;
                 while (_size > 0)
                 {
                     _head = _head->_next;
                     _node_allocator_type::deallocate(temp, 1);
                     temp = _head;
+
                     _size--;
                 }
                 _head = nullptr;
+                _tail = nullptr;
             }
 
             // Funtions used for appending elements (e.g. push_front, push_back, insert, etc.)
@@ -360,29 +334,28 @@ namespace std_copy
             template <class Function>
             size_type __remove(Function compare)
             {
-                size_type numberOfRemoved = 0;
                 _node_type* temp = _head;
-                while (temp)
+
+                size_type currIndex = 0;
+                const size_type sizeRecord = _size;
+                while (currIndex < sizeRecord)
                 {
                     if (compare(temp->_value))
                     {
+                        _node_type* nextNext = temp->_next;
                         temp = temp->_prev;
-                        _node_type* nextNext = temp->_next->_next;
+                        
                         _node_allocator_type::deallocate(temp->_next, 1);
                         temp->_next = nextNext;
 
-                        if (nextNext)
-                        {
-                            nextNext->_prev = temp;
-                        }
-
+                        nextNext->_prev = temp;
                         _size--;
-                        numberOfRemoved++;
                     }
                     _tail = temp;
                     temp = temp->_next;
+                    currIndex++;
                 }
-                return numberOfRemoved;
+                return sizeRecord - _size;
             }
 
         public:
@@ -435,8 +408,6 @@ namespace std_copy
             void clear() noexcept
             {
                 _destroy_list();
-                _size = 0;
-                _tail = nullptr;
             }
             /**
              * Returns the number of elements in the list.
@@ -456,7 +427,10 @@ namespace std_copy
                     return;
                 }
                 _tail->_next = _node_allocator_type::allocate(1);
-                _tail->_next->_init(_tail, nullptr, elem);
+
+                _tail->_next->_prev = _tail;
+                _tail->_next->_value = elem;
+
                 _tail = _tail->_next;
                 _size++;
             }
@@ -466,12 +440,13 @@ namespace std_copy
              */
             void push_front(const_reference elem)
             {
-                if (_check_if_empty(elem))
-                {
-                    return;
-                }
+                if (_check_if_empty(elem)) return;
+
                 _head->_prev = _node_allocator_type::allocate(1);
-                _head->_prev->_init(nullptr, _head, elem);
+
+                _head->_prev->_next = _head;
+                _head->_prev->_value = elem;
+
                 _head = _head->_prev;
                 _size++;
             }
@@ -482,7 +457,6 @@ namespace std_copy
             {
                 _head = _head->_next;
                 _node_allocator_type::deallocate(_head->_prev, 1);
-                _head->_prev = nullptr;
                 _size--;
             }
             /**
@@ -492,7 +466,6 @@ namespace std_copy
             {
                 _tail = _tail->_prev;
                 _node_allocator_type::deallocate(_tail->_next, 1);
-                _tail->_next = nullptr;
                 _size--;
             }
             /**
@@ -548,8 +521,12 @@ namespace std_copy
                 _size++;
 
                 _node_type* newElem = _node_allocator_type::allocate(1);
+
                 newElem->_init(pos.base()->_prev, pos.base(), elem);
+                
                 pos.base()->_prev = newElem;
+                
+                //link the _next reference of the element two elements before @var pos to @var newElem
                 if (pos.base()->_prev->_prev)
                 {
                     pos.base()->_prev->_prev->_next = newElem;
@@ -613,6 +590,34 @@ namespace std_copy
                 return nextIt;
             }
             /**
+             * Erases the elements in the range [start, end)
+             * @param start The start of the range of values to erase.
+             * @param end The end of the range of values to erase.
+             */
+            iterator erase(iterator start, iterator end)
+            {
+                if (start == end) return end;
+
+                // start.base()->_prev->_next = end.base();
+                // end.base()->_prev = start.base()->_prev;
+
+                // _node_type* beforeStart = start.base()->_prev;
+                // _node_type* curr = start.base();
+
+                while (start != end)
+                {
+                    // _node_allocator_type::deallocate(curr, 1);
+                    // start++;
+                    // curr = start.base();
+                    this->erase(start++);
+                    _size--;
+                }
+                // beforeStart->_next = curr;
+                // curr->_prev = beforeStart;
+
+                return end;
+            }
+            /**
              * Resizes the list to contain @p count elements. If @p count is greater than the
              * current size of the list, additional default-inserted elements are appended.
              * @param count The new size to resize the list to.
@@ -641,7 +646,7 @@ namespace std_copy
             }
             /**
              * Removes all elements for which @p func returns true.
-             * @param func The function determing which elements to remove.
+             * @param func The function determining which elements to remove.
              */
             template <class Function>
             size_type remove_if(Function func)
@@ -656,15 +661,26 @@ namespace std_copy
                 std_copy::reverse(this->begin(), this->end());
             }
 
+            /**
+             * Removes consecutive duplicate elements.
+             */
+            void unique() noexcept
+            {
+                auto newEnd = std_copy::unique(this->begin(), this->end());
+                this->erase(newEnd, this->end());
+            }
+
     #if _DEBUG
 
             void _debug_print()
             {
                 _node_type *temp = _head;
-                while (temp)
+                size_type amount = 0;
+                while (amount < _size)
                 {
                     std::cout << temp->_value << ' ';
                     temp = temp->_next;
+                    amount++;
                 }
                 std::cout << '\n';
             }
