@@ -4,7 +4,7 @@
 #define std_copy_vector                         202108L
 #define std_copy_array                          202108L
 #define std_copy_iterator_funcs                 202108L
-#define std_copy_map                            202109L
+#define std_copy_vector_map                     202109L
 #define std_copy_pair                           202109L
 #define std_copy_algorithm                      202109L
 #define std_copy_move                           202109L
