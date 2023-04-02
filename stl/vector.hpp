@@ -57,7 +57,10 @@ namespace std_copy
                 if (x == 0)
                     return 1;
 
-                return __builtin_powl(2, (size_type) (__builtin_log(x) / __builtin_log(2)) + 1);
+                size_type count = 0;
+                while (x >>= 1 && x > 0 && (count++ || 1));
+
+                return 1 << count;
             }
             void _realloc(size_type newAmount, size_type previousAmount, size_type copyUpTo)
             {
@@ -92,7 +95,7 @@ namespace std_copy
 
             size_type _get_new_capacity()
             {
-                return (_capacity == 0) ? 1 : _capacity * 2;
+                return (_capacity == 0) ? 1 : _capacity << 1;
             }
 
             void __resize(size_type n, const_reference val)
@@ -273,8 +276,8 @@ namespace std_copy
             */
             size_type max_size() const noexcept
             {
-                size_type first = __builtin_powl(2, (size_type) (8 * sizeof(size_type) / sizeof(value_type)));
-                size_type second = __builtin_powl(2, (8 * sizeof(difference_type)));
+                size_type first = 1 << ((size_type) (8 * sizeof(size_type) / sizeof(value_type)));
+                size_type second = 1 << (8 * sizeof(difference_type));
                 if (first < second)
                     return first;
                 return second;
@@ -300,8 +303,8 @@ namespace std_copy
             {
                 if (_numberOfElements ==  _capacity)
                 {
-                    _capacity = (_capacity == 0) ? 1 : _capacity * 2;
-                    _realloc(_capacity, _capacity / 2, _numberOfElements);
+                    _capacity = _get_new_capacity();
+                    _realloc(_capacity, _capacity >> 1, _numberOfElements);
                 }
                 construct_at(_internalBuffer + _numberOfElements, elem);
                 _numberOfElements++;
