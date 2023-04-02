@@ -3,6 +3,7 @@
 
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
+#include "iterator_traits.hpp"
 #include <cstdint>
 
 namespace _std_copy_hidden

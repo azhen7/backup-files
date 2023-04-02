@@ -295,9 +295,9 @@ namespace std_copy
         for (std::size_t i = 0; i < std::abs(n); i++)
         {
             if (n < 0)
-                it--;
-            else if (n > 0)
                 it++;
+            else if (n > 0)
+                it--;
         }
         return it;
     }
