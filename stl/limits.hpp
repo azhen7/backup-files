@@ -5,7 +5,7 @@
 #include <climits>
 #include <cstdint>
 
-#define _limits_log2_10     ((643L) / (2136.0))
+#define _std_copy_limits_log2     ((643L) / (2136.0))
 
 namespace std_copy
 {
@@ -129,7 +129,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -169,7 +169,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -207,7 +207,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -247,7 +247,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(wchar_t) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -287,7 +287,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(char8_t) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -327,7 +327,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(char16_t) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -367,7 +367,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(char32_t) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -407,7 +407,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(short) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -447,7 +447,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(short);
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -487,7 +487,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(int) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -527,7 +527,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(int);
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -567,7 +567,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -607,7 +607,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long);
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -647,7 +647,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long long) - 1;
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -687,7 +687,7 @@ namespace std_copy
         static constexpr float_round_style round_style = round_toward_zero;
         static constexpr bool is_bounded        = true;
         static constexpr int digits             = CHAR_BIT * sizeof(long long);
-        static constexpr int digits10           = digits * _limits_log2_10;
+        static constexpr int digits10           = digits * _std_copy_limits_log2;
         static constexpr int min_exponent       = 0;
         static constexpr int max_exponent       = 0;
         static constexpr int max_exponent10     = 0;
@@ -732,7 +732,7 @@ namespace std_copy
         static constexpr int max_exponent       = FLT_MAX_EXP;
         static constexpr int min_exponent10     = FLT_MIN_10_EXP;
         static constexpr int max_exponent10     = FLT_MAX_10_EXP;
-        static constexpr int max_digits10       = (int) 2 + digits * _limits_log2_10;
+        static constexpr int max_digits10       = (int) 2 + digits * _std_copy_limits_log2;
         static constexpr bool traps             = false;
         static constexpr bool is_modulo         = false;
         static constexpr bool radix             = FLT_RADIX;
@@ -772,7 +772,7 @@ namespace std_copy
         static constexpr int max_exponent       = DBL_MAX_EXP;
         static constexpr int min_exponent10     = DBL_MIN_10_EXP;
         static constexpr int max_exponent10     = DBL_MAX_10_EXP;
-        static constexpr int max_digits10       = (int) 2 + digits * _limits_log2_10;
+        static constexpr int max_digits10       = (int) 2 + digits * _std_copy_limits_log2;
         static constexpr bool traps             = false;
         static constexpr bool is_modulo         = false;
         static constexpr bool radix             = FLT_RADIX;
@@ -812,7 +812,7 @@ namespace std_copy
         static constexpr int max_exponent       = LDBL_MAX_EXP;
         static constexpr int min_exponent10     = LDBL_MIN_10_EXP;
         static constexpr int max_exponent10     = LDBL_MAX_10_EXP;
-        static constexpr int max_digits10       = (int) 2 + digits * _limits_log2_10;
+        static constexpr int max_digits10       = (int) 2 + digits * _std_copy_limits_log2;
         static constexpr bool traps             = false;
         static constexpr bool is_modulo         = false;
         static constexpr bool radix             = FLT_RADIX;
