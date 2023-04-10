@@ -54,12 +54,9 @@ namespace std_copy
 
             inline size_type _calculate_smallest_power_of_two_greater_than(size_type x)
             {
-                if (x == 0)
-                    return 1;
-
                 size_type count = 0;
                 while (x >>= 1 && x > 0 && (count++ || 1));
-
+                
                 return 1 << count;
             }
             void _realloc(size_type newAmount, size_type previousAmount, size_type copyUpTo)
