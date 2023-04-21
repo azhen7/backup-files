@@ -262,7 +262,9 @@ namespace std_copy
 
             list(_list_type&& other)
                 : _size(move(other._size)),
-                _head(move(other._head))
+                _head(move(other._head)),
+                _tail(move(other._tail)),
+                _end(move(other._end))
             {
             }
 

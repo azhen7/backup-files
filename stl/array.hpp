@@ -47,15 +47,15 @@ namespace std_copy
             array() : _numberOfElements(0) {}
 
             array(const_reference val)
-                : _numberOfElements(move(s))
+                : _numberOfElements(s)
             {
                 std_copy::fill_n(_internalBuffer, _size, val);
             }
 
             array(const _array_type& copy) 
-                : _numberOfElements(move(copy._numberOfElements))
+                : _numberOfElements(copy._numberOfElements)
             {
-                std_copy::move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
+                std_copy::copy(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
             array(_array_type&& copy)
@@ -66,10 +66,10 @@ namespace std_copy
 
             template <std::size_t Size>
             array(T (&arr)[Size])
-                : _numberOfElements(move(Size))
+                : _numberOfElements(Size)
             {
                 for (size_type i = 0; i < Size; i++)
-                    _internalBuffer[i] = move(arr[i]);
+                    _internalBuffer[i] = arr[i];
             }
 
             virtual ~array() = default;

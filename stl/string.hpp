@@ -59,7 +59,7 @@ namespace std_copy
             typedef CharacterType&                          reference;
             typedef const CharacterType&                    const_reference;
             typedef _alloc_traits::pointer                  pointer;
-            typedef const _alloc_traits::pointer            const_pointer;
+            typedef const pointer                           const_pointer;
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_basic_string_type> iterator;
             typedef const iterator                          const_iterator;
             typedef reverse_iterator<pointer>               reverse_iterator;
@@ -76,6 +76,15 @@ namespace std_copy
                 _capacity = (i + 1 > 15) ? i + 1 : 15;
                 _internalString = mem_alloc(_capacity);
                 traits_type::move(_internalString, src, count);
+                _internalString[i] = value_type();
+            }
+
+            template <class _AllocateFunc>
+            void _allocate_and_copy_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
+            {
+                _capacity = (i + 1 > 15) ? i + 1 : 15;
+                _internalString = mem_alloc(_capacity);
+                traits_type::copy(_internalString, src, count);
                 _internalString[i] = value_type();
             }
 
@@ -119,7 +128,7 @@ namespace std_copy
             {
                 if (newLen == npos)
                     newLen = _length;
-                _length = move(newLen);
+                _length = newLen;
 
                 if (whereToTerminate == npos)
                     whereToTerminate = _length;
@@ -129,16 +138,16 @@ namespace std_copy
             template <class ExceptionType = std::out_of_range>
             void _check_exception(size_type a, difference_type checkAgainst, const char* str)
             {
-                if (a >= checkAgainst)
+                if (a > checkAgainst)
                     throw ExceptionType(str);
             }
 
-            void _move_string(pointer dest, pointer src, size_type n)
+            void _copy_str(pointer dest, pointer src, size_type n)
             {
                 if (n == 1)
                     traits_type::assign(*dest, *src);
                 else
-                    traits_type::move(dest, src, n);
+                    traits_type::copy(dest, src, n);
                 
                 _terminate_and_update_length(_length - n);
             }
@@ -169,7 +178,7 @@ namespace std_copy
             basic_string(const_pointer str)
             {
                 _length = traits_type::length(str);
-                _allocate_and_move_str(_length, allocator_type::allocate,
+                _allocate_and_copy_str(_length, allocator_type::allocate,
                     str, _length);
             }
 
@@ -183,14 +192,14 @@ namespace std_copy
             basic_string(const_pointer str, size_type count)
                 : _length(count)
             {
-                _allocate_and_move_str(_length - 1, allocator_type::allocate,
+                _allocate_and_copy_str(_length - 1, allocator_type::allocate,
                     str, count);
             }
 
             basic_string(const _basic_string_type& s, size_type count)
             {
                 _length = (count > s._length) ? s._length : count;
-                _allocate_and_move_str(_length, allocator_type::allocate,
+                _allocate_and_copy_str(_length, allocator_type::allocate,
                     s._internalString, _length);
             }
 
@@ -198,14 +207,14 @@ namespace std_copy
             {
                 size_type copyUpTo = (pos + count > s._length || count == npos) ? s._length : pos + count;
                 _length = copyUpTo - pos;
-                _allocate_and_move_str(_length, allocator_type::allocate,
+                _allocate_and_copy_str(_length, allocator_type::allocate,
                     s._internalString + pos, _length);
             }
 
             basic_string(const _basic_string_type& s)
                 : _length(s._length)
             {
-                _allocate_and_move_str(_length, allocator_type::allocate,
+                _allocate_and_copy_str(_length, allocator_type::allocate,
                     s._internalString, _length);
             }
 
@@ -361,7 +370,7 @@ namespace std_copy
                 if (_length + count > _capacity)
                     _realloc((_length + count) / _capacity, _length);
 
-                traits_type::move(_internalString + _length, str, count);
+                traits_type::copy(_internalString + _length, str, count);
                 _terminate_and_update_length(_length + count);
                 return *this;
             }
@@ -414,7 +423,13 @@ namespace std_copy
                 if (pos + count > s._length || count == npos)
                     count = s._length - pos;
                 
-                return this->append(move(s._internalString + pos), count);
+                if (_length + count > _capacity)
+                    _realloc((_length + count) / _capacity, _length);
+
+                traits_type::move(_internalString + _length, s, count);
+                _terminate_and_update_length(_length + count);
+                return *this;
+                //return this->append(move(s._internalString + pos), count);
             }
             /**
              * Copies the contents of str to *this.
@@ -440,7 +455,7 @@ namespace std_copy
                 else
                 {
                     _length = count;
-                    _allocate_and_move_str(_length, allocator_type::allocate,
+                    _allocate_and_copy_str(_length, allocator_type::allocate,
                         str._internalString, _length);
                 }
                 return *this;
@@ -470,7 +485,7 @@ namespace std_copy
                 else
                 {
                     _length = count;
-                    _allocate_and_move_str(_length, allocator_type::allocate,
+                    _allocate_and_copy_str(_length, allocator_type::allocate,
                         s, _length);
                 }
                 return *this;
@@ -567,7 +582,7 @@ namespace std_copy
                 if (pos == this->end() - 1)
                     _terminate_and_update_length(_length - 1);
                 else
-                    _move_string(pos.base(), pos.base() + 1, _length - dist - 1);
+                    _copy_str(pos.base(), pos.base() + 1, _length - dist - 1);
 
                 return iterator(_internalString + dist);
             }
@@ -592,7 +607,7 @@ namespace std_copy
                     if (last == this->end())
                         _terminate_and_update_length(size_type(dist_from_first_to_begin));
                     else
-                        _move_string(first.base(), last.base(), _length - dist_from_first_to_begin - len);
+                        _copy_str(first.base(), last.base(), _length - dist_from_first_to_begin - len);
                 }
                 return iterator(_internalString + dist_from_first_to_begin);
             }
@@ -610,7 +625,7 @@ namespace std_copy
                     if (pos + count >= _length || count == npos)
                         _terminate_and_update_length(pos);
                     else
-                        _move_string(_internalString + pos, _internalString + pos + count, _length - pos - count);
+                        _copy_str(_internalString + pos, _internalString + pos + count, _length - pos - count);
                 }
                 return *this;
             }
