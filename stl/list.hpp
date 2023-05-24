@@ -400,7 +400,6 @@ namespace std_copy
                 }
                 else if (pos == this->begin())
                 {
-                    std::cout << elem << ' ' << 557 << '\n';
                     this->push_front(elem);
                     return pos;
                 }
