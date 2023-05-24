@@ -108,9 +108,10 @@ namespace std_copy
 
             size_type _calculate_smallest_power_of_two_greater_than(size_type x)
             {
-                if (x == 0)
-                    return 1;
-                return __builtin_pow(2, (size_type) (__builtin_log(x) / __builtin_log(2)) + 1);
+                size_type count = 0;
+                while (x >>= 1 && x > 0 && (count++ || 1));
+                
+                return 1 << count;
             }
 
             //Reallocates the internal buffer.
@@ -126,12 +127,10 @@ namespace std_copy
             //Null terminates the internal buffer and updates _length
             void _terminate_and_update_length(size_type newLen = npos, size_type whereToTerminate = npos)
             {
-                if (newLen == npos)
-                    newLen = _length;
-                _length = newLen;
+                _length = (newLen == npos) ? _length : newLen;
 
                 if (whereToTerminate == npos)
-                    whereToTerminate = _length;
+                    whereToTerminate = _length - 1;
                 _internalString[whereToTerminate] = value_type();
             }
 
@@ -149,7 +148,7 @@ namespace std_copy
                 else
                     traits_type::copy(dest, src, n);
                 
-                _terminate_and_update_length(_length - n);
+                _terminate_and_update_length(n);
             }
 
             //Contains other helper one-use functions
@@ -574,10 +573,7 @@ namespace std_copy
             */
             iterator erase(iterator pos)
             {
-                const difference_type dist = pos - this->begin();
-
-                _check_exception(0, dist, "basic_string::erase: pos is out of bounds");
-                _check_exception(dist, _length, "basic_string::erase: pos is out of bounds");
+                difference_type dist = pos - this->begin();
                 
                 if (pos == this->end() - 1)
                     _terminate_and_update_length(_length - 1);
@@ -586,6 +582,15 @@ namespace std_copy
 
                 return iterator(_internalString + dist);
             }
+            iterator erase_safe(iterator pos)
+            {
+                difference_type dist = pos - this->begin();
+
+                _check_exception(0, dist, "basic_string::erase: pos is out of bounds");
+                _check_exception(size_type(dist), _length, "basic_string::erase: pos is out of bounds");
+
+                return this->erase(pos);
+            }
             /**
              * Erases the characters in the range [first, last).
              * @param first An iterator to the start of the sequence to erase.
@@ -593,14 +598,8 @@ namespace std_copy
             */
             iterator erase(iterator first, iterator last)
             {
-                const difference_type len = last - first;
-                const difference_type dist_from_last_to_begin = last - this->begin();
-                const difference_type dist_from_first_to_begin = first - this->begin();
-
-                _check_exception(0, dist_from_first_to_begin, "basic_string::erase: first is out of bounds");
-                _check_exception(0, dist_from_last_to_begin, "basic_string::erase: last is out of bounds");
-                _check_exception(size_type(dist_from_first_to_begin), _length, "basic_string::erase: first is out of bounds");
-                _check_exception(size_type(dist_from_last_to_begin), _length + 1, "basic_string::erase: last is out of bounds");
+                difference_type len = last - first;
+                difference_type dist_from_first_to_begin = first - this->begin();
 
                 if (len)
                 {
@@ -611,6 +610,18 @@ namespace std_copy
                 }
                 return iterator(_internalString + dist_from_first_to_begin);
             }
+            iterator erase_safe(iterator first, iterator last)
+            {
+                difference_type dist_from_last_to_begin = last - this->begin();
+                difference_type dist_from_first_to_begin = first - this->begin();
+
+                _check_exception(0, dist_from_first_to_begin, "basic_string::erase: first is out of bounds");
+                _check_exception(0, dist_from_last_to_begin, "basic_string::erase: last is out of bounds");
+                _check_exception(size_type(dist_from_first_to_begin), _length - 1, "basic_string::erase: first is out of bounds");
+                _check_exception(size_type(dist_from_last_to_begin), _length, "basic_string::erase: last is out of bounds");
+
+                return this->erase(first, last);
+            }
             /**
              * Erases the first count characters starting from index pos.
              * @param pos The index from where to start erasing.
@@ -618,8 +629,6 @@ namespace std_copy
             */
             _basic_string_type& erase(size_type pos = 0, size_type count = npos)
             {
-                _check_exception(pos, _length, "basic_string::erase: pos is out of bounds");
-
                 if (count)
                 {
                     if (pos + count >= _length || count == npos)
@@ -628,6 +637,12 @@ namespace std_copy
                         _copy_str(_internalString + pos, _internalString + pos + count, _length - pos - count);
                 }
                 return *this;
+            }
+            _basic_string_type& erase_safe(size_type pos = 0, size_type count = npos)
+            {
+                _check_exception(pos, _length, "basic_string::erase: pos is out of bounds");
+
+                return this->erase(pos, count);
             }
             /**
              * Compares this basic_string with the character sequence pointed to by p.
@@ -890,8 +905,6 @@ namespace std_copy
             */
             _basic_string_type& replace(size_type pos, size_type count, const _basic_string_type& str)
             {
-                _check_exception(pos, _length, "basic_string::replace: pos is out of range");
-
                 if (count > _length - pos)
                     count = _length - pos;
 
@@ -926,6 +939,12 @@ namespace std_copy
                 }
                 return *this;
             }
+            _basic_string_type& replace_safe(size_type pos, size_type count, const _basic_string_type& str)
+            {
+                _check_exception(pos, _length, "basic_string::replace: pos is out of range");
+
+                return this->replace(pos, count, str);
+            }
             /**
              * Replaces the substring [pos1, pos1 + count1) of the current basic_string object with the substring [pos2, pos2 + count2) 
              * of str.
@@ -937,13 +956,17 @@ namespace std_copy
             */
             _basic_string_type& replace(size_type pos1, size_type count1, const _basic_string_type& str, size_type pos2, size_type count2)
             {
-                _check_exception(pos1, str._length, "basic_string::replace: pos1 > str.size()");
-                _check_exception(pos2, str._length, "basic_string::replace: pos2 > str.size()");
-
                 count1 = (count1 > _length - pos1) ? _length - pos1 : count1;
                 count2 = (count2 > str._length - pos2) ? str._length - pos2 : count2;
 
                 return this->replace(pos1, count1, str._internalString + pos2, str._internalString + pos2 + count2);
+            }
+            _basic_string_type& replace_safe(size_type pos1, size_type count1, const _basic_string_type& str, size_type pos2, size_type count2)
+            {
+                _check_exception(pos1, str._length, "basic_string::replace: pos1 > str.size()");
+                _check_exception(pos2, str._length, "basic_string::replace: pos2 > str.size()");
+
+                return this->replace(pos1, count1, str, pos2, count2);
             }
             /**
              * Replaces the range [first, last) of the current basic_string object with s.
@@ -963,8 +986,6 @@ namespace std_copy
             */
             _basic_string_type& replace(size_type pos, size_type count, pointer s)
             {
-                _check_exception(pos, _length, "basic_string::replace: pos > size()");
-                
                 const size_type len = traits_type::length(s);
                 if (count > _length - pos)
                     count = _length - pos;
@@ -1000,6 +1021,12 @@ namespace std_copy
                 }
                 return *this;
             }
+            _basic_string_type& replace_safe(size_type pos, size_type count, pointer s)
+            {
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+                
+                return this->replace(pos, count, s);
+            }
             /**
              * Replaces the substring [pos, pos + count1) of the current basic_string object with the first count2 
              * characters of s.
@@ -1010,14 +1037,18 @@ namespace std_copy
             */
             _basic_string_type& replace(size_type pos, size_type count1, pointer s, size_type count2)
             {
-                _check_exception(pos, _length, "basic_string::replace: pos > size()");
-
                 const size_type len = traits_type::length(s);
                 if (count1 > _length - pos)
                     count1 = _length - pos;
                 count2 = (count2 > len) ? len : count2;
 
                 return this->replace(this->begin() + pos, this->begin() + pos + count1, s, s + count2);
+            }
+            _basic_string_type& replace_safe(size_type pos, size_type count1, pointer s, size_type count2)
+            {
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+
+                return this->replace(pos, count1, s, count2);
             }
             /**
              * Replaces the range [first, last) of the current basic_string object with the first count2 
@@ -1059,8 +1090,6 @@ namespace std_copy
             requires input_iterator<InputIterator>
         #endif
             {
-                _check_exception(pos, _length, "basic_string::replace: pos > size()");
-
                 const size_type len = std_copy::distance(first, last);
                 if (count > _length - pos)
                     count = _length - pos;
@@ -1096,6 +1125,13 @@ namespace std_copy
                 }
                 return *this;
             }
+            template <class InputIterator>
+            _basic_string_type& replace_safe(size_type pos, size_type count, InputIterator first, InputIterator last)
+            {
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+
+                return this->replace(pos, count, first, last);
+            }
             /**
              * Replaces the substring [pos, pos + count) with count2 elements of value ch.
              * @param pos The index to start replacing from.
@@ -1105,7 +1141,6 @@ namespace std_copy
             */
             _basic_string_type& replace(size_type pos, size_type count, size_type count2, const_reference ch)
             {
-                _check_exception(pos, _length, "basic_string::replace: pos > size()");
                 if (count > _length - pos)
                     count = _length - pos;
     
@@ -1129,6 +1164,12 @@ namespace std_copy
                 }
                 return *this;
             }
+            _basic_string_type& replace_safe(size_type pos, size_type count, size_type count2, const_reference ch)
+            {
+                _check_exception(pos, _length, "basic_string::replace: pos > size()");
+
+                return this->replace(pos, count, count2, ch);
+            }
             /**
              * Replaces the range [first, last) with count elements of value ch.
              * @param first An iterator pointing to the start of the range to erase.
@@ -1147,12 +1188,16 @@ namespace std_copy
             */
             _basic_string_type substr(size_type pos, size_type count = npos) const
             {
-                _check_exception(pos, _length, "basic_string::substr: pos > size()");
-
                 if (pos + count > _length)
                     count = _length - pos;
 
                 return _basic_string_type(*this, pos, count);
+            }
+            _basic_string_type substr_safe(size_type pos, size_type count = npos) const
+            {
+                _check_exception(pos, _length, "basic_string::substr: pos > size()");
+
+                return this->substr(pos, count);
             }
             /**
              * Copies the substring [pos, pos + count) of the current basic_string object to dest;
@@ -1162,13 +1207,17 @@ namespace std_copy
             */
             size_type copy(pointer dest, size_type pos = 0, size_type count = npos)
             {
-                _check_exception(pos, _length, "basic_string::copy: pos > size()");
-
                 if (count == npos || pos + count > _length)
                     count = _length - pos;
 
                 traits_type::copy(dest, _internalString + pos, count);
                 return count;
+            }
+            size_type copy_safe(pointer dest, size_type pos = 0, size_type count = npos)
+            {
+                _check_exception(pos, _length, "basic_string::copy: pos > size()");
+
+                return this->copy(dest, pos, count);
             }
             /**
              * Swaps the contents of two basic_string objects.
@@ -1177,7 +1226,6 @@ namespace std_copy
             void swap(_basic_string_type& other)
             {
                 _basic_string_type temp(*this);
-                
 
                 std_copy::swap(_length, other._length);
                 std_copy::swap(_capacity, other._capacity);
