@@ -3,3 +3,6 @@
 
 # Ignore all cpp files
 *.cpp
+
+# Ignore all .json files
+*.json
