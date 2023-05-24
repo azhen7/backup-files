@@ -176,15 +176,9 @@ namespace std_copy
             */
             void assign(_map_type&& m)
             {
-                if (std_copy::addressof(*this) == std_copy::addressof(m))
-                    return;
-                
                 _numberOfElements = m._numberOfElements;
                 _capacity = m._capacity;
-
-                _internalBuffer = allocator_type::allocate(_capacity);
-                for (size_type i = 0; i < _numberOfElements; i++)
-                    _internalBuffer[i] = move(m._internalBuffer[i]);
+                _internalBuffer = move(m._internalBuffer);
             }
             /**
              * This function returns the number of elements 
