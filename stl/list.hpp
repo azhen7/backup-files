@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <stdexcept>
 
-#define _DEBUG 0
+#define _DEBUG 1
 
 #if _DEBUG
 #include <iostream> 
