@@ -1,6 +1,8 @@
 #ifndef _STD_COPY_CONSTRUCT_DESTROY
 #define _STD_COPY_CONSTRUCT_DESTROY
 
+#include "move.hpp"
+
 namespace std_copy
 {
     /**

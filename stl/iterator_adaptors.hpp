@@ -22,10 +22,10 @@ namespace std_copy
             typedef reverse_iterator<Iter>          _reverse_iterator_type;
         public:
             typedef Iter                                iterator_type;
-            typedef _iter_traits::value_type            value_type;
-            typedef _iter_traits::difference_type       difference_type;
-            typedef _iter_traits::pointer               pointer;
-            typedef _iter_traits::reference             reference;
+            typedef typename _iter_traits::value_type            value_type;
+            typedef typename _iter_traits::difference_type       difference_type;
+            typedef typename _iter_traits::pointer               pointer;
+            typedef typename _iter_traits::reference             reference;
             using iterator_concept = std_copy::conditional_t<
                                         random_access_iterator<Iter>,
                                         random_access_iterator_tag,

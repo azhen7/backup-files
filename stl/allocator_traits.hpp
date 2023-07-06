@@ -7,6 +7,7 @@
 #include "pointer_traits.hpp"
 #include "construct_destroy.hpp"
 #include "type_traits.hpp"
+#include "move.hpp"
 
 namespace std_copy
 {

@@ -25,7 +25,7 @@ namespace std_copy
     struct unary_negate
     {
         public:
-            typedef Function::argument_type argument_type;
+            typedef typename Function::argument_type argument_type;
             typedef bool                    result_type;
         
         protected:
@@ -52,8 +52,8 @@ namespace std_copy
     struct binary_negate
     {
         public:
-            typedef Function::first_argument_type   first_argument_type;
-            typedef Function::second_argument_type  second_argument_type;
+            typedef typename Function::first_argument_type   first_argument_type;
+            typedef typename Function::second_argument_type  second_argument_type;
             typedef bool                            result_type;
         
         protected:

@@ -231,7 +231,7 @@ namespace std_copy
     requires input_iterator<InputIterator>
 #endif
     {
-        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
+        using _iter_category = typename std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
@@ -260,7 +260,7 @@ namespace std_copy
     requires input_iterator<InputIterator>
 #endif
     {
-        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
+        using _iter_category = typename std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
@@ -287,7 +287,7 @@ namespace std_copy
     requires bidirectional_iterator<InputIterator>
 #endif
     {
-        using _iter_category = std_copy::iterator_traits<InputIterator>::iterator_category;
+        using _iter_category = typename std_copy::iterator_traits<InputIterator>::iterator_category;
         using _random_access_tag = std_copy::random_access_iterator_tag;
 
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
