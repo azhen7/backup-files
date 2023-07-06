@@ -48,6 +48,13 @@ namespace std_copy
         private:
             void _build_this_from_existing(_node_type *src, _node_type* src_end)
             {
+                if (src == src_end)
+                {
+                    _head = nullptr;
+                    _tail = nullptr;
+                    _end = nullptr;
+                }
+
                 _head = _node_allocator_type::allocate(1);
                 _node_type* n = _head;
                 while (src != src_end)
@@ -60,7 +67,6 @@ namespace std_copy
                     _tail = n;
                     n = n->_next;
                 }
-                if (src != src_end) _tail = _head;
                 _end = n;
             }
             
