@@ -60,6 +60,7 @@ namespace std_copy
                     _tail = n;
                     n = n->_next;
                 }
+                if (src != src_end) _tail = _head;
                 _end = n;
             }
             
