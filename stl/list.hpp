@@ -53,6 +53,7 @@ namespace std_copy
                     _head = nullptr;
                     _tail = nullptr;
                     _end = nullptr;
+                    return;
                 }
 
                 _head = _node_allocator_type::allocate(1);
