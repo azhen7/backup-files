@@ -10,9 +10,9 @@
 #include <cstdint>
 #include <stdexcept>
 
-#define _DEBUG 1
+#define _STD_COPY_LIST_DEBUG_PRINT 1
 
-#if _DEBUG
+#if _STD_COPY_LIST_DEBUG_PRINT
 #include <iostream> 
 #endif
 
@@ -46,14 +46,21 @@ namespace std_copy
             typedef std::ptrdiff_t                                              difference_type;
 
         private:
-            void _copy_list(_node_type *src, _node_type* src_end, _node_type *dest)
+            void _build_this_from_existing(_node_type *src, _node_type* src_end)
             {
+                _head = _node_allocator_type::allocate(1);
+                _node_type* n = _head;
                 while (src != src_end)
                 {
-                    dest->_value = src->_value;
+                    n->_value = src->_value;
                     src = src->_next;
-                    dest = dest->_next;
+                    
+                    n->_next = _node_allocator_type::allocate(1);
+                    n->_next->_prev = n;
+                    _tail = n;
+                    n = n->_next;
                 }
+                _end = n;
             }
             
             void _add_new_end_ptr()
@@ -271,7 +278,7 @@ namespace std_copy
             list(const _list_type &other)
                 : _size(other._size)
             {
-                _copy_list(other._head, other._end, _head);
+                _build_this_from_existing(other._head, other._end);
             }
 
             ~list()
@@ -544,7 +551,6 @@ namespace std_copy
             {
                 std_copy::reverse(this->begin(), this->end());
             }
-
             /**
              * Removes consecutive duplicate elements.
              */
@@ -554,7 +560,7 @@ namespace std_copy
                 this->erase(newEnd, this->end());
             }
 
-    #if _DEBUG
+    #if _STD_COPY_LIST_DEBUG_PRINT
 
             void _debug_print()
             {
