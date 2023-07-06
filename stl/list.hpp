@@ -10,10 +10,10 @@
 #include <cstdint>
 #include <stdexcept>
 
-#define _DEBUG 1
+#define _DEBUG 0
 
 #if _DEBUG
-#include <iostream>
+#include <iostream> 
 #endif
 
 namespace std_copy
