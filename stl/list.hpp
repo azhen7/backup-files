@@ -188,7 +188,7 @@ namespace std_copy
                     size_type leftExcludingEnd = count - _size - 1;
 
                     _tail = _tail->_next;
-                    _tail->_next->_value = val;
+                    _tail->_value = val;
 
                     while (leftExcludingEnd-- > 0)
                     {
@@ -202,15 +202,15 @@ namespace std_copy
                 }
                 else
                 {
+                    _node_allocator_type::deallocate(_end, 1);
                     size_type left = _size - count;
-
-                    _node_allocator_type::deallocate(_tail->_next, 1);
                     while (left-- > 0)
                     {
                         _tail = _tail->_prev;
                         _node_allocator_type::deallocate(_tail->_next, 1);
                     }
                 }
+                _size = count;
                 _add_new_end_ptr();
             }
 
