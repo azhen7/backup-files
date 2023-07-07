@@ -314,10 +314,8 @@ namespace std_copy
              */
             void push_back(const_reference elem)
             {
-                if (_check_if_empty(elem))
-                {
-                    return;
-                }
+                if (_check_if_empty(elem)) return;
+
                 _end = _tail->_next;
                 _node_type* newTail = _node_allocator_type::allocate(1);
 
@@ -360,6 +358,13 @@ namespace std_copy
              */
             void pop_back()
             {
+                if (_size == 1)
+                {
+                    _size = 0;
+                    _node_allocator_type::deallocate(_tail, 1);
+                    return;
+                }
+
                 _end = _tail->_next;
                 _tail = _tail->_prev;
                 _end->_prev = _tail;
@@ -539,7 +544,7 @@ namespace std_copy
              * Removes all elements equal to @p val.
              * @param val The value to remove.
              */
-            size_type remove(const_reference val)
+            size_type remove(const_reference val) noexcept
             {
                 return _remove(bind1st(equal_to<value_type>(), val));
             }
@@ -570,7 +575,7 @@ namespace std_copy
 
     #if _STD_COPY_LIST_DEBUG_PRINT
 
-            void _debug_print()
+            void _debug_print() const noexcept
             {
                 _node_type* temp = _head;
                 size_type amount = 0;
