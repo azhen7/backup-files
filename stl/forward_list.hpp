@@ -19,7 +19,7 @@ namespace std_copy
     {
         private:
             typedef forward_list<T, Alloc>                                              _forward_list_type;
-            typedef _std_copy_hidden::_std_copy_list_iterators::_node<T>                 _node_type;
+            typedef _std_copy_hidden::_std_copy_forward_list_iterators::_node<T>        _node_type;
             typedef allocator<_node_type>                                               _node_allocator_type;
 
         public:
@@ -35,7 +35,9 @@ namespace std_copy
             typedef _std_copy_hidden::_std_copy_list_iterators::_const_node_iterator<T> const_iterator;
 
         private:
-
+            _node_type* _head;
+            _node_type* _end;
+            _node_type* _before_head;
 
         public:
             
