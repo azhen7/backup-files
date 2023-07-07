@@ -583,6 +583,32 @@ namespace std_copy
                 auto newEnd = std_copy::unique(this->begin(), this->end());
                 this->erase(newEnd, this->end());
             }
+            /**
+             * Merges two sorted lists. Assumes both *this and l are sorted.
+             * @param l The other sorted list to merge.
+            */
+            void merge(_list_type& l)
+            {
+                iterator it1 = begin();
+                iterator it2 = l.begin();
+                while (it1 != end() && it2 != l.end())
+                {
+                    if (*it2 <= *it1)
+                    {
+                        this->insert(it1, *it2);
+                        it2++;
+                    }
+                    else
+                    {
+                        it1++;
+                    }
+                }
+                while (it2 != l.end())
+                {
+                    this->push_back(*it2);
+                    it2++;
+                }
+            }
 
     #if _STD_COPY_LIST_DEBUG_PRINT
 
