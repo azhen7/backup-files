@@ -6,6 +6,24 @@
 
 namespace _std_copy_hidden
 {
+    namespace _std_copy_forward_list_iterators
+    {
+        template <class _T>
+        struct _node
+        {
+            private:
+                typedef _node<_T> _self_type;
+            public:
+                _self_type* _next;
+                _T _value;
+
+                void _init(_self_type* n, const _T& v)
+                {
+                    _value = v;
+                    _next = n;
+                }
+        };
+    }
     namespace _std_copy_list_iterators
     {
         template <class _Type>
