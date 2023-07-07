@@ -50,9 +50,9 @@ namespace std_copy
             {
                 if (src == src_end)
                 {
-                    _head = nullptr;
-                    _tail = nullptr;
-                    _end = nullptr;
+                    _tail = _node_allocator_type::allocate(1);
+                    _head = _tail;
+                    _tail->_next = _tail;
                     return;
                 }
 
@@ -68,14 +68,12 @@ namespace std_copy
                     _tail = n;
                     n = n->_next;
                 }
-                _end = n;
             }
             
             void _add_new_end_ptr()
             {
                 _tail->_next = _node_allocator_type::allocate(1);
                 _tail->_next->_prev = _tail;
-                _end = _tail->_next;
             }
 
             void _link_nodes(_node_type* before, _node_type* after)
@@ -161,7 +159,6 @@ namespace std_copy
                 }
                 _head = nullptr;
                 _tail = nullptr;
-                _end = nullptr;
             }
 
             // Funtions used for appending elements (e.g. push_front, push_back, insert, etc.)
@@ -202,7 +199,7 @@ namespace std_copy
                 }
                 else
                 {
-                    _node_allocator_type::deallocate(_end, 1);
+                    _node_allocator_type::deallocate(_tail->_next, 1);
                     size_type left = _size - count;
                     while (left-- > 0)
                     {
@@ -218,7 +215,6 @@ namespace std_copy
             size_type _remove(Function compare)
             {
                 _node_type* temp = _head;
-                _end = _tail->_next;
 
                 size_type currIndex = 0;
                 const size_type sizeRecord = _size;
@@ -238,14 +234,22 @@ namespace std_copy
                     temp = temp->_next;
                     currIndex++;
                 }
-                _node_allocator_type::deallocate(_end, 1);
+                _node_allocator_type::deallocate(_tail->_next, 1);
                 _add_new_end_ptr();
                 return sizeRecord - _size;
+            }
+            void _remove_elem_and_clear()
+            {
+                _size = 0;
+
+                _node_allocator_type::deallocate(_tail, 1);
+                _tail = _tail->_next;
+                _tail->_next = _tail;
+                _head = _tail;
             }
 
             _node_type* _head;
             _node_type* _tail;
-            _node_type* _end;
             size_type _size;
 
         public:
@@ -278,15 +282,14 @@ namespace std_copy
             list(_list_type&& other)
                 : _size(move(other._size)),
                 _head(move(other._head)),
-                _tail(move(other._tail)),
-                _end(move(other._end))
+                _tail(move(other._tail))
             {
             }
 
             list(const _list_type &other)
                 : _size(other._size)
             {
-                _build_this_from_existing(other._head, other._end);
+                _build_this_from_existing(other._head, other._tail->_next);
             }
 
             ~list()
@@ -316,10 +319,9 @@ namespace std_copy
             {
                 if (_check_if_empty(elem)) return;
 
-                _end = _tail->_next;
                 _node_type* newTail = _node_allocator_type::allocate(1);
 
-                _link_nodes(newTail, _end);
+                _link_nodes(newTail, _tail->_next);
                 _link_nodes(_tail, newTail);
 
                 _tail->_next->_value = elem;
@@ -337,8 +339,8 @@ namespace std_copy
 
                 _node_type* a = _node_allocator_type::allocate(1);
 
-                a->_next = _head;
-                _head->_prev = a;
+                _link_nodes(a, _head);
+
                 a->_value = elem;
 
                 _head = _head->_prev;
@@ -349,6 +351,12 @@ namespace std_copy
              */
             void pop_front()
             {
+                if (_size == 1)
+                {
+                    _remove_elem_and_clear();
+                    return;
+                }
+
                 _head = _head->_next;
                 _node_allocator_type::deallocate(_head->_prev, 1);
                 _size--;
@@ -360,18 +368,17 @@ namespace std_copy
             {
                 if (_size == 1)
                 {
-                    _size = 0;
-                    _node_allocator_type::deallocate(_tail, 1);
+                    _remove_elem_and_clear();
                     return;
                 }
 
-                _end = _tail->_next;
+                _node_type* end = _tail->_next;
                 _tail = _tail->_prev;
-                _end->_prev = _tail;
+                end->_prev = _tail;
 
                 _node_allocator_type::deallocate(_tail->_next, 1);
 
-                _tail->_next = _end;
+                _tail->_next = end;
                 _size--;
             }
             /**
@@ -385,11 +392,11 @@ namespace std_copy
             /**
              * Returns iterator to end of list.
              */
-            iterator end() const noexcept { return iterator(_end); }
+            iterator end() const noexcept { return iterator(_tail->_next); }
             /**
              * Returns const iterator to end of list.
              */
-            const_iterator cend() const noexcept { return const_iterator(_end); }
+            const_iterator cend() const noexcept { return const_iterator(_tail->_next); }
             /**
              * Returns reverse iterator to beginning of list.
              */
@@ -397,7 +404,7 @@ namespace std_copy
             /**
              * Returns reverse iterator to beginning of list.
              */
-            reverse_iterator rend() const noexcept { return reverse_iterator(_end); }
+            reverse_iterator rend() const noexcept { return reverse_iterator(_tail->_next); }
             /**
              * Returns constant reverse iterator to beginning of list.
              */
@@ -405,7 +412,7 @@ namespace std_copy
             /**
              * Returns constant reverse iterator to end of list.
              */
-            const_reverse_iterator crend() const noexcept { return const_reverse_iterator(_end); }
+            const_reverse_iterator crend() const noexcept { return const_reverse_iterator(_tail->_next); }
             /**
              * Inserts an element at @p pos.
              * @param pos The position to insert the element at.
@@ -487,7 +494,12 @@ namespace std_copy
                 }
                 
                 _node_type* rawIt = pos.base();
-                (rawIt->_prev)->_next = rawIt->_next;
+                if (rawIt == _tail)
+                {
+                    _tail = _tail->_prev;
+                }
+
+                rawIt->_prev->_next = rawIt->_next;
                 _node_type* nextIt = rawIt->_next;
 
                 _node_allocator_type::deallocate(rawIt, 1);
@@ -516,8 +528,7 @@ namespace std_copy
                     _size--;
                 }
 
-                beforeStart->_next = end.base();
-                end.base()->_prev = beforeStart;
+                _link_nodes(beforeStart, end.base());
 
                 return end;
             }
@@ -577,13 +588,9 @@ namespace std_copy
 
             void _debug_print() const noexcept
             {
-                _node_type* temp = _head;
-                size_type amount = 0;
-                while (amount < _size)
+                for (auto it = begin(); it != end(); it++)
                 {
-                    std::cout << temp->_value << ' ';
-                    temp = temp->_next;
-                    amount++;
+                    std::cout << *it << ' ';
                 }
                 std::cout << '\n';
             }
