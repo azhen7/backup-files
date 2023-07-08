@@ -425,15 +425,6 @@ _CHARCONV_START_HIDDEN_SCOPE
                 s[len - i - 1] = temp;
             }
         }
-        static void _copy(char *s, char *end, char *dest)
-        {
-            while (s != end)
-            {
-                *dest = *s;
-                s++;
-                dest++;
-            }
-        }
 
     public:
         static std_copy::to_chars_result _to_chars(char *first, char *last, IntType val, int base = 10)
@@ -454,7 +445,6 @@ _CHARCONV_START_HIDDEN_SCOPE
                 {
                     first[last - first] = '\0';
                     _reverse(first, first + i);
-                    //_copy(first, first + i + 1, first);
 
                     ret.ptr = last;
                     ret.ec = static_cast<std_copy::errc>(0);
