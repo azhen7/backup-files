@@ -247,7 +247,7 @@ _CHARCONV_START_HIDDEN_SCOPE
                             if (_from_alpha_to_num(*(start + 1)) >= 5)
                                 value += 0.00001;
 
-                            while (_is_num_char(*(start + 1)) && start + 1 != end)
+                            while (start + 1 != end && _is_num_char(*(start + 1)))
                                 start++;
 
                             break;
