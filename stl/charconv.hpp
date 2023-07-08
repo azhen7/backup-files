@@ -231,7 +231,6 @@ _CHARCONV_START_HIDDEN_SCOPE
                 else if (*start == '.')
                 {
                     is_decimal_mode = true;
-                    value /= 10;
                 }
                 else if (_is_num_char(*start))
                 {
@@ -261,8 +260,8 @@ _CHARCONV_START_HIDDEN_SCOPE
                     }
                     else
                     {
+                        value = has_val ? value * 10 : value;
                         value += current_digit;
-                        value *= 10;
                     }
                     if (value > std_copy::numeric_limits<FloatingPointType>::max())
                         return exit(true);
@@ -292,7 +291,14 @@ _CHARCONV_START_HIDDEN_SCOPE
                     std_copy::from_chars_result t = _from_chars_integral_helper<int>::_from_chars(start + 1, end, exp);
                     start = const_cast<char *>(t.ptr);
 
-                    if ((int)__builtin_log10f(value) + exp > 38)
+                    int count = 0;
+                    auto v = value;
+                    while (value > 0)
+                    {
+                        v = static_cast<int>(v / 10);
+                        count++;
+                    }
+                    if (count + exp > 38)
                         return exit(true);
 
                     while (exp-- > 0)
@@ -422,7 +428,11 @@ _CHARCONV_START_HIDDEN_SCOPE
         static void _copy(char *s, char *end, char *dest)
         {
             while (s != end)
-                *dest++ = *s++;
+            {
+                *dest = *s;
+                s++;
+                dest++;
+            }
         }
 
     public:
@@ -432,28 +442,34 @@ _CHARCONV_START_HIDDEN_SCOPE
     #endif
         {
             std_copy::to_chars_result ret;
-            char str_as_arr[last - first];
-            for (decltype(last - first) i = 0; i < last - first; i++)
+            char str_as_arr[last - first + 1];
+            for (decltype(last - first) i = 0; i < last - first + 1; i++)
             {
                 if (val < 0 && i == 0)
                 {
-                    str_as_arr[0] = '-';
+                    first[0] = '-';
                     continue;
                 }
                 if (val == 0)
                 {
-                    _reverse(str_as_arr, &str_as_arr[i]);
-                    _copy(str_as_arr, &str_as_arr[i], first);
+                    first[last - first] = '\0';
+                    _reverse(first, first + i);
+                    //_copy(first, first + i + 1, first);
+
                     ret.ptr = last;
                     ret.ec = static_cast<std_copy::errc>(0);
                     return ret;
                 }
 
+                // auto q = val / base;
+                // IntType digit = val - q * base;
+                // val = q;
                 IntType digit = val % base;
                 val /= base;
-                str_as_arr[i] = _from_num_to_alpha(digit, base); //something about char* being read-only
 
-                if (str_as_arr[i] == '\0')
+                first[i] = _from_num_to_alpha(digit, base); //something about char* being read-only
+
+                if (first[i] == '\0')
                 {
                     ret.ptr = first + i;
                     ret.ec = std_copy::errc::invalid_argument;
