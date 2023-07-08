@@ -444,20 +444,22 @@ _CHARCONV_START_HIDDEN_SCOPE
                 if (val == 0)
                 {
                     first[last - first] = '\0';
-                    _reverse(first, first + i);
+                    _reverse(first, first + i); //This call is necessary as we cannot determine the 
+                                                //number of digits in the number without using
+                                                //some costly operations. As such, we cannot
+                                                //fill in the range "from the back", as we cannot
+                                                //find the index to start filling in backwards from.
 
                     ret.ptr = last;
                     ret.ec = static_cast<std_copy::errc>(0);
                     return ret;
                 }
 
-                // auto q = val / base;
-                // IntType digit = val - q * base;
-                // val = q;
-                IntType digit = val % base;
-                val /= base;
+                auto q = val / base;
+                IntType digit = val - q * base;
+                val = q;
 
-                first[i] = _from_num_to_alpha(digit, base); //something about char* being read-only
+                first[i] = _from_num_to_alpha(digit, base);
 
                 if (first[i] == '\0')
                 {
