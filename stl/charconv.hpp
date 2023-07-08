@@ -6,6 +6,7 @@
 #include "type_traits.hpp"
 #include "char_traits.hpp"
 
+
 #define _CHARCONV_START_HIDDEN_SCOPE \
     namespace _std_copy_hidden       \
     {                                \
@@ -75,7 +76,7 @@ namespace std_copy
     */
     struct from_chars_result
     {
-        const char *ptr;
+        const char* ptr;
         std_copy::errc ec;
 
         friend bool operator==(const from_chars_result &, const from_chars_result &) = default;
@@ -87,7 +88,7 @@ namespace std_copy
     */
     struct to_chars_result
     {
-        char *ptr;
+        char* ptr;
         std_copy::errc ec;
 
         friend bool operator==(const to_chars_result &, const to_chars_result &) = default;
@@ -99,7 +100,7 @@ _CHARCONV_START_HIDDEN_SCOPE
     template <class IntType>
     struct _from_chars_integral_helper
     {
-        static std_copy::from_chars_result _from_chars(char *first, char *last, IntType &val, int base = 10)
+        static std_copy::from_chars_result _from_chars(const char* first, const char* last, IntType &val, int base = 10)
     #if __cplusplus > 201703L
             requires std_copy::is_integral_v<IntType>
     #endif
@@ -190,7 +191,7 @@ _CHARCONV_START_HIDDEN_SCOPE
     template <class FloatingPointType>
     struct _from_chars_float_helper
     {
-        static std_copy::from_chars_result _from_chars(char *start, char *end, FloatingPointType &val, std_copy::chars_format fmt = std_copy::chars_format::general)
+        static std_copy::from_chars_result _from_chars(const char* start, const char* end, FloatingPointType &val, std_copy::chars_format fmt = std_copy::chars_format::general)
     #if __cplusplus > 201703L
             requires std_copy::is_floating_point_v<FloatingPointType>
     #endif
@@ -289,11 +290,11 @@ _CHARCONV_START_HIDDEN_SCOPE
                     }
                     int exp = 0;
                     std_copy::from_chars_result t = _from_chars_integral_helper<int>::_from_chars(start + 1, end, exp);
-                    start = const_cast<char *>(t.ptr);
+                    start = const_cast<char* >(t.ptr);
 
                     int count = 0;
                     auto v = value;
-                    while (value > 0)
+                    while (v > 0)
                     {
                         v = static_cast<int>(v / 10);
                         count++;
@@ -346,44 +347,44 @@ namespace std_copy
      * @param val An integral type to store the result in.
      * @param base The base to interpret the range in.
     */
-    from_chars_result from_chars(char *first, char *last, bool &val, int base = 10) = delete;
-    from_chars_result from_chars(char *first, char *last, char &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, bool &val, int base = 10) = delete;
+    from_chars_result from_chars(const char* first, const char* last, char &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(char, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, unsigned char &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, unsigned char &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(unsigned char, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, short &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, short &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(short, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, unsigned short &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, unsigned short &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(unsigned short, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, int &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, int &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(int, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, unsigned int &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, unsigned int &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(unsigned int, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, long &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, long &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(long, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, unsigned long &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, unsigned long &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(unsigned long, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, long long &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, long long &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(long long, first, last, val, base);
     }
-    from_chars_result from_chars(char *first, char *last, unsigned long long &val, int base = 10)
+    from_chars_result from_chars(const char* first, const char* last, unsigned long long &val, int base = 10)
     {
         return _FROM_CHARS_INTEGRAL(unsigned long long, first, last, val, base);
     }
@@ -395,15 +396,15 @@ namespace std_copy
      * @param val An integral type to store the result in.
      * @param fmt The formatting mode of the sequence.
     */
-    from_chars_result from_chars(char *first, char *last, float &val, chars_format fmt = chars_format::general)
+    from_chars_result from_chars(const char* first, const char* last, float &val, chars_format fmt = chars_format::general)
     {
         return _FROM_CHARS_FLOATING_POINT(float, first, last, val, fmt);
     }
-    from_chars_result from_chars(char *first, char *last, double &val, chars_format fmt = chars_format::general)
+    from_chars_result from_chars(const char* first, const char* last, double &val, chars_format fmt = chars_format::general)
     {
         return _FROM_CHARS_FLOATING_POINT(double, first, last, val, fmt);
     }
-    from_chars_result from_chars(char *first, char *last, long double &val, chars_format fmt = chars_format::general)
+    from_chars_result from_chars(const char* first, const char* last, long double &val, chars_format fmt = chars_format::general)
     {
         return _FROM_CHARS_FLOATING_POINT(long double, first, last, val, fmt);
     }
@@ -415,7 +416,7 @@ _CHARCONV_START_HIDDEN_SCOPE
     struct _to_chars_integral_helper
     {
     private:
-        static void _reverse(char *s, char *end)
+        static void _reverse(char* s, char* end)
         {
             unsigned int len = end - s;
             for (unsigned int i = 0; i < (int)(len / 2); i++)
@@ -427,7 +428,7 @@ _CHARCONV_START_HIDDEN_SCOPE
         }
 
     public:
-        static std_copy::to_chars_result _to_chars(char *first, char *last, IntType val, int base = 10)
+        static std_copy::to_chars_result _to_chars(char* first, char* last, IntType val, int base = 10)
     #if __cplusplus > 201703L
             requires std_copy::is_integral_v<IntType>
     #endif
@@ -485,43 +486,43 @@ namespace std_copy
      * @param last The end of the range to store the decimal value in.
      * @param val The decimal value to convert.
     */
-    to_chars_result to_chars(char *first, char *last, int val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, int val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(int, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, unsigned int val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, unsigned int val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(unsigned int, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, short val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, short val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(short, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, unsigned short val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, unsigned short val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(unsigned short, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, char val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, char val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(char, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, long val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, long val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(long, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, unsigned long val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, unsigned long val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(unsigned long, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, long long val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, long long val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(long long, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, unsigned long long val, int base = 10)
+    to_chars_result to_chars(char* first, char* last, unsigned long long val, int base = 10)
     {
         return _TO_CHARS_INTEGRAL(unsigned long long, first, last, val, base);
     }
-    to_chars_result to_chars(char *first, char *last, bool val, int base = 10) = delete;
+    to_chars_result to_chars(char* first, char* last, bool val, int base = 10) = delete;
 }
 
 #endif /* _STD_COPY_CHARCONV */
