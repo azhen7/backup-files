@@ -2,137 +2,166 @@
 #define _STD_COPY_EQUATION
 
 #include "move.hpp"
+#include "algorithm.hpp"
+
 #include <string>
 #include <cstdint>
+#include <cmath>
+#include <stdexcept>
 
 namespace std_copy
 {
     class point
     {
         protected:
-            long long x;
-            long long y;
+            using LD = long double;
+
+            LD x;
+            LD y;
         
         public:
             point() : x(0), y(0) {}
-            point(long long a, long long b)
-                : x(move(a)), y(move(b)) {}
+            point(LD a, LD b)
+                : x(a), y(b) {}
             point(const point& obj)
-                : x(move(obj.x)), y(move(obj.y)) {}
+                : x(obj.x), y(obj.y) {}
             point(point&& obj)
                 : x(move(obj.x)), y(move(obj.y)) {}
 
-            long long get_x() const noexcept
+            LD get_x() const noexcept
             {
                 return x;
             }
 
-            long long get_y() const noexcept
+            LD get_y() const noexcept
             {
                 return y;
             }
 
-            void set_x(long long a)
+            point& set_x(LD a)
             {
                 x = move(a);
+                return *this;
             }
 
-            void set_y(long long b)
+            point& set_y(LD b)
             {
                 y = move(b);
+                return *this;
             }
     };
 
-    template <std::size_t DegreeOfEquation>
     class equation
     {
-        protected:
-                using _long_long_type = long long;
-                using _equation_type  = equation<DegreeOfEquation>;
+    private:
+        using LD = long double;
+        using _self_type = equation;
 
-                _long_long_type _coefficients[DegreeOfEquation + 1];
-
-        public:
-            equation(_long_long_type (&arr)[DegreeOfEquation + 1])
+        LD* _buf{nullptr};
+        std::ptrdiff_t _n{0};
+    
+    public:
+        equation(std::ptrdiff_t n)
+        {
+            _n = n;
+            _buf = new LD[n + 1];
+        }
+        equation(LD* s, LD* e)
+        {
+            _n = e - s;
+            _buf = new LD[_n + 1];
+            for (std::ptrdiff_t i = 0; s != e; i++)
             {
-                for (_long_long_type i = 0; i < DegreeOfEquation + 1; i++)
-                    _coefficients[i] = move(arr[i]);
+                _buf[i] = *s;
+                s++;
             }
+        }
+        equation()
+        {
+        }
 
-            template <class ...Args>
-            equation(Args ...args)
-            {
-                _long_long_type i = 0;
-                (void(_coefficients[i++] = args), ...);
-            }
+        _self_type& set_terms(LD* s, LD* e) noexcept
+        {
+            _n = e - s - 1;
+            if (_buf)
+                delete[] _buf;
+            _buf = new LD[_n + 1];
 
-            _long_long_type operator()(_long_long_type input)
+            for (std::ptrdiff_t i = 0; s != e; i++)
             {
-                _long_long_type ret = 0;
-                for (_long_long_type i = 0; i < DegreeOfEquation + 1; i++)
-                    ret += _coefficients[i] * __builtin_pow(input, DegreeOfEquation - i);
-                return ret;
+                _buf[i] = *s;
+                s++;
             }
+            return *this;
+        }
+        template <std::ptrdiff_t n>
+        _self_type& set_terms(LD x[n])
+        {
+            _n = n - 1;
+            if (_buf)
+                delete[] _buf;
+            _buf = new LD[_n];
 
-            _equation_type change_coefficient(_long_long_type term, _long_long_type newCoef)
+            for (std::ptrdiff_t i = 0; i < _n; i++)
             {
-                _coefficients[term - 1] = newCoef;
-                return *this;
+                _buf[i] = x[i];
             }
+            return *this;
+        }
+        _self_type& set_terms(const equation& e) noexcept
+        {
+            _n = e._n;
+            if (_buf)
+                delete[] _buf;
+            _buf = new LD[_n + 1];
 
-            _equation_type set_coefficients(_long_long_type (&arr)[DegreeOfEquation + 1])
-            {
-                for (_long_long_type i = 0; i < DegreeOfEquation + 1; i++)
-                    _coefficients[i] = move(arr[i]);
-                return *this;
-            }
-            template <class ...Args>
-            _equation_type set_coefficients(Args... a)
-            {
-                _long_long_type i = 0;
-                (void(_coefficients[i++] = a), ...);
-                return *this;
-            }
+            std_copy::copy(e._buf, e._buf + _n + 1, _buf);
+            return *this;
+        }
 
-            _long_long_type* coefficients() const noexcept
+        LD operator()(LD x) const noexcept
+        {
+            LD sum = 0;
+            LD p = std::pow(x, _n);
+            for (std::ptrdiff_t i = 0; i < _n + 1; i++)
             {
-                return _coefficients;
+                sum += _buf[i] * p;
+                p /= x;
             }
+            return sum;
+        }
+        LD substitute(LD x) const noexcept
+        {
+            return (*this)(x);
+        }
 
-            point y_intercept()
+        LD degree() const noexcept
+        {
+            return _n;
+        }
+        LD& at(std::size_t i) const
+        {
+            if (i > _n)
             {
-                return point(0, _coefficients[DegreeOfEquation]);
+                throw std::out_of_range("equation::at");
             }
+            return _buf[i];
+        }
+        LD* data() const noexcept
+        {
+            return _buf;
+        }
 
-            _long_long_type degree() const noexcept
-            {
-                return DegreeOfEquation;
-            }
-
-            _long_long_type leading_coefficient() const noexcept
-            {
-                if constexpr(DegreeOfEquation == 0)
-                    return 0;
-                return _coefficients[0];
-            }
-
-            _long_long_type constant() const noexcept
-            {
-                if constexpr(DegreeOfEquation == 0)
-                    return 0;
-                return _coefficients[DegreeOfEquation];
-            }
-
-            equation<DegreeOfEquation - 1> derivative()
-            {
-                _long_long_type newCoefs[DegreeOfEquation];
-
-                for (_long_long_type i = 0; i < DegreeOfEquation; i++)
-                {
-                    newCoefs[i] = (DegreeOfEquation - i) * _coefficients[i];
-                }
-                return equation<DegreeOfEquation - 1>(newCoefs);
-            }
+        LD leading_coefficient() const noexcept
+        {
+            if (_n == 0) return 0;
+            return _buf[0];
+        }
+        LD y_intercept() const noexcept
+        {
+            if (_n == 0) return 0;
+            return _buf[_n];
+        }
     };
 }
 
