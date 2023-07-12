@@ -34,7 +34,7 @@ namespace std_copy
     concept assignable_from = is_lvalue_reference_v<LHS> &&
     requires(LHS l, RHS r)
     {
-        {l = move(r)} -> same_as<LHS>;
+        {l = r} -> same_as<LHS>;
     };
     //Checks if a given type T can be constructed from Args...
     template <class T, class ...Args>
