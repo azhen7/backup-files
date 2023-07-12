@@ -74,12 +74,13 @@ namespace std_copy
 
             difference_type _realloc_create_insert_space(
                 difference_type addToGetPos,
-                difference_type secondCopy,
                 difference_type copyFrom,
                 size_type copyUpTo,
                 size_type c
             )
             {
+                difference_type secondCopy = addToGetPos;
+
                 pointer temp = _internalBuffer;
                 _capacity = c;
                 _internalBuffer = allocator_type::allocate(_capacity);
@@ -350,7 +351,7 @@ namespace std_copy
             {
                 const difference_type addToGetPos = pos - this->begin();
                 if (_numberOfElements ==  _capacity)
-                    _realloc_create_insert_space(addToGetPos, addToGetPos, addToGetPos + 1, _numberOfElements, _get_new_capacity());
+                    _realloc_create_insert_space(addToGetPos, addToGetPos + 1, _numberOfElements, _get_new_capacity());
                 else
                     uninitialized_move_backward(_internalBuffer + addToGetPos, _internalBuffer + _numberOfElements, _internalBuffer + _numberOfElements + 1);
 
@@ -578,7 +579,7 @@ namespace std_copy
             {
                 difference_type t = pos - this->begin();
                 if (_numberOfElements == _capacity)
-                    _realloc_create_insert_space(t, t, t + 1, _numberOfElements, _get_new_capacity());
+                    _realloc_create_insert_space(t, t + 1, _numberOfElements, _get_new_capacity());
                 else
                     move_backward(pos.base(), _internalBuffer + _numberOfElements, _internalBuffer + _numberOfElements + 1);
 
@@ -607,7 +608,7 @@ namespace std_copy
                 difference_type addToGetPos = pos - this->begin();
                 
                 if (_numberOfElements > _capacity)
-                    _realloc_create_insert_space(addToGetPos, addToGetPos, addToGetPos + dist, _numberOfElements - dist, _calculate_smallest_power_of_two_greater_than(_numberOfElements));
+                    _realloc_create_insert_space(addToGetPos, addToGetPos + dist, _numberOfElements - dist, _calculate_smallest_power_of_two_greater_than(_numberOfElements));
                 else
                     move_backward(_internalBuffer + addToGetPos, _internalBuffer + _numberOfElements - dist, _internalBuffer + _numberOfElements);
 
