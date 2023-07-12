@@ -80,6 +80,16 @@ namespace std_copy
         {
         }
 
+        ~equation()
+        {
+            if (_buf)
+            {
+                delete[] _buf;
+                _buf = nullptr;
+                _n = 0;
+            }
+        }
+
         _self_type& set_terms(LD* s, LD* e) noexcept
         {
             _n = e - s - 1;
@@ -87,25 +97,7 @@ namespace std_copy
                 delete[] _buf;
             _buf = new LD[_n + 1];
 
-            for (std::ptrdiff_t i = 0; s != e; i++)
-            {
-                _buf[i] = *s;
-                s++;
-            }
-            return *this;
-        }
-        template <std::ptrdiff_t n>
-        _self_type& set_terms(LD x[n])
-        {
-            _n = n - 1;
-            if (_buf)
-                delete[] _buf;
-            _buf = new LD[_n];
-
-            for (std::ptrdiff_t i = 0; i < _n; i++)
-            {
-                _buf[i] = x[i];
-            }
+            std_copy::copy(s, e, _buf);
             return *this;
         }
         _self_type& set_terms(const equation& e) noexcept
@@ -154,12 +146,10 @@ namespace std_copy
 
         LD leading_coefficient() const noexcept
         {
-            if (_n == 0) return 0;
             return _buf[0];
         }
         LD y_intercept() const noexcept
         {
-            if (_n == 0) return 0;
             return _buf[_n];
         }
     };
