@@ -33,7 +33,7 @@ namespace _std_copy_hidden
                 /**
                  * Overloaded postfix increment operator
                 */
-                _iterator_type operator++()
+                _iterator_type operator++() noexcept
                 {
                     _internalPtr++;
                     return *this;
@@ -41,7 +41,7 @@ namespace _std_copy_hidden
                 /**
                  * Overloaded prefix increment operator
                 */
-                _iterator_type operator++(int)
+                _iterator_type operator++(int) noexcept
                 {
                     _iterator_type ptrBeforeIncrement = *this;
                     _internalPtr++;
@@ -50,7 +50,7 @@ namespace _std_copy_hidden
                 /**
                  * Overloaded postfix decrement operator
                 */
-                _iterator_type operator--()
+                _iterator_type operator--() noexcept
                 {
                     _internalPtr--;
                     return *this;
@@ -58,7 +58,7 @@ namespace _std_copy_hidden
                 /**
                  * Overloaded prefix decrement operator
                 */
-                _iterator_type operator--(int)
+                _iterator_type operator--(int) noexcept
                 {
                     _iterator_type ptrBeforeDecrement = _internalPtr;
                     _internalPtr--;
@@ -69,7 +69,7 @@ namespace _std_copy_hidden
                  * another iterator.
                  * @param it The iterator to compare against.
                 */
-                bool operator==(_iterator_type it)
+                bool operator==(_iterator_type it) const noexcept
                 {
                     return _internalPtr == it._internalPtr;
                 }
@@ -77,28 +77,28 @@ namespace _std_copy_hidden
                  * Overloaded inequality operator.
                  * @param it The iterator to compare against.
                 */
-                bool operator!=(_iterator_type it)
+                bool operator!=(_iterator_type it) const noexcept
                 {
                     return !(*this == it);
                 }
                 /**
                  * Overloaded dereference operator
                 */
-                reference operator*()
+                reference operator*() const noexcept
                 {
                     return *_internalPtr;
                 }
                 /**
                  * Overloaded arrow operator
                 */
-                pointer operator->()
+                pointer operator->() const noexcept
                 {
                     return _internalPtr;
                 }
                 /**
                  * Returns the iterator's internal pointer
                 */
-                pointer base()
+                pointer base() const noexcept
                 {
                     return _internalPtr;
                 }
@@ -106,77 +106,77 @@ namespace _std_copy_hidden
                  * Overloaded assignment operator -> assigns 
                  * the current iterator to a provided iterator.
                 */
-                void operator=(_iterator_type it)
+                void operator=(_iterator_type it) noexcept
                 {
                     _internalPtr = it._internalPtr;
                 }
                 /**
                  * Overloaded += operator
                 */
-                void operator+=(difference_type n)
+                void operator+=(difference_type n) noexcept
                 {
                     _internalPtr += n;
                 }
                 /**
                  * Overloaded + operator
                 */
-                _iterator_type operator+(difference_type n)
+                _iterator_type operator+(difference_type n) noexcept
                 {
                     return _iterator_type(_internalPtr + n);
                 }
                 /**
                  * Overloaded -= operator
                 */
-                void operator-=(difference_type n)
+                void operator-=(difference_type n) noexcept
                 {
                     _internalPtr -= n;
                 }
                 /**
                  * Overloaded - operator; decrements the iterator by a certain amount.
                 */
-                _iterator_type operator-(difference_type n)
+                _iterator_type operator-(difference_type n) noexcept
                 {
                     return _iterator_type(_internalPtr - n);
                 }
                 /**
                  * Overloaded - operator; finds the std_copy::distance between two iterators.
                 */
-                difference_type operator-(_iterator_type it)
+                difference_type operator-(_iterator_type it) noexcept
                 {
                     return _internalPtr - it._internalPtr;
                 }
                 /**
                  * Overloaded < operator
                 */
-                bool operator<(_iterator_type i)
+                bool operator<(_iterator_type i) const noexcept
                 {
                     return _internalPtr < i._internalPtr;
                 }
                 /**
                  * Overloaded > operator
                 */
-                bool operator>(_iterator_type i)
+                bool operator>(_iterator_type i) const noexcept
                 {
                     return _internalPtr > i._internalPtr;
                 }
                 /**
                  * Overloaded >= operator
                 */
-                bool operator>=(_iterator_type i)
+                bool operator>=(_iterator_type i) const noexcept
                 {
                     return _internalPtr >= i._internalPtr;
                 }
                 /**
                  * Overloaded <= operator
                 */
-                bool operator<=(_iterator_type i)
+                bool operator<=(_iterator_type i) const noexcept
                 {
                     return _internalPtr <= i._internalPtr;
                 }
                 /**
                  * Overloaded ! operator
                 */
-                bool operator!()
+                bool operator!() const noexcept
                 {
                     return !_internalPtr;
                 }
