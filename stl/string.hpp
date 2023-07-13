@@ -130,7 +130,7 @@ namespace std_copy
                 _length = (newLen == npos) ? _length : newLen;
 
                 if (whereToTerminate == npos)
-                    whereToTerminate = _length - 1;
+                    whereToTerminate = _length;
                 _internalString[whereToTerminate] = value_type();
             }
 
@@ -141,6 +141,7 @@ namespace std_copy
                     throw ExceptionType(str);
             }
 
+            //Usages of this function have @var dest and @var src as overlapping ranges
             void _copy_str(pointer dest, pointer src, size_type n)
             {
                 if (n == 1)
@@ -148,7 +149,38 @@ namespace std_copy
                 else
                     traits_type::copy(dest, src, n);
                 
-                _terminate_and_update_length(n);
+                _terminate_and_update_length(_length - (src - dest));
+            }
+
+            template <class InputIterator>
+            void _replace_main(InputIterator s, size_type pos, size_type len, size_type count)
+            {
+                if (count == len)
+                    traits_type::move(_internalString + pos, s, count);
+                else if (len < count)
+                {
+                    traits_type::move(_internalString + pos, s, len);
+                    traits_type::move(_internalString + pos + len, _internalString + pos + count, _length - pos - count);
+                    _terminate_and_update_length(_length - count + len);
+                }
+                else
+                {
+                    if (_length - count + len > _capacity)
+                    {
+                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
+                        pointer temp = _internalString;
+                        _internalString = allocator_type::allocate(_capacity);
+                        traits_type::move(_internalString, temp, pos);
+                        traits_type::move(_internalString + pos, s, len);
+                        traits_type::move(_internalString + pos + len, temp + pos + count, _length - pos - count);
+                    }
+                    else
+                    {
+                        std_copy::move_backward(_internalString + pos + count, _internalString + _length, _internalString + _length - count + len);
+                        traits_type::move(_internalString + pos, s, len);
+                    }
+                    _terminate_and_update_length(_length - count + len);
+                }
             }
 
             //Contains other helper one-use functions
@@ -993,32 +1025,7 @@ namespace std_copy
                 if (count == 0)
                     return this->erase(pos, count);
                 
-                if (count == len)
-                    traits_type::move(_internalString + pos, s, count);
-                else if (len < count)
-                {
-                    traits_type::move(_internalString + pos, s, len);
-                    traits_type::move(_internalString + pos + len, _internalString + pos + count, _length - pos - count);
-                    _terminate_and_update_length(_length - count + len);
-                }
-                else
-                {
-                    if (_length - count + len > _capacity)
-                    {
-                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
-                        pointer temp = _internalString;
-                        _internalString = allocator_type::allocate(_capacity);
-                        traits_type::move(_internalString, temp, pos);
-                        traits_type::move(_internalString + pos, s, len);
-                        traits_type::move(_internalString + pos + len, temp + pos + count, _length - pos - count);
-                    }
-                    else
-                    {
-                        std_copy::move_backward(_internalString + pos + count, _internalString + _length, _internalString + _length - count + len);
-                        traits_type::move(_internalString + pos, s, len);
-                    }
-                    _terminate_and_update_length(_length - count + len);
-                }
+                _replace_main(s, pos, len, count);
                 return *this;
             }
             _basic_string_type& replace_safe(size_type pos, size_type count, pointer s)
@@ -1097,32 +1104,7 @@ namespace std_copy
                 if (count == 0)
                     return this->erase(pos, count);
                 
-                if (count == len)
-                    traits_type::move(_internalString + pos, first, count);
-                else if (len < count)
-                {
-                    traits_type::move(_internalString + pos, first, len);
-                    traits_type::move(_internalString + pos + len, _internalString + pos + count, _length - pos - count);
-                    _terminate_and_update_length(_length - count + len);
-                }
-                else
-                {
-                    if (_length - count + len > _capacity)
-                    {
-                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
-                        pointer temp = _internalString;
-                        _internalString = allocator_type::allocate(_capacity);
-                        traits_type::move(_internalString, temp, pos);
-                        traits_type::move(_internalString + pos, first, len);
-                        traits_type::move(_internalString + pos + len, temp + pos + count, _length - pos - count);
-                    }
-                    else
-                    {
-                        std_copy::move_backward(_internalString + pos + count, _internalString + _length, _internalString + _length - count + len);
-                        traits_type::move(_internalString + pos, first, len);
-                    }
-                    _terminate_and_update_length(_length - count + len);
-                }
+                _replace_main(first, pos, len, count);
                 return *this;
             }
             template <class InputIterator>
@@ -1418,8 +1400,6 @@ namespace std_copy
             */
             size_type find_first_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
-                _check_exception(pos, _length, "basic_string::find_first_of: pos > size()");
-                
                 pointer where = std_copy::find_first_of(_internalString + pos, _internalString + _length, p, p + count);
                 if (where == _internalString + _length)
                     return npos;
@@ -1442,8 +1422,6 @@ namespace std_copy
             */
             size_type find_first_of(const_reference ch, size_type pos = 0) const noexcept
             {
-                _check_exception(pos, _length, "basic_string::find_first_of: pos > size()");
-                
                 pointer where = std_copy::find(_internalString + pos, this->end().base(), ch);
                 if (where == _internalString + _length)
                     return npos;
@@ -1468,8 +1446,6 @@ namespace std_copy
             */
             size_type find_first_not_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
-                _check_exception(pos, _length, "basic_string::find_first_not_of: pos > size()");
-                
                 for (size_type i = pos; i < _length; i++)
                 {
                     pointer where = std_copy::find(p, p + count, _internalString[i]);
@@ -1496,8 +1472,6 @@ namespace std_copy
             */
             size_type find_first_not_of(const_reference ch, size_type pos = 0) const noexcept
             {
-                _check_exception(pos, _length, "basic_string::find_first_not_of: pos > size()");
-                
                 for (size_type i = pos; i < _length; i++)
                 {
                     if (!traits_type::eq(_internalString[i], ch))
@@ -1514,8 +1488,6 @@ namespace std_copy
             */
             size_type find_last_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
-                _check_exception(pos, _length, "basic_string::find_last_of: pos > size()");
-
                 for (size_type i = pos; i < _length; i++)
                 {
                     if (std_copy::find(p, p + count, _internalString[i]) != p + count)
@@ -1559,10 +1531,11 @@ namespace std_copy
                 if (pos >= _length)
                     pos = _length - 1;
                 
-                while (pos-- > 0)
+                while (pos > 0)
                 {
                     if (traits_type::eq(_internalString[pos], ch))
                         return pos;
+                    pos--;
                 }
                 return npos;
             }
@@ -1575,8 +1548,6 @@ namespace std_copy
             */
             size_type find_last_not_of(const_pointer p, size_type pos, size_type count) const noexcept
             {
-                _check_exception(pos, _length, "basic_string::find_last_not_of: pos > size()");
-
                 for (size_type i = pos; i < _length; i++)
                 {
                     if (std_copy::find(p, p + count, _internalString[i]) == p + count)
@@ -1611,7 +1582,7 @@ namespace std_copy
                 return this->find_last_not_of(p._internalString, pos, p._length);
             }
             /**
-             * Searches for the last occurrence of ch in *this.
+             * Searches for the last occurrence of any character that is not ch in *this.
              * @param ch The character to search for.
              * @param pos The position to start searching from.
              * @returns The index of the last occurrence of ch.
@@ -1621,10 +1592,11 @@ namespace std_copy
                 if (pos >= _length)
                     pos = _length - 1;
                 
-                while (pos-- > 0)
+                while (pos > 0)
                 {
                     if (!traits_type::eq(_internalString[pos], ch))
                         return pos;
+                    pos--;
                 }
                 return npos;
             }
