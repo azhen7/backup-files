@@ -87,7 +87,7 @@ namespace std_copy
     requires input_iterator<InputIterator>
 #endif
     {
-        while (first++ != last && *first != val);
+        while (*first != val && ++first != last);
         return first;
     }
     /**
@@ -103,7 +103,7 @@ namespace std_copy
     requires input_iterator<InputIterator>
 #endif
     {
-        while (first++ != last && !func(*first));
+        while (!func(*first) && ++first != last);
         return first;
     }
     /**
@@ -119,7 +119,7 @@ namespace std_copy
     requires input_iterator<InputIterator>
 #endif
     {
-        while (first++ != last && func(*first));
+        while (func(*first) && ++first != last);
         return first;
     }
     /**
@@ -134,7 +134,7 @@ namespace std_copy
     requires input_iterator<InputIterator>
 #endif
     {
-        while (first != last && (*first++ = move(val)));
+        while (first != last && *first++ = val);
     }
     /**
      * This function assigns val to all the element at most n after first.
@@ -149,7 +149,7 @@ namespace std_copy
     && is_integral_v<Size>
 #endif
     {
-        while (n-- > 0 && *first++ = move(val));
+        while (n-- > 0 && *first++ = val);
     }
     /**
      * This function copies the elements in the range [first, last) to result.
