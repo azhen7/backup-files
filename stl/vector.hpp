@@ -54,10 +54,10 @@ namespace std_copy
 
             inline size_type _calculate_smallest_power_of_two_greater_than(size_type x)
             {
-                size_type count = 0;
-                while (x >>= 1 && x > 0 && (count++ || 1));
+                size_type count = 0ULL;
+                while (x >>= 1ULL && x > 0ULL && (count++ || 1));
                 
-                return 1 << count;
+                return 1ULL << count;
             }
             void _realloc(size_type newAmount, size_type previousAmount, size_type copyUpTo)
             {
@@ -93,7 +93,7 @@ namespace std_copy
 
             size_type _get_new_capacity()
             {
-                return (_capacity == 0) ? 1 : _capacity << 1;
+                return (_capacity == 0) ? 1ULL : _capacity << 1ULL;
             }
 
             void __resize(size_type n, const_reference val)
@@ -274,8 +274,8 @@ namespace std_copy
             */
             size_type max_size() const noexcept
             {
-                size_type first = 1 << ((size_type) (8 * sizeof(size_type) / sizeof(value_type)));
-                size_type second = 1 << (8 * sizeof(difference_type));
+                size_type first = 1ULL << ((size_type) (8ULL * sizeof(size_type) / sizeof(value_type)));
+                size_type second = 1ULL << (sizeof(difference_type) << 3ULL);
                 if (first < second)
                     return first;
                 return second;
@@ -289,8 +289,8 @@ namespace std_copy
             {
                 destroy(_internalBuffer, _internalBuffer + _numberOfElements);
                 allocator_type::deallocate(_internalBuffer, _capacity);
-                _numberOfElements = 0;
-                _capacity = 0;
+                _numberOfElements = 0ULL;
+                _capacity = 0ULL;
             }
             /**
              * This function pushes an element onto the end of 
@@ -302,7 +302,7 @@ namespace std_copy
                 if (_numberOfElements ==  _capacity)
                 {
                     _capacity = _get_new_capacity();
-                    _realloc(_capacity, _capacity >> 1, _numberOfElements);
+                    _realloc(_capacity, _capacity >> 1ULL, _numberOfElements);
                 }
                 construct_at(_internalBuffer + _numberOfElements, elem);
                 _numberOfElements++;
