@@ -54,6 +54,8 @@ namespace std_copy
             {
             }
 
+            ~pair() = default;
+
             void swap(const _pair_type& p)
             {
                 first_type temp = std_copy::move(first);
