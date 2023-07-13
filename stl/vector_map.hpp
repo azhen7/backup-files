@@ -455,7 +455,7 @@ namespace std_copy
                 while (finish >= start)
                 {
                     size_type addToGetMiddle =
-                        (tempNumberOfElements & 1ULL) ? (tempNumberOfElements >> 1ULL) : (tempNumberOfElements >> 1ULL - 1);
+                        (tempNumberOfElements & 1ULL) ? (tempNumberOfElements >> 1ULL) : ((tempNumberOfElements >> 1ULL) - 1);
                     pointer middle = start + addToGetMiddle;
                     if (middle->first == key)
                         return iterator(middle);
