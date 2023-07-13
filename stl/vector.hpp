@@ -88,12 +88,14 @@ namespace std_copy
                 uninitialized_move(temp, temp + addToGetPos, _internalBuffer);
                 uninitialized_move(temp + secondCopy, temp + copyUpTo, _internalBuffer + copyFrom);
 
+                allocator_type::deallocate(temp, c >> 1ULL);
+
                 return addToGetPos;
             }
 
             size_type _get_new_capacity()
             {
-                return (_capacity == 0) ? 1ULL : _capacity << 1ULL;
+                return (_capacity == 0ULL) ? 1ULL : _capacity << 1ULL;
             }
 
             void __resize(size_type n, const_reference val)
@@ -256,7 +258,7 @@ namespace std_copy
              * Returns a bool corresponding to whether the vector 
              * is empty.
             */
-            bool empty() const noexcept { return _numberOfElements == 0; }
+            bool empty() const noexcept { return _numberOfElements == 0ULL; }
             /**
              * This function returns the capacity of the
              * vector, i.e., how many elements the vector
@@ -330,15 +332,15 @@ namespace std_copy
             */
             void pop_back()
             {
+                (_internalBuffer + _numberOfElements - 1)->~value_type();
                 _numberOfElements--;
-                (_internalBuffer + _numberOfElements)->~value_type();
             }
             /**
              * This function removes the element at the beginning of the vector.
             */
             void pop_front()
             {
-                uninitialized_move(_internalBuffer + 1, _internalBuffer + _numberOfElements, _internalBuffer);
+                copy(_internalBuffer + 1, _internalBuffer + _numberOfElements, _internalBuffer);
                 this->pop_back();
             }
             /**
@@ -427,7 +429,7 @@ namespace std_copy
                 _numberOfElements = std_copy::distance(first, last);
                 _capacity = _numberOfElements;
                 _internalBuffer = allocator_type::allocate(_numberOfElements);
-                uninitialized_move(first, last, _internalBuffer);
+                uninitialized_copy(first, last, _internalBuffer);
             }
             /**
              * Copies the elements from the vector s into the vector.
@@ -585,7 +587,7 @@ namespace std_copy
 
                 _numberOfElements++;
                 
-                *(_internalBuffer + t) = move(val);
+                *(_internalBuffer + t) = val;
                 return pos;
             }
             /**
@@ -613,7 +615,7 @@ namespace std_copy
                     move_backward(_internalBuffer + addToGetPos, _internalBuffer + _numberOfElements - dist, _internalBuffer + _numberOfElements);
 
                 while (first != last)
-                    _internalBuffer[addToGetPos++] = move(*first++);
+                    _internalBuffer[addToGetPos++] = *first++;
 
                 return iterator(_internalBuffer + addToGetPos);
             }
