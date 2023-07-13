@@ -135,6 +135,31 @@ namespace std_copy
                 return whereToInsert;
             }
 
+            template <class Function>
+            iterator _find_bound(Function pred)
+            {
+                if (!_numberOfElements)
+                    return this->end();
+
+                pointer start = _internalBuffer;
+                pointer finish = _internalBuffer + _numberOfElements;
+                size_type tempNumberOfElements = _numberOfElements;
+                while (finish >= start)
+                {
+                    size_type addToGetMiddle =
+                        (tempNumberOfElements & 1ULL) ? (tempNumberOfElements >> 1ULL) : ((tempNumberOfElements >> 1ULL) - 1);
+                    pointer middle = start + addToGetMiddle;
+                    if (pred(middle->first))
+                        return iterator(middle);
+                    else
+                    {
+                        start = middle + 1;
+                        tempNumberOfElements = addToGetMiddle + 1;
+                    }
+                }
+                return this->end();
+            }
+
         public:
             /**
              * Default constructor
@@ -429,7 +454,8 @@ namespace std_copy
                 size_type tempNumberOfElements = _numberOfElements;
                 while (finish >= start)
                 {
-                    size_type addToGetMiddle = (tempNumberOfElements % 2 != 0) ? (tempNumberOfElements / 2) : (tempNumberOfElements / 2 - 1);
+                    size_type addToGetMiddle =
+                        (tempNumberOfElements & 1ULL) ? (tempNumberOfElements >> 1ULL) : (tempNumberOfElements >> 1ULL - 1);
                     pointer middle = start + addToGetMiddle;
                     if (middle->first == key)
                         return iterator(middle);
@@ -480,25 +506,7 @@ namespace std_copy
             */
             iterator lower_bound(const key_type& key)
             {
-                if (!_numberOfElements)
-                    return this->end();
-
-                pointer start = _internalBuffer;
-                pointer finish = _internalBuffer + _numberOfElements;
-                size_type tempNumberOfElements = _numberOfElements;
-                while (finish >= start)
-                {
-                    size_type addToGetMiddle = (tempNumberOfElements % 2 != 0) ? (tempNumberOfElements / 2) : (tempNumberOfElements / 2 - 1);
-                    pointer middle = start + addToGetMiddle;
-                    if (middle->first >= key)
-                        return iterator(middle);
-                    else
-                    {
-                        start = middle + 1;
-                        tempNumberOfElements = addToGetMiddle + 1;
-                    }
-                }
-                return this->end();
+                return this->_find_bound(bind1st(less_equal<key_type>(), key));
             }
             /**
              * This function returns an iterator to the first element with 
@@ -508,25 +516,7 @@ namespace std_copy
             */
             iterator upper_bound(const key_type& key)
             {
-                if (!_numberOfElements)
-                    return this->end();
-
-                pointer start = _internalBuffer;
-                pointer finish = _internalBuffer + _numberOfElements;
-                size_type tempNumberOfElements = _numberOfElements;
-                while (finish >= start)
-                {
-                    size_type addToGetMiddle = (tempNumberOfElements % 2 != 0) ? (tempNumberOfElements / 2) : (tempNumberOfElements / 2 - 1);
-                    pointer middle = start + addToGetMiddle;
-                    if (middle->first > key)
-                        return iterator(middle);
-                    else
-                    {
-                        start = middle + 1;
-                        tempNumberOfElements = addToGetMiddle + 1;
-                    }
-                }
-                return this->end();
+                return this->_find_bound(bind1st(less<key_type>(), key));
             }
             /**
              * Returns a range containing all elements with the given key in the container.
