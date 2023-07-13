@@ -340,7 +340,7 @@ namespace std_copy
             */
             void pop_front()
             {
-                copy(_internalBuffer + 1, _internalBuffer + _numberOfElements, _internalBuffer);
+                move(_internalBuffer + 1, _internalBuffer + _numberOfElements, _internalBuffer);
                 this->pop_back();
             }
             /**
