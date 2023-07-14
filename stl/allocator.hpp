@@ -4,6 +4,7 @@
 #include <new>
 #include <cstdint>
 #include "type_traits.hpp"
+#include "concepts.hpp"
 
 #if __cplusplus > 201703L
 namespace _std_copy_hidden
@@ -16,7 +17,7 @@ namespace _std_copy_hidden
         {
             typename Allocator::size_type;
             typename Allocator::difference_type;
-            {Allocator()};
+            {Allocator()} -> std_copy::same_as<Allocator>;
         };
     }
 }
