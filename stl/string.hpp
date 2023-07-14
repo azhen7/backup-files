@@ -24,7 +24,7 @@ namespace _std_copy_hidden
             {c1 != c2} -> std_copy::same_as<bool>;
             {c1 = c2};
             {c1 < c2} -> std_copy::same_as<bool>;
-            {CharT()};
+            {CharT()} -> std_copy::same_as<CharT>;
         };
     }
 }
