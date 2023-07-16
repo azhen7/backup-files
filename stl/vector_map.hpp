@@ -119,7 +119,7 @@ namespace std_copy
                 }
                 else if (_numberOfElements == _capacity)
                 {
-                    _capacity = _capacity << 1ULL;
+                    _capacity <<= 1ULL;
 
                     pointer temp = _internalBuffer;
                     _internalBuffer = allocator_type::allocate(_capacity);
@@ -138,7 +138,7 @@ namespace std_copy
             template <class Function>
             iterator _find_bound(Function pred)
             {
-                if (!_numberOfElements)
+                if (_numberOfElements == 0ULL)
                     return this->end();
 
                 pointer start = _internalBuffer;
@@ -415,7 +415,7 @@ namespace std_copy
             template <class ...Args>
             _iterator_and_bool try_emplace(const key_type& key, Args&&... args)
             {
-                return _emplace(value_type(move(key), mapped_type(forward<Args>(args)...)));
+                return _emplace(value_type(key, mapped_type(forward<Args>(args)...)));
             }
             /**
              * This function copies one map to another.
