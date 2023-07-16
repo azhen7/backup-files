@@ -1474,7 +1474,8 @@ namespace std_copy
     }
     /**
      * This function copies the elements from [first, last) to the range starting at 
-     * result. This function invokes operator== to compare the elements.
+     * result, and doesn't copy adjacent duplicate elements. This function invokes
+     * operator== to compare the elements.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
      * @param result An iterator to the initial position of the range where the function results 
@@ -1504,7 +1505,8 @@ namespace std_copy
     }
     /**
      * This function copies the elements from [first, last) to the range starting at 
-     * result. This function invokes a provided function to compare the elements.
+     * result, and doesn't copy adjacent duplicate elements. This function invokes
+     * a provided function to compare the elements.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
      * @param result An iterator to the initial position of the range where the function results 
