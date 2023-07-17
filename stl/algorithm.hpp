@@ -505,6 +505,22 @@ namespace std_copy
         return first;
     }
     /**
+     * Returns true if val is in [first, last), and false if not. Invokes operator<
+     * to compare the elements.
+     * @param first The start of the range to search in.
+     * @param last The end of the range to search in.
+     * @param val The value to search for.
+    */
+    template <class InputIterator, class T>
+#if __cplusplus > 201703L
+    requires input_iterator<InputIterator>
+#endif
+    InputIterator binary_search(InputIterator first, InputIterator last, const T& val)
+    {
+        InputIterator lower = lower_bound(first, last, val);
+        return (lower != last && !(val < *lower));
+    }
+    /**
      * This function returns the larger element of two elements. This function invokes 
      * operator<.
      * @param a The first element.
@@ -683,18 +699,36 @@ namespace std_copy
     }
     /**
      * This function returns a pair with first as an iterator pointing to the smallest element in 
-     * the range [first, second), and second as an iterator pointing to the largest element.
+     * the range [first, last), and second as an iterator pointing to the largest element.
      * @param first An iterator to the initial position of the sequence of elements.
      * @param last An iterator to the final position of the sequence of elements.
     */
     template <class InputIterator>
-    pair<InputIterator, InputIterator> minmax_element(InputIterator first, InputIterator second)
+    pair<InputIterator, InputIterator> minmax_element(InputIterator first, InputIterator last)
 #if __cplusplus > 201703L
     requires input_iterator<InputIterator>
 #endif
     {
-        InputIterator largest = max_element(first, second);
-        InputIterator smallest = min_element(first, second);
+        InputIterator smallest = first;
+        InputIterator largest = first;
+
+        if (first == last || ++first == last)
+        {
+            return make_pair(smallest, largest);
+        }
+
+        while (first != last)
+        {
+            if (*first < *smallest)
+            {
+                smallest = first;
+            }
+            if (*first > *largest)
+            {
+                largest = first;
+            }
+            first++;
+        }
         return make_pair(smallest, largest);
     }
     /**
