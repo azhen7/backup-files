@@ -515,7 +515,7 @@ namespace std_copy
 #if __cplusplus > 201703L
     requires input_iterator<InputIterator>
 #endif
-    InputIterator binary_search(InputIterator first, InputIterator last, const T& val)
+    bool binary_search(InputIterator first, InputIterator last, const T& val)
     {
         InputIterator lower = lower_bound(first, last, val);
         return (lower != last && !(val < *lower));
