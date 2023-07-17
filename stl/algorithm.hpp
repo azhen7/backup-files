@@ -916,27 +916,23 @@ namespace std_copy
     {
         if (first2 == last2)
             return last1;
-        last2--;
+        
+        InputIterator1 loc = last1;
         while (true)
         {
-            last1--;
-            InputIterator1 it1 = last1;
-            InputIterator2 it2 = last2;
-
-            while (*it1 == *it2)
+            InputIterator1 l = search(first1, last1, first2, last2);
+            if (l == last1)
             {
-                it1--;
-                it2--;
-                if (it2 == first2)
-                    return it1;
-                if (it1 == first1)
-                    return last1;
+                return loc;
             }
-
-            if (last1 == first1)
-                break;
+            else
+            {
+                loc = l;
+                first1 = loc;
+                first1++;
+            }
         }
-        return last1;
+        return loc;
     }
     /**
      * This function returns an iterator to the last element in the range [first1, last1) that matches any of 
@@ -957,27 +953,23 @@ namespace std_copy
     {
         if (first2 == last2)
             return last1;
-        last2--;
+        
+        InputIterator1 loc = last1;
         while (true)
         {
-            last1--;
-            InputIterator1 it1 = last1;
-            InputIterator2 it2 = last2;
-
-            while (comp(*it1,*it2))
+            InputIterator1 l = search(first1, last1, first2, last2, comp);
+            if (l == last1)
             {
-                it1--;
-                it2--;
-                if (it2 == first2)
-                    return it1;
-                if (it1 == first1)
-                    return last1;
+                return loc;
             }
-
-            if (last1 == first1)
-                break;
+            else
+            {
+                loc = l;
+                first1 = loc;
+                first1++;
+            }
         }
-        return last1;
+        return loc;
     }
     /**
      * This function finds the first occurence of the sequence of elements in the range [first2, last2) 
