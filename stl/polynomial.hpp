@@ -40,13 +40,13 @@ namespace std_copy
 
             point& set_x(LD a)
             {
-                x = move(a);
+                x = a;
                 return *this;
             }
 
             point& set_y(LD b)
             {
-                y = move(b);
+                y = b;
                 return *this;
             }
     };
@@ -151,6 +151,12 @@ namespace std_copy
         LD y_intercept() const noexcept
         {
             return _buf[_n];
+        }
+
+        bool test(const point& p, LD threshold = 1e-11) const noexcept
+        {
+            LD res = this->substitute(p.get_x());
+            return (std::abs(res - p.get_y()) < threshold);
         }
     };
 }
