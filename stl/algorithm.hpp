@@ -1354,7 +1354,10 @@ namespace std_copy
 #endif
     {
         while (first != last)
-            *first++ = (*first == old_val) ? new_val : *first;
+        {
+            *first = (*first == old_val) ? new_val : *first;
+            first++;
+        }
     }
     /**
      * Replaces all the elements in the range [first, last) that compare equal to old_val 
@@ -1371,7 +1374,10 @@ namespace std_copy
 #endif
     {
         while (first != last)
-            *first++ = (func(*first)) ? new_val : *first;
+        {
+            *first = (func(*first)) ? new_val : *first;
+            first++;
+        }
     }
     /**
      * Copies the elements in the range [first, last) to the range starting at result, 
