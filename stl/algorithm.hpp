@@ -521,6 +521,22 @@ namespace std_copy
         return (lower != last && !(val < *lower));
     }
     /**
+     * Returns true if val is in [first, last), and false if not. Invokes
+     * custom comparison object to compare the elements.
+     * @param first The start of the range to search in.
+     * @param last The end of the range to search in.
+     * @param pred The comparison object used to compare the elements.
+    */
+    template <class InputIterator, class T, class Pred>
+#if __cplusplus > 201703L
+    requires input_iterator<InputIterator>
+#endif
+    bool binary_search(InputIterator first, InputIterator last, const T& val, Pred p)
+    {
+        InputIterator lower = lower_bound(first, last, val, p);
+        return (lower != last && !p(val, *lower));
+    }
+    /**
      * This function returns the larger element of two elements. This function invokes 
      * operator<.
      * @param a The first element.
@@ -747,7 +763,10 @@ namespace std_copy
 #endif
     {
         while (first1 != last1 && *first1 == *first2)
+        {
             first1++;
+            first2++;
+        }
 
         return make_pair(first1, first2);
     }
@@ -762,14 +781,68 @@ namespace std_copy
      * @param pred The function used to compare the elements.
     */
     template <class InputIterator1, class InputIterator2, class Compare>
-    pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, Compare pred)
+    pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
+                                                  InputIterator2 first2, Compare pred)
 #if __cplusplus > 201703L
     requires input_iterator<InputIterator1>
     && input_iterator<InputIterator2>
 #endif
     {
         while (first1 != last1 && pred(*first1, *first2))
+        {
             first1++;
+            first2++;
+        }
+
+        return make_pair(first1, first2);
+    }
+    /**
+     * This function compares the elements in the ranges [first1, last1) and the sequence of elements 
+     * starting from first2 and returns a pair of iterators which point to the first elements in each 
+     * sequence that aren't equal. This function invokes operator==.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+    */
+    template <class InputIterator1, class InputIterator2>
+    pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
+                                                  InputIterator2 first2, InputIterator2 last2)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIterator1>
+    && input_iterator<InputIterator2>
+#endif
+    {
+        while (first1 != last1 && first2 != last2 && *first1 == *first2)
+        {
+            first1++;
+            first2++;
+        }
+
+        return make_pair(first1, first2);
+    }
+    /**
+     * This function compares the elements in the ranges [first1, last1) and the sequence of elements 
+     * starting from first2 and returns a pair of iterators which point to the first elements in each 
+     * sequence that aren't equal. This function invokes a provided function which is used to compare 
+     * the elements.
+     * @param first1 An iterator to the initial position of the first sequence of elements.
+     * @param last1 An iterator to the final position of the first sequence of elements.
+     * @param first2 An iterator to the initial position of the second sequence of elements.
+     * @param pred The function used to compare the elements.
+    */
+    template <class InputIterator1, class InputIterator2, class Compare>
+    pair<InputIterator1, InputIterator2> mismatch(InputIterator1 first1, InputIterator1 last1,
+                                                  InputIterator2 first2, InputIterator2 last2, Compare pred)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIterator1>
+    && input_iterator<InputIterator2>
+#endif
+    {
+        while (first1 != last1 && first2 != last2 && pred(*first1, *first2))
+        {
+            first1++;
+            first2++;
+        }
 
         return make_pair(first1, first2);
     }
