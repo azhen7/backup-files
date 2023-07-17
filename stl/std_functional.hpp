@@ -2,9 +2,19 @@
 #define _STD_COPY_STD_FUNCTIONAL
 
 #include "move.hpp"
+#include <stdexcept>
 
 namespace std_copy
 {
+    class bad_function_call : std::exception
+    {
+        public:
+            virtual ~bad_function_call() noexcept = default;
+            const char* what() const noexcept
+            {
+                return "bad function call";
+            }
+    };
     /**
      * An implementation of std::function from the header <functional>.
      * @param ReturnType The return type of the internal function object.
@@ -29,7 +39,7 @@ namespace std_copy
             function(const _function_type& f)
                 : _target(f._target) {}
             function(_function_type&& f) noexcept
-                : _target(forward<F>(f._target)) {}
+                : _target(forward<_function_type>(f._target)) {}
             
             template <class F>
             function(F&& f)
@@ -37,7 +47,7 @@ namespace std_copy
             
             _function_type& operator=(const _function_type& f)
             {
-                _target = move(f._target);
+                _target = f._target;
                 return *this;
             }
             _function_type& operator=(_function_type&& f)
@@ -76,7 +86,7 @@ namespace std_copy
             ReturnType operator()(ArgumentTypes... Arguments)
             {
                 if (!_target)
-                    throw std::bad_function_call();
+                    throw bad_function_call();
 
                 return _target(forward<ArgumentTypes>(Arguments)...);
             }
