@@ -42,8 +42,8 @@ namespace std_copy
             typedef std::size_t                                     size_type;
             typedef std::ptrdiff_t                                  difference_type;
             typedef Alloc                                           allocator_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_vector_type> iterator;
-            typedef const iterator                                  const_iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<pointer, _vector_type> iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<const_pointer, _vector_type> const_iterator;
             typedef reverse_iterator<pointer>                       reverse_iterator;
             typedef const reverse_iterator                          const_reverse_iterator;
 
@@ -325,7 +325,7 @@ namespace std_copy
             */
             void push_front(const_reference elem)
             {
-                this->insert(this->begin(), elem);
+                this->insert(this->cbegin(), elem);
             }
             /**
              * This function removes the last element in the vector.
@@ -349,9 +349,9 @@ namespace std_copy
              * @param args The arguments to forward to the element's constructor.
             */
             template <class ...Args>
-            iterator emplace(iterator pos, Args&& ...args)
+            iterator emplace(const_iterator pos, Args&& ...args)
             {
-                const difference_type addToGetPos = pos - this->begin();
+                const difference_type addToGetPos = pos - this->cbegin();
                 if (_numberOfElements ==  _capacity)
                     _realloc_create_insert_space(addToGetPos, addToGetPos + 1, _numberOfElements, _get_new_capacity());
                 else
@@ -370,7 +370,7 @@ namespace std_copy
             template <class ...Args>
             reference emplace_back(Args&&... args)
             {
-                this->emplace(this->end(), forward<Args>(args)...);
+                this->emplace(this->cend(), forward<Args>(args)...);
                 return this->back();
             }
             /**
@@ -551,13 +551,13 @@ namespace std_copy
              * This function returns a const iterator to the 
              * first element in the vector.
             */
-            const_iterator cbegin() const noexcept { return const_iterator(this->begin()); }
+            const_iterator cbegin() const noexcept { return const_iterator(_internalBuffer); }
             /**
              * This function returns a const iterator to 
              * the theoretical element after the last element 
              * in the vector.
             */
-            const_iterator cend() const noexcept { return const_iterator(this->end()); }
+            const_iterator cend() const noexcept { return const_iterator(_internalBuffer + _numberOfElements); }
             /**
              * Overloaded assignment operator.
             */
@@ -577,18 +577,18 @@ namespace std_copy
              * @param pos The position to insert the element at.
              * @param val The value to insert.
             */
-            iterator insert(iterator pos, const_reference val)
+            iterator insert(const_iterator pos, const_reference val)
             {
-                difference_type t = pos - this->begin();
+                difference_type t = pos - this->cbegin();
                 if (_numberOfElements == _capacity)
                     _realloc_create_insert_space(t, t + 1, _numberOfElements, _get_new_capacity());
                 else
-                    move_backward(pos.base(), _internalBuffer + _numberOfElements, _internalBuffer + _numberOfElements + 1);
+                    move_backward(_internalBuffer + t, _internalBuffer + _numberOfElements, _internalBuffer + _numberOfElements + 1);
 
                 _numberOfElements++;
                 
                 *(_internalBuffer + t) = val;
-                return pos;
+                return iterator(_internalBuffer + t);
             }
             /**
              * This function inserts the elements in the range [start, end) to the position pointed 
@@ -598,7 +598,7 @@ namespace std_copy
              * @param end The end of the sequence of elements to insert.
             */
             template <class InputIterator>
-            iterator insert(iterator pos, InputIterator first, InputIterator last)
+            iterator insert(const_iterator pos, InputIterator first, InputIterator last)
         #if __cplusplus > 201703L
             requires input_iterator<InputIterator>
         #endif
@@ -607,7 +607,7 @@ namespace std_copy
                 if (dist == 0)
                     return pos;
                 _numberOfElements += dist;
-                difference_type addToGetPos = pos - this->begin();
+                difference_type addToGetPos = pos - this->cbegin();
                 
                 if (_numberOfElements > _capacity)
                     _realloc_create_insert_space(addToGetPos, addToGetPos + dist, _numberOfElements - dist, _calculate_smallest_power_of_two_greater_than(_numberOfElements));
@@ -644,7 +644,7 @@ namespace std_copy
                 }
 
                 move(_internalBuffer + index2, _internalBuffer + _numberOfElements, _internalBuffer + index1);
-                destroy(_internalBuffer + _numberOfElements - (index2 - index1), this->end().base());
+                destroy(_internalBuffer + _numberOfElements - (index2 - index1), _internalBuffer + _numberOfElements);
                 _numberOfElements -= index2 - index1;
                 return *this;
             }
@@ -654,20 +654,23 @@ namespace std_copy
              * @param first The start of the block to erase.
              * @param last The end of the block to erase.
             */
-            _vector_type& erase(iterator first, iterator last)
+            _vector_type& erase(const_iterator first, const_iterator last)
             {
-                move(last.base(), _internalBuffer + _numberOfElements, first.base());
-                destroy(_internalBuffer + _numberOfElements - (last - first), this->end().base());
-                _numberOfElements -= std_copy::distance(first, last);
+                auto distF = first - cbegin();
+                auto distL = last - cbegin();
+                move(_internalBuffer + distL, _internalBuffer + _numberOfElements, _internalBuffer + distF);
+                destroy(_internalBuffer + _numberOfElements - (distL - distF), _internalBuffer + _numberOfElements);
+                _numberOfElements -= (distL - distF);
                 return *this;
             }
             /**
              * This function erases the element pointed to by pos.
              * @param pos The iterator pointing to the element to be erased.
             */
-            _vector_type& erase(iterator pos)
+            _vector_type& erase(const_iterator pos)
             {
-                move(pos.base() + 1, _internalBuffer + _numberOfElements, pos.base());
+                auto dist = pos - cbegin();
+                move(_internalBuffer + dist + 1, _internalBuffer + _numberOfElements, _internalBuffer + dist);
                 this->pop_back();
                 return *this;
             }
