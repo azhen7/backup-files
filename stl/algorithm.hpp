@@ -1765,17 +1765,18 @@ namespace std_copy
     template <class ForwardIterator>
     constexpr ForwardIterator rotate(ForwardIterator first, ForwardIterator new_first, ForwardIterator last)
     {
-        std::ptrdiff_t dist = distance(first, new_first);
-        for (std::size_t i = 0; i < dist; i++)
-        {
-            ForwardIterator temp = last;
-            ForwardIterator tempFirst = first;
-            typename iterator_traits<ForwardIterator>::value_type firstVal = *first;
+        // std::ptrdiff_t dist = distance(first, new_first);
+        // for (std::size_t i = 0; i < dist; i++)
+        // {
+        //     ForwardIterator temp = last;
+        //     ForwardIterator tempFirst = first;
+        //     typename iterator_traits<ForwardIterator>::value_type firstVal = *first;
 
-            move(++tempFirst, last, first);
-            swap(firstVal, *(--temp));
-        }
-        return next(first, dist);
+        //     move(++tempFirst, last, first);
+        //     swap(firstVal, *(--temp));
+        // }
+        // return next(first, dist);
+        
     }
     /**
      * Swaps two ranges.
