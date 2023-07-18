@@ -1,6 +1,8 @@
 #ifndef _STD_COPY_TYPE_TRAITS
 #define _STD_COPY_TYPE_TRAITS
 
+#include <type_traits>
+
 namespace std_copy
 {
     //integral_constant
@@ -244,6 +246,10 @@ namespace std_copy
     {
         typedef typename remove_reference<T>::type*  type;
     };
+    template <class T>
+    struct add_pointer<T&> : add_pointer<T> {};
+    template <class T>
+    struct add_pointer<T&&> : add_pointer<T> {};
     template <class T>
     using add_pointer_t = typename add_pointer<T>::type;
     
