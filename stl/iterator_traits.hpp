@@ -41,6 +41,12 @@ namespace std_copy
         typedef std::ptrdiff_t                          difference_type;
         typedef std_copy::random_access_iterator_tag    iterator_category;
     };
+    template <class T>
+    struct iterator_traits<T* const> : iterator_traits<T*> {};
+    template <class T>
+    struct iterator_traits<T* volatile> : iterator_traits<T*> {};
+    template <class T>
+    struct iterator_traits<T* const volatile> : iterator_traits<T*> {};
 
     template <class Category, class T, class Distance = std::ptrdiff_t, class Pointer = T*, class Reference = T&>
     struct iterator
