@@ -60,8 +60,8 @@ namespace std_copy
             typedef const CharacterType&                    const_reference;
             typedef _alloc_traits::pointer                  pointer;
             typedef const pointer                           const_pointer;
-            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_basic_string_type> iterator;
-            typedef const iterator                          const_iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<pointer, _basic_string_type> iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<const_pointer, _basic_string_type> const_iterator;
             typedef reverse_iterator<pointer>               reverse_iterator;
             typedef const reverse_iterator                  const_reverse_iterator;
 
@@ -603,14 +603,14 @@ namespace std_copy
              * Erases the character pointed to by pos.
              * @param pos An iterator pointing to the element to be erased.
             */
-            iterator erase(iterator pos)
+            iterator erase(const_iterator pos)
             {
-                difference_type dist = pos - this->begin();
+                difference_type dist = pos - cbegin();
                 
-                if (pos == this->end() - 1)
+                if (pos == end() - 1)
                     _terminate_and_update_length(_length - 1);
                 else
-                    _copy_str(pos.base(), pos.base() + 1, _length - dist - 1);
+                    _copy_str(_internalString + dist, _internalString + dist + 1, _length - dist - 1);
 
                 return iterator(_internalString + dist);
             }
@@ -628,24 +628,28 @@ namespace std_copy
              * @param first An iterator to the start of the sequence to erase.
              * @param last An iterator to the end of the sequence to erase.
             */
-            iterator erase(iterator first, iterator last)
+            iterator erase(const_iterator first, const_iterator last)
             {
                 difference_type len = last - first;
-                difference_type dist_from_first_to_begin = first - this->begin();
+                difference_type dist_from_first_to_begin = first - this->cbegin();
 
                 if (len)
                 {
                     if (last == this->end())
                         _terminate_and_update_length(size_type(dist_from_first_to_begin));
                     else
-                        _copy_str(first.base(), last.base(), _length - dist_from_first_to_begin - len);
+                        _copy_str(
+                            _internalString + dist_from_first_to_begin,
+                            _internalString + dist_from_first_to_begin + len,
+                            _length - dist_from_first_to_begin - len
+                        );
                 }
                 return iterator(_internalString + dist_from_first_to_begin);
             }
-            iterator erase_safe(iterator first, iterator last)
+            iterator erase_safe(const_iterator first, const_iterator last)
             {
-                difference_type dist_from_last_to_begin = last - this->begin();
-                difference_type dist_from_first_to_begin = first - this->begin();
+                difference_type dist_from_last_to_begin = last - cbegin();
+                difference_type dist_from_first_to_begin = first - cbegin();
 
                 _check_exception(0, dist_from_first_to_begin, "basic_string::erase: first is out of bounds");
                 _check_exception(0, dist_from_last_to_begin, "basic_string::erase: last is out of bounds");
@@ -925,9 +929,9 @@ namespace std_copy
              * @param last An iterator pointing to the end of the range to erase.
              * @param str The basic_string object to replace the range.
             */
-            _basic_string_type& replace(iterator first, iterator last, const _basic_string_type& str)
+            _basic_string_type& replace(const_iterator first, const_iterator last, const _basic_string_type& str)
             {
-                return this->replace(first - this->begin(), last - first, str);
+                return this->replace(first - cbegin(), last - first, str);
             }
             /**
              * Replaces the substring [pos, pos + count) of the current basic_string object with str.
@@ -1051,7 +1055,7 @@ namespace std_copy
 
                 return this->replace(this->begin() + pos, this->begin() + pos + count1, s, s + count2);
             }
-            _basic_string_type& replace_safe(size_type pos, size_type count1, pointer s, size_type count2)
+            _basic_string_type& replace_safe(size_type pos, size_type count1, const_pointer s, size_type count2)
             {
                 _check_exception(pos, _length, "basic_string::replace: pos > size()");
 
@@ -1065,7 +1069,7 @@ namespace std_copy
              * @param s The character sequence to replace the range.
              * @param count2 The number of characters in s to replace with.
             */
-            _basic_string_type& replace(iterator first, iterator last, pointer s, size_type count2)
+            _basic_string_type& replace(iterator first, iterator last, const_pointer s, size_type count2)
             {
                 return this->replace(first, last, s, s + count2);
             }
@@ -1159,9 +1163,9 @@ namespace std_copy
              * @param count The number of elements to replace the range with.
              * @param ch The value of each element.
             */
-            _basic_string_type& replace(iterator first, iterator last, size_type count, const_reference ch)
+            _basic_string_type& replace(const_iterator first, const_iterator last, size_type count, const_reference ch)
             {
-                return this->replace(first - this->begin(), last - first, count, ch);
+                return this->replace(first - this->cbegin(), last - first, count, ch);
             }
             /**
              * Returns the substring [pos, pos + count) of the current basic_string object.
