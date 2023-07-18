@@ -35,8 +35,8 @@ namespace std_copy
             typedef const T&                                                            const_reference;
             typedef std::size_t                                                         size_type;
             typedef std::ptrdiff_t                                                      difference_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<_array_type>  iterator;
-            typedef const iterator                                                      const_iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<pointer, _array_type> iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<const_pointer, _array_type> const_iterator;
             
         protected:
             T _internalBuffer[s];
