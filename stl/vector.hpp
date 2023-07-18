@@ -98,7 +98,7 @@ namespace std_copy
                 return (_capacity == 0ULL) ? 1ULL : _capacity << 1ULL;
             }
 
-            void __resize(size_type n, const_reference val)
+            void _resize(size_type n, const_reference val)
             {
                 pointer temp = _internalBuffer;
                 _internalBuffer = allocator_type::allocate(n);
@@ -484,7 +484,7 @@ namespace std_copy
             */
             void resize(size_type n, const_reference val)
             {
-                __resize(n, val);
+                _resize(n, val);
             }
             /**
              * This function resizes the vector to contain 
@@ -494,7 +494,7 @@ namespace std_copy
             */
             void resize(size_type n)
             {
-                __resize(n, value_type());
+                _resize(n, value_type());
             }
             /**
              * This function returns a reference to the
