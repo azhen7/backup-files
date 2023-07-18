@@ -3,16 +3,16 @@
 
 #include <type_traits>
 
-#define _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV_HELPER(pre, post) \
+#define _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(TYPE) \
     template <class T>                          \
-    struct pre##post <const T> : pre##post <T> {};      \
+    struct TYPE <const T> : TYPE <T> {};      \
     template <class T>                          \
-    struct pre##post <volatile T> : pre##post <T> {};   \
+    struct TYPE <volatile T> : TYPE <T> {};   \
     template <class T>                          \
-    struct pre##post <const volatile T>: pre##post <T> {};
+    struct TYPE <const volatile T>: TYPE <T> {};
 
-#define _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(t) \
-            _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV_HELPER(, t)
+// #define _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(t) \
+//             _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV_HELPER(t)
 
 namespace std_copy
 {
