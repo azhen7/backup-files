@@ -3,6 +3,17 @@
 
 #include <type_traits>
 
+#define _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV_HELPER(pre, post) \
+    template <class T>                          \
+    struct pre##post <const T> : pre##post <T> {};      \
+    template <class T>                          \
+    struct pre##post <volatile T> : pre##post <T> {};   \
+    template <class T>                          \
+    struct pre##post <const volatile T>: pre##post <T> {};
+
+#define _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(t) \
+            _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV_HELPER(, t)
+
 namespace std_copy
 {
     //integral_constant
@@ -97,21 +108,7 @@ namespace std_copy
     {
         typedef T   type;
     };
-    template <class T>
-    struct remove_cv<const T>
-    {
-        typedef T   type;
-    };
-    template <class T>
-    struct remove_cv<volatile T>
-    {
-        typedef T   type;
-    };
-    template <class T>
-    struct remove_cv<const volatile T>
-    {
-        typedef T   type;
-    };
+    _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(remove_cv)
     template <class T>
     using remove_cv_t = typename remove_cv<T>::type;
 
@@ -156,17 +153,17 @@ namespace std_copy
     template <class T>
     struct add_cv
     {
-        typedef const volatile T    type;
+        typedef T const volatile    type;
     };
     template <class T>
     struct add_const
     {
-        typedef const T             type;
+        typedef T const             type;
     };
     template <class T>
     struct add_volatile
     {
-        typedef volatile T          type;
+        typedef T volatile          type;
     };
     template <class T>
     using add_cv_t = typename add_cv<T>::type;
@@ -186,21 +183,7 @@ namespace std_copy
     {
         typedef T   type;
     };
-    template <class T>
-    struct remove_pointer<const T*>
-    {
-        typedef T   type;
-    };
-    template <class T>
-    struct remove_pointer<volatile T*>
-    {
-        typedef T   type;
-    };
-    template <class T>
-    struct remove_pointer<const volatile T*>
-    {
-        typedef T   type;
-    };
+    _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(remove_pointer);
 
     //remove_extent
     template <class T>
@@ -235,7 +218,7 @@ namespace std_copy
     template <class T, unsigned long long N>
     struct remove_all_extents<T[N]>
     {
-        typedef T   type;
+        typedef typename remove_all_extents<T>::type type;
     };
     template <class T>
     using remove_all_extents_t = typename remove_all_extents<T>::type;
@@ -299,6 +282,8 @@ namespace std_copy
     {
         typedef unsigned char       type;
     };
+
+    _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(make_unsigned)
     template <class T>
     using make_unsigned_t = typename make_unsigned<T>::type;
 
@@ -333,6 +318,8 @@ namespace std_copy
     {
         typedef signed long long    type;
     };
+
+    _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(make_signed)
     template <class T>
     using make_signed_t = typename make_signed<T>::type;
 
@@ -391,12 +378,8 @@ namespace std_copy
     struct is_pointer : false_type {};
     template <class T>
     struct is_pointer<T*> : true_type {};
-    template <class T>
-    struct is_pointer<const T> : is_pointer<T> {};
-    template <class T>
-    struct is_pointer<volatile T> : is_pointer<T> {};
-    template <class T>
-    struct is_pointer<const volatile T> : is_pointer<T> {};
+    
+    _STD_COPY_HIDDEN_TYPE_TRAITS_REMOVE_CV(is_pointer);
     template <class T>
     constexpr bool is_pointer_v = is_pointer<T>::value;
 
