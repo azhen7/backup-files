@@ -126,8 +126,15 @@ namespace _std_copy_hidden
                 typedef const _T& reference;
                 typedef const _T* pointer;
 
-                _const_node_iterator(_node_type *e)
+                _const_node_iterator(const _node_type *e)
                     : _curr(e)
+                {
+                }
+
+                _const_node_iterator() : _curr() {}
+
+                _const_node_iterator(const _node_iterator& n)
+                    : _curr(n.base())
                 {
                 }
 
