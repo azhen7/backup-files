@@ -1759,24 +1759,39 @@ namespace std_copy
      * the new first element in the range and the last element becomes 
      * new_first - 1.
      * @param first The initial iterator to the beginning of the range.
-     * @param new_first The to-be-iterator to the beginning of the range.
+     * @param new_first The to-be-starting-iterator to the beginning of the range.
      * @param last The initial iterator to the end of the range.
     */
     template <class ForwardIterator>
     constexpr ForwardIterator rotate(ForwardIterator first, ForwardIterator new_first, ForwardIterator last)
     {
-        // std::ptrdiff_t dist = distance(first, new_first);
-        // for (std::size_t i = 0; i < dist; i++)
-        // {
-        //     ForwardIterator temp = last;
-        //     ForwardIterator tempFirst = first;
-        //     typename iterator_traits<ForwardIterator>::value_type firstVal = *first;
+        if (first == new_first) return last;
+        if (last == new_first) return first;
 
-        //     move(++tempFirst, last, first);
-        //     swap(firstVal, *(--temp));
-        // }
-        // return next(first, dist);
-        
+        ForwardIterator first2 = new_first;
+        while (first2 != last)
+        {
+            std_copy::iter_swap(first, first2);
+            first++;
+            first2++;
+            if (first == new_first)
+                new_first = first2;
+        }
+        first2 = new_first;
+        ForwardIterator ret = first;
+
+        while (first2 != last)
+        {
+            std_copy::iter_swap(first, first2);
+            first++;
+            first2++;
+            if (first == new_first)
+                new_first = first2;
+            else if (first2 == last)
+                first2 = new_first;
+        }
+
+        return ret;
     }
     /**
      * Swaps two ranges.
