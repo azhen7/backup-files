@@ -1764,6 +1764,9 @@ namespace std_copy
     */
     template <class ForwardIterator>
     constexpr ForwardIterator rotate(ForwardIterator first, ForwardIterator new_first, ForwardIterator last)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIterator>
+#endif
     {
         if (first == new_first) return last;
         if (last == new_first) return first;
@@ -1801,6 +1804,10 @@ namespace std_copy
     */
     template <class ForwardIterator1, class ForwardIterator2>
     constexpr ForwardIterator2 swap_ranges(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIterator1>
+    && input_iterator<ForwardIterator2>
+#endif
     {
         for ( ; first1 != last1; first1++)
             std_copy::iter_swap(first1, first2++);
