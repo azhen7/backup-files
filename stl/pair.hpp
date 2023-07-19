@@ -87,7 +87,7 @@ namespace std_copy
      * @brief Swaps the member variables of two pair objects.
     */
     template <class T1, class T2>
-    void swap(pair<T1, T2> lhs, pair<T1, T2> rhs)
+    void swap(pair<T1, T2>& lhs, pair<T1, T2>& rhs)
     {
         T1 tempFirst = lhs.first;
         lhs.first = rhs.first;
