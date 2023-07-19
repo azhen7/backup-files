@@ -661,6 +661,8 @@ namespace std_copy
             decltype(_std_copy_hidden::_std_copy_type_traits::test_if_base<T, U>(0))::value
         >
     {};
+    template <class T, class U>
+    constexpr bool is_base_of_v = is_base_of<T, U>::value;
 }
 
 #endif /* _STD_COPY_TYPE_TRAITS */
