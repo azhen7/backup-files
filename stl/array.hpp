@@ -156,7 +156,7 @@ namespace std_copy
             */
             const_iterator cbegin() const noexcept
             {
-                return iterator(_internalBuffer);
+                return const_iterator(_internalBuffer);
             }
             /**
              * This function returns an const iterator to the theoretical element 
@@ -164,7 +164,7 @@ namespace std_copy
             */
             const_iterator cend() const noexcept
             {
-                return iterator(_internalBuffer + _numberOfElements);
+                return const_iterator(_internalBuffer + _numberOfElements);
             }
             /**
              * This function returns a reference to 
