@@ -35,5 +35,6 @@
 #define std_copy_polynomial                     202112L
 #define std_copy_iterator_adaptors              202201L
 #define std_copy_list                           202201L
+#define std_copy_numeric                        202307L
 
 #endif /* _STD_COPY_VERSION */
