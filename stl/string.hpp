@@ -153,7 +153,7 @@ namespace std_copy
             }
 
             template <class InputIterator>
-            void _replace_main(InputIterator s, size_type pos, size_type len, size_type count)
+            void _replace_core(InputIterator s, size_type pos, size_type len, size_type count)
             {
                 if (count == len)
                     traits_type::move(_internalString + pos, s, count);
@@ -1029,7 +1029,7 @@ namespace std_copy
                 if (count == 0)
                     return this->erase(pos, count);
                 
-                _replace_main(s, pos, len, count);
+                _replace_core(s, pos, len, count);
                 return *this;
             }
             _basic_string_type& replace_safe(size_type pos, size_type count, pointer s)
@@ -1108,7 +1108,7 @@ namespace std_copy
                 if (count == 0)
                     return this->erase(pos, count);
                 
-                _replace_main(first, pos, len, count);
+                _replace_core(first, pos, len, count);
                 return *this;
             }
             template <class InputIterator>
