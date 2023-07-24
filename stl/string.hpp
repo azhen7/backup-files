@@ -1911,9 +1911,12 @@ namespace std_copy
 
     typedef basic_string<char>      string;
     typedef basic_string<wchar_t>   wstring;
-    typedef basic_string<char8_t>   u8string;
     typedef basic_string<char16_t>  u16string;
     typedef basic_string<char32_t>  u32string;
+
+#if __cplusplus > 201703L
+    typedef basic_string<char8_t>   u8string;
+#endif
 }
 
 #endif /* _STD_COPY_STRING */
