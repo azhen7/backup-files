@@ -52,12 +52,12 @@ namespace std_copy
             size_type _numberOfElements;
             size_type _capacity;
 
-            inline size_type _calculate_smallest_power_of_two_greater_than(size_type x)
+            inline size_type _power_of_smallest_power_of_two_greater_than(size_type x)
             {
                 size_type count = 0ULL;
                 while (x >>= 1ULL && x > 0ULL && (count++ || 1));
                 
-                return 1ULL << count;
+                return count;
             }
             void _realloc(size_type newAmount, size_type previousAmount, size_type copyUpTo)
             {
@@ -610,7 +610,7 @@ namespace std_copy
                 difference_type addToGetPos = pos - this->cbegin();
                 
                 if (_numberOfElements > _capacity)
-                    _realloc_create_insert_space(addToGetPos, addToGetPos + dist, _numberOfElements - dist, _calculate_smallest_power_of_two_greater_than(_numberOfElements));
+                    _realloc_create_insert_space(addToGetPos, addToGetPos + dist, _numberOfElements - dist, 1ULL << _power_of_smallest_power_of_two_greater_than(_numberOfElements));
                 else
                     move_backward(_internalBuffer + addToGetPos, _internalBuffer + _numberOfElements - dist, _internalBuffer + _numberOfElements);
 
