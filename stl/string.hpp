@@ -70,10 +70,12 @@ namespace std_copy
             size_type _length;
             size_type _capacity;
 
+            static constexpr size_type _DEFAULT_SIZE = 15ULL;
+
             template <class _AllocateFunc>
             void _allocate_and_move_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
             {
-                _capacity = (i + 1 > 15) ? i + 1 : 15;
+                _capacity = (i + 1 > _DEFAULT_SIZE) ? i + 1 : _DEFAULT_SIZE;
                 _internalString = mem_alloc(_capacity);
                 traits_type::move(_internalString, src, count);
                 _internalString[i] = value_type();
@@ -82,7 +84,7 @@ namespace std_copy
             template <class _AllocateFunc>
             void _allocate_and_copy_str(size_type i, _AllocateFunc mem_alloc, pointer src, size_type count)
             {
-                _capacity = (i + 1 > 15) ? i + 1 : 15;
+                _capacity = (i + 1 > _DEFAULT_SIZE) ? i + 1 : _DEFAULT_SIZE;
                 _internalString = mem_alloc(_capacity);
                 traits_type::copy(_internalString, src, count);
                 _internalString[i] = value_type();
@@ -91,7 +93,7 @@ namespace std_copy
             template <class _AllocateFunc>
             void _allocate_and_assign_str(size_type i, _AllocateFunc mem_alloc, size_type count, const_reference ch)
             {
-                _capacity = (i + 1 > 15) ? i + 1 : 15;
+                _capacity = (i + 1 > _DEFAULT_SIZE) ? i + 1 : _DEFAULT_SIZE;
                 _internalString = mem_alloc(_capacity);
                 traits_type::assign(_internalString, count, ch);
                 _internalString[i] = value_type();
@@ -100,13 +102,13 @@ namespace std_copy
             template <class _AllocateFunc, class InputIterator>
             void _allocate_and_move_range(size_type i, _AllocateFunc mem_alloc, InputIterator first, InputIterator last)
             {
-                _capacity = (i + 1 > 15) ? i + 1 : 15;
+                _capacity = (i + 1 > _DEFAULT_SIZE) ? i + 1 : _DEFAULT_SIZE;
                 _internalString = mem_alloc(_capacity);
                 std_copy::move(first, last, _internalString);
                 _internalString[i] = value_type();
             }
 
-            size_type _calculate_smallest_power_of_two_greater_than(size_type x)
+            size_type _power_of_smallest_power_of_two_greater_than(size_type x)
             {
                 size_type count = 0;
                 while (x >>= 1 && x > 0 && (count++ || 1));
@@ -118,7 +120,7 @@ namespace std_copy
             void _realloc(size_type n, size_type copyUpTo)
             {
                 pointer temp = _internalString;
-                size_type newSize = _capacity << _calculate_smallest_power_of_two_greater_than(n);
+                size_type newSize = _capacity << _power_of_smallest_power_of_two_greater_than(n);
                 _allocate_and_move_str(newSize - 1, allocator_type::allocate, temp, copyUpTo);
                 allocator_type::deallocate(temp, _capacity);
                 _capacity = newSize;
@@ -167,7 +169,7 @@ namespace std_copy
                 {
                     if (_length - count + len > _capacity)
                     {
-                        _capacity <<= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
+                        _capacity <<= _power_of_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
                         pointer temp = _internalString;
                         _internalString = allocator_type::allocate(_capacity);
                         traits_type::move(_internalString, temp, pos);
@@ -201,9 +203,9 @@ namespace std_copy
 
             basic_string()
                 : _length(0),
-                _capacity(15)
+                _capacity(_DEFAULT_SIZE)
             {
-                _internalString = allocator_type::allocate(15);
+                _internalString = allocator_type::allocate(_DEFAULT_SIZE);
             }
 
             basic_string(const_pointer str)
@@ -959,7 +961,7 @@ namespace std_copy
                 {
                     if (_length - count + str._length > _capacity)
                     {
-                        _capacity <<= _calculate_smallest_power_of_two_greater_than((_length - count + str._length) / _capacity);
+                        _capacity <<= _power_of_smallest_power_of_two_greater_than((_length - count + str._length) / _capacity);
                         pointer temp = _internalString;
                         _internalString = allocator_type::allocate(_capacity);
                         traits_type::move(_internalString, temp, pos);
@@ -1140,7 +1142,7 @@ namespace std_copy
                 }
                 else
                 {
-                    _capacity <<= _calculate_smallest_power_of_two_greater_than((_length - count + count2) / _capacity);
+                    _capacity <<= _power_of_smallest_power_of_two_greater_than((_length - count + count2) / _capacity);
                     pointer temp = _internalString;
                     _internalString = allocator_type::allocate(_capacity);
                     traits_type::move(_internalString, temp, pos);
