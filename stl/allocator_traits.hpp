@@ -24,7 +24,7 @@ namespace std_copy
             class _has_construct
             {
                 protected:
-                    typedef char[2] yes;
+                    typedef wchar_t yes;
                     typedef char no;
 
                     template <class C>
@@ -42,7 +42,7 @@ namespace std_copy
             class _has_destroy
             {
                 protected:
-                    typedef char[2] yes;
+                    typedef wchar_t yes;
                     typedef char no;
 
                     template <class T>
@@ -60,7 +60,7 @@ namespace std_copy
             class _has_select_on_container_copy_construction
             {
                 protected:
-                    typedef char[2] yes;
+                    typedef wchar_t yes;
                     typedef char no;
 
                     template <class T>
