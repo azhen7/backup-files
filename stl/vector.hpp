@@ -429,7 +429,7 @@ namespace std_copy
                 _numberOfElements = std_copy::distance(first, last);
                 _capacity = _numberOfElements;
                 _internalBuffer = allocator_type::allocate(_numberOfElements);
-                uninitialized_copy(first, last, _internalBuffer);
+                uninitialized_move(first, last, _internalBuffer);
             }
             /**
              * Copies the elements from the vector s into the vector.
@@ -771,7 +771,7 @@ namespace std_copy
      * Gets the Nth element from vec. N is a template parameter.
      * @param vec The vector from which to get the element.
     */
-    template <unsigned long long N, class T, class Alloc>
+    template <std::size_t N, class T, class Alloc>
     T&& get(vector<T, Alloc>& vec)
     {
         return move(vec[N]);
@@ -780,7 +780,7 @@ namespace std_copy
      * Gets the Nth element from vec. N is a template parameter.
      * @param vec The vector from which to get the element.
     */
-    template <unsigned long long N, class T, class Alloc>
+    template <std::size_t N, class T, class Alloc>
     T& get(vector<T, Alloc>& vec)
     {
         return vec[N];
