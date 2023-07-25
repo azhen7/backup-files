@@ -220,7 +220,7 @@ namespace std_copy
                 _capacity(copy._capacity)
             {
                 _internalBuffer = allocator_type::allocate(_capacity);
-                uninitialized_copy(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
+                uninitialized_move(copy._internalBuffer, copy._internalBuffer + _numberOfElements, _internalBuffer);
             }
 
             /**
