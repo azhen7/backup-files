@@ -111,14 +111,14 @@ namespace std_copy
                 size_type count = 0;
                 while (x >>= 1 && x > 0 && (count++ || 1));
                 
-                return 1 << count;
+                return count;
             }
 
             //Reallocates the internal buffer.
             void _realloc(size_type n, size_type copyUpTo)
             {
                 pointer temp = _internalString;
-                size_type newSize = _capacity * _calculate_smallest_power_of_two_greater_than(n);
+                size_type newSize = _capacity << _calculate_smallest_power_of_two_greater_than(n);
                 _allocate_and_move_str(newSize - 1, allocator_type::allocate, temp, copyUpTo);
                 allocator_type::deallocate(temp, _capacity);
                 _capacity = newSize;
@@ -167,7 +167,7 @@ namespace std_copy
                 {
                     if (_length - count + len > _capacity)
                     {
-                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
+                        _capacity <<= _calculate_smallest_power_of_two_greater_than((_length - count + len) / _capacity);
                         pointer temp = _internalString;
                         _internalString = allocator_type::allocate(_capacity);
                         traits_type::move(_internalString, temp, pos);
@@ -959,7 +959,7 @@ namespace std_copy
                 {
                     if (_length - count + str._length > _capacity)
                     {
-                        _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + str._length) / _capacity);
+                        _capacity <<= _calculate_smallest_power_of_two_greater_than((_length - count + str._length) / _capacity);
                         pointer temp = _internalString;
                         _internalString = allocator_type::allocate(_capacity);
                         traits_type::move(_internalString, temp, pos);
@@ -1140,7 +1140,7 @@ namespace std_copy
                 }
                 else
                 {
-                    _capacity *= _calculate_smallest_power_of_two_greater_than((_length - count + count2) / _capacity);
+                    _capacity <<= _calculate_smallest_power_of_two_greater_than((_length - count + count2) / _capacity);
                     pointer temp = _internalString;
                     _internalString = allocator_type::allocate(_capacity);
                     traits_type::move(_internalString, temp, pos);
