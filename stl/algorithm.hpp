@@ -6,6 +6,7 @@
 #include "iterator.hpp"
 #include "type_traits.hpp"
 #include "concepts.hpp"
+#include "pair.hpp"
 
 #include <cstdint>
 
@@ -1812,6 +1813,87 @@ namespace std_copy
         for ( ; first1 != last1; first1++)
             std_copy::iter_swap(first1, first2++);
         return first2;
+    }
+    /**
+     * Checks if all elements that satisfy pred come before 
+     * all elements that don't.
+     * @param first The start of the range to check.
+     * @param last The end of the range to check.
+     * @param pred The predicate used to test the elements.
+    */
+    template <class ForwardIterator, class Pred>
+    constexpr bool is_partitioned(ForwardIterator first, ForwardIterator last, Pred pred)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIterator>
+#endif
+    {
+        while (first != last)
+        {
+            if (!pred(*first++))
+                break;
+        }
+        while (first != last)
+        {
+            if (pred(*first++))
+                return false;
+        }
+        return true;
+    }
+    /**
+     * Reorders the elements in [first, last) according to pred.
+     * @param first The start of the range to reorder.
+     * @param last The end of the range to reorder.
+     * @param pred The predicate used to test the elements.
+    */
+    template <class ForwardIt, class Pred>
+    constexpr ForwardIt partition(ForwardIt first, ForwardIt last, Pred pred)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+#endif
+    {
+        first = std_copy::find_if_not(first, last, pred);
+        if (first == last) return last;
+
+        ForwardIt i = first++;
+        while (first != last)
+        {
+            if (pred(*first))
+            {
+                std_copy::iter_swap(first, i);
+                i++;
+            }
+            first++;
+        }
+        return i;
+    }
+    /**
+     * Copies the elements of [first, last) to two different ranges
+     * depending on the value returned by pred.
+     * @param first The start of the range to test.
+     * @param last The end of the range to test.
+     * @param if_true The start of the range for elements that satisfy pred.
+     * @param if_false The start of the range for elements that don't satisfy pred.
+     * @param pred The predicate used to test the elements.
+    */
+    template <class ForwardIt, class OutputIt1, class OutputIt2, class Pred>
+    constexpr pair<OutputIt1, OutputIt2> partition_copy(ForwardIt first, ForwardIt last, OutputIt1 if_true, OutputIt2 if_false, Pred pred)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+    && output_iterator<OutputIt1> && output_iterator<OutputIt2>
+#endif
+    {
+        while (first != last)
+        {
+            if (pred(*first))
+            {
+                *if_true++ = *first++;
+            }
+            else
+            {
+                *if_false++ = *first++;
+            }
+        }
+        return make_pair(if_true, if_false);
     }
 }
 
