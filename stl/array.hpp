@@ -20,11 +20,11 @@ namespace std_copy
      * to another, and you can return them from functions. They also
      * come with a lot of helpful functions.
     */
-    template <class T, std::size_t s>
+    template <class T, std::size_t _Size>
     class array
     {
         protected:
-            typedef array<T, s>                                     _array_type;
+            typedef array<T, _Size>                                     _array_type;
             
         public:
             //typdefs
@@ -39,17 +39,16 @@ namespace std_copy
             typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<const_pointer, _array_type> const_iterator;
             
         protected:
-            T _internalBuffer[s];
+            T _internalBuffer[_Size];
             size_type _numberOfElements;
-            const size_type _size = s;
 
         public:
             array() : _numberOfElements(0) {}
 
             array(const_reference val)
-                : _numberOfElements(s)
+                : _numberOfElements(_Size)
             {
-                std_copy::fill_n(_internalBuffer, _size, val);
+                std_copy::fill_n(_internalBuffer, _Size, val);
             }
 
             array(const _array_type& copy) 
@@ -64,11 +63,10 @@ namespace std_copy
             {
             }
 
-            template <std::size_t Size>
-            array(T (&arr)[Size])
-                : _numberOfElements(Size)
+            array(T (&arr)[_Size])
+                : _numberOfElements(_Size)
             {
-                for (size_type i = 0; i < Size; i++)
+                for (size_type i = 0; i < _Size; i++)
                     _internalBuffer[i] = arr[i];
             }
 
@@ -80,7 +78,7 @@ namespace std_copy
             */
             void operator=(const _array_type& assign)
             {
-                for (int i = 0; i < _size; i++)
+                for (int i = 0; i < _Size; i++)
                     _internalBuffer[i] = assign._internalBuffer[i];
             }
             /**
@@ -90,7 +88,7 @@ namespace std_copy
             */
             void fill(const_reference val)
             {
-                std_copy::fill_n(_internalBuffer, _size, val);
+                std_copy::fill_n(_internalBuffer, _Size, val);
             }
             /**
              * This function returns the number of elements
@@ -132,7 +130,7 @@ namespace std_copy
             */
             size_type size() const noexcept
             {
-                return _size;
+                return _Size;
             }
             /**
              * This function returns an iterator to the first element 
@@ -181,7 +179,7 @@ namespace std_copy
 
                     throw std::out_of_range(err);
                 }
-                return const_cast<reference>(_internalBuffer[index]);
+                return _internalBuffer[index];
             }
             /**
              * operator[] is overloaded to provide C-style array
@@ -190,7 +188,7 @@ namespace std_copy
             */
             reference operator[](size_type index) const noexcept
             {
-                return const_cast<reference>(_internalBuffer[index]);
+                return _internalBuffer[index];
             }
             /**
              * This function returns a reference to the
