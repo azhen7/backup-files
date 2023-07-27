@@ -135,7 +135,10 @@ namespace std_copy
     requires input_iterator<InputIterator>
 #endif
     {
-        while (first != last && *first++ = val);
+        while (first != last)
+        {
+            *first++ = val;
+        }
     }
     /**
      * This function assigns val to all the element at most n after first.
@@ -150,7 +153,10 @@ namespace std_copy
     && is_integral_v<Size>
 #endif
     {
-        while (n-- > 0 && *first++ = val);
+        while (n-- > 0)
+        {
+            *first++ = val;
+        }
     }
     /**
      * This function copies the elements in the range [first, last) to result.
