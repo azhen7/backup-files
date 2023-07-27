@@ -4,8 +4,10 @@
 #include "move.hpp"
 #include "pair.hpp"
 #include <cstdint>
+#include "type_traits.hpp"
 
-namespace std_copy {
+namespace std_copy
+{
     /**
      * This function swaps the values of two parameters.
      * @param a The first parameter.
@@ -56,6 +58,69 @@ namespace std_copy {
     constexpr add_const_t<T>& as_const(T& t)
     {
         return t;
+    }
+
+    /**
+     * Comparison functions between integer types. Negative numbers
+     * are guaranteed to always compare less than nonnegative numbers.
+    */
+    template <class T, class U>
+    constexpr bool cmp_equal(T a, U b) noexcept
+    {
+        using UT = make_unsigned_t<T>;
+        using UU = make_unsigned_t<U>;
+        if constexpr(is_signed_v<T> == is_signed_v<U>)
+        {
+            return a == b;
+        }
+        else if constexpr(is_signed_v<T>)
+        {
+            //U is unsigned
+            return a < 0 ? false : static_cast<UT>(a) == b;
+        }
+        else
+        {
+            return b < 0 ? false : a == static_cast<UT>(b);
+        }
+    }
+    template <class T, class U>
+    constexpr bool cmp_not_equal(T a, U b) noexcept
+    {
+        return !cmp_equal(a, b);
+    }
+    template <class T, class U>
+    constexpr bool cmp_greater(T a, U b) noexcept
+    {
+        using UT = make_unsigned_t<T>;
+        using UU = make_unsigned_t<U>;
+        if constexpr(is_signed_v<T> == is_signed_v<U>)
+        {
+            return a > b;
+        }
+        else if constexpr(is_signed_v<T>)
+        {
+            //U is unsigned
+            return a < 0 ? false : static_cast<UT>(a) > b;
+        }
+        else
+        {
+            return b < 0 ? true : a > static_cast<UT>(b);
+        }
+    }
+    template <class T, class U>
+    constexpr bool cmp_less(T a, U b)
+    {
+        return cmp_greater(b, a);
+    }
+    template <class T, class U>
+    constexpr bool cmp_less_equal(T a, U b)
+    {
+        return !cmp_greater(a, b);
+    }
+    template <class T, class U>
+    constexpr bool cmp_greater_equal(T a, U b)
+    {
+        return !cmp_less(a, b);
     }
 }
 
