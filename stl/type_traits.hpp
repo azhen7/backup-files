@@ -634,6 +634,17 @@ namespace _std_copy_hidden
                                                 double,
                                                 long double>::type;
         };
+        
+        //Replace first argument of template parameters; used for rebind
+        template <class T, class U>
+        struct _replace_first_arg 
+        {
+        };
+        template <template <typename, typename...> class Template, class T, class U, class ...Args>
+        struct _replace_first_arg<Template<T, Args...>, U>
+        {
+            using type = Template<U, Args...>;
+        };
     }
 }
 
