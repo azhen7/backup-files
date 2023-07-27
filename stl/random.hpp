@@ -54,6 +54,7 @@ namespace std_copy
                 const std::size_t q = p + t;
                 const std::size_t m = std_copy::max(s + 1, n);
 
+                //k == 0
                 {
                     std::uint32_t r1 = 1371501266u;
                     std::uint32_t r2 = r1 + s;
@@ -62,6 +63,7 @@ namespace std_copy
                     first[0] = r2;
                 }
 
+                //k = 1 to m - 1
                 for (std::size_t k = 1; k < m; k++)
                 {
                     std::size_t kp = (k + p) % n;
@@ -77,6 +79,7 @@ namespace std_copy
                     first[kmod] = r2;
                 }
 
+                //k = m to (m + n - 1)
                 for (std::size_t k = m; k < m + n; k++)
                 {
                     std::size_t kp = (k + p) % n;
