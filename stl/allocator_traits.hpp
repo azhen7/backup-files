@@ -92,6 +92,8 @@ namespace std_copy
             using _pointer             =    typename T::pointer;
 
         public:
+            using allocator_type       =    Alloc;
+            using value_type           =    typename Alloc::value_type;
             using pointer              =    _std_copy_hidden::_detector_t<value_type*, _pointer, Alloc>;
 
         private:
@@ -103,12 +105,12 @@ namespace std_copy
             using _const_void_pointer  =    typename T::const_void_pointer;
 
             template <template<typename> class P, class T, typename = void>
-            struct _pointer
+            struct _ptr
             {
-                using type = pointer_traits<pointer>::rebind<T>;
+                using type = typename pointer_traits<pointer>::rebind<T>;
             };
             template <template<typename> class P, class T>
-            struct _pointer<P, T, void_t<P<Alloc>>>
+            struct _ptr<P, T, void_t<P<Alloc>>>
             {
                 using type = P<Alloc>;
             };
@@ -129,7 +131,7 @@ namespace std_copy
             template <class T, class P, typename = void>
             struct _size
             {
-                using type = make_unsigned_t<typename _diff<T, P>::type>;
+                using type = std_copy::make_unsigned_t<typename _diff<T, P>::type>;
             };
             template <class T, class P>
             struct _size<T, P, void_t<typename T::size_type>>
@@ -137,14 +139,26 @@ namespace std_copy
                 using type = typename T::size_type;
             };
 
+            //propogate_on_container_copy_assignment
+            template <class T>
+            using _pocca = typename T::propogate_on_container_copy_assignment;
+            //propogate_on_container_move_assignment
+            template <class T>
+            using _pocma = typename T::propogate_on_container_move_assignment;
+            //propogate_on_container_swap
+            template <class T>
+            using _pocs = typename T::propogate_on_container_swap;
+
         public:
-            using allocator_type       =    Alloc;
-            using value_type           =    typename Alloc::value_type;
-            using const_pointer        =    typename _pointer<_const_pointer, const value_type>::type;
-            using void_pointer         =    typename _pointer<_void_pointer, void>::type;
-            using const_void_pointer   =    typename _pointer<_const_void_pointer, const void>::type;
+            using const_pointer        =    typename _ptr<_const_pointer, const value_type>::type;
+            using void_pointer         =    typename _ptr<_void_pointer, void>::type;
+            using const_void_pointer   =    typename _ptr<_const_void_pointer, const void>::type;
             using difference_type      =    typename _diff<Alloc, pointer>::type;
             using size_type            =    typename _size<Alloc, pointer>::type;
+
+            using propogate_on_container_copy_assignment = _std_copy_hidden::_detector_t<std_copy::false_type, _pocca, Alloc>;
+            using propogate_on_container_move_assignment = _std_copy_hidden::_detector_t<std_copy::false_type, _pocma, Alloc>;
+            using propogate_on_container_swap            = _std_copy_hidden::_detector_t<std_copy::false_type, _pocs, Alloc>;
 
             template <class U>
             using rebind_alloc         =    _rebind<Alloc, U>::type;
@@ -230,6 +244,10 @@ namespace std_copy
             using rebind_alloc          =   allocator<U>;
             template <class U>
             using rebind_traits         =   allocator_traits<allocator<U>>;
+
+            using propogate_on_container_copy_assignment = std_copy::false_type;
+            using propogate_on_container_move_assignment = std_copy::false_type;
+            using propogate_on_container_swap            = std_copy::false_type;
 
             /**
              * This function allocates n elements and returns a 
