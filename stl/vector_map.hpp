@@ -43,10 +43,10 @@ namespace std_copy
             typedef Alloc                                       allocator_type;
             typedef std::size_t                                 size_type;
             typedef std::ptrdiff_t                              difference_type;
-            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<T*, _map_type> iterator;
-            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<const T*, _map_type> const_iterator;
-            typedef reverse_iterator<pointer>                   reverse_iterator;
-            typedef reverse_iterator<const_pointer>             const_reverse_iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<pointer, _map_type> iterator;
+            typedef _std_copy_hidden::_std_copy_stl_containers::_iterator<const_pointer, _map_type> const_iterator;
+            typedef std_copy::reverse_iterator<pointer>         reverse_iterator;
+            typedef std_copy::reverse_iterator<const_pointer>   const_reverse_iterator;
         
         protected:
             typedef pair<iterator, bool>                        _iterator_and_bool;
