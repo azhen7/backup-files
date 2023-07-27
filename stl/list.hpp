@@ -192,7 +192,7 @@ namespace std_copy
         protected:
             typedef list<T, Alloc>                                              _list_type;
             typedef _std_copy_hidden::_std_copy_list_iterators::_node<T>        _node_type;
-            typedef allocator<_node_type>                                       _node_allocator_type;
+            typedef typename allocator_traits<Alloc>::rebind_alloc<_node_type> _node_allocator_type;
 
         public:
             typedef T                                                           value_type;
