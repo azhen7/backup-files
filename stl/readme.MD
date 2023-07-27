@@ -1,16 +1,16 @@
 # std_copy
 
 Implemented so far:
-* `&lt;vector&gt;`
-* `&lt;algorithm&gt;`
-* `&lt;array&gt;`
-* `&lt;string&gt;`
-* `&lt;iterator&gt;`
-* `&lt;limits&gt;`
-* `&lt;list&gt;`
-* `&lt;functional&gt;`
-* `&lt;type_traits&gt;`
-* `&lt;utility&gt;`
-* `&lt;random&gt;` - `linear_congruential_engine`
-* `&lt;vector_map&gt;` (a vector-like implementation of `map`)
-* `&lt;char_conv&gt;
+* `<vector>`
+* `<algorithm>`
+* `<array>`
+* `<string>`
+* `<iterator>`
+* `<limits>`
+* `<list>`
+* `<functional>`
+* `<type_traits>`
+* `<utility>`
+* `<random>` - `linear_congruential_engine`
+* `<vector_map>` (a vector-like implementation of `map`)
+* `<char_conv>`
