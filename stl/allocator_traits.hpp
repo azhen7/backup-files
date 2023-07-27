@@ -18,7 +18,7 @@ namespace std_copy
     template <class Alloc>
     class allocator_traits
     {
-        protected:
+        private:
             //Check if allocator object has construct function
             template <class T>
             class _has_construct
@@ -72,6 +72,17 @@ namespace std_copy
                 public:
                     static constexpr bool value = sizeof(test<C>(0)) == sizeof(yes);
             };
+
+            template <class T, class U, typename = void>
+            struct _rebind : _std_copy_hidden::_std_copy_type_traits::_replace_first_arg<T, U>
+            {
+            };
+
+            template <class T, class U>
+            struct _rebind<T, U, void_t<typename T::rebind<U>::other>>
+            {
+                typedef typename T::rebind<U>::other type;
+            };
             
             //_pointer_traits_rebind
             template <class Ptr, class T>
@@ -79,26 +90,66 @@ namespace std_copy
 
             template <class T>
             using _pointer             =    typename T::pointer;
+
+        public:
+            using pointer              =    _std_copy_hidden::_detector_t<value_type*, _pointer, Alloc>;
+
+        private:
             template <class T>
             using _const_pointer       =    typename T::const_pointer;
             template <class T>
             using _void_pointer        =    typename T::void_pointer;
             template <class T>
             using _const_void_pointer  =    typename T::const_void_pointer;
-            template <class T>
-            using _diff_type           =    typename T::difference_type;
-            template <class T>
-            using _size_type           =    typename T::size_type;
+
+            template <template<typename> class P, class T, typename = void>
+            struct _pointer
+            {
+                using type = pointer_traits<pointer>::rebind<T>;
+            };
+            template <template<typename> class P, class T>
+            struct _pointer<P, T, void_t<P<Alloc>>>
+            {
+                using type = P<Alloc>;
+            };
+
+            //difference_type
+            template <class T, class P, typename = void>
+            struct _diff
+            {
+                using type = pointer_traits<P>::difference_type;
+            };
+            template <class T, class P>
+            struct _diff<T, P, void_t<typename T::difference_type>>
+            {
+                using type = typename T::difference_type;
+            };
+
+            //size_type
+            template <class T, class P, typename = void>
+            struct _size
+            {
+                using type = make_unsigned_t<typename _diff<T, P>::type>;
+            };
+            template <class T, class P>
+            struct _size<T, P, void_t<typename T::size_type>>
+            {
+                using type = typename T::size_type;
+            };
 
         public:
             using allocator_type       =    Alloc;
             using value_type           =    typename Alloc::value_type;
-            using pointer              =    _std_copy_hidden::_detector_t<value_type*, _pointer, Alloc>;
-            using const_pointer        =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, const value_type*>, _const_pointer, Alloc>;
-            using void_pointer         =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, void>, _void_pointer, Alloc>;
-            using const_void_pointer   =    _std_copy_hidden::_detector_t<_pointer_traits_rebind<pointer, const void>, _const_void_pointer, Alloc>;
-            using difference_type      =    _std_copy_hidden::_detector_t<std::ptrdiff_t, _diff_type, Alloc>;
-            using size_type            =    _std_copy_hidden::_detector_t<std::size_t, _size_type, Alloc>;
+            using const_pointer        =    typename _pointer<_const_pointer, const value_type>::type;
+            using void_pointer         =    typename _pointer<_void_pointer, void>::type;
+            using const_void_pointer   =    typename _pointer<_const_void_pointer, const void>::type;
+            using difference_type      =    typename _diff<Alloc, pointer>::type;
+            using size_type            =    typename _size<Alloc, pointer>::type;
+
+            template <class U>
+            using rebind_alloc         =    _rebind<Alloc, U>::type;
+            template <class U>
+            using rebind_traits        =    allocator_traits<rebind_alloc<U>>;
 
             /**
              * This function allocates n elements and returns a 
@@ -173,7 +224,12 @@ namespace std_copy
             typedef void*                   void_pointer;
             typedef const void*             const_void_pointer;
             typedef std::size_t             size_type;
-            typedef std::size_t             difference_type;
+            typedef std::ptrdiff_t          difference_type;
+
+            template <class U>
+            using rebind_alloc          =   allocator<U>;
+            template <class U>
+            using rebind_traits         =   allocator_traits<allocator<U>>;
 
             /**
              * This function allocates n elements and returns a 

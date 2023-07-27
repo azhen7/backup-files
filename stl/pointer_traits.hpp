@@ -31,34 +31,23 @@ namespace std_copy
                 using type = T;
             };
 
-            //Replace first argument of template parameters; used for rebind
-            template <class T, class U>
-            struct _replace_first_arg 
-            {
-            };
-            template <template <typename, typename...> class Template, class T, class U, class ...Args>
-            struct _replace_first_arg<Template<T, Args...>, U>
-            {
-                using type = Template<U, Args...>;
-            };
-
 
             template <class T>
             using _element_type     =   typename T::element_type;
             template <class T>
             using _diff_type        =   typename T::difference_type;
             template <class T, class U>
-            using _rebind           =   typename _replace_first_arg<T, U>::type;
+            using _rebind           =   typename _std_copy_hidden::_std_copy_type_traits::_replace_first_arg<T, U>::type;
 
             template <class T>
             using _get_first_arg_t   =   typename _get_first_arg<T>::type;
             template <class T, class U>
-            using _replace_first_arg_t = typename _replace_first_arg<T, U>::type;
+            using _replace_first_arg_t = typename _std_copy_hidden::_std_copy_type_traits::_replace_first_arg<T, U>::type;
 
         public:
             using pointer           =   Ptr;
             using element_type      =   _std_copy_hidden::_detector_t<_get_first_arg_t<Ptr>, _element_type, Ptr>;
-            using difference_type   =   _std_copy_hidden::_detector_t<long long, _diff_type, Ptr>;
+            using difference_type   =   _std_copy_hidden::_detector_t<std::ptrdiff_t, _diff_type, Ptr>;
 
             template <class U>
             using rebind            =   _std_copy_hidden::_detector_t<_replace_first_arg_t<Ptr, U>, _rebind, Ptr, U>;
@@ -82,7 +71,7 @@ namespace std_copy
             //typedefs
             typedef T*              pointer;
             typedef T               element_type;
-            typedef long long       difference_type;
+            typedef std::ptrdiff_t  difference_type;
 
             template <class U>
             using rebind =          U*;
