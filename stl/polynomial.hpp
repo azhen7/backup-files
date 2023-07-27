@@ -40,13 +40,13 @@ namespace std_copy
 
             point& set_x(LD a)
             {
-                x = a;
+                x = move(a);
                 return *this;
             }
 
             point& set_y(LD b)
             {
-                y = b;
+                y = move(b);
                 return *this;
             }
     };
@@ -63,7 +63,7 @@ namespace std_copy
     public:
         polynomial(std::ptrdiff_t n)
         {
-            _n = n;
+            _n = move(n);
             _buf = new LD[n + 1];
         }
         polynomial(LD* s, LD* e)
