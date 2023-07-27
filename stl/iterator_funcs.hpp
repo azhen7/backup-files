@@ -2,6 +2,7 @@
 #define _STD_COPY_ITERATOR_FUNCS
 
 #include "iterator_traits.hpp"
+#include "type_traits.hpp"
 #include <cstdint>
 #include <stdexcept>
 #include <cmath>
