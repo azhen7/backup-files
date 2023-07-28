@@ -7,6 +7,82 @@
 #include "iterator.hpp"
 #include "algorithm.hpp"
 
+namespace _std_copy_hidden
+{
+    namespace _std_copy_random
+    {
+        template <
+            class UIntType,
+            UIntType mult,
+            UIntType add,
+            UIntType mod,
+            bool bigEnough = (!(mod & (mod - 1)) /*Is a power of two*/ || ((UIntType(-1) - add) / mult >= mod - 1) /*Result - 1 is less than max value of UIntType*/),
+            bool useSchrage = (mod % mult < mod / mult)
+        >
+        struct _mod_without_overflow
+        {
+            static UIntType calc(UIntType x)
+            {
+                using T = typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type;
+                return static_cast<UIntType>((x * T(mult) + add) % mod);
+            }
+        };
+        //Current integer type (UIntType) is large enough to store the value
+        template <
+            class UIntType,
+            UIntType mult,
+            UIntType add,
+            UIntType mod,
+            bool s
+        >
+        struct _mod_without_overflow<UIntType, mult, add, mod, true, s>
+        {
+            static UIntType calc(UIntType x)
+            {
+                UIntType result = x * mult + add;
+                if (mod != 0) result %= mod;
+                return result;
+            }
+        };
+        //Use Schrage's method
+        template <
+            class UIntType,
+            UIntType mult,
+            UIntType add,
+            UIntType mod
+        >
+        struct _mod_without_overflow<UIntType, mult, add, mod, false, true>
+        {
+            static UIntType calc(UIntType x)
+            {
+                if (mult == 1)
+                    x %= mod;
+                else
+                {
+                    static const UIntType q = mod / mult;
+                    static const UIntType r = mod % mult;
+
+                    UIntType t1 = mult * (x % q);
+                    UIntType t2 = r * (x / q);
+                    if (t1 >= t2)
+                        x = t1 - t2;
+                    else
+                        x = mod - (t1 - t2);
+                }
+                if (add != 0)
+                {
+                    const UIntType d = mod - x;
+                    if (d > add)
+                        x += add;
+                    else
+                        x = add - d;
+                }
+                return x;
+            }
+        };
+    }
+}
+
 namespace std_copy
 {
     class seed_seq
@@ -99,21 +175,25 @@ namespace std_copy
             vector<result_type> _internalBuffer;
     };
 
+    /**
+     * Given a seed s, the next generated seed is calculated by
+     * s = ((s * multiplierVal) + incrementVal) % modulusVal.
+     * 
+     * @param UIntType The unsigned integral type.
+     * @param multiplierVal The multiplier.
+     * @param incrementVal The added value.
+     * @param modulusVal The value to mod.
+    */
     template <
         class UIntType,
         UIntType multiplierVal,
         UIntType incrementVal,
         UIntType modulusVal
     >
-    /**
-     * Given three variables a, b, c, calculates the next
-     * generated pseudo-random value with the formula
-     * _seed = ((_seed * a) + b) % c.
-    */
     class linear_congruential_engine
     {
         protected:
-            typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type _seed;
+            UIntType _seed;
 
             typedef linear_congruential_engine<
                 UIntType,
@@ -166,7 +246,7 @@ namespace std_copy
             */
             result_type operator()()
             {
-                _seed = ((multiplier * _seed) + increment) % modulus;
+                _seed = _std_copy_hidden::_std_copy_random::_mod_without_overflow<UIntType, multiplier, increment, modulus>::calc(_seed);
                 return _seed;
             }
             /**
@@ -204,6 +284,43 @@ namespace std_copy
 
     typedef linear_congruential_engine<std::uint_fast32_t, 16807UL, 0UL, 2147483647UL> minstd_rand0;
     typedef linear_congruential_engine<std::uint_fast32_t, 48271UL, 0UL, 2147483647UL> minstd_rand;
+
+    /**
+     * Let X the generated pseudo-random sequence.
+     * For the ith generated value, it is calculated by the formula
+     * Xi = (X(i - r) - X(i - s) - C) mod 2^w. If Xi < 0, C is set to 1,
+     * otherwise, it's set to 0.
+     * 
+     * @param UIntType The unsigned integral type.
+     * @param w The word size, in bits, of the state sequence.
+     * @param s The short lag.
+     * @param r The long lag.
+    */
+    template <
+        class UIntType,
+        std::size_t w,
+        std::size_t s,
+        std::size_t r
+    >
+    class subtract_with_carry_engine
+    {
+        protected:
+            typedef subtract_with_carry_engine<UIntType, w, s, r> _self_type;
+            typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type _seed;
+        
+        public:
+            static constexpr std::size_t word_size = w;
+            static constexpr std::size_t short_lag = s;
+            static constexpr std::size_t long_lag = r;
+            static constexpr UIntType default_seed = 19780503u;
+
+            typedef UIntType result_type;
+
+            subtract_with_carry_engine()
+            {
+
+            }
+    };
 }
 
 #endif /* _STD_COPY_RANDOM */
