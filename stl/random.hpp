@@ -2,6 +2,8 @@
 #define _STD_COPY_RANDOM
 
 #include <cstdint>
+#include <iostream>
+
 #include "type_traits.hpp"
 #include "vector.hpp"
 #include "iterator.hpp"
@@ -16,13 +18,15 @@ namespace _std_copy_hidden
             UIntType mult,
             UIntType add,
             UIntType mod,
-            bool bigEnough = (!(mod & (mod - 1)) /*Is a power of two*/ || ((UIntType(-1) - add) / mult >= mod - 1) /*Result - 1 is less than max value of UIntType*/),
+            bool bigEnough = (!(mod & (mod - 1)) /*Is a power of two*/
+                    || ((UIntType(-1) - add) / mult >= mod - 1) /*Result - 1 is less than max value of UIntType*/),
             bool useSchrage = (mod % mult < mod / mult)
         >
         struct _mod_without_overflow
         {
             static UIntType calc(UIntType x)
             {
+                std::cout << "test1\n";
                 using T = typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type;
                 return static_cast<UIntType>((x * T(mult) + add) % mod);
             }
@@ -39,6 +43,7 @@ namespace _std_copy_hidden
         {
             static UIntType calc(UIntType x)
             {
+                std::cout << "test2\n";
                 UIntType result = x * mult + add;
                 if (mod != 0) result %= mod;
                 return result;
@@ -67,8 +72,9 @@ namespace _std_copy_hidden
                     if (t1 >= t2)
                         x = t1 - t2;
                     else
-                        x = mod - (t1 - t2);
+                        x = mod - (t2 - t1);
                 }
+                
                 if (add != 0)
                 {
                     const UIntType d = mod - x;
