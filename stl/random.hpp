@@ -198,6 +198,7 @@ namespace std_copy
     >
     class linear_congruential_engine
     {
+        static_assert(std_copy::is_unsigned_v<UIntType>, "UIntType must be unsigned");
         protected:
             UIntType _seed;
 
@@ -310,6 +311,8 @@ namespace std_copy
     >
     class subtract_with_carry_engine
     {
+        static_assert(std_copy::is_unsigned_v<UIntType>, "UIntType must be unsigned");
+        
         protected:
             typedef subtract_with_carry_engine<UIntType, w, s, r> _self_type;
             typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type _seed;
