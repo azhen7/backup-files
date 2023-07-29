@@ -198,6 +198,8 @@ namespace std_copy
     class linear_congruential_engine
     {
         static_assert(std_copy::is_unsigned_v<UIntType>, "UIntType must be unsigned");
+        static_assert(modulusVal == 0 || (multiplierVal < modulusVal && incrementVal < modulusVal), "modulus out of bounds");
+
         protected:
             UIntType _seed;
 
@@ -266,24 +268,24 @@ namespace std_copy
             }
 
             template <class UInt, UInt a, UInt c, UInt m>
-            friend bool operator==(const _self_type& lhs,
-                                   const _self_type& rhs);
+            friend bool operator==(const linear_congruential_engine<UInt, a, c, m>& lhs,
+                                   const linear_congruential_engine<UInt, a, c, m>& rhs);
             template <class UInt, UInt a, UInt c, UInt m>
-            friend bool operator!=(const _self_type& lhs,
-                                   const _self_type& rhs);
+            friend bool operator!=(const linear_congruential_engine<UInt, a, c, m>& lhs,
+                                   const linear_congruential_engine<UInt, a, c, m>& rhs);
     };
     
-    template <class UIntType, UIntType a, UIntType c, UIntType m>
-    bool operator==(const linear_congruential_engine<UIntType, a, c, m>& lhs,
-                    const linear_congruential_engine<UIntType, a, c, m>& rhs)
+    template <class UInt, UInt a, UInt c, UInt m>
+    bool operator==(const linear_congruential_engine<UInt, a, c, m>& lhs,
+                    const linear_congruential_engine<UInt, a, c, m>& rhs)
     {
         return (lhs._seed == rhs._seed) && (lhs.multiplier == rhs.multiplier)
                && (lhs.increment == rhs.increment) && (lhs.default_seed == rhs.default_seed);
     }
 
-    template <class UIntType, UIntType a, UIntType c, UIntType m>
-    bool operator!=(const linear_congruential_engine<UIntType, a, c, m>& lhs,
-                    const linear_congruential_engine<UIntType, a, c, m>& rhs)
+    template <class UInt, UInt a, UInt c, UInt m>
+    bool operator!=(const linear_congruential_engine<UInt, a, c, m>& lhs,
+                    const linear_congruential_engine<UInt, a, c, m>& rhs)
     {
         return !(lhs == rhs);
     }
@@ -311,6 +313,9 @@ namespace std_copy
     class subtract_with_carry_engine
     {
         static_assert(std_copy::is_unsigned_v<UIntType>, "UIntType must be unsigned");
+        static_assert(0 < s && s < r, "0 < s < r");
+        static_assert(0ULL < w && w <= std_copy::numeric_limits<UIntType>::digits, "word_size out of bounds");
+
         private:
             typedef subtract_with_carry_engine<UIntType, w, s, r> _self_type;
             
@@ -355,11 +360,7 @@ namespace std_copy
                             break;
                         }
                     }
-                    if (word_size < std_copy::numeric_limits<UIntType>::digits)
-                    {
-                        sum &= ((1 << word_size) - 1);
-                    }
-                    _buf[i] = sum;
+                    _buf[i] = sum & ((1 << word_size) - 1);;
                 }
                 _carry = (_buf[long_lag - 1] == 0) ? 1 : 0;
                 _longLagIndex = 0;
@@ -394,14 +395,10 @@ namespace std_copy
                 return xi;
             }
 
-            static constexpr result_type min() const noexcept { return 0; }
+            static constexpr result_type min() { return 0; }
 
-            static constexpr result_type max() const noexcept
+            static constexpr result_type max()
             {
-                if (word_size < static_cast<std::size_t>(std_copy::numeric_limits<UIntType>::digits))
-                {
-                    return -1;
-                }
                 return (UIntType(1) << word_size) - 1;
             }
 
