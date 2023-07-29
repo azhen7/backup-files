@@ -2,6 +2,7 @@
 #define _STD_COPY_NUMERIC
 
 #include "move.hpp"
+#include "iterator.hpp"
 
 namespace std_copy
 {
@@ -14,6 +15,9 @@ namespace std_copy
     */
     template <class ForwardIt, class T>
     constexpr void iota(ForwardIt first, ForwardIt last, T value)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+#endif
     {
         while (first != last)
         {
@@ -30,6 +34,9 @@ namespace std_copy
     */
     template <class ForwardIt, class T>
     constexpr T accumulate(ForwardIt first, ForwardIt last, T init)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+#endif
     {
         while (first != last)
         {
@@ -48,6 +55,9 @@ namespace std_copy
     */
     template <class ForwardIt, class T, class Adder>
     constexpr T accumulate(ForwardIt first, ForwardIt last, T init, Adder adder)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+#endif
     {
         while (first != last)
         {
@@ -67,6 +77,10 @@ namespace std_copy
     */
     template <class ForwardIt1, class ForwardIt2, class T>
     constexpr T inner_product(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2, T init)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt1>
+    && input_iterator<ForwardIt2>
+#endif
     {
         while (first1 != last1)
         {
@@ -89,6 +103,10 @@ namespace std_copy
     */
     template <class ForwardIt1, class ForwardIt2, class T, class Adder, class Multiplier>
     constexpr T inner_product(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2, T init, Adder adder, Multiplier multiplier)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt1>
+    && input_iterator<ForwardIt2>
+#endif
     {
         while (first1 != last1)
         {
@@ -108,6 +126,10 @@ namespace std_copy
     */
     template <class ForwardIt, class OutputIt>
     constexpr OutputIt adjacent_difference(ForwardIt first, ForwardIt last, OutputIt dest)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+    && output_iterator<OutputIt>
+#endif
     {
         if (first == last) return dest;
 
@@ -132,6 +154,10 @@ namespace std_copy
     */
     template <class ForwardIt, class OutputIt, class Subtractor>
     constexpr OutputIt adjacent_difference(ForwardIt first, ForwardIt last, OutputIt dest, Subtractor subtractor)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+    && output_iterator<OutputIt>
+#endif
     {
         if (first == last) return dest;
 
@@ -154,6 +180,10 @@ namespace std_copy
     */
     template <class ForwardIt, class OutputIt>
     constexpr OutputIt partial_sum(ForwardIt first, ForwardIt last, OutputIt dest)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+    && output_iterator<OutputIt>
+#endif
     {
         if (first == last) return dest;
 
@@ -178,6 +208,10 @@ namespace std_copy
     */
     template <class ForwardIt, class OutputIt, class Adder>
     constexpr OutputIt partial_sum(ForwardIt first, ForwardIt last, OutputIt dest, Adder adder)
+#if __cplusplus > 201703L
+    requires input_iterator<ForwardIt>
+    && output_iterator<OutputIt>
+#endif
     {
         if (first == last) return dest;
 
