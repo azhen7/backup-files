@@ -8,6 +8,7 @@
 #include "vector.hpp"
 #include "iterator.hpp"
 #include "algorithm.hpp"
+#include "limits.hpp"
 
 namespace _std_copy_hidden
 {
@@ -26,7 +27,6 @@ namespace _std_copy_hidden
         {
             static UIntType calc(UIntType x)
             {
-                std::cout << "test1\n";
                 using T = typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type;
                 return static_cast<UIntType>((x * T(mult) + add) % mod);
             }
@@ -43,7 +43,6 @@ namespace _std_copy_hidden
         {
             static UIntType calc(UIntType x)
             {
-                std::cout << "test2\n";
                 UIntType result = x * mult + add;
                 if (mod != 0) result %= mod;
                 return result;
@@ -106,13 +105,13 @@ namespace std_copy
                 _internalBuffer.assign(first, last);
             }
 
-            std::size_t size() { return _internalBuffer.size(); }
+            std::size_t size() const noexcept { return _internalBuffer.size(); }
             
             template <class OutputIt>
         #if __cplusplus > 201703L
             requires output_iterator<OutputIt>
         #endif
-            void param(OutputIt out)
+            void param(OutputIt out) const
             {
                 std_copy::copy(_internalBuffer.begin(), _internalBuffer.end(), out);
             }
@@ -312,9 +311,12 @@ namespace std_copy
     class subtract_with_carry_engine
     {
         static_assert(std_copy::is_unsigned_v<UIntType>, "UIntType must be unsigned");
-        protected:
+        private:
             typedef subtract_with_carry_engine<UIntType, w, s, r> _self_type;
-            typename _std_copy_hidden::_std_copy_type_traits::_find_uleast<UIntType>::type _seed;
+            
+            UIntType _buf[r];
+            UIntType _carry;
+            std::size_t _longLagIndex;
         
         public:
             static constexpr std::size_t word_size = w;
@@ -326,9 +328,94 @@ namespace std_copy
 
             subtract_with_carry_engine()
             {
+                seed(0u);
+            }
+            subtract_with_carry_engine(result_type val)
+            {
+                seed(val);
+            }
 
+            void seed(result_type seed)
+            {
+                std_copy::linear_congruential_engine<std::uint_least32_t, 40014u, 0u, 2147483563u> lcg(seed == 0 ? default_seed : seed);
+                constexpr std::size_t n = (word_size + 31) >> 5;
+                for (std::size_t i = 0; i < long_lag; i++)
+                {
+                    UIntType sum = 0u, factor = 1u;
+                    for (std::size_t j = 0; j < n; j++)
+                    {
+                        sum += lcg() * factor;
+                        if (32u < static_cast<std::size_t>(std_copy::numeric_limits<UIntType>::digits))
+                        {
+                            factor <<= 32u;
+                        }
+                        else
+                        {
+                            lcg.discard(n - j - 1);
+                            break;
+                        }
+                    }
+                    if (word_size < std_copy::numeric_limits<UIntType>::digits)
+                    {
+                        sum &= ((1 << word_size) - 1);
+                    }
+                    _buf[i] = sum;
+                }
+                _carry = (_buf[long_lag - 1] == 0) ? 1 : 0;
+                _longLagIndex = 0;
+            }
+
+            result_type operator()()
+            {
+                std::size_t shortLagIndex;
+                if (_longLagIndex < short_lag)
+                    shortLagIndex = long_lag + _longLagIndex - short_lag;
+                else
+                    shortLagIndex = _longLagIndex - short_lag;
+                
+                UIntType xi;
+                if (_buf[shortLagIndex] < _buf[_longLagIndex] + _carry)
+                {
+                    xi = (UIntType(1) << word_size) + _buf[shortLagIndex] - _buf[_longLagIndex] - _carry;
+                    _carry = 1;
+                }
+                else
+                {
+                    xi = _buf[shortLagIndex] - _buf[_longLagIndex] - _carry;
+                    _carry = 0;
+                }
+
+                _buf[_longLagIndex] = xi;
+                if (++_longLagIndex >= long_lag)
+                {
+                    _longLagIndex = 0;
+                }
+
+                return xi;
+            }
+
+            static constexpr result_type min() const noexcept { return 0; }
+
+            static constexpr result_type max() const noexcept
+            {
+                if (word_size < static_cast<std::size_t>(std_copy::numeric_limits<UIntType>::digits))
+                {
+                    return -1;
+                }
+                return (UIntType(1) << word_size) - 1;
+            }
+
+            void discard(std::size_t n)
+            {
+                while (n-- > 0)
+                {
+                    (*this)();
+                }
             }
     };
+
+    typedef subtract_with_carry_engine<std::uint_fast32_t, 24, 10, 24> ranlux24_base;
+    typedef subtract_with_carry_engine<std::uint_fast64_t, 48, 5, 12> ranlux48_base;
 }
 
 #endif /* _STD_COPY_RANDOM */
