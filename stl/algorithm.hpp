@@ -335,51 +335,6 @@ namespace std_copy
         return !all_of(first, last, func);
     }
     /**
-     * This function compares all the elements in the range [first1, last1) and the 
-     * start of first2. This function invokes operator!=.
-     * @param first1 An iterator to the initial position of the first sequence of elements.
-     * @param last1 An iterator to the final position of the first sequence of elements.
-     * @param first2 An iterator to the initial position of the second sequence of elements.
-    */
-    template <class InputIterator1, class InputIterator2>
-    bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2)
-#if __cplusplus > 201703L
-    requires input_iterator<InputIterator1>
-    && input_iterator<InputIterator2>
-#endif
-    {
-        while (first1 != last1)
-        {
-            if (*first1 != *first2)
-                return false;
-            first1++;
-            first2++;
-        }
-        return true;
-    }
-    /**
-     * This function compares all the elements in the range [first1, last1) and the 
-     * start of first2. This function invokes a provided function which is used to 
-     * compare the elements.
-     * @param first1 An iterator to the initial position of the first sequence of elements.
-     * @param last1 An iterator to the final position of the first sequence of elements.
-     * @param first2 An iterator to the initial position of the second sequence of elements.
-    */
-    template <class InputIterator1, class InputIterator2, class Compare>
-    bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, Compare pred)
-#if __cplusplus > 201703L
-    requires input_iterator<InputIterator1>
-    && input_iterator<InputIterator2>
-#endif
-    {
-        while (first1 != last1)
-        {
-            if (!pred(*first1++, *first2++))
-                return false;
-        }
-        return true;
-    }
-    /**
      * This function returns an iterator to the first element in the range [first, second) 
      * that doesn't compare less to val. This function uses operator<.
      * @param first An iterator to the initial position of the sequence of elements.
@@ -854,6 +809,58 @@ namespace std_copy
         return make_pair(first1, first2);
     }
     /**
+     * Checks if all elements in the ranges [first1, last1) and the range starting from first2
+     * are equal. Invokes operator== to compare the elements.
+     * @param first1 The start of the first range.
+     * @param last1 The end of the first range.
+     * @param first2 The start of the second range.
+    */
+    template <class InputIt1, class InputIt2>
+    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+    {
+        return mismatch(first1, last1, first2).first == last1;
+    }
+    /**
+     * Checks if all elements in the ranges [first1, last1) and the range starting from first2
+     * are equal. Invokes a custom object to compare the elements.
+     * @param first1 The start of the first range.
+     * @param last1 The end of the first range.
+     * @param first2 The start of the second range.
+     * @param comp The comparison object.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, Compare comp)
+    {
+        return mismatch(first1, last1, first2, comp).first == last1;
+    }
+    /**
+     * Checks if all elements in the ranges [first1, last1) and [first2, last2)
+     * are equal. Invokes operator== to compare the elements.
+     * @param first1 The start of the first range.
+     * @param last1 The end of the first range.
+     * @param first2 The start of the second range.
+     * @param last2 The end of the second range.
+    */
+    template <class InputIt1, class InputIt2>
+    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+    {
+        return mismatch(first1, last1, first2, last2).first == last1;
+    }
+    /**
+     * Checks if all elements in the ranges [first1, last1) and the range starting from first2
+     * are equal. Invokes a comparison object to compare the elements.
+     * @param first1 The start of the first range.
+     * @param last1 The end of the first range.
+     * @param first2 The start of the second range.
+     * @param last2 The end of the second range.
+     * @param comp The comparison object.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+    {
+        return mismatch(first1, last1, first2, last2, comp).first == last1;
+    }
+    /**
      * This function returns an iterator to the first element in the range [first1, last1) that matches any of 
      * the elements in the range [first2, last2). This function invokes operator== to compare the elements. 
      * If an element is found, an iterator to it is returned, otherwise, last1 is returned.
@@ -1326,7 +1333,7 @@ namespace std_copy
 #endif
     {
         InputIterator temp = next(first, 1);
-        while (*++first != *++temp && first != last);
+        while (!(*++first == *++temp) && first != last);
         return first;
     }
     /**
@@ -1900,6 +1907,131 @@ namespace std_copy
             }
         }
         return make_pair(if_true, if_false);
+    }
+    /**
+     * Merges two sorted ranges. Invokes operator< to compare the elements.
+     * @param first1 The start to the first range.
+     * @param last1 The end to the first range.
+     * @param first2 The start to the second range.
+     * @param last2 The end to the second range.
+     * @param out The output range to merge at.
+    */
+    template <class InputIt1, class InputIt2, class OutputIt>
+    constexpr OutputIt merge(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, OutputIt out)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIt1>
+    && input_iterator<InputIt2> && output_iterator<OutputIt>
+#endif
+    {
+        while (first1 != last1 && first2 != last2)
+        {
+            if (*first1 < *first2)
+            {
+                *out++ = *first1++;
+            }
+            else
+            {
+                *out++ = *first2++;
+                //*first1 >= *first2 and *first2 >= *first1 -> *first1 == *first2
+                if (!(*first2 < *first1))
+                {
+                    *out++ = *first1++;
+                }
+            }
+        }
+        while (first1 != last1)
+        {
+            *out++ = *first1++;
+        }
+        while (first2 != last2)
+        {
+            *out++ = *first2++;
+        }
+        return out;
+    }
+
+    //Sorting algorithms
+    /**
+     * Returns an iterator to the first element which compares greater than its previous element.
+     * Invokes operator< to compare the elements.
+     * @param first The start of the range.
+     * @param last The end of the range.
+    */
+    template <class InputIt>
+    constexpr InputIt is_sorted_until(InputIt first, InputIt last)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIt>
+#endif
+    {
+        if (first == last) return last;
+
+        InputIt temp = std_copy::next(first, 1);
+        while (first != last)
+        {
+            if (*temp < *first)
+            {
+                return temp;
+            }
+            temp++;
+            first++;
+        }
+        return last;
+    }
+    /**
+     * Returns an iterator to the first element which compares greater than its previous element.
+     * Invokes a custom comparison object to compare the elements.
+     * @param first The start of the range.
+     * @param last The end of the range.
+     * @param comp The comparison object.
+    */
+    template <class InputIt, class Compare>
+    constexpr InputIt is_sorted_until(InputIt first, InputIt last, Compare comp)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIt>
+#endif
+    {
+        if (first == last) return last;
+        
+        InputIt temp = std_copy::next(first, 1);
+        while (first != last)
+        {
+            if (comp(*temp, *first))
+            {
+                return temp;
+            }
+            temp++;
+            first++;
+        }
+        return last;
+    }
+    /**
+     * Checks if the elements in [first, last) are sorted in non-descending order.
+     * Invokes operator< to compare the elements.
+     * @param first The start of the range.
+     * @param last The end of the range.
+    */
+    template <class InputIt>
+    constexpr bool is_sorted(InputIt first, InputIt last)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIt>
+#endif
+    {
+        return is_sorted_until(first, last) == last;
+    }
+    /**
+     * Checks if the elements in [first, last) are sorted in non-descending order.
+     * Invokes a custom comparison object to compare the elements.
+     * @param first The start of the range.
+     * @param last The end of the range.
+     * @param comp The comparison object.
+    */
+    template <class InputIt, class Compare>
+    constexpr bool is_sorted(InputIt first, InputIt last, Compare comp)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIt>
+#endif
+    {
+        return is_sorted_until(first, last, comp) == last;
     }
 }
 
