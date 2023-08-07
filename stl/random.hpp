@@ -360,7 +360,7 @@ namespace std_copy
                             break;
                         }
                     }
-                    _buf[i] = sum & ((1 << word_size) - 1);;
+                    _buf[i] = sum & ((1 << word_size) - 1);
                 }
                 _carry = (_buf[long_lag - 1] == 0) ? 1 : 0;
                 _longLagIndex = 0;

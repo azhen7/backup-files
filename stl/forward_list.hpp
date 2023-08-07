@@ -24,6 +24,17 @@ namespace _std_copy_hidden
                     _next = n;
                 }
         };
+
+        template <class T>
+        struct _node_iterator
+        {
+
+        };
+
+        template <class T>
+        struct _const_node_iterator
+        {
+        };
     }
 };
 
@@ -41,7 +52,7 @@ namespace std_copy
         private:
             typedef forward_list<T, Alloc>                                              _forward_list_type;
             typedef _std_copy_hidden::_std_copy_forward_list_iterators::_node<T>        _node_type;
-            typedef allocator<_node_type>                                               _node_allocator_type;
+            typedef typename allocator_traits<Alloc>::rebind_alloc<_node_type>          _node_allocator_type;
 
         public:
             typedef T                                                                   value_type;
@@ -52,8 +63,8 @@ namespace std_copy
             typedef allocator_traits<Alloc>::const_pointer                              const_pointer;
             typedef std::size_t                                                         size_type;
             typedef std::ptrdiff_t                                                      difference_type;
-            typedef _std_copy_hidden::_std_copy_list_iterators::_node_iterator<T>       iterator;
-            typedef _std_copy_hidden::_std_copy_list_iterators::_const_node_iterator<T> const_iterator;
+            typedef _std_copy_hidden::_std_copy_forward_list_iterators::_node_iterator<T> iterator;
+            typedef _std_copy_hidden::_std_copy_forward_list_iterators::_const_node_iterator<T> const_iterator;
 
         private:
             _node_type* _head;
