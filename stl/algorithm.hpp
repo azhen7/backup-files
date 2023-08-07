@@ -2033,6 +2033,66 @@ namespace std_copy
     {
         return is_sorted_until(first, last, comp) == last;
     }
+    /**
+     * Checks if the sorted range [subseq_first, subseq_last) is a subsequence of
+     * the sorted range [first, last). Invokes operator< to compare the elements.
+     * @param first An iterator to the start of the range.
+     * @param last An iterator to the end of the range.
+     * @param subseq_first An iterator to the start of the subsequence to search for.
+     * @param subseq_last An iterator to the start of the subsequence to search for.
+    */
+    template <class InputIt1, class InputIt2>
+    constexpr bool includes(InputIt1 first, InputIt1 last, InputIt2 subseq_first, InputIt2 subseq_last)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIt1>
+    && input_iterator<InputIt2>
+#endif
+    {
+        while (subseq_first != subseq_last)
+        {
+            if (first == last || *subseq_first < *first)
+            {
+                return false;
+            }
+            if (!(*first < *subseq_first))
+            {
+                subseq_first++;
+            }
+            first++;
+        }
+        return true;
+    }
+    /**
+     * Checks if the sorted range [subseq_first, subseq_last) is a subsequence of
+     * the sorted range [first, last). Invokes a custom comparison function
+     * to compare the elements.
+     * @param first An iterator to the start of the range.
+     * @param last An iterator to the end of the range.
+     * @param subseq_first An iterator to the start of the subsequence to search for.
+     * @param subseq_last An iterator to the start of the subsequence to search for.
+     * @param comp The custom comparison function.
+    */
+    template <class InputIt1, class InputIt2, class Compare>
+    constexpr bool includes(InputIt1 first, InputIt1 last, InputIt2 subseq_first, InputIt2 subseq_last, Compare comp)
+#if __cplusplus > 201703L
+    requires input_iterator<InputIt1>
+    && input_iterator<InputIt2>
+#endif
+    {
+        while (subseq_first != subseq_last)
+        {
+            if (first == last || comp(*subseq_first, *first))
+            {
+                return false;
+            }
+            if (!comp(*first, *subseq_first))
+            {
+                subseq_first++;
+            }
+            first++;
+        }
+        return true;
+    }
 }
 
 #endif /* _STD_COPY_ALGORITHM */
