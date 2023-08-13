@@ -1934,9 +1934,7 @@ namespace std_copy
                 *out++ = *first2++;
                 //*first1 >= *first2 and *first2 >= *first1 -> *first1 == *first2
                 if (!(*first2 < *first1))
-                {
                     *out++ = *first1++;
-                }
             }
         }
         while (first1 != last1)
@@ -1969,9 +1967,8 @@ namespace std_copy
         while (first != last)
         {
             if (*temp < *first)
-            {
                 return temp;
-            }
+
             temp++;
             first++;
         }
@@ -1996,9 +1993,8 @@ namespace std_copy
         while (first != last)
         {
             if (comp(*temp, *first))
-            {
                 return temp;
-            }
+
             temp++;
             first++;
         }
@@ -2051,13 +2047,11 @@ namespace std_copy
         while (subseq_first != subseq_last)
         {
             if (first == last || *subseq_first < *first)
-            {
                 return false;
-            }
+
             if (!(*first < *subseq_first))
-            {
                 subseq_first++;
-            }
+
             first++;
         }
         return true;
@@ -2082,13 +2076,11 @@ namespace std_copy
         while (subseq_first != subseq_last)
         {
             if (first == last || comp(*subseq_first, *first))
-            {
                 return false;
-            }
+
             if (!comp(*first, *subseq_first))
-            {
                 subseq_first++;
-            }
+            
             first++;
         }
         return true;
