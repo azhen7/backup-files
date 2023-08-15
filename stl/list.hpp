@@ -611,6 +611,46 @@ namespace std_copy
                 return p;
             }
             /**
+             * Inserts count elements of value val at @p pos.
+             * @param pos The position to insert at.
+             * @param count The number of elements to insert.
+             * @param val The value of the elements to insert.
+            */
+            iterator insert(const_iterator pos, size_type count, const_reference val)
+            {
+                iterator p = next(this->begin(), distance(this->cbegin(), pos));
+                if (p == this->begin())
+                {
+                    while (count-- > 0)
+                    {
+                        this->push_front(val);
+                    }
+                    return p;
+                }
+                else if (p == this->end())
+                {
+                    while (count-- > 0)
+                    {
+                        this->push_back(val);
+                    }
+                    return p;
+                }
+
+                _size += count;
+
+                _node_type* beforePos = p.base()->_prev;
+
+                while (count-- > 0)
+                {
+                    _node_type* newElem = _node_allocator_type::allocate(1);
+                    newElem->_value = val;
+                    _link_nodes(beforePos, newElem);
+                    beforePos = newElem;
+                }
+                _link_nodes(beforePos, p.base());
+                return p;
+            }
+            /**
              * Inserts [first, last) at @p pos.
              * @param pos The position to insert at.
              * @param first The start of the range to insert.
