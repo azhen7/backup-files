@@ -581,43 +581,50 @@ namespace std_copy
              * @param pos The position to insert the element at.
              * @param elem The element to insert.
              */
-            iterator insert(iterator pos, const_reference elem)
+            iterator insert(const_iterator pos, const_reference elem)
             {
-                if (pos == this->end())
+                iterator p = next(this->begin(), distance(this->cbegin(), pos));
+                if (pos == this->cend())
                 {
                     this->push_back(elem);
-                    return pos;
+                    return p;
                 }
-                else if (pos == this->begin())
+                else if (pos == this->cbegin())
                 {
                     this->push_front(elem);
-                    return pos;
+                    return p;
                 }
 
                 _size++;
 
                 _node_type* newElem = _node_allocator_type::allocate(1);
 
-                newElem->_init(pos.base()->_prev, pos.base(), elem);
+                newElem->_init(p.base()->_prev, p.base(), elem);
                 
-                pos.base()->_prev = newElem;
+                p.base()->_prev = newElem;
                 
                 //link the _next reference of the element two elements before @var pos to @var newElem
-                if (pos.base()->_prev->_prev)
+                if (p.base()->_prev->_prev)
                 {
-                    pos.base()->_prev->_prev->_next = newElem;
+                    p.base()->_prev->_prev->_next = newElem;
                 }
-                return pos;
+                return p;
             }
+            /**
+             * Inserts [first, last) at @p pos.
+             * @param pos The position to insert at.
+             * @param first The start of the range to insert.
+             * @param last The end of the range to insert.
+            */
             /**
              * Inserts an element at @p pos.
              * @param pos The position to insert the element at.
              * @param args The arguments that are forwarded to the element's type's constructor.
              */
             template <class... Args>
-            iterator emplace(iterator pos, Args &&...args)
+            iterator emplace(const_iterator pos, Args &&...args)
             {
-                return this->insert(pos, value_type(args...));
+                return this->insert(pos, value_type(forward<Args>(args)...));
             }
             /**
              * Inserts an element at the end of the list.
@@ -626,7 +633,7 @@ namespace std_copy
             template <class... Args>
             reference emplace_back(Args &&...args)
             {
-                this->push_back(value_type(args...));
+                this->push_back(value_type(forward<Args>(args)...));
                 return _tail->_value;
             }
             /**
@@ -636,21 +643,17 @@ namespace std_copy
             template <class... Args>
             reference emplace_front(Args &&...args)
             {
-                this->push_front(value_type(args...));
+                this->push_front(value_type(forward<Args>(args)...));
                 return _head->_value;
             }
             /**
              * Erases the element at @p pos.
              * @param pos The position of the element to erase.
              */
-            iterator erase(iterator pos) noexcept
+            iterator erase(const_iterator p) noexcept
             {
-                if (pos.base() == this->end())
-                {
-                    this->pop_back();
-                    return this->end();
-                }
-                else if (pos.base() == this->begin())
+                iterator pos = next(this->begin(), distance(this->cbegin(), p));
+                if (pos.base() == this->begin())
                 {
                     this->pop_front();
                     return this->begin();
@@ -671,19 +674,24 @@ namespace std_copy
                 return nextIt;
             }
             /**
-             * Erases the elements in the range [start, end)
+             * Erases the elements in the range [start, last).
              * @param start The start of the range of values to erase.
-             * @param end The end of the range of values to erase.
+             * @param last The end of the range of values to erase.
              */
-            iterator erase(iterator start, iterator end) noexcept
+            iterator erase(iterator start, iterator last) noexcept
             {
-                if (start == end) return end;
+                if (start == last) return last;
 
-                _node_type* beforeStart = start.base()->_prev;
+                _node_type* beforeStart = nullptr;
+                if (start != this->begin())
+                {
+                    beforeStart = start.base()->_prev;
+                }
+
                 _node_type* afterStart = start.base()->_next;
                 _node_type* curr = start.base();
 
-                while (curr != end.base())
+                while (curr != last.base())
                 {
                     _node_allocator_type::deallocate(curr, 1);
                     curr = afterStart;
@@ -691,9 +699,16 @@ namespace std_copy
                     _size--;
                 }
 
-                _link_nodes(beforeStart, end.base());
+                if (beforeStart)
+                {
+                    _link_nodes(beforeStart, last.base());
+                }
+                else
+                {
+                    _head = last.base();
+                }
 
-                return end;
+                return last;
             }
             /**
              * Resizes the list to contain @p count elements. If @p count is greater than the
