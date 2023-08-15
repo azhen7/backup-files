@@ -176,6 +176,12 @@ namespace _std_copy_hidden
                     return !(a == l);
                 }
         };
+
+        template <class T>
+        _node_iterator<T> _toUnconstNodeIterator(_const_node_iterator<T> s)
+        {
+            return _node_iterator<T>(const_cast<_node<T>*>(s.base()));
+        }
     }
 };
 
@@ -583,7 +589,7 @@ namespace std_copy
              */
             iterator insert(const_iterator pos, const_reference elem)
             {
-                iterator p = next(this->begin(), distance(this->cbegin(), pos));
+                iterator p = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(pos);
                 if (pos == this->cend())
                 {
                     this->push_back(elem);
@@ -618,7 +624,7 @@ namespace std_copy
             */
             iterator insert(const_iterator pos, size_type count, const_reference val)
             {
-                iterator p = next(this->begin(), distance(this->cbegin(), pos));
+                iterator p = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(pos);
                 if (p == this->begin())
                 {
                     while (count-- > 0)
@@ -687,12 +693,12 @@ namespace std_copy
                 return _head->_value;
             }
             /**
-             * Erases the element at @p pos.
-             * @param pos The position of the element to erase.
+             * Erases the element at @p p.
+             * @param p The position of the element to erase.
              */
             iterator erase(const_iterator p) noexcept
             {
-                iterator pos = next(this->begin(), distance(this->cbegin(), p));
+                iterator pos = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(p);
                 if (pos.base() == this->begin())
                 {
                     this->pop_front();
@@ -714,13 +720,16 @@ namespace std_copy
                 return nextIt;
             }
             /**
-             * Erases the elements in the range [start, last).
-             * @param start The start of the range of values to erase.
-             * @param last The end of the range of values to erase.
+             * Erases the elements in the range [s, l).
+             * @param s The start of the range of values to erase.
+             * @param l The end of the range of values to erase.
              */
-            iterator erase(iterator start, iterator last) noexcept
+            iterator erase(const_iterator s, const_iterator l) noexcept
             {
-                if (start == last) return last;
+                if (s == l) return l;
+
+                iterator start = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(s);
+                iterator last = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(l);
 
                 _node_type* beforeStart = nullptr;
                 if (start != this->begin())
