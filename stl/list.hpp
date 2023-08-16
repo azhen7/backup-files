@@ -215,30 +215,6 @@ namespace std_copy
             typedef std::ptrdiff_t                                              difference_type;
 
         private:
-            void _build_this_from_existing(_node_type *src, _node_type* src_end)
-            {
-                if (src == src_end)
-                {
-                    _tail = _node_allocator_type::allocate(1);
-                    _head = _tail;
-                    _tail->_next = _tail;
-                    return;
-                }
-
-                _head = _node_allocator_type::allocate(1);
-                _node_type* n = _head;
-                while (src != src_end)
-                {
-                    n->_value = src->_value;
-                    src = src->_next;
-                    
-                    n->_next = _node_allocator_type::allocate(1);
-                    n->_next->_prev = n;
-                    _tail = n;
-                    n = n->_next;
-                }
-            }
-            
             void _add_new_end_ptr()
             {
                 _tail->_next = _node_allocator_type::allocate(1);
@@ -455,7 +431,7 @@ namespace std_copy
             list(const _list_type &other)
                 : _size(other._size)
             {
-                _build_this_from_existing(other._head, other._tail->_next);
+                _range_init_list(other.begin(), other.end());
             }
 
             ~list()
