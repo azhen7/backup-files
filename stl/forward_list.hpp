@@ -3,9 +3,11 @@
 
 #include "allocator.hpp"
 #include "allocator_traits.hpp"
-#include <cstdint>
 #include "iterator.hpp"
 #include "move.hpp"
+#include "type_traits.hpp"
+
+#include <cstdint>
 
 #define _STD_COPY_FORWARD_LIST_DEBUG_PRINT 1
 
@@ -154,7 +156,15 @@ namespace _std_copy_hidden
         {
             return _node_iterator<T>(const_cast<_node<T>*>(s.base()));
         }
-    }
+
+        template <class T>
+        using _is_input_iterator = std_copy::enable_if_t<
+            std_copy::is_base_of_v<
+                std_copy::input_iterator_tag,
+                typename std_copy::iterator_traits<T>::iterator_category
+            >
+        >;
+    };
 };
 
 namespace std_copy
@@ -186,87 +196,111 @@ namespace std_copy
             typedef _std_copy_hidden::_std_copy_forward_list_iterators::_const_node_iterator<T> const_iterator;
 
         private:
-            _node_type* _head;
-            _node_type* _tail;
-            _node_type* _beforeHead;
+            _node_type* _beforeHead{nullptr};
             size_type _size;
 
-            void _add_before_begin_and_end_ptrs()
+            void _allocate_beforeHead()
             {
                 _beforeHead = _node_allocator_type::allocate(1);
-                _beforeHead->_next = _head;
-
-                _tail->_next = nullptr; //operator-- is not defined (forward_list::iterator isn't bidirectional) so we can cheat using nullptr
+                _beforeHead->_next = nullptr;
             }
+
             void _value_init_list(size_type count, const_reference val)
             {
+                if (_beforeHead && _beforeHead->_next)
+                {
+                    _size = 0;
+                    _destroy_list();
+                }
+                _allocate_beforeHead();
+                _beforeHead->_next = _node_allocator_type::allocate(1);
+                _beforeHead->_next->_value = val;
                 _size = 1;
-                _head = _node_allocator_type::allocate(1);
-                _head->_value = val;
-                _node_type* copy = _head;
-
+                
+                _node_type* copy = _beforeHead->_next;
                 while (count > 1)
                 {
                     _node_type* nextElem = _node_allocator_type::allocate(1);
-                    nextElem->_value = val;
+                    nextElem->_init(nullptr, val);
                     copy->_next = nextElem;
                     copy = nextElem;
                     count--;
                     _size++;
                 }
-                _tail = copy;
-                _add_before_begin_and_end_ptrs();
             }
             template <class InputIt>
             void _range_init_list(InputIt first, InputIt last)
             {
+                if (_beforeHead && _beforeHead->_next)
+                {
+                    _size = 0;
+                    _destroy_list();
+                }
+                _allocate_beforeHead();
+                _beforeHead->_next = _node_allocator_type::allocate(1);
+                _beforeHead->_next->_value = *first++;
                 _size = 1;
-                _head = _node_allocator_type::allocate(1);
-                _head->_value = *first++;
-                _node_type* copy = _head;
 
+                _node_type* copy = _beforeHead->_next;
                 while (first != last)
                 {
                     _node_type* nextElem = _node_allocator_type::allocate(1);
-                    nextElem->_value = *first++;
+                    nextElem->_init(nullptr, *first++);
                     copy->_next = nextElem;
                     copy = nextElem;
                     _size++;
                 }
-                _tail = copy;
-                _add_before_begin_and_end_ptrs();
             }
             void _destroy_list()
             {
-                _node_type* temp = _head;
-                while (_size > 0)
+                _node_type* copy = _beforeHead;
+                _node_type* temp = _beforeHead->_next;
+                while (_size-- > 0)
                 {
-                    _head = _head->_next;
+                    _beforeHead->_next = _beforeHead->_next->_next;
                     _node_allocator_type::deallocate(temp, 1);
-                    temp = _head;
-
-                    _size--;
+                    temp = _beforeHead->_next;
                 }
-                _head = nullptr;
-                _tail = nullptr;
+                _node_allocator_type::deallocate(copy, 1);
+                _beforeHead = nullptr;
+            }
+            template <class ...Args>
+            iterator _insert_after_helper(const_iterator pos, Args&& ...args)
+            {
+                iterator p = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(pos);
+                if (pos == this->cbefore_begin())
+                {
+                    this->push_front(forward<Args>(args)...);
+                    return p;
+                }
+                
+                _node_type* newElem = _node_allocator_type::allocate(1);
+                newElem->_init(p.base()->_next, value_type(forward<Args>(args)...));
+                p.base()->_next = newElem;
+                _size++;
+                return p;
             }
 
         public:
-            forward_list() : _size(0)
+            forward_list()
             {
+                _allocate_beforeHead();
             }
 
-            forward_list(size_type count, const_reference val)
+            explicit forward_list(size_type count, const_reference val)
             {
                 _value_init_list(count, val);
             }
-            forward_list(size_type count)
+            explicit forward_list(size_type count)
             {
                 _value_init_list(count, value_type());
             }
 
-            template <class InputIt>
+            template <typename InputIt/*, typename = _std_copy_hidden::_std_copy_forward_list_iterators::_is_input_iterator<InputIt>*/>
             forward_list(InputIt first, InputIt last)
+        #if __cplusplus > 201703L
+            requires input_iterator<InputIt>
+        #endif
             {
                 _range_init_list(first, last);
             }
@@ -276,10 +310,7 @@ namespace std_copy
                 _range_init_list(other.begin(), other.end());
             }
             forward_list(forward_list&& other)
-                : _head(move(other._head)),
-                _tail(move(other._tail)),
-                _beforeHead(move(other._beforeHead)),
-                _size(move(other._size))
+                : _beforeHead(move(other._beforeHead))
             {}
 
             ~forward_list()
@@ -290,24 +321,31 @@ namespace std_copy
             /**
              * Clears the contents of the list.
             */
-            void clear()
+            void clear() noexcept
             {
                 _destroy_list();
             }
             /**
-             * Returns iterator to start
+             * Returns true if the list is empty.
             */
-            iterator begin() const noexcept { return iterator(_head); }
+            bool empty() const noexcept
+            {
+                return _beforeHead->_next == nullptr;
+            }
             /**
-             * Returns const_iterator to start
+             * Returns iterator to start.
             */
-            const_iterator cbegin() const noexcept { return const_iterator(_head); }
+            iterator begin() const noexcept { return iterator(_beforeHead->_next); }
             /**
-             * Returns iterator to end
+             * Returns const_iterator to start.
+            */
+            const_iterator cbegin() const noexcept { return const_iterator(_beforeHead->_next); }
+            /**
+             * Returns iterator to end.
             */
             iterator end() const noexcept { return iterator(nullptr); }
             /**
-             * Returns const_iterator to end
+             * Returns const_iterator to end.
             */
             const_iterator cend() const noexcept { return const_iterator(nullptr); }
             /**
@@ -318,6 +356,114 @@ namespace std_copy
              * Returns const_iterator to hypothetical element before start.
             */
             const_iterator cbefore_begin() const noexcept { return const_iterator(_beforeHead); }
+            /**
+             * Inserts an element at the front of the container.
+             * @param elem The element to insert.
+            */
+            void push_front(const_reference elem)
+            {
+                if (_size == 0ULL)
+                {
+                    _allocate_beforeHead();
+                }
+                _node_type* newElem = _node_allocator_type::allocate(1);
+                newElem->_init(_beforeHead->_next, elem);
+                _beforeHead->_next = newElem;
+                _size++;
+            }
+            /**
+             * Inserts @var element after @p pos.
+             * @param pos The position to insert after.
+             * @param element The element to insert.
+            */
+            iterator insert_after(const_iterator pos, const_reference element)
+            {
+                return this->_insert_after_helper(pos, element);
+            }
+            /**
+             * Inserts rvalue @var element after @p pos.
+             * @param pos The position to insert after.
+             * @param element The rvalue element to insert.
+            */
+            iterator insert_after(const_iterator pos, value_type&& element)
+            {
+                return this->_insert_after_helper(pos, move(element));
+            }
+            /**
+             * Inserts the range [first, last) after @p pos.
+             * @param pos The position to insert after.
+             * @param first The start of the range to insert.
+             * @param last The end of the range to insert.
+            */
+            template <class InputIt>
+        #if __cplusplus > 201703L
+            requires input_iterator<InputIt>
+        #endif
+            iterator insert_after(const_iterator pos, InputIt first, InputIt last)
+            {
+                iterator p = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(pos);
+                if (first == last) return p;
+
+                if (pos == this->cbefore_begin())
+                {
+                    this->push_front(*first++);
+                    _node_type* curr = _beforeHead->_next;
+                    _node_type* next = _beforeHead->_next->_next;
+                    while (first != last)
+                    {
+                        _node_type* newElem = _node_allocator_type::allocate(1);
+                        newElem->_value = *first++;
+                        curr->_next = newElem;
+                        curr = newElem;
+                    }
+                    curr->_next = next;
+                    return p;
+                }
+                
+                _node_type* before = p.base();
+                _node_type* afterPos = p.base()->_next;
+                while (first != last)
+                {
+                    _node_type* elem = _node_allocator_type::allocate(1);
+                    elem->_value = *first++;
+                    before->_next = elem;
+                    before = elem;
+                }
+                before->_next = afterPos;
+                return p;
+            }
+            /**
+             * Inserts count instances of element after @p pos.
+             * @param pos The position to insert after.
+             * @param count The number of elements to insert.
+             * @param element The element to insert.
+            */
+            iterator insert_after(const_iterator pos, size_type count, const_reference element)
+            {
+                iterator p = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(pos);
+                if (count == 0ULL) return p;
+
+                if (pos == this->cbefore_begin())
+                {
+                    while (count-- > 0)
+                    {
+                        this->push_front(element);
+                    }
+                    return p;
+                }
+                
+                _node_type* before = p.base();
+                _node_type* afterPos = p.base()->_next;
+                while (count-- > 0)
+                {
+                    _node_type* elem = _node_allocator_type::allocate(1);
+                    elem->_value = element;
+                    before->_next = elem;
+                    before = elem;
+                }
+                before->_next = afterPos;
+                return p;
+            }
 
         #if _STD_COPY_FORWARD_LIST_DEBUG_PRINT
 
