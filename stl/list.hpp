@@ -234,16 +234,15 @@ namespace std_copy
                 {
                     _size = 0;
                     _destroy_list();
-                    _head = _node_allocator_type::allocate(1);
                 }
 
-                _head->_value = *first;
+                _head = _node_allocator_type::allocate(1);
+                _head->_value = *first++;
 
                 _node_type *tempHead = _head;
                 _size = 1;
 
                 _tail = tempHead;
-                ++first;
                 while (first != last)
                 {
                     if (_size == size_type(-1))
@@ -268,9 +267,9 @@ namespace std_copy
                 if (_head)
                 {
                     _destroy_list();
-                    _head = _node_allocator_type::allocate(1);
                 }
 
+                _head = _node_allocator_type::allocate(1);
                 _head->_value = val;
 
                 _node_type *tempHead = _head;
@@ -522,6 +521,44 @@ namespace std_copy
 
                 _tail->_next = end;
                 _size--;
+            }
+            /**
+             * Assigns the contents of the list to the range [first, last).
+             * @param first The start of the range.
+             * @param last The end of the range.
+            */
+            template <class InputIt>
+            void assign(InputIt first, InputIt last)
+            {
+                _range_init_list(first, last);
+            }
+            /**
+             * Assigns the contents of the list to count instances of val.
+             * @param count The number of elements.
+             * @param val The value of the elements.
+            */
+            void assign(size_type count, const_reference val)
+            {
+                _value_init_list(count, val);
+            }
+            /**
+             * Assigns the contents of the list to another list.
+             * @param other The other list.
+            */
+            void operator=(const list& other)
+            {
+                _range_init_list(other.begin(), other.end());
+            }
+            /**
+             * Assigns the contents of the list to an r-value list.
+             * @param other The r-value other list.
+            */
+            void operator=(list&& other)
+            {
+                _destroy_list();
+                _head = move(other._head);
+                _tail = move(other._tail);
+                _size = move(other._size);
             }
             /**
              * Returns iterator to beginning of list.
