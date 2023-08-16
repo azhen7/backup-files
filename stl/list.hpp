@@ -578,6 +578,9 @@ namespace std_copy
             */
             template <class InputIt>
             void assign(InputIt first, InputIt last)
+        #if __cplusplus > 201703L
+            requires input_iterator<InputIt>
+        #endif
             {
                 _range_init_list(first, last);
             }
@@ -704,6 +707,9 @@ namespace std_copy
              * @param last The end of the range to insert.
             */
             template <class InputIt>
+        #if __cplusplus > 201703L
+            requires input_iterator<InputIt>
+        #endif
             iterator insert(const_iterator pos, InputIt first, InputIt last)
             {
                 iterator p = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(pos);
