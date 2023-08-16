@@ -85,6 +85,10 @@ namespace _std_copy_hidden
                 {
                     return _curr->_value;
                 }
+                _node_type* operator->() const noexcept
+                {
+                    return _curr;
+                }
                 _node_type* base() const noexcept
                 {
                     return _curr;
@@ -159,7 +163,11 @@ namespace _std_copy_hidden
                 {
                     return _curr->_value;
                 }
-                _node_type* base() const noexcept
+                const _node_type* operator->() const noexcept
+                {
+                    return _curr;
+                }
+                const _node_type* base() const noexcept
                 {
                     return _curr;
                 }
@@ -167,11 +175,11 @@ namespace _std_copy_hidden
                 {
                     _curr = l._curr;
                 }
-                friend bool operator==(const _self_type& a, const _self_type& l)
+                friend bool operator==(const _const_node_iterator& a, const _const_node_iterator& l)
                 {
                     return a._curr == l._curr;
                 }
-                friend bool operator!=(const _self_type& a, const _self_type& l)
+                friend bool operator!=(const _const_node_iterator& a, const _const_node_iterator& l)
                 {
                     return !(a == l);
                 }
@@ -235,7 +243,6 @@ namespace std_copy
                     _size = 0;
                     _destroy_list();
                 }
-
                 _head = _node_allocator_type::allocate(1);
                 _head->_value = *first++;
 
@@ -263,12 +270,11 @@ namespace std_copy
             }
             void _value_init_list(size_type count, const_reference val)
             {
-                _size = 0;
                 if (_head)
                 {
+                    _size = 0;
                     _destroy_list();
                 }
-
                 _head = _node_allocator_type::allocate(1);
                 _head->_value = val;
 
@@ -301,6 +307,7 @@ namespace std_copy
 
                     _size--;
                 }
+                _node_allocator_type::deallocate(_head, 1);
                 _head = nullptr;
                 _tail = nullptr;
             }
@@ -320,6 +327,35 @@ namespace std_copy
                     return true;
                 }
                 return false;
+            }
+
+            template <class ...Args>
+            iterator _insert_helper(const_iterator pos, Args&& ...args)
+            {
+                iterator p = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(pos);
+                //iterator p = next(begin(), distance(cbegin(), pos));
+                if (pos == this->cend())
+                {
+                    this->push_back(forward<Args>(args)...);
+                    return p;
+                }
+                else if (pos == this->cbegin())
+                {
+                    this->push_front(forward<Args>(args)...);
+                    return p;
+                }
+
+                _size++;
+                _node_type* newElem = _node_allocator_type::allocate(1);
+                newElem->_init(p.base()->_prev, p.base(), value_type(forward<Args>(args)...));
+                p.base()->_prev = newElem;
+                
+                //link the _next reference of the element two elements before @var pos to @var newElem
+                if (p.base()->_prev->_prev)
+                {
+                    p.base()->_prev->_prev->_next = newElem;
+                }
+                return p;
             }
             
             void _resize(size_type count, const_reference val)
@@ -399,6 +435,9 @@ namespace std_copy
         public:
             list() : _size(0)
             {
+                _tail = _node_allocator_type::allocate(1);
+                _tail->_next = _tail; //circular reference shenanigans lol
+                _head = _tail;
             }
 
             explicit list(size_type count, const_reference val)
@@ -444,6 +483,13 @@ namespace std_copy
             void clear() noexcept
             {
                 _destroy_list();
+            }
+            /**
+             * Returns true if the list is empty.
+            */
+            bool empty() const noexcept
+            {
+                return _size == 0;
             }
             /**
              * Returns the number of elements in the list.
@@ -599,32 +645,16 @@ namespace std_copy
              */
             iterator insert(const_iterator pos, const_reference elem)
             {
-                iterator p = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(pos);
-                if (pos == this->cend())
-                {
-                    this->push_back(elem);
-                    return p;
-                }
-                else if (pos == this->cbegin())
-                {
-                    this->push_front(elem);
-                    return p;
-                }
-
-                _size++;
-
-                _node_type* newElem = _node_allocator_type::allocate(1);
-
-                newElem->_init(p.base()->_prev, p.base(), elem);
-                
-                p.base()->_prev = newElem;
-                
-                //link the _next reference of the element two elements before @var pos to @var newElem
-                if (p.base()->_prev->_prev)
-                {
-                    p.base()->_prev->_prev->_next = newElem;
-                }
-                return p;
+                return this->_insert_helper(pos, elem);
+            }
+            /**
+             * Inserts rvalue element at @p pos.
+             * @param pos The position to insert at.
+             * @param elem The element to insert.
+            */
+            iterator insert(const_iterator pos, value_type&& elem)
+            {
+                return this->_insert_helper(pos, move(elem));
             }
             /**
              * Inserts count elements of value val at @p pos.
@@ -709,7 +739,7 @@ namespace std_copy
              * @param args The arguments that are forwarded to the element's type's constructor.
              */
             template <class... Args>
-            iterator emplace(const_iterator pos, Args &&...args)
+            iterator emplace(const_iterator pos, Args&& ...args)
             {
                 return this->insert(pos, value_type(forward<Args>(args)...));
             }
@@ -718,7 +748,7 @@ namespace std_copy
              * @param args The arguments that are forwarded to the element's type's constructor.
              */
             template <class... Args>
-            reference emplace_back(Args &&...args)
+            reference emplace_back(Args&& ...args)
             {
                 this->push_back(value_type(forward<Args>(args)...));
                 return _tail->_value;
@@ -728,7 +758,7 @@ namespace std_copy
              * @param args The arguments that are forwarded to the element's type's constructor.
              */
             template <class... Args>
-            reference emplace_front(Args &&...args)
+            reference emplace_front(Args&& ...args)
             {
                 this->push_front(value_type(forward<Args>(args)...));
                 return _head->_value;
