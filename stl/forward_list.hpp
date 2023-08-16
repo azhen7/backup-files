@@ -5,6 +5,13 @@
 #include "allocator_traits.hpp"
 #include <cstdint>
 #include "iterator.hpp"
+#include "move.hpp"
+
+#define _STD_COPY_FORWARD_LIST_DEBUG_PRINT 1
+
+#if _STD_COPY_FORWARD_LIST_DEBUG_PRINT
+    #include <iostream>
+#endif
 
 namespace _std_copy_hidden
 {
@@ -141,6 +148,12 @@ namespace _std_copy_hidden
                     return !(a == l);
                 }
         };
+
+        template <class T>
+        _node_iterator<T> _toUnconstNodeIterator(_const_node_iterator<T> s)
+        {
+            return _node_iterator<T>(const_cast<_node<T>*>(s.base()));
+        }
     }
 };
 
@@ -174,11 +187,150 @@ namespace std_copy
 
         private:
             _node_type* _head;
-            _node_type* _end;
-            _node_type* _before_head;
+            _node_type* _tail;
+            _node_type* _beforeHead;
+            size_type _size;
+
+            void _add_before_begin_and_end_ptrs()
+            {
+                _beforeHead = _node_allocator_type::allocate(1);
+                _beforeHead->_next = _head;
+
+                _tail->_next = nullptr; //operator-- is not defined (forward_list::iterator isn't bidirectional) so we can cheat using nullptr
+            }
+            void _value_init_list(size_type count, const_reference val)
+            {
+                _size = 1;
+                _head = _node_allocator_type::allocate(1);
+                _head->_value = val;
+                _node_type* copy = _head;
+
+                while (count > 1)
+                {
+                    _node_type* nextElem = _node_allocator_type::allocate(1);
+                    nextElem->_value = val;
+                    copy->_next = nextElem;
+                    copy = nextElem;
+                    count--;
+                    _size++;
+                }
+                _tail = copy;
+                _add_before_begin_and_end_ptrs();
+            }
+            template <class InputIt>
+            void _range_init_list(InputIt first, InputIt last)
+            {
+                _size = 1;
+                _head = _node_allocator_type::allocate(1);
+                _head->_value = *first++;
+                _node_type* copy = _head;
+
+                while (first != last)
+                {
+                    _node_type* nextElem = _node_allocator_type::allocate(1);
+                    nextElem->_value = *first++;
+                    copy->_next = nextElem;
+                    copy = nextElem;
+                    _size++;
+                }
+                _tail = copy;
+                _add_before_begin_and_end_ptrs();
+            }
+            void _destroy_list()
+            {
+                _node_type* temp = _head;
+                while (_size > 0)
+                {
+                    _head = _head->_next;
+                    _node_allocator_type::deallocate(temp, 1);
+                    temp = _head;
+
+                    _size--;
+                }
+                _head = nullptr;
+                _tail = nullptr;
+            }
 
         public:
-            
+            forward_list() : _size(0)
+            {
+            }
+
+            forward_list(size_type count, const_reference val)
+            {
+                _value_init_list(count, val);
+            }
+            forward_list(size_type count)
+            {
+                _value_init_list(count, value_type());
+            }
+
+            template <class InputIt>
+            forward_list(InputIt first, InputIt last)
+            {
+                _range_init_list(first, last);
+            }
+
+            forward_list(const forward_list& other)
+            {
+                _range_init_list(other.begin(), other.end());
+            }
+            forward_list(forward_list&& other)
+                : _head(move(other._head)),
+                _tail(move(other._tail)),
+                _beforeHead(move(other._beforeHead)),
+                _size(move(other._size))
+            {}
+
+            ~forward_list()
+            {
+                _destroy_list();
+            }
+
+            /**
+             * Clears the contents of the list.
+            */
+            void clear()
+            {
+                _destroy_list();
+            }
+            /**
+             * Returns iterator to start
+            */
+            iterator begin() const noexcept { return iterator(_head); }
+            /**
+             * Returns const_iterator to start
+            */
+            const_iterator cbegin() const noexcept { return const_iterator(_head); }
+            /**
+             * Returns iterator to end
+            */
+            iterator end() const noexcept { return iterator(nullptr); }
+            /**
+             * Returns const_iterator to end
+            */
+            const_iterator cend() const noexcept { return const_iterator(nullptr); }
+            /**
+             * Returns iterator to hypothetical element before start.
+            */
+            iterator before_begin() const noexcept { return iterator(_beforeHead); }
+            /**
+             * Returns const_iterator to hypothetical element before start.
+            */
+            const_iterator cbefore_begin() const noexcept { return const_iterator(_beforeHead); }
+
+        #if _STD_COPY_FORWARD_LIST_DEBUG_PRINT
+
+            void _debug_print() const noexcept
+            {
+                for (auto it = begin(); it != end(); it++)
+                {
+                    std::cout << *it << ' ';
+                }
+                std::cout << '\n';
+            }
+
+        #endif
     };
 }
 
