@@ -271,12 +271,9 @@ namespace std_copy
         if constexpr(std_copy::is_same<_iter_category, _random_access_tag>::value)
             return it + n;
         
-        for (std::size_t i = 0; i < std::abs(n); i++)
+        for (std::size_t i = 0; i < n; i++)
         {
-            if (n < 0)
-                it--;
-            else if (n > 0)
-                it++;
+            it++;
         }
         return it;
     }
