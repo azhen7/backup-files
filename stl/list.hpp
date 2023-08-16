@@ -159,7 +159,7 @@ namespace _std_copy_hidden
                     return temp;
                 }
         
-                _T& operator*() const noexcept
+                reference operator*() const noexcept
                 {
                     return _curr->_value;
                 }
@@ -245,6 +245,7 @@ namespace std_copy
                 }
                 _head = _node_allocator_type::allocate(1);
                 _head->_value = *first++;
+                _head->_prev = nullptr;
 
                 _node_type *tempHead = _head;
                 _size = 1;
@@ -277,6 +278,7 @@ namespace std_copy
                 }
                 _head = _node_allocator_type::allocate(1);
                 _head->_value = val;
+                _head->_prev = nullptr;
 
                 _node_type *tempHead = _head;
                 _tail = tempHead;
@@ -307,7 +309,6 @@ namespace std_copy
 
                     _size--;
                 }
-                _node_allocator_type::deallocate(_head, 1);
                 _head = nullptr;
                 _tail = nullptr;
             }
@@ -319,6 +320,7 @@ namespace std_copy
                 {
                     _head = _node_allocator_type::allocate(1);
                     _head->_value = val;
+                    _head->_prev = nullptr;
                     _tail = _head;
 
                     _add_new_end_ptr();
@@ -438,6 +440,7 @@ namespace std_copy
                 _tail = _node_allocator_type::allocate(1);
                 _tail->_next = _tail; //circular reference shenanigans lol
                 _head = _tail;
+                _head->_prev = nullptr;
             }
 
             explicit list(size_type count, const_reference val)
@@ -706,10 +709,23 @@ namespace std_copy
                 iterator p = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(pos);
                 if (p == this->begin())
                 {
+                    bool isEmptyAtStart = _tail == _head;
+
+                    this->push_front(*first++);
+                    _node_type* next = _head->_next;
+                    _node_type* copy = _head;
                     while (first != last)
                     {
-                        this->push_front(*first++);
+                        _node_type* newElem = _node_allocator_type::allocate(1);
+                        newElem->_value = *first++;
+                        _link_nodes(copy, newElem);
+                        copy = newElem;
+                        _size++;
                     }
+
+                    if (isEmptyAtStart) _tail = copy;
+
+                    _link_nodes(copy, next);
                     return p;
                 }
                 else if (p == this->end())
