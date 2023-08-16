@@ -256,11 +256,10 @@ namespace std_copy
             {
                 if (_head)
                 {
+                    _size = 0;
                     _destroy_list();
                     _head = _node_allocator_type::allocate(1);
                 }
-                
-                _size = distance(first, last);
 
                 _head->_value = *first;
 
@@ -289,6 +288,7 @@ namespace std_copy
             }
             void _value_init_list(size_type count, const_reference val)
             {
+                _size = 0;
                 if (_head)
                 {
                     _destroy_list();
@@ -427,13 +427,11 @@ namespace std_copy
             }
 
             explicit list(size_type count, const_reference val)
-                : _size(0)
             {
                 _value_init_list(count, val);
             }
 
             explicit list(size_type count)
-                : _size(0)
             {
                 _value_init_list(count, value_type());
             }
@@ -443,7 +441,6 @@ namespace std_copy
     #if __cplusplus > 201703L
                 requires input_iterator<InputIt>
     #endif
-                : _size(0)
             {
                 _range_init_list(first, last);
             }
@@ -643,9 +640,7 @@ namespace std_copy
                 }
 
                 _size += count;
-
                 _node_type* beforePos = p.base()->_prev;
-
                 while (count-- > 0)
                 {
                     _node_type* newElem = _node_allocator_type::allocate(1);
@@ -662,6 +657,39 @@ namespace std_copy
              * @param first The start of the range to insert.
              * @param last The end of the range to insert.
             */
+            template <class InputIt>
+            iterator insert(const_iterator pos, InputIt first, InputIt last)
+            {
+                iterator p = _std_copy_hidden::_std_copy_list_iterators::_toUnconstNodeIterator(pos);
+                if (p == this->begin())
+                {
+                    while (first != last)
+                    {
+                        this->push_front(*first++);
+                    }
+                    return p;
+                }
+                else if (p == this->end())
+                {
+                    while (first != last)
+                    {
+                        this->push_back(*first++);
+                    }
+                    return p;
+                }
+
+                _node_type* beforePos = p.base()->_prev;
+                while (first != last)
+                {
+                    _node_type* newElem = _node_allocator_type::allocate(1);
+                    newElem->_value = *first++;
+                    _link_nodes(beforePos, newElem);
+                    beforePos = newElem;
+                    _size++;
+                }
+                _link_nodes(beforePos, p.base());
+                return p;
+            }
             /**
              * Inserts an element at @p pos.
              * @param pos The position to insert the element at.
