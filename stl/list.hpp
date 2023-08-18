@@ -520,6 +520,24 @@ namespace std_copy
                 _size++;
             }
             /**
+             * Appends an rvalue reference onto end of list.
+             * @param elem The rvalue ref to append.
+            */
+            void push_back(value_type&& elem)
+            {
+                if (_check_if_empty(elem)) return;
+
+                _node_type* newTail = _node_allocator_type::allocate(1);
+
+                _link_nodes(newTail, _tail->_next);
+                _link_nodes(_tail, newTail);
+
+                _tail->_next->_value = move(elem);
+
+                _tail = _tail->_next;
+                _size++;
+            }
+            /**
              * Pushes an element to the beginning of the list.
              * @param elem The element to push to the beginning.
              */
@@ -532,6 +550,23 @@ namespace std_copy
                 _link_nodes(a, _head);
 
                 a->_value = elem;
+
+                _head = _head->_prev;
+                _size++;
+            }
+            /**
+             * Pushes an rvalue ref to the beginning of the list.
+             * @param elem The rvalue ref to push to the beginning.
+             */
+            void push_front(value_type&& elem)
+            {
+                if (_check_if_empty(elem)) return;
+
+                _node_type* a = _node_allocator_type::allocate(1);
+
+                _link_nodes(a, _head);
+
+                a->_value = move(elem);
 
                 _head = _head->_prev;
                 _size++;
