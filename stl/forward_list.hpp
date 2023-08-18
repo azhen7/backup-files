@@ -403,22 +403,6 @@ namespace std_copy
             {
                 iterator p = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(pos);
                 if (first == last) return p;
-
-                if (pos == this->cbefore_begin())
-                {
-                    this->push_front(*first++);
-                    _node_type* curr = _beforeHead->_next;
-                    _node_type* next = _beforeHead->_next->_next;
-                    while (first != last)
-                    {
-                        _node_type* newElem = _node_allocator_type::allocate(1);
-                        newElem->_value = *first++;
-                        curr->_next = newElem;
-                        curr = newElem;
-                    }
-                    curr->_next = next;
-                    return p;
-                }
                 
                 _node_type* before = p.base();
                 _node_type* afterPos = p.base()->_next;
@@ -428,6 +412,7 @@ namespace std_copy
                     elem->_value = *first++;
                     before->_next = elem;
                     before = elem;
+                    _size+;
                 }
                 before->_next = afterPos;
                 return p;
@@ -442,15 +427,7 @@ namespace std_copy
             {
                 iterator p = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(pos);
                 if (count == 0ULL) return p;
-
-                if (pos == this->cbefore_begin())
-                {
-                    while (count-- > 0)
-                    {
-                        this->push_front(element);
-                    }
-                    return p;
-                }
+                _size += count;
                 
                 _node_type* before = p.base();
                 _node_type* afterPos = p.base()->_next;
@@ -462,6 +439,33 @@ namespace std_copy
                     before = elem;
                 }
                 before->_next = afterPos;
+                return p;
+            }
+            /**
+             * Forwards args... to value_type's constructor and inserts that element
+             * after @p pos.
+             * @param pos The position to insert after.
+             * @param args The arguments to forward to the constructor.
+            */
+            template <class ...Args>
+            iterator emplace_after(const_iterator pos, Args&& ...args)
+            {
+                return this->_insert_after_helper(pos, value_type(forward<Args>(args)...));
+            }
+            /**
+             * Erases the element after @p pos.
+             * @param pos An iterator to the element before the element to erase.
+            */
+            iterator erase_after(const_iterator pos)
+            {
+                iterator p = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(pos);
+                if (p.base()->_next == nullptr) return this->end();
+
+                _node_type* node = p.base();
+                _node_type* nextNext = p.base()->_next->_next;
+                _node_allocator_type::deallocate(node->_next, 1);
+                node->_next = nextNext;
+                _size--;
                 return p;
             }
 
