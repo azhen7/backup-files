@@ -412,7 +412,7 @@ namespace std_copy
                     elem->_value = *first++;
                     before->_next = elem;
                     before = elem;
-                    _size+;
+                    _size++;
                 }
                 before->_next = afterPos;
                 return p;
