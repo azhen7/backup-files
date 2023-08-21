@@ -944,9 +944,9 @@ namespace std_copy
             */
             void merge(_list_type& l)
             {
-                iterator it1 = begin();
+                iterator it1 = this->begin();
                 iterator it2 = l.begin();
-                while (it1 != end() && it2 != l.end())
+                while (it1 != this->end() && it2 != l.end())
                 {
                     if (*it2 <= *it1)
                     {
