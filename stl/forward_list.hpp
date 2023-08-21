@@ -262,7 +262,6 @@ namespace std_copy
                     temp = _beforeHead->_next;
                 }
                 _node_allocator_type::deallocate(copy, 1);
-                _beforeHead = nullptr;
             }
             template <class ...Args>
             iterator _insert_after_helper(const_iterator pos, Args&& ...args)
@@ -324,6 +323,7 @@ namespace std_copy
             void clear() noexcept
             {
                 _destroy_list();
+                _allocate_beforeHead();
             }
             /**
              * Returns true if the list is empty.
