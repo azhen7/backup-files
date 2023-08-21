@@ -479,7 +479,7 @@ namespace std_copy
                 }
                 std::cout << '\n';
             }
-
+            
         #endif
     };
 }
