@@ -453,6 +453,15 @@ namespace std_copy
                 return this->_insert_after_helper(pos, value_type(forward<Args>(args)...));
             }
             /**
+             * Forwards args... to value_type's constructor and inserts that element at front.
+             * @param args The arguments to forward to the constructor.
+            */
+            template <class ...Args>
+            iterator emplace_front(Args&& ...args)
+            {
+                return this->_insert_after_helper(this->cbefore_begin(), value_type(forward<Args>(args)...));
+            }
+            /**
              * Erases the element after @p pos.
              * @param pos An iterator to the element before the element to erase.
             */
@@ -468,6 +477,73 @@ namespace std_copy
                 _size--;
                 return p;
             }
+            /**
+             * Erases the elements from [first, last).
+             * @param before_first The iterator to the element before the first to be erased.
+             * @param last The last element to be erased.
+            */
+            iterator erase_after(const_iterator before_first, const_iterator last)
+            {
+                iterator bf = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(before_first);
+                iterator l = _std_copy_hidden::_std_copy_forward_list_iterators::_toUnconstNodeIterator(last);
+                
+                _node_type* toErase = bf.base()->_next;
+                _node_type* nextAfterLast = l.base()->_next;
+
+                while (toErase != nextAfterLast)
+                {
+                    _node_type* afterCurr = toErase->_next;
+                    _node_allocator_type::deallocate(toErase, 1);
+                    toErase = afterCurr;
+                    _size--;
+                }
+                bf.base()->_next = nextAfterLast;
+                return l;
+            }
+            /**
+             * Merges two sorted lists. Assumes both *this and l are sorted.
+             * @param l The other sorted list to merge.
+            */
+            void merge(_forward_list_type& l)
+            {
+                _node_type* thisHead = _beforeHead->_next;
+                _node_type* otherHead = l.begin().base();
+                _node_type* prev = _beforeHead;
+
+                while (thisHead != nullptr && otherHead != nullptr)
+                {
+                    if (otherHead->_value <= thisHead->_value)
+                    {
+                        _node_type* insert = _node_allocator_type::allocate(1);
+                        insert->_init(thisHead, otherHead->_value);
+                        prev->_next = insert;
+
+                        if (otherHead->_value == thisHead->_value)
+                        {
+                            prev = thisHead;
+                            thisHead = thisHead->_next;
+                        }
+                        else
+                        {
+                            prev = prev->_next;
+                        }
+                        otherHead = otherHead->_next;
+                    }
+                    else
+                    {
+                        prev = thisHead;
+                        thisHead = thisHead->_next;
+                    }
+                }
+                while (otherHead != nullptr)
+                {
+                    _node_type* insert = _node_allocator_type::allocate(1);
+                    insert->_init(nullptr, otherHead->_value);
+                    otherHead = otherHead->_next;
+                    prev->_next = insert;
+                    prev = prev->_next;
+                }
+            }
 
         #if _STD_COPY_FORWARD_LIST_DEBUG_PRINT
 
@@ -479,7 +555,7 @@ namespace std_copy
                 }
                 std::cout << '\n';
             }
-            
+
         #endif
     };
 }
