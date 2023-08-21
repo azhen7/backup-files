@@ -965,7 +965,7 @@ namespace std_copy
                 }
             }
 
-    #if _STD_COPY_LIST_DEBUG_PRINT
+        #if _STD_COPY_LIST_DEBUG_PRINT
 
             void _debug_print() const noexcept
             {
@@ -976,7 +976,7 @@ namespace std_copy
                 std::cout << '\n';
             }
 
-    #endif
+        #endif
     };
 }
 
