@@ -54,8 +54,8 @@ namespace std_copy
 
             inline size_type _power_of_smallest_power_of_two_greater_than(size_type x)
             {
-                size_type count = 0ULL;
-                while (x >>= 1ULL && x > 0ULL && (count++ || 1));
+                size_type count = static_cast<size_type>(0);
+                while (x >>= static_cast<size_type>(1) && x > static_cast<size_type>(0) && (count++ || 1));
                 
                 return count;
             }
@@ -88,14 +88,14 @@ namespace std_copy
                 uninitialized_move(temp, temp + addToGetPos, _internalBuffer);
                 uninitialized_move(temp + secondCopy, temp + copyUpTo, _internalBuffer + copyFrom);
 
-                allocator_type::deallocate(temp, c >> 1ULL);
+                allocator_type::deallocate(temp, c >> static_cast<size_type>(1));
 
                 return addToGetPos;
             }
 
             size_type _get_new_capacity()
             {
-                return (_capacity == 0ULL) ? 1ULL : _capacity << 1ULL;
+                return (_capacity == static_cast<size_type>(0)) ? static_cast<size_type>(1) : _capacity << static_cast<size_type>(1);
             }
 
             void _resize(size_type n, const_reference val)
@@ -258,7 +258,7 @@ namespace std_copy
              * Returns a bool corresponding to whether the vector 
              * is empty.
             */
-            bool empty() const noexcept { return _numberOfElements == 0ULL; }
+            bool empty() const noexcept { return _numberOfElements == static_cast<size_type>(0); }
             /**
              * This function returns the capacity of the
              * vector, i.e., how many elements the vector
@@ -276,8 +276,8 @@ namespace std_copy
             */
             size_type max_size() const noexcept
             {
-                size_type first = 1ULL << ((size_type) (8ULL * sizeof(size_type) / sizeof(value_type)));
-                size_type second = 1ULL << (sizeof(difference_type) << 3ULL);
+                size_type first = static_cast<size_type>(1) << ((size_type) (static_cast<size_type>(8) * sizeof(size_type) / sizeof(value_type)));
+                size_type second = static_cast<size_type>(1) << (sizeof(difference_type) << static_cast<size_type>(3));
                 if (first < second)
                     return first;
                 return second;
@@ -291,8 +291,8 @@ namespace std_copy
             {
                 destroy(_internalBuffer, _internalBuffer + _numberOfElements);
                 allocator_type::deallocate(_internalBuffer, _capacity);
-                _numberOfElements = 0ULL;
-                _capacity = 0ULL;
+                _numberOfElements = static_cast<size_type>(0);
+                _capacity = static_cast<size_type>(0);
             }
             /**
              * This function pushes an element onto the end of 
@@ -304,7 +304,7 @@ namespace std_copy
                 if (_numberOfElements ==  _capacity)
                 {
                     _capacity = _get_new_capacity();
-                    _realloc(_capacity, _capacity >> 1ULL, _numberOfElements);
+                    _realloc(_capacity, _capacity >> static_cast<size_type>(1), _numberOfElements);
                 }
                 construct_at(_internalBuffer + _numberOfElements, elem);
                 _numberOfElements++;
@@ -610,7 +610,7 @@ namespace std_copy
                 difference_type addToGetPos = pos - this->cbegin();
                 
                 if (_numberOfElements > _capacity)
-                    _realloc_create_insert_space(addToGetPos, addToGetPos + dist, _numberOfElements - dist, 1ULL << _power_of_smallest_power_of_two_greater_than(_numberOfElements));
+                    _realloc_create_insert_space(addToGetPos, addToGetPos + dist, _numberOfElements - dist, static_cast<size_type>(1) << _power_of_smallest_power_of_two_greater_than(_numberOfElements));
                 else
                     move_backward(_internalBuffer + addToGetPos, _internalBuffer + _numberOfElements - dist, _internalBuffer + _numberOfElements);
 
