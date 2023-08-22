@@ -6,6 +6,7 @@
 #include "iterator.hpp"
 #include "move.hpp"
 #include "type_traits.hpp"
+#include "functional_comp.hpp"
 
 #include <cstdint>
 
@@ -506,19 +507,28 @@ namespace std_copy
             */
             void merge(_forward_list_type& l)
             {
+                this->merge(l, less<value_type>());
+            }
+            /**
+             * Merges two sorted lists. Assumes both *this and l are sorted.
+             * @param l The other sorted list to merge.
+            */
+            template <class Compare>
+            void merge(_forward_list_type& l, Compare comp)
+            {
                 _node_type* thisHead = _beforeHead->_next;
                 _node_type* otherHead = l.begin().base();
                 _node_type* prev = _beforeHead;
 
                 while (thisHead != nullptr && otherHead != nullptr)
                 {
-                    if (otherHead->_value <= thisHead->_value)
+                    if (!comp(thisHead->_value, otherHead->_value))
                     {
                         _node_type* insert = _node_allocator_type::allocate(1);
                         insert->_init(thisHead, otherHead->_value);
                         prev->_next = insert;
 
-                        if (otherHead->_value == thisHead->_value)
+                        if (!comp(otherHead->_value, thisHead->_value))
                         {
                             prev = thisHead;
                             thisHead = thisHead->_next;
