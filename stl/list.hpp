@@ -940,15 +940,27 @@ namespace std_copy
             }
             /**
              * Merges two sorted lists. Assumes both *this and l are sorted.
+             * Compares the elements using operator<.
              * @param l The other sorted list to merge.
             */
             void merge(_list_type& l)
+            {
+                this->merge(l, less<value_type>());
+            }
+            /**
+             * Merges two sorted lists. Assumes both *this and l are sorted.
+             * Compares the elements using custom comparison object.
+             * @param l The other sorted list to merge.
+             * @param comp The comparison object.
+            */
+            template <class Compare>
+            void merge(_list_type& l, Compare comp)
             {
                 iterator it1 = this->begin();
                 iterator it2 = l.begin();
                 while (it1 != this->end() && it2 != l.end())
                 {
-                    if (*it2 <= *it1)
+                    if (!comp(*it1, *it2))
                     {
                         this->insert(it1, *it2);
                         it2++;
