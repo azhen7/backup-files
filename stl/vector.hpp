@@ -681,7 +681,7 @@ namespace std_copy
             */
             bool contains(const_reference elem) const noexcept
             {
-                return std_copy::find(_internalBuffer, _internalBuffer + _numberOfElements, elem) != this->end();
+                return std_copy::find(this->begin(), this->end(), elem) != this->end();
             }
             /**
              * This function returns an iterator to the first occurrence 
