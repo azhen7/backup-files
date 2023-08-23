@@ -681,7 +681,7 @@ namespace std_copy
             */
             bool contains(const_reference elem) const noexcept
             {
-                return std_copy::find(this->begin(), this->end(), elem) != this->end();
+                return this->find(elem) != this->end();
             }
             /**
              * This function returns an iterator to the first occurrence 
@@ -691,7 +691,7 @@ namespace std_copy
             */
             iterator find(const_reference elem) const noexcept
             {
-                return find(_internalBuffer, _internalBuffer + _numberOfElements, elem);
+                return find(this->begin(), this->end(), elem);
             }
             /**
              * This function finds how many occurrences of an element exist 
