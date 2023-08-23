@@ -7,6 +7,7 @@
 #include "move.hpp"
 #include "type_traits.hpp"
 #include "functional_comp.hpp"
+#include "construct_destroy.hpp"
 
 #include <cstdint>
 
@@ -199,6 +200,15 @@ namespace std_copy
         private:
             _node_type* _beforeHead{nullptr};
             size_type _size;
+            allocator_type _value_type_alloc;
+
+            template <class ...Args>
+            _node_type* _construct_node(Args&& ...args)
+            {
+                _node_type* elem = _node_allocator_type::allocate(1);
+                allocator_traits<allocator_type>::construct(_value_type_alloc, &elem->_value, forward<Args>(args)...);
+                return elem;
+            }
 
             void _allocate_beforeHead()
             {
@@ -208,21 +218,17 @@ namespace std_copy
 
             void _value_init_list(size_type count, const_reference val)
             {
-                if (_beforeHead && _beforeHead->_next)
-                {
-                    _size = 0;
-                    _destroy_list();
-                }
                 _allocate_beforeHead();
-                _beforeHead->_next = _node_allocator_type::allocate(1);
-                _beforeHead->_next->_value = val;
+                _beforeHead->_next = _construct_node(val);
+                
                 _size = 1;
                 
                 _node_type* copy = _beforeHead->_next;
                 while (count > 1)
                 {
-                    _node_type* nextElem = _node_allocator_type::allocate(1);
-                    nextElem->_init(nullptr, val);
+                    _node_type* nextElem = _construct_node(val);
+                    nextElem->_next = nullptr;
+
                     copy->_next = nextElem;
                     copy = nextElem;
                     count--;
@@ -232,21 +238,16 @@ namespace std_copy
             template <class InputIt>
             void _range_init_list(InputIt first, InputIt last)
             {
-                if (_beforeHead && _beforeHead->_next)
-                {
-                    _size = 0;
-                    _destroy_list();
-                }
                 _allocate_beforeHead();
-                _beforeHead->_next = _node_allocator_type::allocate(1);
-                _beforeHead->_next->_value = *first++;
+                _beforeHead->_next = _construct_node(*first++);
                 _size = 1;
 
                 _node_type* copy = _beforeHead->_next;
                 while (first != last)
                 {
-                    _node_type* nextElem = _node_allocator_type::allocate(1);
-                    nextElem->_init(nullptr, *first++);
+                    _node_type* nextElem = _construct_node(*first++);
+                    nextElem->_next = nullptr;
+
                     copy->_next = nextElem;
                     copy = nextElem;
                     _size++;
@@ -274,8 +275,9 @@ namespace std_copy
                     return p;
                 }
                 
-                _node_type* newElem = _node_allocator_type::allocate(1);
-                newElem->_init(p.base()->_next, value_type(forward<Args>(args)...));
+                _node_type* newElem = _construct_node(value_type(forward<Args>(args)...));
+                newElem->_next = p.base()->_next;
+
                 p.base()->_next = newElem;
                 _size++;
                 return p;
@@ -334,6 +336,39 @@ namespace std_copy
                 return _beforeHead->_next == nullptr;
             }
             /**
+             * Replaces the contents of the list with count instances of element.
+             * @param count The number of elements to insert.
+             * @param element The element to fill the list with.
+            */
+            void assign(size_type count, const_reference element)
+            {
+                _destroy_list();
+                _value_init_list(count, element);
+            }
+            /**
+             * Replaces the contents of the list with [first, last).
+             * @param first An iterator to the start of the range.
+             * @param last An iterator to the end of the range.
+            */
+            template <class InputIt>
+        #if __cplusplus > 201703L
+            requires input_iterator<InputIt>
+        #endif
+            void assign(InputIt first, InputIt last)
+            {
+                _destroy_list();
+                _range_init_list(first, last);
+            }
+            /**
+             * Assigns the contents of the list with the contents of other.
+             * @param other The other list.
+            */
+            void operator=(const forward_list& other)
+            {
+                _destroy_list();
+                _range_init_list(other.begin(), other.end());
+            }
+            /**
              * Returns iterator to start.
             */
             iterator begin() const noexcept { return iterator(_beforeHead->_next); }
@@ -367,8 +402,9 @@ namespace std_copy
                 {
                     _allocate_beforeHead();
                 }
-                _node_type* newElem = _node_allocator_type::allocate(1);
-                newElem->_init(_beforeHead->_next, elem);
+                _node_type* newElem = _construct_node(elem);
+                newElem->_next = _beforeHead->_next;
+
                 _beforeHead->_next = newElem;
                 _size++;
             }
@@ -409,8 +445,8 @@ namespace std_copy
                 _node_type* afterPos = p.base()->_next;
                 while (first != last)
                 {
-                    _node_type* elem = _node_allocator_type::allocate(1);
-                    elem->_value = *first++;
+                    _node_type* elem = _construct_node(*first++);
+
                     before->_next = elem;
                     before = elem;
                     _size++;
@@ -434,8 +470,8 @@ namespace std_copy
                 _node_type* afterPos = p.base()->_next;
                 while (count-- > 0)
                 {
-                    _node_type* elem = _node_allocator_type::allocate(1);
-                    elem->_value = element;
+                    _node_type* elem = _construct_node(element);
+                    
                     before->_next = elem;
                     before = elem;
                 }
