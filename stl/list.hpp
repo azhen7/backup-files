@@ -6,6 +6,7 @@
 #include "iterator.hpp"
 #include "algorithm.hpp"
 #include "functional_comp.hpp"
+#include "move.hpp"
 #include <cstdint>
 #include <stdexcept>
 
@@ -206,7 +207,7 @@ namespace std_copy
         protected:
             typedef list<T, Alloc>                                              _list_type;
             typedef _std_copy_hidden::_std_copy_list_iterators::_node<T>        _node_type;
-            typedef typename allocator_traits<Alloc>::rebind_alloc<_node_type> _node_allocator_type;
+            typedef typename allocator_traits<Alloc>::rebind_alloc<_node_type>  _node_allocator_type;
 
         public:
             typedef T                                                           value_type;
@@ -223,6 +224,19 @@ namespace std_copy
             typedef std::ptrdiff_t                                              difference_type;
 
         private:
+            template <class ...Args>
+            void _construct_value_at(_node_type* elem, Args&& ...args)
+            {
+                allocator_traits<allocator_type>::construct(_value_type_alloc, &elem->_value, forward<Args>(args)...);
+            }
+            template <class ...Args>
+            _node_type* _construct_node(Args&& ...args)
+            {
+                _node_type* elem = _node_allocator_type::allocate(1);
+                _construct_value_at(elem, forward<Args>(args)...);
+                return elem;
+            }
+
             void _add_new_end_ptr()
             {
                 _tail->_next = _node_allocator_type::allocate(1);
@@ -238,13 +252,7 @@ namespace std_copy
             template <class InputIt>
             void _range_init_list(InputIt first, InputIt last)
             {
-                if (_head)
-                {
-                    _size = 0;
-                    _destroy_list();
-                }
-                _head = _node_allocator_type::allocate(1);
-                _head->_value = *first++;
+                _head = _construct_node(*first++);
                 _head->_prev = nullptr;
 
                 _node_type *tempHead = _head;
@@ -255,45 +263,34 @@ namespace std_copy
                 {
                     if (_size == size_type(-1))
                         throw std::length_error("Range is too large");
-                    _node_type *attach = _node_allocator_type::allocate(1);
-
+                    _node_type *attach = _construct_node(*first++);
                     attach->_prev = tempHead;
-                    attach->_value = *first;
 
                     tempHead->_next = attach;
                     tempHead = tempHead->_next;
 
                     _size++;
-                    first++;
                     _tail = tempHead;
                 }
                 _add_new_end_ptr();
             }
             void _value_init_list(size_type count, const_reference val)
             {
-                if (_head)
-                {
-                    _size = 0;
-                    _destroy_list();
-                }
-                _head = _node_allocator_type::allocate(1);
-                _head->_value = val;
+                _size = count;
+                _head = _construct_node(val);
                 _head->_prev = nullptr;
 
                 _node_type *tempHead = _head;
                 _tail = tempHead;
                 while (count > 1)
                 {
-                    _node_type *attach = _node_allocator_type::allocate(1);
-
+                    _node_type *attach = _construct_node(val);
                     attach->_prev = tempHead;
-                    attach->_value = val;
 
                     tempHead->_next = attach;
                     tempHead = tempHead->_next;
 
                     count--;
-                    _size++;
                     _tail = tempHead;
                 }
                 _add_new_end_ptr();
@@ -309,6 +306,7 @@ namespace std_copy
 
                     _size--;
                 }
+                _node_allocator_type::deallocate(_head, 1);
                 _head = nullptr;
                 _tail = nullptr;
             }
@@ -318,8 +316,7 @@ namespace std_copy
             {
                 if (_size == 0)
                 {
-                    _head = _node_allocator_type::allocate(1);
-                    _head->_value = val;
+                    _head = _construct_node(val);
                     _head->_prev = nullptr;
                     _tail = _head;
 
@@ -348,8 +345,10 @@ namespace std_copy
                 }
 
                 _size++;
-                _node_type* newElem = _node_allocator_type::allocate(1);
-                newElem->_init(p.base()->_prev, p.base(), value_type(forward<Args>(args)...));
+                _node_type* newElem = _construct_node(value_type(forward<Args>(args)...));
+                newElem->_prev = p.base()->_prev;
+                newElem->_next = p.base();
+                
                 p.base()->_prev = newElem;
                 
                 //link the _next reference of the element two elements before @var pos to @var newElem
@@ -371,11 +370,9 @@ namespace std_copy
 
                     while (leftExcludingEnd-- > 0)
                     {
-                        _node_type* it = _node_allocator_type::allocate(1);
+                        _node_type* it = _construct_node(val);
 
                         _link_nodes(_tail, it);
-
-                        it->_value = val;
                         _tail = _tail->_next;
                     }
                 }
@@ -433,6 +430,7 @@ namespace std_copy
             _node_type* _head;
             _node_type* _tail;
             size_type _size;
+            allocator_type _value_type_alloc;
 
         public:
             list() : _size(0)
@@ -514,7 +512,7 @@ namespace std_copy
                 _link_nodes(newTail, _tail->_next);
                 _link_nodes(_tail, newTail);
 
-                _tail->_next->_value = elem;
+                _construct_value_at(_tail, elem);
 
                 _tail = _tail->_next;
                 _size++;
@@ -532,7 +530,7 @@ namespace std_copy
                 _link_nodes(newTail, _tail->_next);
                 _link_nodes(_tail, newTail);
 
-                _tail->_next->_value = move(elem);
+                _construct_value_at(_tail, move(elem));
 
                 _tail = _tail->_next;
                 _size++;
@@ -545,11 +543,9 @@ namespace std_copy
             {
                 if (_check_if_empty(elem)) return;
 
-                _node_type* a = _node_allocator_type::allocate(1);
+                _node_type* a = _construct_node(elem);
 
                 _link_nodes(a, _head);
-
-                a->_value = elem;
 
                 _head = _head->_prev;
                 _size++;
@@ -562,11 +558,9 @@ namespace std_copy
             {
                 if (_check_if_empty(elem)) return;
 
-                _node_type* a = _node_allocator_type::allocate(1);
+                _node_type* a = _construct_node(move(elem));
 
                 _link_nodes(a, _head);
-
-                a->_value = move(elem);
 
                 _head = _head->_prev;
                 _size++;
@@ -617,6 +611,7 @@ namespace std_copy
             requires input_iterator<InputIt>
         #endif
             {
+                this->clear();
                 _range_init_list(first, last);
             }
             /**
@@ -626,6 +621,7 @@ namespace std_copy
             */
             void assign(size_type count, const_reference val)
             {
+                this->clear();
                 _value_init_list(count, val);
             }
             /**
@@ -634,6 +630,7 @@ namespace std_copy
             */
             void operator=(const list& other)
             {
+                this->clear();
                 _range_init_list(other.begin(), other.end());
             }
             /**
@@ -642,7 +639,7 @@ namespace std_copy
             */
             void operator=(list&& other)
             {
-                _destroy_list();
+                this->clear();
                 _head = move(other._head);
                 _tail = move(other._tail);
                 _size = move(other._size);
@@ -727,8 +724,7 @@ namespace std_copy
                 _node_type* beforePos = p.base()->_prev;
                 while (count-- > 0)
                 {
-                    _node_type* newElem = _node_allocator_type::allocate(1);
-                    newElem->_value = val;
+                    _node_type* newElem = _construct_node(val);
                     _link_nodes(beforePos, newElem);
                     beforePos = newElem;
                 }
@@ -757,8 +753,7 @@ namespace std_copy
                     _node_type* copy = _head;
                     while (first != last)
                     {
-                        _node_type* newElem = _node_allocator_type::allocate(1);
-                        newElem->_value = *first++;
+                        _node_type* newElem = _construct_node(*first++);
                         _link_nodes(copy, newElem);
                         copy = newElem;
                         _size++;
@@ -781,8 +776,7 @@ namespace std_copy
                 _node_type* beforePos = p.base()->_prev;
                 while (first != last)
                 {
-                    _node_type* newElem = _node_allocator_type::allocate(1);
-                    newElem->_value = *first++;
+                    _node_type* newElem = _construct_node(*first++);
                     _link_nodes(beforePos, newElem);
                     beforePos = newElem;
                     _size++;
@@ -963,6 +957,11 @@ namespace std_copy
                     if (!comp(*it1, *it2))
                     {
                         this->insert(it1, *it2);
+                        if (!comp(*it2, *it1))
+                        {
+                            this->insert(it1, *it2);
+                            it1++;
+                        }
                         it2++;
                     }
                     else
