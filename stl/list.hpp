@@ -512,7 +512,7 @@ namespace std_copy
                 _link_nodes(newTail, _tail->_next);
                 _link_nodes(_tail, newTail);
 
-                _construct_value_at(_tail, elem);
+                _construct_value_at(_tail->_next, elem);
 
                 _tail = _tail->_next;
                 _size++;
@@ -530,7 +530,7 @@ namespace std_copy
                 _link_nodes(newTail, _tail->_next);
                 _link_nodes(_tail, newTail);
 
-                _construct_value_at(_tail, move(elem));
+                _construct_value_at(_tail->_next, move(elem));
 
                 _tail = _tail->_next;
                 _size++;
@@ -959,7 +959,6 @@ namespace std_copy
                         this->insert(it1, *it2);
                         if (!comp(*it2, *it1))
                         {
-                            this->insert(it1, *it2);
                             it1++;
                         }
                         it2++;
@@ -969,11 +968,14 @@ namespace std_copy
                         it1++;
                     }
                 }
+                _debug_print();
                 while (it2 != l.end())
                 {
                     this->push_back(*it2);
                     it2++;
+                    _debug_print();
                 }
+                std::cout << _size << '\n';
             }
 
         #if _STD_COPY_LIST_DEBUG_PRINT
