@@ -968,14 +968,11 @@ namespace std_copy
                         it1++;
                     }
                 }
-                _debug_print();
                 while (it2 != l.end())
                 {
                     this->push_back(*it2);
                     it2++;
-                    _debug_print();
                 }
-                std::cout << _size << '\n';
             }
 
         #if _STD_COPY_LIST_DEBUG_PRINT
