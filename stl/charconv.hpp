@@ -33,11 +33,9 @@ _CHARCONV_START_HIDDEN_SCOPE
     {
         if (c < 10)
         {
-            char ret;
             if (c >= base)
                 return -1;
-            ret = c + '0';
-            return ret;
+            return c + '0';
         }
         if (c >= 10 && base > 10)
         {
